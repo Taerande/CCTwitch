@@ -9,10 +9,7 @@
      query:{
        q: item.login
      },
-       params:{
-         name: item.display_name,
-         id: item.id,
-       }
+       params: item,
      }">
      <v-card>
        <v-card-title>{{item.display_name}}</v-card-title>
@@ -26,6 +23,8 @@
      </router-link>
 
     </v-col>
+  </v-row>
+  <v-row>
   </v-row>
   <v-row>
     {{$store.state.searchList.length}}
@@ -78,6 +77,7 @@ export default {
     },
   },
   created() {
+    console.log(this.$route.query);
     this.searchChannel();
   },
 };

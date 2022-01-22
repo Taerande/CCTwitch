@@ -7,6 +7,13 @@ export default new Vuex.Store({
   state: {
     searchBar: false,
     searchList: [],
+    headerConfig: {
+      Authorization: process.env.VUE_APP_TWTITCH_OAUTH,
+      'Client-id': process.env.VUE_APP_TWITCH_CLIENT_ID,
+      Accept: process.env.VUE_APP_TWITCH_HEADER_ACCEPT,
+    },
+    VidClipData: [],
+
   },
   mutations: {
     TOGGLE_SearchBar(state) {
@@ -14,6 +21,9 @@ export default new Vuex.Store({
     },
     SET_SearchList(state, response) {
       state.searchList = response;
+    },
+    SET_VidClipData(state, response) {
+      state.VidClipData.push(response);
     },
   },
   actions: {

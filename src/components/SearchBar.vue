@@ -34,11 +34,6 @@ export default {
     return {
       searchString: null,
       lists: [],
-      headerConfig: {
-        Authorization: 'Bearer ebuqjmjwopv9uroc6jc8yso7kjnokm',
-        'Client-id': 'c3ovwwcs9lhrx1rq13fsllzqfu9o9t',
-        Accept: 'application/json',
-      },
 
     };
   },
@@ -49,7 +44,7 @@ export default {
         params: {
           query: el,
         },
-        headers: this.headerConfig,
+        headers: this.$store.state.headerConfig,
       }).then((res) => {
         this.lists = [];
         res.data.data.forEach((element) => {
@@ -58,7 +53,7 @@ export default {
               params: {
                 id: element.id,
               },
-              headers: this.headerConfig,
+              headers: this.$store.state.headerConfig,
             }).then((resp) => {
               resp.data.data.forEach((ele) => {
                 this.lists.push(ele);

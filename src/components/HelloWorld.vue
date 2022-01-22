@@ -143,5 +143,7 @@ export default {
       },
     ],
   }),
+  created() {
+  },
 };
 </script>
