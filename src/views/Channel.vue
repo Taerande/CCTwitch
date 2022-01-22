@@ -32,7 +32,6 @@
       </v-btn>
   </v-row>
   <v-row
-  class="pb-15"
     v-for="(item, i) in this.vidLists"
     :key="item.data.id"
   >
