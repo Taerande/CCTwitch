@@ -27,14 +27,14 @@
     </template>
       <iframe
       v-if="clip.id === currentId"
-      :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=localhost`" parent="localhost"
+      :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=twitch-hotclip-tracker.netlify.app`" parent="twitch-hotclip-tracker.netlify.app"
       autoplay="true"
       preload="auto"
       frameborder="0"
       allowfullscreen="false"
       height="542"
       width="964"></iframe>
-    </v-dialog>z
+    </v-dialog>
     </v-col>
   </v-row>
 </v-container>

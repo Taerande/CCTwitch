@@ -22,14 +22,15 @@
     <span>
       {{$route.params.display_name}}
     </span>
-  </v-row>
-  <v-row>
-    <v-btn @click="()=>{ currentPage -= 1
-        }">이전으로
-      </v-btn>
-      <v-btn @click="()=>{ currentPage += 1
-        }">다음으로
-      </v-btn>
+    <v-btn
+    @click="()=>{ currentPage -= 1 }">
+    ◁prev
+    </v-btn>
+    {{$route.params.created_at}}
+    <v-btn
+    @click="()=>{ currentPage += 1 }">
+    next▷
+    </v-btn>
   </v-row>
   <v-row
     v-for="(item, i) in this.vidLists"
@@ -50,11 +51,6 @@
     </v-row>
     </div>
   </v-row>
-<v-row>
-  <div class="twitch-video">
-   <!-- <iframe src="https://clips.twitch.tv/embed?clip=HorribleBlatantSwordNerfBlueBlaster&parent=localhost" parent="localhost" frameborder="0" allowfullscreen="false" scrolling="yes" height="720" width="1280"></iframe> -->
-  </div>
-</v-row>
 </v-container>
 </template>
 <script>
