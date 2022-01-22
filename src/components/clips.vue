@@ -12,23 +12,29 @@
     sm="6"
     xs="12">
     <div>{{clip.title}} 조회수:{{clip.view_count}}</div>
-      <v-img
-      @click="changeId(clip.id)"
-      lazy-src="@/assets/img/404.jpg"
-      :src="clip.thumbnail_url"></v-img>
-    <!-- <v-dialog
-      v-model="dialog"
-      width="1280"
+    <v-dialog
+      :v-model="clip.id === currentId"
+      @click:outside="currentId = ''"
+      width="1080"
     >
     <template v-slot:activator="{ on, attrs }">
+      <v-img
+      @click="changeId(clip.id)"
+      v-bind="attrs"
+      v-on="on"
+      lazy-src="@/assets/img/404.jpg"
+      :src="clip.thumbnail_url"></v-img>
     </template>
       <iframe
+      v-if="clip.id === currentId"
       :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=localhost`" parent="localhost"
-      preload="metadata"
+      autoplay="true"
+      preload="auto"
+      frameborder="0"
       allowfullscreen="false"
-      height="576"
-      width="1024"></iframe>
-    </v-dialog> -->
+      height="542"
+      width="964"></iframe>
+    </v-dialog>z
     </v-col>
   </v-row>
 </v-container>
@@ -51,7 +57,6 @@ export default {
   updated() {
     console.log(this.currentId);
   },
-
 };
 </script>
 <style>
