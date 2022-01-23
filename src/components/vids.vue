@@ -1,45 +1,29 @@
 <template>
   <v-carousel
-    @change="changeCarousel(vids[$event])"
-    height="400"
-    hide-delimiter-background
+    @change="emitVidsId(vids[$event])"
+    height="250"
+    hide-delimiters
     show-arrows-on-hover
   >
     <v-carousel-item
       v-for="(item, i) in vids"
       :key="i"
+      lazy-src="@/assets/img/404.jpg"
+      :src="setThumbnailSize(item.data.thumbnail_url) || '@/assets/img/404.jpg'"
     >
-      <v-sheet
-        height="100%"
-      >
-        <v-row
-          class="fill-height"
-          align="center"
-          justify="center"
-        >
-          <div class="text-h2">
-            {{ item.data.title }}
-            {{ item.data.created_at }}
-            {{ item.data.duration }}
-          </div>
-        </v-row>
-      </v-sheet>
+    <v-sheet
+    class="pa-5"
+    color="rgba(0,0,0,0.3)">
+      <div class="white--text">
+        <div>
+        {{item.data.title}}
+        </div>
+        <div>
+          ({{setDate(item.data.created_at)}})
+        </div>
+      </div>
+    </v-sheet>
     </v-carousel-item>
-    <!-- <template v-slot:prev="{ on, attrs }">
-      <v-btn
-        icon
-        color="success"
-        v-bind="attrs"
-        v-on="on"
-      >Previous slide</v-btn>
-    </template>
-    <template v-slot:next="{ on, attrs }">
-      <v-btn
-        color="info"
-        v-bind="attrs"
-        v-on="on"
-      >Next slide</v-btn>
-    </template> -->
   </v-carousel>
 </template>
 <script>
@@ -52,9 +36,20 @@ export default {
     };
   },
   methods: {
-    changeCarousel(el) {
+    setDate(el) {
+      const time = new Date(el).getTime();
+      const krTime = time - 9 * 60 * 60 * 1000;
+      const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
+      return dateFormatted;
+    },
+    emitVidsId(el) {
       this.currentId = el.data.id;
       this.$emit('emitVidId', el.data.id);
+    },
+    setThumbnailSize(el) {
+      const width = /%{width}/;
+      const height = /%{height}/;
+      return el.replace(width, '600').replace(height, '338');
     },
   },
 

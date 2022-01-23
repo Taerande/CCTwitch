@@ -1,7 +1,9 @@
 <template>
 <v-container>
-  <v-row>
+  <v-row class="pa-3">
+    <h1>
     Clips
+    </h1>
   </v-row>
   <v-row>
   <v-col
@@ -11,7 +13,7 @@
     md="4"
     sm="6"
     xs="12">
-    <div>{{clip.title}} 조회수:{{clip.view_count}}</div>
+    <div>{{`${clip.title.substr(0,20)}...`}} ⏯조회수:{{clip.view_count}}</div>
     <v-dialog
       :v-model="clip.id === currentId"
       @click:outside="currentId = ''"
@@ -28,7 +30,7 @@
     </template>
       <iframe
       v-if="clip.id === currentId"
-      :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=localhost`" parent="localhost"
+      :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=twitch-hotclip-tracker.netlify.app`" parent="twitch-hotclip-tracker.netlify.app"
       preload="auto"
       frameborder="0"
       allowfullscreen="false"

@@ -36,11 +36,21 @@
   <v-row class="ma-0 palign-bottom">
     {{$route.params.description}}
   </v-row>
-  <v-row>
+  <v-row
+  class="ma-auto pa-0 justify-center align-center">
+  <v-col
+  id="vidCarousel"
+  class="pa-0"
+  lg="3"
+  md="4"
+  sm="6"
+  xs="12"
+  >
     <vids
     :vids="this.vidLists"
     @emitVidId="changeCarsouelId"
     ></vids>
+  </v-col>
   </v-row>
   <v-row
     v-for="item in this.vidLists"
@@ -141,5 +151,8 @@ export default {
 };
 </script>
 <style>
+#vidCarousel{
+  border: 2px solid black;
+}
 
 </style>
