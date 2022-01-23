@@ -27,7 +27,7 @@
   </v-container>
 </template>
 <script>
-import axios from 'axios';
+// import axios from 'axios';
 
 export default {
   data() {
@@ -40,6 +40,24 @@ export default {
 
   methods: {
     searchChannel(el) {
+      this.$store.state.searchQuery = el;
+      this.$router.push({
+        path: '/search',
+        query: {
+          q: el,
+        },
+        params: {
+          q: el,
+        },
+      });
+    },
+
+  },
+};
+</script>
+<style >
+/*
+ searchChannel(el) {
       axios.get('https://api.twitch.tv/helix/search/channels', {
         params: {
           query: el,
@@ -69,10 +87,6 @@ export default {
           q: el,
         },
       })).catch((error) => console.log(error));
-    },
-  },
-};
-</script>
-<style >
+    }, */
 
 </style>

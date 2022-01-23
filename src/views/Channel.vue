@@ -1,6 +1,16 @@
 <template>
 <v-container>
-  <v-row class="pa-10">
+  <v-row
+    v-if="dataLoading == false"
+      class="ma-auto pa-0 justify-center align-center"
+      style="position:absolute; top:45%; left:48%;">
+   <v-progress-circular
+      indeterminate
+      size="100"
+      color="purple"
+    ></v-progress-circular>
+  </v-row>
+  <v-row class="pa-10 align-center">
       <v-badge
       v-if="this.$route.params.broadcaster_type == 'partner'"
       bordered
@@ -9,44 +19,37 @@
       overlap
       >
     <v-avatar
-    size="100">
+    size="80">
         <v-img :src="$route.params.profile_image_url" alt="profile_img"></v-img>
     </v-avatar>
     </v-badge>
     <v-avatar
-    size="100"
+    size="80"
     v-else>
         <v-img :src="$route.params.profile_image_url" alt="profile_img"></v-img>
     </v-avatar>
 
-    <span>
+    <h1 class="pl-4">
       {{$route.params.display_name}}
-    </span>
-    <v-btn
-    @click="()=>{ currentPage -= 1 }">
-    ◁prev
-    </v-btn>
-    {{$route.params.created_at}}
-    <v-btn
-    @click="()=>{ currentPage += 1 }">
-    next▷
-    </v-btn>
+    </h1>
+  </v-row>
+  <v-row class="ma-0 palign-bottom">
+    {{$route.params.description}}
+  </v-row>
+  <v-row>
+    <vids
+    :vids="this.vidLists"
+    @emitVidId="changeCarsouelId"
+    ></vids>
   </v-row>
   <v-row
-    v-for="(item, i) in this.vidLists"
+    v-for="item in this.vidLists"
     :key="item.data.id"
   >
-    <div
-    v-if="currentPage == i">
-
-    <v-row>
-      <div>{{item.data.title}}</div>
-      <div>{{item.data.created_at}}</div>
-      <div>{{item.data.thumbnail_url}}</div>
-    </v-row>
+    <div v-if="carsouelId == item.data.id">
     <v-row>
       <clips
-      v-if="currentPage == i"
+      v-if="carsouelId == item.data.id"
       :clips="item.clips"></clips>
     </v-row>
     </div>
@@ -56,19 +59,25 @@
 <script>
 import axios from 'axios';
 import clips from '../components/clips.vue';
+import vids from '../components/vids.vue';
 
 export default {
-  components: { clips },
+  components: { clips, vids },
   data() {
     return {
+      dataLoading: false,
       currentPage: 0,
       isActive: false,
       vidLists: [],
       todayDate: new Date(),
+      carsouelId: 123123,
 
     };
   },
   methods: {
+    changeCarsouelId(currentId) {
+      this.carsouelId = currentId;
+    },
     async getVid(userId) {
       await axios.get('https://api.twitch.tv/helix/videos', {
         headers: this.$store.state.headerConfig,
@@ -118,6 +127,7 @@ export default {
       await this.getVid(this.$route.params.id);
       const promise = this.vidLists.map(this.getClip);
       await Promise.all(promise);
+      this.dataLoading = true;
     },
 
   },

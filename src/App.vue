@@ -71,8 +71,18 @@ export default {
 };
 </script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&display=swap');
+
+html, body{
+  font-family: 'Noto Sans KR', sans-serif;
+}
+#app{
+  font-family: 'Noto Sans KR', sans-serif;
+
+}
 #app-bar{
   background: rgb(119,44,232);
   background: linear-gradient(90deg, rgba(119,44,232,1) 0%, rgba(119,44,232,0.8911939775910365) 74%, rgba(119,44,232,0.7203256302521008) 100%);
 }
+
 </style>

@@ -13,6 +13,7 @@ export default new Vuex.Store({
       Accept: process.env.VUE_APP_TWITCH_HEADER_ACCEPT,
     },
     VidClipData: [],
+    searchQuery: '',
 
   },
   mutations: {
@@ -23,7 +24,7 @@ export default new Vuex.Store({
       state.searchList = response;
     },
     SET_VidClipData(state, response) {
-      state.VidClipData.push(response);
+      state.VidClipData = response;
     },
   },
   actions: {

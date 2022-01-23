@@ -19,6 +19,7 @@
     >
     <template v-slot:activator="{ on, attrs }">
       <v-img
+      id="clip-thumbnail"
       @click="changeId(clip.id)"
       v-bind="attrs"
       v-on="on"
@@ -27,8 +28,7 @@
     </template>
       <iframe
       v-if="clip.id === currentId"
-      :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=twitch-hotclip-tracker.netlify.app`" parent="twitch-hotclip-tracker.netlify.app"
-      autoplay="true"
+      :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=localhost`" parent="localhost"
       preload="auto"
       frameborder="0"
       allowfullscreen="false"
@@ -60,5 +60,9 @@ export default {
 };
 </script>
 <style>
+#clip-thumbnail{
+  border: 2px solid black;
+  border-radius: 2%;
+}
 
 </style>
