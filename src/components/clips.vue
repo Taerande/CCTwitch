@@ -31,7 +31,7 @@
       </template>
         <iframe
         v-if="clip.id === currentId"
-        :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=localhost`" parent="localhost"
+        :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=https://twitch-hotclip-tracker.netlify.app/`" parent="https://twitch-hotclip-tracker.netlify.app/"
         preload="auto"
         frameborder="0"
         allowfullscreen="false"
