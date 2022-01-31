@@ -1,10 +1,9 @@
 <template >
-  <v-container
-  v-show="this.$store.state.searchBar">
+  <v-container>
     <v-row
     class="d-flex align-center justify-center">
     <v-col
-    class="col-4">
+    class="col-10">
     <v-form
       @submit.prevent="searchChannel(searchString)">
       <v-text-field

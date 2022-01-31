@@ -88,12 +88,21 @@ export default {
     changeCarsouelId(currentId) {
       this.carsouelId = currentId;
     },
+    getEndDate(el) {
+      const startedAt = new Date(el).getTime();
+      const endedAt = new Date(startedAt + 24 * 60 * 60 * 1000);
+      return endedAt.toISOString();
+    },
+    getDuration() {
+
+    },
+
     async getVid(userId) {
       await axios.get('https://api.twitch.tv/helix/videos', {
         headers: this.$store.state.headerConfig,
         params: {
           user_id: userId,
-          first: 7,
+          first: 10,
         },
       }).then((res) => {
         res.data.data.forEach((el) => {
@@ -111,11 +120,12 @@ export default {
         params: {
           broadcaster_id: target.data.user_id,
           started_at: target.data.created_at,
-          first: 50,
+          ended_at: this.getEndDate(target.data.created_at),
+          first: 100,
         },
       }).then((resp) => {
         resp.data.data.forEach((el) => {
-          if (el.video_id === target.data.id && target.clips.length < 20) {
+          if (el.video_id === target.data.id && el.view_count > 9) {
             target.clips.push(el);
           }
         });
