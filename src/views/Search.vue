@@ -15,42 +15,58 @@
   v-for="item in $store.state.searchList"
   :key="item.id">
   <v-col cols="6">
-     <router-link :to="{name: 'Channel',
+
+     <v-card
+     dark>
+       <v-card-title>
+          <v-badge
+            v-if="item.broadcaster_type == 'partner'"
+            bordered
+            color="rgb(119,44,232)"
+            icon="mdi-check"
+            overlap
+            >
+          <v-avatar
+          size="50">
+              <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
+          </v-avatar>
+        </v-badge>
+        <v-avatar
+        size="50"
+        v-else>
+            <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
+        </v-avatar>
+
+       <div
+       class="pl-3"
+       ><router-link :to="{name: 'Channel',
      query:{
        q: item.login
      },
        params: item,
      }">
-     <v-card
-     dark>
-       <v-card-title>
-        <v-badge
-      v-if="item.broadcaster_type == 'partner'"
-      bordered
-      color="rgb(119,44,232)"
-      icon="mdi-check"
-      overlap
-      >
-    <v-avatar
-    size="50">
-        <v-img :src="item.profile_image_url" alt="profile_img"></v-img>
-    </v-avatar>
-    </v-badge>
-    <v-avatar
-    size="50"
-    v-else>
-        <v-img :src="item.profile_image_url" alt="profile_img"></v-img>
-    </v-avatar>
-
-       <span
-       class="pl-3"
-       >
-       {{item.display_name}}
-       </span>
-       </v-card-title>
-       <v-card-subtitle>조회수 : {{item.view_count}}</v-card-subtitle>
-     </v-card>
+        <div class="white--text">
+       {{item.display_name}} / {{kFormatter(item.follower_count)}}
+        </div>
      </router-link>
+        <div v-if="item.is_live">
+          <v-icon color="red">mdi-broadcast</v-icon>
+          <span class="red--text text-body-2 pa-1">LIVE</span>
+        </div>
+        <div v-else>
+          <v-icon color="blue">mdi-broadcast-off</v-icon>
+          <span class="blue--text text-body-2 pa-1">OFF</span>
+        </div>
+       </div>
+       <v-btn v-if="$store.state.likedStreamer.find(ele =>
+          ele.id === item.id)" icon @click="deleteFav($store.state.likedStreamer.findIndex(el => el.id == item.id))">
+          <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
+        </v-btn>
+       <v-btn v-else icon @click="like(item)">
+          <v-icon>mdi-star</v-icon>
+        </v-btn>
+       </v-card-title>
+     </v-card>
   </v-col>
   </v-row>
 </v-container>
@@ -63,20 +79,26 @@ export default {
   data() {
     return {
       dataLoading: false,
-      lists: [],
       userInfoLists: [],
     };
   },
   methods: {
-    searchChannel(el) {
-      axios.get('https://api.twitch.tv/helix/search/channels', {
+    deleteFav(el) {
+      this.$store.commit('DELETE_LikedStreamer', el);
+    },
+    like(el) {
+      this.$store.commit('SET_LikedStreamer', el);
+    },
+    async searchChannel(el) {
+      const lists = [];
+      await axios.get('https://api.twitch.tv/helix/search/channels', {
         params: {
           query: el,
         },
         headers: this.$store.state.headerConfig,
       }).then((res) => {
-        this.lists = [];
         res.data.data.forEach((element) => {
+          const data = element;
           if (element.title.length > 0 && element.game_id > 0) {
             axios.get('https://api.twitch.tv/helix/users', {
               params: {
@@ -84,26 +106,41 @@ export default {
               },
               headers: this.$store.state.headerConfig,
             }).then((resp) => {
-              resp.data.data.forEach((ele) => {
-                this.lists.push(ele);
+              if (resp.data.data[0].broadcaster_type) {
+                data.broadcaster_type = resp.data.data[0].broadcaster_type;
+              } else {
+                data.broadcaster_type = '';
+              }
+            }).then(() => {
+              axios.get('https://api.twitch.tv/helix/users/follows', {
+                params: {
+                  to_id: element.id,
+                },
+                headers: this.$store.state.headerConfig,
+              }).then((respp) => {
+                data.follower_count = respp.data.total;
+                lists.push(data);
+                lists.sort((a, b) => b.follower_count - a.follower_count);
               });
-              this.lists.sort((a, b) => b.view_count - a.view_count);
             });
           }
         });
-        this.$store.commit('SET_SearchList', this.lists);
-        this.dataLoading = true;
       }).catch((error) => console.log(error));
+      this.$store.commit('SET_SearchList', lists);
+      this.dataLoading = true;
     },
+    kFormatter(el) {
+      if (el > 999999) {
+        return `${(Math.abs(el) / 1000000).toFixed(1)}M`;
+      } if (el > 999) {
+        return `${(Math.abs(el) / 1000).toFixed(1)}K`;
+      }
+      return Math.abs(el);
+    },
+
   },
   created() {
-    // console.log('store', this.$store.state.searchQuery);
-    // console.log('router : ', this.$router);
-    // console.log('router : ', this.$router.currentRoute.query.q);
-    this.searchChannel(this.$store.state.searchQuery || this.$router.currentRoute.query.q);
-  },
-  watch: {
-    'this.$store.state.searchQuery': 'searchChannel(this.$store.state.searchQuery || this.$router.currentRoute.query.q)',
+    this.searchChannel(this.$route.query.q);
   },
 };
 </script>

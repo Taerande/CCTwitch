@@ -5,6 +5,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    searchString: null,
     searchBar: false,
     searchList: [],
     headerConfig: {
@@ -14,7 +15,7 @@ export default new Vuex.Store({
     },
     VidClipData: [],
     searchQuery: '',
-
+    likedStreamer: [],
   },
   mutations: {
     TOGGLE_SearchBar(state) {
@@ -25,6 +26,25 @@ export default new Vuex.Store({
     },
     SET_VidClipData(state, response) {
       state.VidClipData = response;
+    },
+    DELETE_LikedStreamer(state, response) {
+      const temp = JSON.parse(localStorage.getItem('alllikes'));
+      temp.splice(response, 1);
+      localStorage.setItem('alllikes', JSON.stringify(temp));
+      state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
+    },
+    SET_LikedStreamer(state, response) {
+      let existinglikes = JSON.parse(localStorage.getItem('alllikes'));
+      if (existinglikes == null) existinglikes = [];
+      if (existinglikes.length < 10) {
+        const input = response;
+        localStorage.setItem('liked', JSON.stringify(input));
+        console.log(input);
+        // Save allEntries back to local storage
+        existinglikes.push(input);
+        localStorage.setItem('alllikes', JSON.stringify(existinglikes));
+        state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
+      }
     },
   },
   actions: {

@@ -11,6 +11,7 @@
     ></v-progress-circular>
   </v-row>
   <v-row class="pa-10 align-center">
+    <v-col cols="5" class="d-flex">
       <v-badge
       v-if="this.$route.params.broadcaster_type == 'partner'"
       bordered
@@ -20,49 +21,62 @@
       >
     <v-avatar
     size="80">
-        <v-img :src="$route.params.profile_image_url" alt="profile_img"></v-img>
+        <v-img :src="$route.params.thumbnail_url" alt="profile_img"></v-img>
     </v-avatar>
     </v-badge>
     <v-avatar
     size="80"
     v-else>
-        <v-img :src="$route.params.profile_image_url" alt="profile_img"></v-img>
+        <v-img :src="$route.params.thumbnail_url" alt="profile_img"></v-img>
     </v-avatar>
 
-    <h1 class="pl-4">
+    <div class="pl-4">
+      <span class="text-h5">
       {{$route.params.display_name}}
-    </h1>
-  </v-row>
-  <v-row class="ma-0 palign-bottom">
-    {{$route.params.description}}
-  </v-row>
-  <v-row
-  class="ma-auto pa-0 justify-center align-center">
-  <v-col
-  id="vidCarousel"
-  class="pa-0"
-  lg="3"
-  md="4"
-  sm="6"
-  xs="12"
-  >
+      </span>
+      <span class="grey--text">
+        {{kFormatter($route.params.follower_count)}}
+      </span>
+      <div v-if="$route.params.is_live">
+        <v-icon color="red">mdi-broadcast</v-icon>
+        <span class="red--text text-body-2 pa-1">LIVE</span>
+      </div>
+      <div v-else>
+        <v-icon color="blue">mdi-broadcast-off</v-icon>
+        <span class="blue--text text-body-2 pa-1">OFF</span>
+      </div>
+      <div>
+       <v-btn v-if="$store.state.likedStreamer.find(ele =>
+          ele.id === $route.params.id)" icon @click="deleteFav($store.state.likedStreamer.findIndex(el => el.id == $route.params.id))">
+          <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
+        </v-btn>
+       <v-btn v-else icon @click="like($route.params)">
+          <v-icon>mdi-star</v-icon>
+        </v-btn>
+      </div>
+    </div>
+    </v-col>
+    <v-col
+    id="vidCarousel"
+    class="pa-0"
+    cols="7"
+    >
     <vids
     :vids="this.vidLists"
     @emitVidId="changeCarsouelId"
     ></vids>
   </v-col>
   </v-row>
+
   <v-row
     v-for="item in this.vidLists"
     :key="item.data.id"
   >
-    <div v-if="carsouelId == item.data.id">
-    <v-row>
+    <v-row v-if="carsouelId == item.data.id">
       <clips
       v-if="carsouelId == item.data.id"
       :clips="item.clips"></clips>
     </v-row>
-    </div>
   </v-row>
 </v-container>
 </template>
@@ -85,12 +99,18 @@ export default {
     };
   },
   methods: {
+    like(el) {
+      this.$store.commit('SET_LikedStreamer', el);
+    },
+    deleteFav(el) {
+      this.$store.commit('DELETE_LikedStreamer', el);
+    },
     changeCarsouelId(currentId) {
       this.carsouelId = currentId;
     },
     getEndDate(el) {
       const startedAt = new Date(el).getTime();
-      const endedAt = new Date(startedAt + 24 * 60 * 60 * 1000);
+      const endedAt = new Date(startedAt + 48 * 60 * 60 * 1000);
       return endedAt.toISOString();
     },
     getDuration() {
@@ -102,7 +122,7 @@ export default {
         headers: this.$store.state.headerConfig,
         params: {
           user_id: userId,
-          first: 10,
+          first: 20,
         },
       }).then((res) => {
         res.data.data.forEach((el) => {
@@ -125,8 +145,9 @@ export default {
         },
       }).then((resp) => {
         resp.data.data.forEach((el) => {
-          if (el.video_id === target.data.id && el.view_count > 9) {
+          if (el.video_id === target.data.id) {
             target.clips.push(el);
+            // && el.view_count > 0
           }
         });
       }).catch((error) => console.log(error));
@@ -149,10 +170,18 @@ export default {
       await Promise.all(promise);
       this.dataLoading = true;
     },
+    kFormatter(el) {
+      if (el > 999999) {
+        return `${(Math.abs(el) / 1000000).toFixed(1)}M`;
+      } if (el > 999) {
+        return `${(Math.abs(el) / 1000).toFixed(1)}K`;
+      }
+      return Math.abs(el);
+    },
 
   },
   created() {
-    if (Object.keys(this.$route.params).length === 0) { this.$router.push({ path: '/' }); }
+    if (Object.keys(this.$route.params.id).length === 0) { this.$router.push({ path: '/' }); }
     this.process();
   },
   updated() {
