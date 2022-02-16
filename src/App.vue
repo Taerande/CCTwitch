@@ -7,7 +7,7 @@
       app
       id="app-bar"
       class="d-flex align-center justify-center">
-        <v-row class="d-flex justify-space-between">
+        <v-row class="d-flex align-center justify-space-between">
           <v-col class="d-flex">
           <router-link class="d-flex" :to="{name: 'Home'}">
             <v-img
@@ -23,7 +23,7 @@
           </router-link>
           </v-col>
           <v-col class="d-flex">
-            <SearchBar v-show="true"></SearchBar>
+            <SearchBar v-show="$route.path !== '/'"></SearchBar>
           </v-col>
         </v-row>
       </v-container>
@@ -55,18 +55,21 @@
       @click="toggleDarkTheme()"
       class="v-btn--example">
         <v-icon color="red">mdi-weather-sunny</v-icon></v-btn>
+      <AlertBar app></AlertBar>
   </v-app>
 </template>
 
 <script>
 import bookmark from '@/components/layout/bookmark.vue';
 import SearchBar from '@/components/SearchBar.vue';
+import AlertBar from '@/components/layout/AlertBar.vue';
 
 export default {
   name: 'App',
   components: {
     SearchBar,
     bookmark,
+    AlertBar,
   },
   data() {
     return {
@@ -77,18 +80,18 @@ export default {
     searchBarToggle() {
       this.$store.commit('TOGGLE_SearchBar');
     },
-    resetData() {
-      this.searchString = null;
-    },
     toggleDarkTheme() {
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
       localStorage.setItem('dark', this.$vuetify.theme.dark);
     },
 
   },
-  mounted() {
-    this.resetData();
+  created() {
     this.$store.state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
+    if (this.$store.state.likedStreamer === null) {
+      const likes = [];
+      localStorage.setItem('alllikes', JSON.stringify(likes));
+    }
     this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'));
   },
 };

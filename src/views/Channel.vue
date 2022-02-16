@@ -12,70 +12,67 @@
   </v-row>
   <v-row class="pa-10 align-center">
     <v-col cols="5" class="d-flex">
-      <v-badge
-      v-if="this.$route.params.broadcaster_type == 'partner'"
-      bordered
-      color="rgb(119,44,232)"
-      icon="mdi-check"
-      overlap
-      >
-    <v-avatar
-    size="80">
-        <v-img :src="$route.params.thumbnail_url" alt="profile_img"></v-img>
-    </v-avatar>
-    </v-badge>
-    <v-avatar
-    size="80"
-    v-else>
-        <v-img :src="$route.params.thumbnail_url" alt="profile_img"></v-img>
-    </v-avatar>
-
-    <div class="pl-4">
-      <span class="text-h5">
-      {{$route.params.display_name}}
-      </span>
-      <span class="grey--text">
-        {{kFormatter($route.params.follower_count)}}
-      </span>
-      <div v-if="$route.params.is_live">
-        <v-icon color="red">mdi-broadcast</v-icon>
-        <span class="red--text text-body-2 pa-1">LIVE</span>
-      </div>
-      <div v-else>
-        <v-icon color="blue">mdi-broadcast-off</v-icon>
-        <span class="blue--text text-body-2 pa-1">OFF</span>
-      </div>
-      <div>
-       <v-btn v-if="$store.state.likedStreamer.find(ele =>
-          ele.id === $route.params.id)" icon @click="deleteFav($store.state.likedStreamer.findIndex(el => el.id == $route.params.id))">
-          <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
-        </v-btn>
-       <v-btn v-else icon @click="like($route.params)">
-          <v-icon>mdi-star</v-icon>
-        </v-btn>
-      </div>
-    </div>
+      <v-row>
+        <v-badge
+        v-if="userInfo.broadcaster_type == 'partner'"
+        bordered
+        color="rgb(119,44,232)"
+        icon="mdi-check"
+        overlap
+        >
+        <v-avatar
+        size="80">
+            <v-img :src="userInfo.profile_image_url" alt="profile_img"></v-img>
+        </v-avatar>
+        </v-badge>
+        <v-avatar
+        size="80"
+        v-else>
+            <v-img :src="userInfo.profile_image_url" alt="profile_img"></v-img>
+        </v-avatar>
+        <div class="d-flex flex-column justify-center pl-5">
+          <div class="d-flex align-center">
+            <span class="text-h5">{{userInfo.display_name}}</span>
+            <span span class="grey--text pl-1">{{ kFormatter(this.userInfo.follower_count) }}
+            </span>
+            <v-btn v-if="$store.state.likedStreamer.find(ele => ele.id === userInfo.id)" icon @click="deleteFav($store.state.likedStreamer.findIndex(el => el.id == userInfo.id))">
+              <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
+            </v-btn>
+            <v-btn v-else icon @click="like({id:userInfo.id ,login: userInfo.login, display_name: userInfo.display_name})">
+              <v-icon>mdi-star</v-icon>
+            </v-btn>
+          </div>
+          <div v-if="userInfo.is_live">
+            <v-icon color="red">mdi-broadcast</v-icon>
+            <span class="red--text text-body-2 pa-1">LIVE</span>
+            <span class="red--text text-caption"> {{ viewerkFormatter(this.userInfo.viewer_count) }} </span>
+          </div>
+          <div v-else>
+            <v-icon color="blue">mdi-broadcast-off</v-icon>
+            <span class="blue--text text-body-2 pa-1">OFF</span>
+          </div>
+        </div>
+      </v-row>
     </v-col>
     <v-col
     id="vidCarousel"
     class="pa-0"
-    cols="7"
-    >
+    cols="7">
     <vids
     :vids="this.vidLists"
-    @emitVidId="changeCarsouelId"
-    ></vids>
-  </v-col>
+    @emitVidId="changeCarsouelId"></vids>
+    </v-col>
   </v-row>
-
   <v-row
     v-for="item in this.vidLists"
-    :key="item.data.id"
-  >
+    :key="item.data.id">
     <v-row v-if="carsouelId == item.data.id">
       <clips
       v-if="carsouelId == item.data.id"
-      :clips="item.clips"></clips>
+      :clips="{
+        'clips': item.clips,
+        'page': 'channel',
+      }"></clips>
     </v-row>
   </v-row>
 </v-container>
@@ -95,6 +92,7 @@ export default {
       vidLists: [],
       todayDate: new Date(),
       carsouelId: 123123,
+      userInfo: '',
 
     };
   },
@@ -113,10 +111,6 @@ export default {
       const endedAt = new Date(startedAt + 48 * 60 * 60 * 1000);
       return endedAt.toISOString();
     },
-    getDuration() {
-
-    },
-
     async getVid(userId) {
       await axios.get('https://api.twitch.tv/helix/videos', {
         headers: this.$store.state.headerConfig,
@@ -153,22 +147,44 @@ export default {
       }).catch((error) => console.log(error));
     },
 
-    getUserInfo(query) {
-      axios.get('https://api.twitch.tv/helix/users', {
-        headers: this.$store.state.headerConfig,
+    async getUserInfo(element) {
+      await axios.get('https://api.twitch.tv/helix/users', {
         params: {
-          login: query,
+          login: element,
         },
-      }).then((resp) => {
-        this.userInfo = resp.data.data;
-      }).catch((error) => console.log(error));
+        headers: this.$store.state.headerConfig,
+      }).then((res) => {
+        this.userInfo = res.data.data['0'];
+        axios.get('https://api.twitch.tv/helix/users/follows', {
+          params: {
+            to_id: this.userInfo.id,
+          },
+          headers: this.$store.state.headerConfig,
+        }).then((resp) => {
+          this.userInfo.follower_count = resp.data.total;
+          axios.get('https://api.twitch.tv/helix/streams', {
+            params: {
+              user_login: element,
+            },
+            headers: this.$store.state.headerConfig,
+          }).then((respp) => {
+            if (respp.data.data.length === 0) {
+              this.userInfo.is_live = '';
+            } else {
+              this.userInfo.is_live = respp.data.data['0'].type;
+              this.userInfo.viewer_count = respp.data.data['0'].viewer_count;
+            }
+          });
+        });
+      });
     },
-
-    async process() {
-      await this.getVid(this.$route.params.id);
-      const promise = this.vidLists.map(this.getClip);
-      await Promise.all(promise);
-      this.dataLoading = true;
+    async setUserInfo() {
+      if (this.$route.params.id === undefined) {
+        await this.getUserInfo(this.$route.query.q);
+      } else {
+        await this.getUserInfo(this.$route.query.q);
+        // this.userInfo = this.$route.params;
+      }
     },
     kFormatter(el) {
       if (el > 999999) {
@@ -178,15 +194,31 @@ export default {
       }
       return Math.abs(el);
     },
+    viewerkFormatter(el) {
+      const num = el.toString();
+      if (el > 999999999) {
+        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
+      }
+      if (el > 999999) {
+        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
+      }
+      if (el > 999) {
+        return `${num.slice(0, -3)},${num.slice(-3)}`;
+      }
+      return Math.abs(el);
+    },
+    async process() {
+      await this.setUserInfo();
+      await this.getVid(this.userInfo.id);
+      const promise = this.vidLists.map(this.getClip);
+      await Promise.all(promise);
+      this.dataLoading = true;
+    },
 
   },
   created() {
-    if (Object.keys(this.$route.params.id).length === 0) { this.$router.push({ path: '/' }); }
     this.process();
   },
-  updated() {
-  },
-
 };
 </script>
 <style>

@@ -6,10 +6,10 @@
     </h1>
   </v-row>
   <v-row
-  v-if="this.clips.length >0">
+  v-if="clips.clips.length > 0">
   <v-col
-    v-for="clip in this.clips"
-    :key="clip.id"
+    v-for="item in clips.clips"
+    :key="item.id"
     lg="3"
     md="4"
     sm="12"
@@ -20,12 +20,14 @@
         :options="{ threshold: 0.5}">
         <v-card>
           <v-card-title class="d-flex justify-space-between align-center pa-0">
-        <span class="text-body-1">{{clip.title.length >19 ? `${clip.title.substr(0,20)}...` : clip.title }}</span>
-        <span class="text-body-1">⏯조회수:{{clip.view_count}}</span>
+            <v-avatar v-if="clips.page == 'trending'" size="30">
+            <v-img :src="$store.state.likedStreamer.find( ele => ele.id == item.broadcaster_id).thumbnail" alt="profile_img"></v-img>
+        </v-avatar>
+        <span class="text-body-1">{{item.title.length >19 ? `${item.title.substr(0,20)}...` : item.title }}</span>
           </v-card-title>
           <v-card-text class="d-flex justify-center align-center pa-0">
         <v-dialog
-          :v-model="clip.id === currentId"
+          :v-model="item.id === currentId"
           @click:outside="currentId = ''"
           width="1280"
         >
@@ -33,27 +35,32 @@
           <v-img
           width="100"
           id="clip-thumbnail"
-          @click="changeId(clip.id)"
+          @click="changeId(item.id)"
           v-bind="attrs"
           v-on="on"
           lazy-src="@/assets/img/404.jpg"
-          :src="clip.thumbnail_url"></v-img>
+          :src="item.thumbnail_url"></v-img>
         </template>
           <iframe
-          v-if="clip.id === currentId"
-          :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=localhost&autoplay=true`" parent="localhost"
+          v-if="item.id === currentId"
+          :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=localhost&autoplay=true`" parent="localhost"
           preload="auto"
           frameborder="0"
           height="720"
           allowfullscreen="true"></iframe>
         </v-dialog>
+
           </v-card-text>
+          <div class="d-flex justify-space-between">
+        <span class="text-body-1">{{getTodayDate(item.created_at)}}</span>
+        <span class="text-body-1">⏯조회수:{{item.view_count}}</span>
+          </div>
         </v-card>
       </v-lazy>
     </v-sheet>
-      </v-col>
+    </v-col>
     </v-row>
-    <v-row class="justify-center align-center" v-else>
+    <v-row v-else class="justify-center align-center">
       <v-col class="justify-center align-center">
 
     <v-img max-height="250px" max-width="300px" src="@/assets/img/404.jpg"></v-img>
@@ -75,8 +82,15 @@ export default {
     changeId(el) {
       this.currentId = el;
     },
-  },
-  computed: {
+    getTodayDate(el) {
+      const d = new Date(el);
+      let month = `${d.getMonth() + 1}`;
+      let day = `${d.getDate()}`;
+      const year = d.getFullYear();
+      if (month.length < 2) month = `0${month}`;
+      if (day.length < 2) day = `0${day}`;
+      return [year, month, day].join('-');
+    },
   },
 };
 </script>

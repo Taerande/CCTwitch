@@ -5,27 +5,24 @@
           Liked Streamer
         </v-card-title>
           <div class="d-flex grey--text justify-end pr-2 pb-1 text-caption">
-            <span :class="$store.state.likedStreamer.length == 10 ? 'red--text' : ''">
-            {{$store.state.likedStreamer.length}} / 10
+            <span :class="this.$store.state.likedStreamer.length == 10 ? 'red--text' : ''">
+            {{this.$store.state.likedStreamer.length}} / 10
             </span></div>
         <v-divider></v-divider>
         <v-card-text class="ma-0 pa-0">
-          <v-list v-if="$store.state.likedStreamer.length > 0" class="pa-0 ma-0">
+          <v-list v-if="this.$store.state.likedStreamer.length > 0" class="pa-0 ma-0">
             <v-list-item
             dense
             v-for="(item, index) in $store.state.likedStreamer" :key="index">
              <router-link :to="{name: 'Channel',
              query:{
-               q: item.id
+               q: item.login
               },
               params: item}">
               <span class="d-flex align-center twitch--text">
                 <span class="pr-1">
                 {{ item.display_name }}
                 </span>
-              <v-icon size="15" color="red" v-if="item.is_live">
-                mdi-broadcast
-              </v-icon>
               </span>
             </router-link>
                 <v-icon @click="deleteFav(index)" class="ml-1" size="16">mdi-close</v-icon>

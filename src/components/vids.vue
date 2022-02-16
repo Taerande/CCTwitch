@@ -74,7 +74,6 @@ export default {
     },
   },
   created() {
-    console.log(this.vids);
   },
 
 };

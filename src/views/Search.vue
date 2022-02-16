@@ -41,9 +41,8 @@
        class="pl-3"
        ><router-link :to="{name: 'Channel',
      query:{
-       q: item.login
-     },
-       params: item,
+       q: item.broadcaster_login
+     }
      }">
         <div class="white--text">
        {{item.display_name}} / {{kFormatter(item.follower_count)}}
@@ -59,10 +58,10 @@
         </div>
        </div>
        <v-btn v-if="$store.state.likedStreamer.find(ele =>
-          ele.id === item.id)" icon @click="deleteFav($store.state.likedStreamer.findIndex(el => el.id == item.id))">
+          ele.id == item.id)" icon @click="deleteFav($store.state.likedStreamer.findIndex(el => el.id == item.id))">
           <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
         </v-btn>
-       <v-btn v-else icon @click="like(item)">
+       <v-btn v-else icon @click="like({id:item.id ,login: item.broadcaster_login, display_name: item.display_name, thumbnail:item.thumbnail_url})">
           <v-icon>mdi-star</v-icon>
         </v-btn>
        </v-card-title>
@@ -79,7 +78,6 @@ export default {
   data() {
     return {
       dataLoading: false,
-      userInfoLists: [],
     };
   },
   methods: {
@@ -106,11 +104,7 @@ export default {
               },
               headers: this.$store.state.headerConfig,
             }).then((resp) => {
-              if (resp.data.data[0].broadcaster_type) {
-                data.broadcaster_type = resp.data.data[0].broadcaster_type;
-              } else {
-                data.broadcaster_type = '';
-              }
+              data.broadcaster_type = resp.data.data[0].broadcaster_type;
             }).then(() => {
               axios.get('https://api.twitch.tv/helix/users/follows', {
                 params: {

@@ -5,6 +5,11 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    snackbar: {
+      type: 'error',
+      text: '',
+      value: false,
+    },
     searchString: null,
     searchBar: false,
     searchList: [],
@@ -18,6 +23,12 @@ export default new Vuex.Store({
     likedStreamer: [],
   },
   mutations: {
+    SET_SnackBar(state, response) {
+      state.snackbar.type = response.type;
+      state.snackbar.text = response.text;
+      state.snackbar.value = response.value;
+      if (response.value === undefined) state.snackbar.value = true;
+    },
     TOGGLE_SearchBar(state) {
       state.searchBar = !state.searchBar;
     },
@@ -39,12 +50,13 @@ export default new Vuex.Store({
       if (existinglikes.length < 10) {
         const input = response;
         localStorage.setItem('liked', JSON.stringify(input));
-        console.log(input);
         // Save allEntries back to local storage
         existinglikes.push(input);
         localStorage.setItem('alllikes', JSON.stringify(existinglikes));
-        state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
+      } else {
+        this.commit('SET_SnackBar', { type: 'error', text: 'Liked Streamer 목록이 꽉 찼습니다.', value: true });
       }
+      state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
     },
   },
   actions: {

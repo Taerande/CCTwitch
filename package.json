@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vue/eslint-config-prettier": "^7.0.0",
     "axios": "^0.25.0",
     "core-js": "^3.6.5",
     "prettier": "^2.5.1",
