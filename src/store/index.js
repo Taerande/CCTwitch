@@ -21,6 +21,7 @@ export default new Vuex.Store({
     VidClipData: [],
     searchQuery: '',
     likedStreamer: [],
+    pinnedClips: [],
   },
   mutations: {
     SET_SnackBar(state, response) {
@@ -57,6 +58,16 @@ export default new Vuex.Store({
         this.commit('SET_SnackBar', { type: 'error', text: 'Liked Streamer 목록이 꽉 찼습니다.', value: true });
       }
       state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
+    },
+    ADD_pinnedClip(state, response) {
+      state.pinnedClips.push(response);
+    },
+    DELETE_pinnedClip(state, response) {
+      const target = state.pinnedClips.find((ele) => ele === response);
+      const index = state.pinnedClips.indexOf(target);
+      console.log(target, index);
+      state.pinnedClips.splice(index, 1);
+      console.log(state.pinnedClips);
     },
   },
   actions: {

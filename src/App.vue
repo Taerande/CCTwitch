@@ -139,5 +139,8 @@ a{
   top: 90%;
   left: 5%;
 }
+.hidden{
+  display: none;
+}
 
 </style>

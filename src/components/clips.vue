@@ -1,6 +1,8 @@
 <template>
 <v-container>
-  <v-row class="pa-3">
+  <v-row v-if="$store.state.likedStreamer.length > 0" >
+
+  <v-row class="pa-3 d-flex justify-space-between align-baseline">
     <h1>
     Clips
     </h1>
@@ -14,16 +16,35 @@
     md="4"
     sm="12"
     class="pa-5"
+    :class="$store.state.likedStreamer.find( ele => ele.id == item.broadcaster_id).id"
     >
-    <v-sheet min-height="300px" class="d-flex align-center justify-center fill-height">
+    <v-sheet min-height="300px" class="fill-height">
       <v-lazy
         :options="{ threshold: 0.5}">
         <v-card>
-          <v-card-title class="d-flex justify-space-between align-center pa-0">
-            <v-avatar v-if="clips.page == 'trending'" size="30">
-            <v-img :src="$store.state.likedStreamer.find( ele => ele.id == item.broadcaster_id).thumbnail" alt="profile_img"></v-img>
-        </v-avatar>
-        <span class="text-body-1">{{item.title.length >19 ? `${item.title.substr(0,20)}...` : item.title }}</span>
+          <v-card-title class="pa-0">
+            <v-container>
+            <v-row class="d-flex justify-space-between align-center">
+              <v-avatar v-if="clips.page == 'trending'" size="30">
+                <v-img :src="$store.state.likedStreamer.find( ele => ele.id == item.broadcaster_id).thumbnail" alt="profile_img"></v-img>
+                </v-avatar>
+                <v-btn
+                  v-if="$store.state.pinnedClips.find( ele => ele == item.id)"
+                  @click="$store.commit('DELETE_pinnedClip',item.id)"
+                  icon
+                  >
+                  <v-icon size="20" color="red">mdi-pin</v-icon>
+                </v-btn>
+                <v-btn v-else icon
+                  @click="$store.commit('ADD_pinnedClip',item.id)">
+                  <v-icon size="20" color="twitch">mdi-pin-outline</v-icon>
+                </v-btn>
+            </v-row>
+            <v-row class="d-flex justify-center">
+              <span class="text-body-2">{{item.title.length >18 ? `${item.title.substr(0,17)}...` : item.title }}</span>
+            </v-row>
+            </v-container>
+
           </v-card-title>
           <v-card-text class="d-flex justify-center align-center pa-0">
         <v-dialog
@@ -52,8 +73,8 @@
 
           </v-card-text>
           <div class="d-flex justify-space-between">
-        <span class="text-body-1">{{getTodayDate(item.created_at)}}</span>
-        <span class="text-body-1">⏯조회수:{{item.view_count}}</span>
+        <span class="text-caption">{{getTodayDate(item.created_at)}}</span>
+        <span class="text-caption">views:{{item.view_count}}</span>
           </div>
         </v-card>
       </v-lazy>
@@ -66,13 +87,22 @@
     <v-img max-height="250px" max-width="300px" src="@/assets/img/404.jpg"></v-img>
     </v-col>
   </v-row>
+  </v-row>
+  <v-row v-else>
+    <v-col>
+      <span>there is no clips</span>
+    </v-col>
+
+  </v-row>
 </v-container>
 </template>
 <script>
+
 export default {
   props: ['clips'],
   data() {
     return {
+      pinned: false,
       overlay: false,
       currentId: '',
       dialog: false,

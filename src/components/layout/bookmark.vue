@@ -58,9 +58,9 @@ export default {
 
 #bookmark{
   position: fixed;
-  width: 220px;
+  width: 180px;
   top: 100px;
-  right: 5%;
+  right: 3%;
 }
 
 </style>
