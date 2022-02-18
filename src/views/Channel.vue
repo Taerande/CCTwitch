@@ -42,7 +42,7 @@
               <v-icon>mdi-star</v-icon>
             </v-btn>
           </div>
-          <div v-if="userInfo.is_live">
+          <div v-if="this.userInfo.is_live">
             <v-icon color="red">mdi-broadcast</v-icon>
             <span class="red--text text-body-2 pa-1">LIVE</span>
             <span class="red--text text-caption"> {{ viewerkFormatter(this.userInfo.viewer_count) }} </span>
@@ -70,7 +70,8 @@
       <clips
       v-if="carsouelId == item.data.id"
       :clips="{
-        'clips': item.clips,
+        'data': item.data,
+        'data-type': 'videos',
         'page': 'channel',
       }"></clips>
     </v-row>
@@ -106,11 +107,7 @@ export default {
     changeCarsouelId(currentId) {
       this.carsouelId = currentId;
     },
-    getEndDate(el) {
-      const startedAt = new Date(el).getTime();
-      const endedAt = new Date(startedAt + 48 * 60 * 60 * 1000);
-      return endedAt.toISOString();
-    },
+
     async getVid(userId) {
       await axios.get('https://api.twitch.tv/helix/videos', {
         headers: this.$store.state.headerConfig,
@@ -122,31 +119,10 @@ export default {
         res.data.data.forEach((el) => {
           this.vidLists.push({
             data: el,
-            clips: [],
           });
         });
       }).catch((error) => console.log(error));
     },
-
-    async getClip(target) {
-      await axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          broadcaster_id: target.data.user_id,
-          started_at: target.data.created_at,
-          ended_at: this.getEndDate(target.data.created_at),
-          first: 100,
-        },
-      }).then((resp) => {
-        resp.data.data.forEach((el) => {
-          if (el.video_id === target.data.id) {
-            target.clips.push(el);
-            // && el.view_count > 0
-          }
-        });
-      }).catch((error) => console.log(error));
-    },
-
     async getUserInfo(element) {
       await axios.get('https://api.twitch.tv/helix/users', {
         params: {
@@ -210,8 +186,6 @@ export default {
     async process() {
       await this.setUserInfo();
       await this.getVid(this.userInfo.id);
-      const promise = this.vidLists.map(this.getClip);
-      await Promise.all(promise);
       this.dataLoading = true;
     },
 

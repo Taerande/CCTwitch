@@ -22,6 +22,7 @@ export default new Vuex.Store({
     searchQuery: '',
     likedStreamer: [],
     pinnedClips: [],
+    cliplist: [],
   },
   mutations: {
     SET_SnackBar(state, response) {

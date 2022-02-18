@@ -46,8 +46,9 @@
   </v-row>
   <v-row>
     <clips :clips="{
-      'clips': clips,
-      'page': 'trending',
+        'data': userInfo,
+        'data-type': 'user',
+        'page': 'trending',
     }"></clips>
   </v-row>
 </v-container>
@@ -73,6 +74,7 @@ export default {
       const toggleClips = document.getElementsByClassName(el.id);
       const check = [...toggleClips][0].classList.contains('hidden');
       const target = this.userInfo.find((ele) => ele.id === el.id);
+      console.log(toggleClips);
       target.is_checked = check;
       if (check) {
         [...toggleClips].forEach((item) => {
@@ -113,22 +115,7 @@ export default {
         this.userInfo.push(data);
       }).catch((error) => console.log(error));
     },
-    async getClip(target) {
-      await axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          broadcaster_id: target.id,
-          started_at: this.getStartDate(this.getTodayDate),
-          ended_at: this.getTodayDate,
-          first: 3,
-        },
-      }).then((resp) => {
-        resp.data.data.forEach((el) => {
-          this.clips.push(el);
-          this.clips.sort((a, b) => b.view_count - a.view_count);
-        });
-      }).catch((error) => console.log(error));
-    },
+
     kFormatter(el) {
       if (el > 999999) {
         return `${(Math.abs(el) / 1000000).toFixed(1)}M`;
@@ -138,9 +125,8 @@ export default {
       return Math.abs(el);
     },
     async process() {
-      const promise = this.$store.state.likedStreamer.map(this.getClip);
-      const promise2 = this.$store.state.likedStreamer.map(this.getUserInfo);
-      await Promise.all([...promise, ...promise2]);
+      const promise = this.$store.state.likedStreamer.map(this.getUserInfo);
+      await Promise.all(promise);
     },
 
   },

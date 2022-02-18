@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
-// import Channel from '../views/Channel.vue';
 import About from '../views/About.vue';
+// import Channel from '../views/Channel.vue';
 // import Search from '../views/Search.vue';
 
 Vue.use(VueRouter);
@@ -14,6 +14,7 @@ Vue.use(VueRouter);
 const Search = () => import(/* webpackChunkName: "search" */ '@/views/Search.vue');
 const Channel = () => import(/* webpackChunkName: "channel" */ '@/views/Channel.vue');
 const Trending = () => import(/* webpackChunkName: "trending" */ '@/views/Trending.vue');
+const Cliplist = () => import(/* webpackChunkName: "cliplist" */ '@/views/Cliplist.vue');
 
 const routes = [
   {
@@ -40,6 +41,11 @@ const routes = [
     path: '/trending',
     name: 'Trending',
     component: Trending,
+  },
+  {
+    path: '/cliplist',
+    name: 'Cliplist',
+    component: Cliplist,
   },
 ];
 

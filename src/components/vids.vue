@@ -50,7 +50,7 @@ export default {
   methods: {
     setDate(el) {
       const time = new Date(el).getTime();
-      const krTime = time - 9 * 60 * 60 * 1000;
+      const krTime = time + 9 * 60 * 60 * 1000;
       const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
       return dateFormatted;
     },
