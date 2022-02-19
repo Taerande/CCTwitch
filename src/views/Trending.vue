@@ -49,7 +49,9 @@
         'data': userInfo,
         'data-type': 'user',
         'page': 'trending',
-    }"></clips>
+    }"
+    @pagination="changePaginationCursor"
+    ></clips>
   </v-row>
 </v-container>
 </template>
@@ -70,6 +72,10 @@ export default {
     };
   },
   methods: {
+    changePaginationCursor(el) {
+      const target = this.userInfo.find((ele) => ele.id === el.id);
+      target.paginationCursor = el.pagination;
+    },
     toggleClip(el) {
       const toggleClips = document.getElementsByClassName(el.id);
       const check = [...toggleClips][0].classList.contains('hidden');
@@ -111,6 +117,7 @@ export default {
         },
       }).then((res) => {
         const data = res.data.data[0];
+        data.paginationCursor = '';
         data.is_checked = true;
         this.userInfo.push(data);
       }).catch((error) => console.log(error));

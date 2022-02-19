@@ -1,10 +1,14 @@
 <template>
 <v-container>
   <v-row
-  class="pa-3 d-flex justify-space-between align-baseline"
+  class="pa-1 d-flex justify-space-between align-baseline"
   v-if="this.cliplist.length > 0">
-    <v-row>
+    <v-row class="pa-1 d-flex justify-space-between align-baseline">
       <h1>Clips</h1>
+      <div>
+        <v-icon @click="refresh">mdi-refresh</v-icon>
+        <v-icon @click="refresh">mdi-shuffle</v-icon>
+      </div>
     </v-row>
   <v-row>
     <v-col
@@ -13,7 +17,7 @@
       lg="3"
       md="4"
       sm="12"
-      class="pa-5"
+      class="pa-1"
       :class="item.broadcaster_id"
 
       >
@@ -48,12 +52,13 @@
             <v-card-text class="d-flex justify-center align-center pa-0">
           <v-dialog
             :v-model="item.id === currentId"
-            @click:outside="currentId = ''"
+            @click:outside="currentId = null"
             width="1280"
           >
           <template v-slot:activator="{ on, attrs }">
             <v-img
-            width="100"
+            width="275"
+            height="156"
             id="clip-thumbnail"
             @click="changeId(item.id)"
             v-bind="attrs"
@@ -88,8 +93,8 @@
       <span v-else>What's going on</span>
     </v-col>
   </v-row>
-    <infinite-loading v-if="this.clips.page === 'channel'" @infinite="channelInfiniteHandler" spinner="spiral"></infinite-loading>
-    <infinite-loading v-else-if="this.clips.page === 'trending'" @infinite="trendingInfiniteHandler" spinner="spiral"></infinite-loading>
+    <infinite-loading v-if="this.clips.page === 'channel' && this.clips.data.length >0" @infinite="channelInfiniteHandler" spinner="spiral"></infinite-loading>
+    <infinite-loading v-else-if="this.clips.page === 'trending' && this.clips.data.length >0" @infinite="trendingInfiniteHandler" spinner="spiral"></infinite-loading>
 </v-container>
 </template>
 <script>
@@ -111,9 +116,13 @@ export default {
       dialog: false,
       paginationCursor: '',
       infiniteData: {},
+      userInfo: '',
     };
   },
   methods: {
+    refresh() {
+      this.cliplist.sort((a, b) => b.view_count - a.view_count);
+    },
     changeId(el) {
       this.currentId = el;
     },
@@ -182,36 +191,27 @@ export default {
       }).catch((error) => console.log(error));
     },
     async channelProcess() {
-      console.log(this.infiniteData.data);
       await this.channelGetClip(this.infiniteData);
     },
 
-    async trendingGetClipInfinite(target, index) {
+    async trendingGetClipInfinite(target) {
       await axios.get('https://api.twitch.tv/helix/clips', {
         headers: this.$store.state.headerConfig,
         params: {
           broadcaster_id: target.id,
           started_at: this.getStartDate(this.getTodayDate),
           ended_at: this.getTodayDate,
-          first: 3,
+          first: 6,
           after: target.paginationCursor,
         },
       }).then((resp) => {
-        this.clips.data[index].paginationCursor = resp.data.pagination.cursor;
+        this.$emit('pagination', { id: target.id, pagination: resp.data.pagination.cursor });
         resp.data.data.forEach((el) => {
-          this.cliplist.push(el);
-          this.cliplist.sort((a, b) => b.view_count - a.view_count);
+          if (el.view_count > 100) {
+            this.cliplist.push(el);
+          }
         });
       }).catch((error) => console.log(error));
-    },
-
-    async trendingInfiniteHandler($state) {
-      const promise = this.clips.data.map(this.trendingGetClipInfinite);
-      await Promise.all(promise).then(() => {
-        if (this.clips.data[0].paginationCursor === '') { $state.complete(); } else {
-          $state.loaded();
-        }
-      });
     },
     async trendingGetClip(target) {
       await axios.get('https://api.twitch.tv/helix/clips', {
@@ -223,15 +223,23 @@ export default {
           first: 6,
         },
       }).then((resp) => {
-        this.target.paginationCursor = resp.data.pagination.cursor;
+        this.$emit('pagination', { id: target.id, pagination: resp.data.pagination.cursor });
         resp.data.data.forEach((el) => {
           this.cliplist.push(el);
           this.cliplist.sort((a, b) => b.view_count - a.view_count);
         });
       }).catch((error) => console.log(error));
     },
+    async trendingInfiniteHandler($state) {
+      const promise = this.clips.data.map(this.trendingGetClipInfinite);
+      await Promise.all(promise).then(() => {
+        if (this.cliplist.length > 501) { $state.complete(); } else {
+          $state.loaded();
+        }
+      });
+    },
     async trendingProcess() {
-      const promise = this.$store.state.likedStreamer.map(this.trendingGetClip);
+      const promise = this.clips.data.map(this.trendingGetClip);
       await Promise.all(promise);
     },
   },
@@ -246,12 +254,6 @@ export default {
       };
       this.channelProcess();
     } else if (this.clips.page === 'trending') {
-      // this.infiniteData.data = {
-      //   broadcaster_id: this.clips.data.id,
-      //   started_at: this.getStartDate(this.getTodayDate),
-      //   ended_at: this.getTodayDate,
-      //   first: 20,
-      // };
       this.trendingProcess();
     }
   },
