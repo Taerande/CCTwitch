@@ -1,17 +1,19 @@
 <template>
  <v-snackbar
   id="snack-bar"
+  timeout="1500"
   v-model="$store.state.snackbar.value"
   :color="$store.state.snackbar.type">
-  <span>
+  <div class="d-flex justify-space-between align-center">
+    <div>
       {{ $store.state.snackbar.text }}
-  </span>
-  <v-btn
-    icon
-    @click="$store.commit('SET_SnackBar',{value: false})"
-  >
-  <v-icon>mdi-close</v-icon>
-  </v-btn>
+    </div>
+    <v-btn
+      icon
+      @click="$store.commit('SET_SnackBar',{value: false})">
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
+  </div>
 </v-snackbar>
 </template>
 <script>
@@ -26,7 +28,7 @@ export default {
   },
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 #snack-bar{
   position: fixed;
   margin: 0 auto;

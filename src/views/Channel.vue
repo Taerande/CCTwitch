@@ -1,20 +1,10 @@
 <template>
 <v-container>
-  <v-row
-    v-if="dataLoading == false"
-      class="ma-auto pa-0 justify-center align-center"
-      style="position:absolute; top:45%; left:48%;">
-   <v-progress-circular
-      indeterminate
-      size="100"
-      color="purple"
-    ></v-progress-circular>
-  </v-row>
   <v-row class="pa-10 align-center">
     <v-col cols="5" class="d-flex">
-      <v-row>
+      <v-row v-if="userInfo">
         <v-badge
-        v-if="userInfo.broadcaster_type == 'partner'"
+        v-if="userInfo.data.broadcaster_type == 'partner'"
         bordered
         color="rgb(119,44,232)"
         icon="mdi-check"
@@ -22,23 +12,23 @@
         >
         <v-avatar
         size="80">
-            <v-img :src="userInfo.profile_image_url" alt="profile_img"></v-img>
+            <v-img :src="userInfo.data.profile_image_url" alt="profile_img"></v-img>
         </v-avatar>
         </v-badge>
         <v-avatar
         size="80"
         v-else>
-            <v-img :src="userInfo.profile_image_url" alt="profile_img"></v-img>
+            <v-img :src="userInfo.data.profile_image_url" alt="profile_img"></v-img>
         </v-avatar>
         <div class="d-flex flex-column justify-center pl-5">
           <div class="d-flex align-center">
-            <span class="text-h5">{{userInfo.display_name}}</span>
-            <span span class="grey--text pl-1">{{ kFormatter(this.userInfo.follower_count) }}
+            <span class="text-h5">{{userInfo.data.display_name}}</span>
+            <span class="grey--text pl-1">{{ kFormatter(this.userInfo.follower_count) }}
             </span>
-            <v-btn v-if="$store.state.likedStreamer.find(ele => ele.id === userInfo.id)" icon @click="deleteFav($store.state.likedStreamer.findIndex(el => el.id == userInfo.id))">
+            <v-btn v-if="$store.state.likedStreamer.find(ele => ele.id === userInfo.data.id)" icon @click="deleteFav($store.state.likedStreamer.findIndex(el => el.id == userInfo.data.id))">
               <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
             </v-btn>
-            <v-btn v-else icon @click="like({id:userInfo.id ,login: userInfo.login, display_name: userInfo.display_name})">
+            <v-btn v-else icon @click="like({id:userInfo.data.id ,login: userInfo.data.login, display_name: userInfo.data.display_name, thumbnail:userInfo.data.profile_image_url,broadcaster_type:userInfo.data.broadcaster_type, follower_count:userInfo.data.follower_count, is_checked:true,})">
               <v-icon>mdi-star</v-icon>
             </v-btn>
           </div>
@@ -63,24 +53,29 @@
     @emitVidId="changeCarsouelId"></vids>
     </v-col>
   </v-row>
-  <v-row
-    v-for="item in this.vidLists"
-    :key="item.data.id">
-    <v-row v-if="carsouelId == item.data.id">
-      <clips
-      v-if="carsouelId == item.data.id"
-      :clips="{
-        'data': item.data,
-        'data-type': 'videos',
-        'page': 'channel',
-      }"></clips>
+    <v-row
+      v-for="item in this.vidLists"
+      :key="item.data.id">
+      <v-row v-if="carsouelId == item.data.id">
+        <clips
+        v-if="carsouelId == item.data.id"
+        :clips="{
+          'data': item.data,
+          'data-type': 'videos',
+          'page': 'channel',
+        }"></clips>
+      </v-row>
     </v-row>
-  </v-row>
+    <v-row class="d-flex align-center justify-center no-clips" v-if="this.vidLists.length === 0">
+      <div class="text-h4">
+        😫There is no Clips
+      </div>
+    </v-row>
 </v-container>
 </template>
 <script>
 import axios from 'axios';
-import clips from '../components/clips.vue';
+import clips from '../components/ChannelClip.vue';
 import vids from '../components/vids.vue';
 
 export default {
@@ -93,7 +88,12 @@ export default {
       vidLists: [],
       todayDate: new Date(),
       carsouelId: 123123,
-      userInfo: '',
+      userInfo: {
+        data: '',
+        follower_count: '',
+        is_live: '',
+        viewer_count: '',
+      },
 
     };
   },
@@ -130,14 +130,16 @@ export default {
         },
         headers: this.$store.state.headerConfig,
       }).then((res) => {
-        this.userInfo = res.data.data['0'];
+        this.userInfo.data = res.data.data['0'];
+      }).then(() => {
         axios.get('https://api.twitch.tv/helix/users/follows', {
           params: {
-            to_id: this.userInfo.id,
+            to_id: this.userInfo.data.id,
           },
           headers: this.$store.state.headerConfig,
         }).then((resp) => {
           this.userInfo.follower_count = resp.data.total;
+        }).then(() => {
           axios.get('https://api.twitch.tv/helix/streams', {
             params: {
               user_login: element,
@@ -153,14 +155,6 @@ export default {
           });
         });
       });
-    },
-    async setUserInfo() {
-      if (this.$route.params.id === undefined) {
-        await this.getUserInfo(this.$route.query.q);
-      } else {
-        await this.getUserInfo(this.$route.query.q);
-        // this.userInfo = this.$route.params;
-      }
     },
     kFormatter(el) {
       if (el > 999999) {
@@ -184,8 +178,8 @@ export default {
       return Math.abs(el);
     },
     async process() {
-      await this.setUserInfo();
-      await this.getVid(this.userInfo.id);
+      await this.getUserInfo(this.$route.query.q);
+      await this.getVid(this.userInfo.data.id);
       this.dataLoading = true;
     },
 
@@ -195,9 +189,11 @@ export default {
   },
 };
 </script>
-<style>
-#vidCarousel{
-  border: 2px solid black;
+<style lang="scss" scoped>
+.no-clips{
+  position: absolute !important;
+  top: 50% !important;
+  right: 50% !important;
 }
 
 </style>

@@ -61,7 +61,7 @@
           ele.id == item.id)" icon @click="deleteFav($store.state.likedStreamer.findIndex(el => el.id == item.id))">
           <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
         </v-btn>
-       <v-btn v-else icon @click="like({id:item.id ,login: item.broadcaster_login, display_name: item.display_name, thumbnail:item.thumbnail_url})">
+       <v-btn v-else icon @click="like({id:item.id ,login: item.broadcaster_login, display_name: item.display_name, thumbnail:item.thumbnail_url, broadcaster_type:item.broadcaster_type, follower_count: item.follower_count, is_checked:true,})">
           <v-icon>mdi-star</v-icon>
         </v-btn>
        </v-card-title>
@@ -133,7 +133,7 @@ export default {
     },
 
   },
-  created() {
+  mounted() {
     this.searchChannel(this.$route.query.q);
   },
 };

@@ -1,5 +1,5 @@
 <template>
- <div id="bookmark">
+ <div id="bookmark" v-if="this.$store.state.likedStreamer">
       <v-card>
         <v-card-title class="d-flex justify-center align-center pa-2 pb-0 ma-0">
           Liked Streamer
@@ -14,18 +14,24 @@
             <v-list-item
             dense
             v-for="(item, index) in $store.state.likedStreamer" :key="index">
-             <router-link :to="{name: 'Channel',
-             query:{
-               q: item.login
-              },
-              params: item}">
-              <span class="d-flex align-center twitch--text">
-                <span class="pr-1">
-                {{ item.display_name }}
+            <v-row class="d-flex justify-space-between">
+            <div>
+              <router-link :to="{name: 'Channel',
+              query:{
+                q: item.login
+                },
+                params: item}">
+                <span class="twitch--text">
+                  <span class="pr-1">
+                  {{ item.display_name }}
+                  </span>
                 </span>
-              </span>
-            </router-link>
-                <v-icon @click="deleteFav(index)" class="ml-1" size="16">mdi-close</v-icon>
+              </router-link>
+            </div>
+            <div>
+                <v-icon @click="deleteFav({index: index, display_name:item.display_name})" class="ml-1" size="16">mdi-close</v-icon>
+            </div>
+            </v-row>
             </v-list-item>
           </v-list>
           <v-list v-else>
@@ -59,7 +65,7 @@ export default {
 #bookmark{
   position: fixed;
   width: 180px;
-  top: 100px;
+  top: 180px;
   right: 3%;
 }
 

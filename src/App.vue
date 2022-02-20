@@ -1,75 +1,25 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-    >
-      <v-container
-      app
-      id="app-bar"
-      class="d-flex align-center justify-center">
-        <v-row class="d-flex align-center justify-space-between">
-          <v-col class="d-flex">
-          <router-link class="d-flex" :to="{name: 'Home'}">
-            <v-img
-              alt="Vuetify Logo"
-              class="shrink mr-2"
-              contain
-              src="@/assets/img/TwitchGlitchBlackOps.png"
-              transition="scale-transition"
-              width="40"
-            />
-          <h1
-            class="pl-3">Twitch Hot Clip Trakcer</h1>
-          </router-link>
-          </v-col>
-          <v-col class="d-flex">
-            <SearchBar v-show="$route.path !== '/'"></SearchBar>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-app-bar>
+    <AppBar app></AppBar>
     <bookmark app></bookmark>
     <v-main id="container" app>
       <router-view :key="$route.fullPath"/>
     </v-main>
-      <v-btn
-      v-if="!this.$vuetify.theme.dark"
-      id="dark-mode-switch"
-      dark
-      fab
-      large
-      bottom
-      left
-      @click="toggleDarkTheme()"
-      class="v-btn--example"
-      >
-        <v-icon color="yellow">mdi-weather-night</v-icon>
-      </v-btn>
-      <v-btn v-else
-      id="dark-mode-switch"
-      light
-      fab
-      large
-      bottom
-      left
-      @click="toggleDarkTheme()"
-      class="v-btn--example">
-        <v-icon color="red">mdi-weather-sunny</v-icon></v-btn>
-      <AlertBar app></AlertBar>
+      <SnackBar app></SnackBar>
   </v-app>
 </template>
 
 <script>
 import bookmark from '@/components/layout/bookmark.vue';
-import SearchBar from '@/components/SearchBar.vue';
-import AlertBar from '@/components/layout/AlertBar.vue';
+import SnackBar from '@/components/layout/SnackBar.vue';
+import AppBar from '@/components/layout/AppBar.vue';
 
 export default {
   name: 'App',
   components: {
-    SearchBar,
+    AppBar,
     bookmark,
-    AlertBar,
+    SnackBar,
   },
   data() {
     return {
@@ -80,18 +30,20 @@ export default {
     searchBarToggle() {
       this.$store.commit('TOGGLE_SearchBar');
     },
-    toggleDarkTheme() {
-      this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
-      localStorage.setItem('dark', this.$vuetify.theme.dark);
-    },
 
   },
   created() {
     this.$store.state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
+    this.$store.state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
     if (this.$store.state.likedStreamer === null) {
       const likes = [];
       localStorage.setItem('alllikes', JSON.stringify(likes));
     }
+    if (this.$store.state.cliplist === null) {
+      const likes = [];
+      localStorage.setItem('allCliplists', JSON.stringify(likes));
+    }
+
     this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'));
   },
 };
@@ -120,12 +72,6 @@ html, body{
   font-family: 'Noto Sans KR', sans-serif;
 
 }
-#app-bar{
-  position: sticky;
-  top: 0;
-  margin-left: 20%;
-  margin-right: 20%;
-}
 #container{
   margin-left: 20%;
   margin-right: 20%;
@@ -133,11 +79,6 @@ html, body{
 a{
   text-decoration: none !important;
   color: inherit !important;
-}
-#dark-mode-switch{
-  position: fixed;
-  top: 90%;
-  left: 5%;
 }
 .hidden{
   display: none;

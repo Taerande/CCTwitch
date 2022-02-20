@@ -23,8 +23,12 @@ export default new Vuex.Store({
     likedStreamer: [],
     pinnedClips: [],
     cliplist: [],
+    userInfo: {},
   },
   mutations: {
+    SET_UserInfo(state, response) {
+      state.userInfo = response;
+    },
     SET_SnackBar(state, response) {
       state.snackbar.type = response.type;
       state.snackbar.text = response.text;
@@ -42,9 +46,10 @@ export default new Vuex.Store({
     },
     DELETE_LikedStreamer(state, response) {
       const temp = JSON.parse(localStorage.getItem('alllikes'));
-      temp.splice(response, 1);
+      temp.splice(response.index, 1);
       localStorage.setItem('alllikes', JSON.stringify(temp));
       state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
+      this.commit('SET_SnackBar', { type: 'error', text: `BookMark : ${response.display_name} 님이 삭제되었습니다.`, value: true });
     },
     SET_LikedStreamer(state, response) {
       let existinglikes = JSON.parse(localStorage.getItem('alllikes'));
@@ -59,6 +64,7 @@ export default new Vuex.Store({
         this.commit('SET_SnackBar', { type: 'error', text: 'Liked Streamer 목록이 꽉 찼습니다.', value: true });
       }
       state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
+      this.commit('SET_SnackBar', { type: 'success', text: `BookMark : ${response.display_name} 님이 추가되었습니다.`, value: true });
     },
     ADD_pinnedClip(state, response) {
       state.pinnedClips.push(response);
@@ -66,9 +72,28 @@ export default new Vuex.Store({
     DELETE_pinnedClip(state, response) {
       const target = state.pinnedClips.find((ele) => ele === response);
       const index = state.pinnedClips.indexOf(target);
-      console.log(target, index);
       state.pinnedClips.splice(index, 1);
-      console.log(state.pinnedClips);
+    },
+    SET_newCliplist(state, response) {
+      const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
+      const input = {
+        id: existingCliplist.length,
+        title: response.title,
+        color: response.color,
+        pinnedClips: [],
+      };
+      localStorage.setItem('cliplist', JSON.stringify(input));
+      existingCliplist.push(input);
+      localStorage.setItem('allCliplists', JSON.stringify(existingCliplist));
+      state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
+      this.commit('SET_SnackBar', { type: 'success', text: `ClipList : ${response.title} 가 추가되었습니다.`, value: true });
+    },
+    DELETE_newCliplist(state, response) {
+      const temp = JSON.parse(localStorage.getItem('allCliplists'));
+      temp.splice(response.index, 1);
+      localStorage.setItem('allCliplists', JSON.stringify(temp));
+      state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
+      this.commit('SET_SnackBar', { type: 'error', text: `ClipList : ${response.title}가 삭제되었습니다.`, value: true });
     },
   },
   actions: {

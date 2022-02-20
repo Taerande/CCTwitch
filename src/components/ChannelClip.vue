@@ -1,13 +1,16 @@
 <template>
 <v-container>
   <v-row
-  class="pa-1 d-flex justify-space-between align-baseline"
+  class="pa-1 justify-space-between align-baseline"
   v-if="this.cliplist.length > 0">
-    <v-row class="pa-1 d-flex justify-space-between align-baseline">
+    <v-row class="col-12 pa-1 d-flex justify-space-between align-baseline">
+      <div class="d-flex align-baseline">
       <h1>Clips</h1>
+      <span class="pl-2 text-caption">(동영상별 최대 100개의 클립을 가져옵니다.)</span>
+      </div>
       <div>
         <v-icon @click="refresh">mdi-refresh</v-icon>
-        <v-icon @click="refresh">mdi-shuffle</v-icon>
+        <v-icon @click="shuffle">mdi-shuffle</v-icon>
       </div>
     </v-row>
   <v-row>
@@ -21,7 +24,7 @@
       :class="item.broadcaster_id"
 
       >
-      <v-sheet min-height="300px" class="fill-height">
+      <v-sheet class="fill-height">
         <v-lazy
           :options="{ threshold: 0.5}">
           <v-card>
@@ -88,13 +91,10 @@
   </v-row>
   <v-row v-else class="justify-center align-center">
     <v-col class="justify-center align-center">
-      <span v-if="clips.page == 'channel'">there is no clips</span>
-      <span v-else-if="clips.page == 'trending'">there is no liked Streamer</span>
-      <span v-else>What's going on</span>
+      <span class="text-h4">😫There is no Clips</span>
     </v-col>
   </v-row>
-    <infinite-loading v-if="this.clips.page === 'channel' && this.clips.data.length >0" @infinite="channelInfiniteHandler" spinner="spiral"></infinite-loading>
-    <infinite-loading v-else-if="this.clips.page === 'trending' && this.clips.data.length >0" @infinite="trendingInfiniteHandler" spinner="spiral"></infinite-loading>
+    <infinite-loading @infinite="channelInfiniteHandler" spinner="spiral"></infinite-loading>
 </v-container>
 </template>
 <script>
@@ -120,8 +120,24 @@ export default {
     };
   },
   methods: {
+    shuffle() {
+      const playlist = [...this.cliplist];
+      let listLength = playlist.length;
+      let t;
+      let i;
+      while (listLength) {
+        i = Math.floor(Math.random() * listLength);
+        listLength -= 1;
+        t = playlist[listLength];
+        playlist[listLength] = playlist[i];
+        playlist[i] = t;
+        this.cliplist = playlist;
+      }
+      this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 랜덤으로 정렬합니다.', value: true });
+    },
     refresh() {
       this.cliplist.sort((a, b) => b.view_count - a.view_count);
+      this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 조회수순으로 정렬합니다.', value: true });
     },
     changeId(el) {
       this.currentId = el;
@@ -155,7 +171,7 @@ export default {
         },
       }).then((res) => {
         this.paginationCursor = res.data.pagination.cursor;
-        if (res.data.pagination.cursor == null) {
+        if (res.data.pagination.cursor == null || this.cliplist.length > 100) {
           $state.complete();
         } else {
           if (this.clips.page === 'channel') {
@@ -171,91 +187,16 @@ export default {
         }
       });
     },
-    async channelGetClip(target) {
-      await axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          broadcaster_id: target.data.broadcaster_id,
-          started_at: target.data.started_at,
-          ended_at: this.getEndDate(target.data.ended_at),
-          first: target.data.first,
-        },
-      }).then((resp) => {
-        this.paginationCursor = resp.data.pagination.cursor;
-        resp.data.data.forEach((el) => {
-          if (el.video_id === target.data.video_id) {
-            this.cliplist.push(el);
-            // && el.view_count > 0
-          }
-        });
-      }).catch((error) => console.log(error));
-    },
-    async channelProcess() {
-      await this.channelGetClip(this.infiniteData);
-    },
 
-    async trendingGetClipInfinite(target) {
-      await axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          broadcaster_id: target.id,
-          started_at: this.getStartDate(this.getTodayDate),
-          ended_at: this.getTodayDate,
-          first: 6,
-          after: target.paginationCursor,
-        },
-      }).then((resp) => {
-        this.$emit('pagination', { id: target.id, pagination: resp.data.pagination.cursor });
-        resp.data.data.forEach((el) => {
-          if (el.view_count > 100) {
-            this.cliplist.push(el);
-          }
-        });
-      }).catch((error) => console.log(error));
-    },
-    async trendingGetClip(target) {
-      await axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          broadcaster_id: target.id,
-          started_at: this.getStartDate(this.getTodayDate),
-          ended_at: this.getTodayDate,
-          first: 6,
-        },
-      }).then((resp) => {
-        this.$emit('pagination', { id: target.id, pagination: resp.data.pagination.cursor });
-        resp.data.data.forEach((el) => {
-          this.cliplist.push(el);
-          this.cliplist.sort((a, b) => b.view_count - a.view_count);
-        });
-      }).catch((error) => console.log(error));
-    },
-    async trendingInfiniteHandler($state) {
-      const promise = this.clips.data.map(this.trendingGetClipInfinite);
-      await Promise.all(promise).then(() => {
-        if (this.cliplist.length > 501) { $state.complete(); } else {
-          $state.loaded();
-        }
-      });
-    },
-    async trendingProcess() {
-      const promise = this.clips.data.map(this.trendingGetClip);
-      await Promise.all(promise);
-    },
   },
   created() {
-    if (this.clips.page === 'channel') {
-      this.infiniteData.data = {
-        broadcaster_id: this.clips.data.user_id,
-        started_at: this.clips.data.created_at,
-        ended_at: this.getEndDate(this.clips.data.created_at),
-        first: 20,
-        video_id: this.clips.data.id,
-      };
-      this.channelProcess();
-    } else if (this.clips.page === 'trending') {
-      this.trendingProcess();
-    }
+    this.infiniteData.data = {
+      broadcaster_id: this.clips.data.user_id,
+      started_at: this.clips.data.created_at,
+      ended_at: this.getEndDate(this.clips.data.created_at),
+      first: 20,
+      video_id: this.clips.data.id,
+    };
   },
   computed: {
     getTodayDate() {
