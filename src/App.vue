@@ -43,6 +43,7 @@ export default {
       const likes = [];
       localStorage.setItem('allCliplists', JSON.stringify(likes));
     }
+    this.$store.commit('INIT_localStorage');
     this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'));
   },
 };

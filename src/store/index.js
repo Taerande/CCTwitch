@@ -94,6 +94,10 @@ export default new Vuex.Store({
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
       this.commit('SET_SnackBar', { type: 'error', text: `ClipList : ${response.title}가 삭제되었습니다.`, value: true });
     },
+    INIT_localStorage(state) {
+      state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
+      state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
+    },
   },
   actions: {
   },
