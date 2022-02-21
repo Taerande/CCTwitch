@@ -70,7 +70,7 @@
             </template>
               <iframe
               v-if="item.id === currentId"
-              :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=twitch-hotclip-tracker.netlify.app&autoplay=true`" parent="twitch-hotclip-tracker.netlify.app"
+              :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=localhost&autoplay=true`" parent="localhost"
               preload="auto"
               frameborder="0"
               height="720"
@@ -136,7 +136,9 @@ export default {
       this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 랜덤으로 정렬합니다.', value: true });
     },
     refresh() {
+      console.time('messuer');
       this.cliplist.sort((a, b) => b.view_count - a.view_count);
+      console.timeEnd('meusussre end');
       this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 조회수순으로 정렬합니다.', value: true });
     },
     changeId(el) {

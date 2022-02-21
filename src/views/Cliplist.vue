@@ -41,6 +41,8 @@ export default {
   },
   methods: {
   },
+  created() {
+  },
 };
 </script>
 <style lang="scss" scoped>

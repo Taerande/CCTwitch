@@ -33,16 +33,18 @@ export default {
 
   },
   created() {
-    this.$store.state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
-    this.$store.state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-    if (this.$store.state.likedStreamer === null) {
-      const likes = [];
-      localStorage.setItem('alllikes', JSON.stringify(likes));
-    }
-    if (this.$store.state.cliplist === null) {
-      const likes = [];
-      localStorage.setItem('allCliplists', JSON.stringify(likes));
-    }
+    this.$store.commit('SET_LikedStreamer', null);
+    this.$store.commit('SET_newCliplist', null);
+    // this.$store.state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
+    // this.$store.state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
+    // if (this.$store.state.likedStreamer === null) {
+    //   const likes = [];
+    //   localStorage.setItem('alllikes', JSON.stringify(likes));
+    // }
+    // if (this.$store.state.cliplist === null) {
+    //   const likes = [];
+    //   localStorage.setItem('allCliplists', JSON.stringify(likes));
+    // }
 
     this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'));
   },

@@ -54,17 +54,19 @@ export default new Vuex.Store({
     SET_LikedStreamer(state, response) {
       let existinglikes = JSON.parse(localStorage.getItem('alllikes'));
       if (existinglikes == null) existinglikes = [];
-      if (existinglikes.length < 10) {
-        const input = response;
-        localStorage.setItem('liked', JSON.stringify(input));
-        // Save allEntries back to local storage
-        existinglikes.push(input);
-        localStorage.setItem('alllikes', JSON.stringify(existinglikes));
-      } else {
-        this.commit('SET_SnackBar', { type: 'error', text: 'Liked Streamer 목록이 꽉 찼습니다.', value: true });
+      const input = response;
+      if (input !== null) {
+        if (existinglikes.length <= 9) {
+          localStorage.setItem('liked', JSON.stringify(input));
+          // Save allEntries back to local storage
+          existinglikes.push(input);
+          localStorage.setItem('alllikes', JSON.stringify(existinglikes));
+          this.commit('SET_SnackBar', { type: 'success', text: `BookMark : ${input.display_name} 님이 추가되었습니다.`, value: true });
+        } else {
+          this.commit('SET_SnackBar', { type: 'error', text: 'Liked Streamer 목록이 꽉 찼습니다.', value: true });
+        }
       }
       state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
-      this.commit('SET_SnackBar', { type: 'success', text: `BookMark : ${response.display_name} 님이 추가되었습니다.`, value: true });
     },
     ADD_pinnedClip(state, response) {
       state.pinnedClips.push(response);
@@ -76,6 +78,9 @@ export default new Vuex.Store({
     },
     SET_newCliplist(state, response) {
       const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
+      if (response === null) {
+        state.cliplist = existingCliplist;
+      }
       const input = {
         id: existingCliplist.length,
         title: response.title,
