@@ -52,19 +52,16 @@ export default new Vuex.Store({
       this.commit('SET_SnackBar', { type: 'error', text: `BookMark : ${response.display_name} 님이 삭제되었습니다.`, value: true });
     },
     SET_LikedStreamer(state, response) {
-      let existinglikes = JSON.parse(localStorage.getItem('alllikes'));
-      if (existinglikes == null) existinglikes = [];
+      const existinglikes = JSON.parse(localStorage.getItem('alllikes'));
       const input = response;
-      if (input !== null) {
-        if (existinglikes.length <= 9) {
-          localStorage.setItem('liked', JSON.stringify(input));
-          // Save allEntries back to local storage
-          existinglikes.push(input);
-          localStorage.setItem('alllikes', JSON.stringify(existinglikes));
-          this.commit('SET_SnackBar', { type: 'success', text: `BookMark : ${input.display_name} 님이 추가되었습니다.`, value: true });
-        } else {
-          this.commit('SET_SnackBar', { type: 'error', text: 'Liked Streamer 목록이 꽉 찼습니다.', value: true });
-        }
+      if (existinglikes.length <= 9) {
+        localStorage.setItem('liked', JSON.stringify(input));
+        // Save allEntries back to local storage
+        existinglikes.push(input);
+        localStorage.setItem('alllikes', JSON.stringify(existinglikes));
+        this.commit('SET_SnackBar', { type: 'success', text: `BookMark : ${input.display_name} 님이 추가되었습니다.`, value: true });
+      } else {
+        this.commit('SET_SnackBar', { type: 'error', text: 'Liked Streamer 목록이 꽉 찼습니다.', value: true });
       }
       state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
     },
@@ -78,9 +75,6 @@ export default new Vuex.Store({
     },
     SET_newCliplist(state, response) {
       const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      if (response === null) {
-        state.cliplist = existingCliplist;
-      }
       const input = {
         id: existingCliplist.length,
         title: response.title,
