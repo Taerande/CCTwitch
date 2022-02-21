@@ -20,31 +20,19 @@
       lg="3"
       md="4"
       sm="12"
-      class="pa-1"
+      class="pa-2 clip-item"
       :class="item.broadcaster_id"
 
       >
-      <v-sheet class="fill-height">
+      <v-sheet
+       class="fill-height">
         <v-lazy
           :options="{ threshold: 0.5}">
           <v-card>
             <v-card-title class="pa-0">
               <v-container>
-              <v-row class="d-flex justify-space-between align-center">
-                <v-avatar v-if="clips.page == 'trending'" size="30">
-                  <v-img :src="$store.state.likedStreamer.find( ele => ele.id == item.broadcaster_id).thumbnail" alt="profile_img"></v-img>
-                  </v-avatar>
-                  <v-btn
-                    v-if="$store.state.pinnedClips.find( ele => ele == item.id)"
-                    @click="$store.commit('DELETE_pinnedClip',item.id)"
-                    icon
-                    >
-                    <v-icon size="20" color="red">mdi-pin</v-icon>
-                  </v-btn>
-                  <v-btn v-else icon
-                    @click="$store.commit('ADD_pinnedClip',item.id)">
-                    <v-icon size="20" color="twitch">mdi-pin-outline</v-icon>
-                  </v-btn>
+              <v-row class="d-flex justify-end align-center">
+                <pinClip name="channelClipPin" :clipData="item"></pinClip>
               </v-row>
               <v-row class="d-flex justify-center">
                 <span class="text-body-2">{{item.title.length >18 ? `${item.title.substr(0,17)}...` : item.title }}</span>
@@ -100,11 +88,13 @@
 <script>
 import axios from 'axios';
 import infiniteLoading from 'vue-infinite-loading';
+import pinClip from '@/components/pinClip.vue';
 
 export default {
   props: ['clips'],
   components: {
     infiniteLoading,
+    pinClip,
   },
   data() {
     return {
@@ -205,13 +195,19 @@ export default {
   },
 };
 </script>
-<style>
+<style lang="scss" scoped>
 #clip-thumbnail{
   cursor: pointer;
   border-radius: 3%;
 }
 .v-dialog{
   box-shadow: none !important;
+}
+
+.clip-item:hover{
+  transform: scale(1.05) !important;
+  transition: all 0.1s;
+  transition-timing-function: ease;
 }
 
 </style>

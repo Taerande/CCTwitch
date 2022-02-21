@@ -4,7 +4,6 @@
     height="250"
     width="250"
     hide-delimiters
-    show-arrows-on-hover
     v-if="vidlist.length > 0"
   >
     <v-carousel-item

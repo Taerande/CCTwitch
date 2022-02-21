@@ -1,9 +1,11 @@
 <template>
 <v-dialog
   v-model="dialog"
+  max-height="600"
   max-width="290">
   <template v-slot:activator="{ on, attrs }">
     <v-btn
+      v-if="type.data === 'button'"
       class="text-caption"
       color="success"
       v-bind="attrs"
@@ -11,6 +13,19 @@
     >
     Add New List
     </v-btn>
+    <div class="d-flex align-center py-2"
+    v-else-if="type.data === 'pin'"
+    v-bind="attrs"
+    v-on="on"
+      >
+      <div
+      class="twitch cliplist-canvas d-flex justify-center align-center">
+        <v-icon large>mdi-plus</v-icon>
+      </div>
+      <span class="pl-2">
+        새 플레이 리스트 추가
+      </span>
+    </div>
   </template>
   <v-card class="justify-center">
     <v-card-title class="text-h5">
@@ -53,6 +68,7 @@
 </template>
 <script>
 export default {
+  props: ['type'],
   data() {
     return {
       dialog: false,
@@ -71,4 +87,19 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.cliplist-canvas{
+  border-radius: 5%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  width: 50px;
+  height: 50px;
+}
+.v-list-item__content{
+  padding-left: 10px !important;
+}
+div[role=listitem]:hover{
+  cursor: pointer;
+  background-color: rgb(0, 0, 0, 0.2) !important;
+}
 </style>

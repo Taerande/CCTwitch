@@ -33,17 +33,7 @@
                   <v-avatar size="30">
                     <v-img :src="$store.state.likedStreamer.find( ele => ele.id == item.broadcaster_id).thumbnail" lazy-src="@/assets/img/404.jpg" alt="profile_img"></v-img>
                     </v-avatar>
-                    <v-btn
-                      v-if="$store.state.pinnedClips.find( ele => ele == item.id)"
-                      @click="$store.commit('DELETE_pinnedClip',item.id)"
-                      icon
-                      >
-                      <v-icon size="20" color="red">mdi-pin</v-icon>
-                    </v-btn>
-                    <v-btn v-else icon
-                      @click="$store.commit('ADD_pinnedClip',item.id)">
-                      <v-icon size="20" color="twitch">mdi-pin-outline</v-icon>
-                    </v-btn>
+                    <pinClip name="tredingClipPin" :clipData="item"></pinClip>
                 </v-row>
                 <v-row class="d-flex justify-center">
                   <span class="text-body-2">{{item.title.length >18 ? `${item.title.substr(0,17)}...` : item.title }}</span>
@@ -99,11 +89,13 @@
 <script>
 import axios from 'axios';
 import infiniteLoading from 'vue-infinite-loading';
+import pinClip from '@/components/pinClip.vue';
 
 export default {
   props: ['clips'],
   components: {
     infiniteLoading,
+    pinClip,
   },
   data() {
     return {
@@ -197,7 +189,7 @@ export default {
   },
 };
 </script>
-<style>
+<style lang="scss" scoped>
 #clip-thumbnail{
   cursor: pointer;
   border-radius: 3%;

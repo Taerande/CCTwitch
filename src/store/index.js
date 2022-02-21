@@ -66,7 +66,15 @@ export default new Vuex.Store({
       state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
     },
     ADD_pinnedClip(state, response) {
-      state.pinnedClips.push(response);
+      const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
+      if (existingCliplist[response.listIndex].pinnedClips.find((ele) => ele.id === response.data.id)) {
+        this.commit('SET_SnackBar', { type: 'error', text: `ClipList : ${response.data.title} 는 이미 있습니다.`, value: true });
+      } else {
+        existingCliplist[response.listIndex].pinnedClips.push(response.data);
+        localStorage.setItem('allCliplists', JSON.stringify(existingCliplist));
+        state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
+        this.commit('SET_SnackBar', { type: 'success', text: `ClipList : ${response.data.title} 가 추가되었습니다.`, value: true });
+      }
     },
     DELETE_pinnedClip(state, response) {
       const target = state.pinnedClips.find((ele) => ele === response);

@@ -25,7 +25,7 @@
             <span class="text-h5">{{userInfo.data.display_name}}</span>
             <span class="grey--text pl-1">{{ kFormatter(this.userInfo.follower_count) }}
             </span>
-            <v-btn v-if="$store.state.likedStreamer.find(ele => ele.id === userInfo.data.id)" icon @click="deleteFav($store.state.likedStreamer.findIndex(el => el.id == userInfo.data.id))">
+            <v-btn v-if="$store.state.likedStreamer.find(ele => ele.id === userInfo.data.id)" icon @click="deleteFav({index: $store.state.likedStreamer.findIndex(el => el.id == userInfo.data.id), display_name:userInfo.data.display_name})">
               <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
             </v-btn>
             <v-btn v-else icon @click="like({id:userInfo.data.id ,login: userInfo.data.login, display_name: userInfo.data.display_name, thumbnail:userInfo.data.profile_image_url,broadcaster_type:userInfo.data.broadcaster_type, follower_count:userInfo.data.follower_count, is_checked:true,})">
@@ -113,7 +113,8 @@ export default {
         headers: this.$store.state.headerConfig,
         params: {
           user_id: userId,
-          first: 20,
+          first: 100,
+          type: 'archive',
         },
       }).then((res) => {
         res.data.data.forEach((el) => {
