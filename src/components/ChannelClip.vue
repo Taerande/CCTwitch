@@ -35,7 +35,7 @@
                 <pinClip name="channelClipPin" :clipData="item"></pinClip>
               </v-row>
               <v-row class="d-flex justify-center">
-                <span class="text-body-2">{{item.title.length >18 ? `${item.title.substr(0,17)}...` : item.title }}</span>
+                <span class="text-body-2 text-truncate">{{item.title}}</span>
               </v-row>
               </v-container>
 

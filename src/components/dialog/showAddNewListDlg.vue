@@ -1,40 +1,4 @@
 <template>
-<v-dialog
-  v-model="dialog"
-  max-width="290">
-  <template v-slot:activator="{ on, attrs }">
-    <v-btn
-      v-if="type.type === 'button'"
-      class="text-caption"
-      color="success"
-      v-bind="attrs"
-      v-on="on"
-    >
-    Add New List
-    </v-btn>
-    <div class="d-flex align-center py-2"
-    v-else-if="type.type === 'pin'"
-    v-bind="attrs"
-    v-on="on"
-      >
-      <div
-      class="twitch cliplist-canvas d-flex justify-center align-center">
-        <v-icon large>mdi-plus</v-icon>
-      </div>
-      <span class="pl-2">
-        새 플레이 리스트 추가
-      </span>
-    </div>
-    <div
-    v-else-if="type.type === 'edit'"
-    v-bind="attrs"
-    v-on="on">
-      <v-btn
-      icon>
-      <v-icon>mdi-note-edit-outline</v-icon>
-      </v-btn>
-    </div>
-  </template>
   <v-card class="justify-center">
     <v-card-title class="text-h5">
       Add New Clip List
@@ -56,27 +20,27 @@
           placeholder="Title (최대 20자)"
         ></v-text-field>
       </div>
+      <div>
+        {{$store.state.likedStreamer}}
+      </div>
+      <div>
+        {{color}} // {{titleValue}}
+      </div>
     </v-card-text>
+    <v-spacer></v-spacer>
     <v-card-actions>
-      <v-spacer></v-spacer>
       <v-btn
         color="green darken-1"
         text
         :disabled="titleValue === ''"
-        @click="dialog = false,  $store.commit('SET_newCliplist',{
-          title: titleValue,
-          color: color
-        }), titleValue = ''"
       >
         Add
       </v-btn>
     </v-card-actions>
   </v-card>
-</v-dialog>
 </template>
 <script>
 export default {
-  props: ['type'],
   data() {
     return {
       dialog: false,
@@ -86,16 +50,11 @@ export default {
         required: (value) => !!value || 'Required.',
         counter: (value) => value.length <= 20 || 'Max 20 characters',
       },
-
     };
   },
   methods: {
   },
   created() {
-    if (this.type.data) {
-      this.color = this.type.data.color;
-      this.titleValue = this.type.data.title;
-    }
   },
 
 };

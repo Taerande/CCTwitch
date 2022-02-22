@@ -17,7 +17,7 @@
                 <v-icon size="60" color="green">mdi-check</v-icon>
               </v-sheet>
             </v-img>
-          </v-avatar>
+        </v-avatar>
         </v-badge>
         <v-avatar
         @click="toggleClip(item)"
