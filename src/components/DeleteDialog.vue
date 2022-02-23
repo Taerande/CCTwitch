@@ -21,7 +21,7 @@
     </v-card-title>
     <v-card-text class="d-flex align-center justify-center pt-5">
       <span>Clip : </span>
-      <span class="twitch--text px-1">{{type.title}}</span>
+      <span class="twitch--text px-1">{{type.title.length > 25 ? `${type.title.substr(0, 24)}...` : type.title}}</span>
       <span>을 삭제하시겠습니까?</span>
     </v-card-text>
     <v-card-actions class="pb-3 pt-0">
@@ -41,7 +41,7 @@
       </div>
       <div class="d-flex justify-center align-center">
         <span>Cliplist :</span>
-        <span class="text-h6 px-1" :style="{color: type.color}">{{type.title}}</span>
+        <span class="text-h6 px-1 text-truncate" :style="{color: type.color}">{{type.title.length > 25 ? `${type.title.substr(0, 24)}...` : type.title}}</span>
         <span>을 삭제하시겠습니까?</span>
       </div>
     </v-card-text>
@@ -67,6 +67,7 @@ export default {
       this.dialog = !this.dialog;
     },
     async deleteClipList(el) {
+      this.$emit('initCurrentData');
       await this.$store.commit('DELETE_newCliplist', el);
       this.dialog = !this.dialog;
     },

@@ -45,6 +45,7 @@
             :v-model="item.id === currentId"
             @click:outside="currentId = null"
             width="1280"
+            class="d-flex"
           >
           <template v-slot:activator="{ on, attrs }">
             <v-img
@@ -69,6 +70,7 @@
             </v-card-text>
             <div class="d-flex justify-space-between">
           <span class="text-caption">{{setDate(item.created_at)}}</span>
+          <span class="text-caption">{{item.id}}</span>
           <span class="text-caption">views:{{item.view_count}}</span>
             </div>
           </v-card>
@@ -161,18 +163,21 @@ export default {
         },
       }).then((res) => {
         this.paginationCursor = res.data.pagination.cursor;
-        if (res.data.pagination.cursor == null || this.cliplist.length > 100) {
+        if (this.cliplist.length >= 100) {
+          $state.complete();
+        } else if (res.data.pagination.cursor === undefined && res.data.data.length > 0) {
+          res.data.data.forEach((el) => {
+            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < 100) {
+              this.cliplist.push(el);
+            }
+          });
           $state.complete();
         } else {
-          if (this.clips.page === 'channel') {
-            res.data.data.forEach((el) => {
-              if (el.video_id === this.infiniteData.data.video_id) {
-                this.cliplist.push(el);
-              }
-            });
-          } else {
-            this.cliplist.push(...res.data.data);
-          }
+          res.data.data.forEach((el) => {
+            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < 100) {
+              this.cliplist.push(el);
+            }
+          });
           $state.loaded();
         }
       });
@@ -200,10 +205,6 @@ export default {
   cursor: pointer;
   border-radius: 3%;
 }
-.v-dialog{
-  box-shadow: none !important;
-}
-
 .clip-item:hover{
   transform: scale(1.05) !important;
   transition: all 0.1s;

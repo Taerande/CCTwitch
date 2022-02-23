@@ -23,7 +23,7 @@
         {{item.data.title}}
         </div>
         <div class="d-flex justify-between align-baseline pt-1">
-          <span>({{setDate(item.data.created_at)}})</span>
+          <span>({{setDate(item.data.created_at)}})  [{{getDurationTime(item.data.duration)}}]</span>
           <span v-if="item.data.is_live" class="pl-1 red--text text-caption">OnAir</span>
           <v-spacer></v-spacer>
           <v-btn v-if="item.data.is_live"
@@ -101,6 +101,21 @@ export default {
         this.vidlist[index].data.thumbnail_url = convert;
         this.vidlist[index].data.is_live = res.data.data[0].type;
       });
+    },
+    getDurationTime(el) {
+      const regex = /h|m|s/;
+      const duration = el.split(regex);
+      if (duration.length === 4) {
+        if (duration[1] === '0') {
+          return `${duration[0]}시간`;
+        }
+        return `${duration[0]}시간 ${duration[1]}분`;
+      }
+      if (duration.length === 3) {
+        return `${duration[0]}분`;
+      }
+
+      return '1분 미만';
     },
   },
   mounted() {

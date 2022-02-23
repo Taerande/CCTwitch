@@ -61,8 +61,6 @@
         v-if="carsouelId == item.data.id"
         :clips="{
           'data': item.data,
-          'data-type': 'videos',
-          'page': 'channel',
         }"></clips>
       </v-row>
     </v-row>

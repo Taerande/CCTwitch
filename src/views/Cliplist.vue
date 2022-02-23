@@ -17,16 +17,21 @@
       </div>
       <div>
         <v-btn-toggle borderless>
-          <DeleteDialog :type="{type:'cliplist', index:$store.state.cliplist.findIndex(el => el.id == currentData.id), title: currentData.title, color:currentData.color}"></DeleteDialog>
+          <DeleteDialog @initCurrentData="initData" :type="{type:'cliplist', index:$store.state.cliplist.findIndex(el => el.id == currentData.id), title: currentData.title, color:currentData.color}"></DeleteDialog>
           <v-btn icon>
             <v-icon>mdi-clipboard-multiple-outline</v-icon>
+          </v-btn>
+          <v-btn
+          @click="loading = !loading"
+          icon>
+            <v-icon>mdi-refresh</v-icon>
           </v-btn>
           <AddNewCliplistDialog :type="{type:'edit', data:{
             color: currentData.color,
             title: currentData.title,
           }}"></AddNewCliplistDialog>
           <v-btn icon @click="resetData(currentData)">
-            <v-icon>mdi-menu-down</v-icon>
+            <v-icon>mdi-close-thick</v-icon>
           </v-btn>
        </v-btn-toggle>
         </div>
@@ -60,7 +65,7 @@
           </th>
           <th></th>
         </thead>
-        <tbody>
+        <tbody v-if="!loading">
           <tr v-for="(clip, index) in $store.state.cliplist.find((el) => el.id === currentData.id).pinnedClips" :key="clip.id">
             <v-dialog
             @click:outside="dialogId = null"
@@ -70,14 +75,15 @@
             >
             <template v-slot:activator="{ on, attrs }">
               <td
+              class="pa-2"
               v-bind="attrs"
               v-on="on"
               @click="dialogId = clip.id"
               >
                 <v-img
-                sizes="60"
-                height="60"
-                width="96"
+                sizes="50"
+                height="50"
+                width="80"
                 lazy-src="@/assets/img/404.jpg"
                 :src="clip.thumbnail_url"></v-img>
               </td>
@@ -103,6 +109,9 @@
               <DeleteDialog :type="{type:'clip', title:clip.title, clipIndex:index, listIndex: $store.state.cliplist.findIndex(el => el.id == currentData.id)}"></DeleteDialog>
             </td>
           </tr>
+        </tbody>
+        <tbody v-else>
+          <v-progress-circular :width="5" :size="60" color="twitch" indeterminate></v-progress-circular>
         </tbody>
       </table>
     </v-row>
@@ -137,6 +146,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       currentData: {},
       dialogId: '',
       nameSort: '',
@@ -188,8 +198,11 @@ export default {
       }
     },
     resetData(el) {
-      this.currentData = [];
+      this.currentData = {};
       this.$store.commit('SET_SnackBar', { type: 'info', text: `Cliplist : ${el.title}를 숨깁니다.`, value: true });
+    },
+    initData() {
+      this.currentData = {};
     },
   },
   computed: {
@@ -251,5 +264,11 @@ td{
 }
 .title-table{
   cursor: pointer;
+}
+div[role="progressbar"]{
+  position: relative;
+  left: 50%;
+  top: 10%;
+  transform: translateX(-50%);
 }
 </style>

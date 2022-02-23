@@ -83,5 +83,8 @@ a{
 .hidden{
   display: none;
 }
+div[role="dialog"]{
+  box-shadow: none;
+}
 
 </style>

@@ -68,12 +68,15 @@ export default new Vuex.Store({
     ADD_pinnedClip(state, response) {
       const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
       if (existingCliplist[response.listIndex].pinnedClips.find((ele) => ele.id === response.data.id)) {
-        this.commit('SET_SnackBar', { type: 'error', text: `ClipList : ${response.data.title} 는 이미 있습니다.`, value: true });
+        console.log(response);
+        const title = response.data.title.length > 25 ? `${response.data.title.substr(0, 24)}...` : response.data.title;
+        this.commit('SET_SnackBar', { type: 'error', text: `ClipList : ${title} 는 이미 있습니다.`, value: true });
       } else {
         existingCliplist[response.listIndex].pinnedClips.push(response.data);
         localStorage.setItem('allCliplists', JSON.stringify(existingCliplist));
         state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-        this.commit('SET_SnackBar', { type: 'success', text: `ClipList : ${response.data.title} 가 추가되었습니다.`, value: true });
+        const title = response.data.title.length > 25 ? `${response.data.title.substr(0, 24)}...` : response.data.title;
+        this.commit('SET_SnackBar', { type: 'success', text: `ClipList : ${title} 가 추가되었습니다.`, value: true });
       }
     },
     // SET_pinnedClip(state, response){
@@ -98,14 +101,16 @@ export default new Vuex.Store({
       existingCliplist.push(input);
       localStorage.setItem('allCliplists', JSON.stringify(existingCliplist));
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      this.commit('SET_SnackBar', { type: 'success', text: `ClipList : ${response.title} 가 추가되었습니다.`, value: true });
+      const title = response.title.length > 25 ? `${response.title.substr(0, 24)}...` : response.title;
+      this.commit('SET_SnackBar', { type: 'success', text: `ClipList : ${title} 가 추가되었습니다.`, value: true });
     },
     DELETE_newCliplist(state, response) {
       const temp = JSON.parse(localStorage.getItem('allCliplists'));
       temp.splice(response.index, 1);
       localStorage.setItem('allCliplists', JSON.stringify(temp));
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      this.commit('SET_SnackBar', { type: 'error', text: `ClipList : ${response.title}가 삭제되었습니다.`, value: true });
+      const title = response.title.length > 25 ? `${response.title.substr(0, 24)}...` : response.title;
+      this.commit('SET_SnackBar', { type: 'error', text: `ClipList : ${title}가 삭제되었습니다.`, value: true });
     },
     INIT_localStorage(state) {
       state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
@@ -116,7 +121,8 @@ export default new Vuex.Store({
       temp[response.listIndex].pinnedClips.splice(response.clipIndex, 1);
       localStorage.setItem('allCliplists', JSON.stringify(temp));
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      this.commit('SET_SnackBar', { type: 'error', text: `Clip : ${response.title}가 삭제되었습니다.`, value: true });
+      const title = response.title.length > 25 ? `${response.title.substr(0, 24)}...` : response.title;
+      this.commit('SET_SnackBar', { type: 'error', text: `Clip : ${title}가 삭제되었습니다.`, value: true });
     },
   },
   actions: {
