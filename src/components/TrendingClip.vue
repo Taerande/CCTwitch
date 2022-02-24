@@ -10,6 +10,7 @@
       </div>
       <div>
         <v-icon @click="refresh">mdi-refresh</v-icon>
+        <v-icon @click="sortByName">mdi-play</v-icon>
         <v-icon @click="isShuffled = !isShuffled, shuffle()">mdi-shuffle</v-icon>
       </div>
     </v-row>
@@ -70,6 +71,7 @@
               </v-card-text>
               <div class="d-flex justify-space-between">
             <span class="text-caption">{{setDate(item.created_at)}}</span>
+            <span class="text-caption">{{item.id}}</span>
             <span class="text-caption">views:{{item.view_count}}</span>
               </div>
             </v-card>
@@ -133,6 +135,9 @@ export default {
       console.timeEnd('meusussre end');
       this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 조회수순으로 정렬합니다.', value: true });
     },
+    sortByName() {
+      this.cliplist.sort((a, b) => a.id.localeCompare(b.id));
+    },
     changeId(el) {
       this.currentId = el;
     },
@@ -153,7 +158,7 @@ export default {
       return dateFormatted;
     },
 
-    async trendingGetClipInfinite(target) {
+    async trendingGetClipInfinite(target, index) {
       await axios.get('https://api.twitch.tv/helix/clips', {
         headers: this.$store.state.headerConfig,
         params: {
@@ -161,26 +166,37 @@ export default {
           started_at: this.getStartDate(this.getTodayDate),
           ended_at: this.getTodayDate,
           first: 4,
-          after: this.paginationCursor,
+          after: this.$store.state.likedStreamer[index].pagination,
         },
       }).then((resp) => {
-        this.paginationCursor = resp.data.pagination.cursor;
+        this.$store.commit('SET_Pagination', { data: target, pagination: resp.data.pagination.cursor });
         resp.data.data.forEach((el) => {
-          if (el.view_count > 100) {
+          if (this.cliplist.length < 100 && el.view_count > 2) {
             this.cliplist.push(el);
           }
         });
       }).catch((error) => console.log(error));
     },
 
-    async trendingInfiniteHandler($state) {
-      const promise = this.$store.state.likedStreamer.map(this.trendingGetClipInfinite);
-      await Promise.all(promise).then(() => {
-        if (this.cliplist.length > 100 || this.paginationCursor === undefined) { $state.complete(); } else {
-          $state.loaded();
-        }
-      });
-    },
+    // async trendingInfiniteHandler($state) {
+    //   if (this.cliplist.length >= 100) {
+    //     $state.complete();
+    //   } else if (this.paginationCursor === undefined && this.cliplist.length > 0) {
+    //     const promise = this.$store.state.likedStreamer.map((target, index) => (target.login === 'ohsunny0731'
+    //       ? this.trendingGetClipInfinite(target, index)
+    //       : null));
+    //     console.log('list length', promise);
+    //     await Promise.all(promise);
+    //     $state.complete();
+    //   } else {
+    //     const promise = this.$store.state.likedStreamer.map((target, index) => (target.login === 'ohsunny0731'
+    //       ? this.trendingGetClipInfinite(target, index)
+    //       : null));
+    //     console.log('else', promise);
+    //     await Promise.all(promise);
+    //     $state.loaded();
+    //   }
+    // },
   },
   computed: {
     getTodayDate() {

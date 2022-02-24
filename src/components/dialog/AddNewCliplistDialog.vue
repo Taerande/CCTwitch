@@ -4,7 +4,9 @@
   max-width="290">
   <template v-slot:activator="{ on, attrs }">
     <v-btn
-      v-if="type.type === 'button'"
+    text
+    outlined
+      v-if="type.type === 'add'"
       class="text-caption"
       color="success"
       v-bind="attrs"
@@ -12,19 +14,19 @@
     >
     Add New List
     </v-btn>
-    <div class="d-flex align-center py-2"
+    <v-list-item class="align-center pa-1 py-2"
     v-else-if="type.type === 'pin'"
     v-bind="attrs"
     v-on="on"
-      >
+    >
       <div
       class="twitch cliplist-canvas d-flex justify-center align-center">
         <v-icon large>mdi-plus</v-icon>
       </div>
-      <span class="pl-2">
+      <span class="pl-3">
         새 플레이 리스트 추가
       </span>
-    </div>
+    </v-list-item>
     <div
     v-else-if="type.type === 'edit'"
     v-bind="attrs"
@@ -37,7 +39,7 @@
   </template>
   <v-card class="justify-center">
     <v-card-title class="text-h5">
-      Add New Clip List
+      {{type.data.text}}
     </v-card-title>
     <v-card-text class="d-flex justify-center">
       <div>
@@ -60,15 +62,29 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn
+      v-if="type.type === 'add' || type.type==='pin'"
         color="green darken-1"
         text
         :disabled="titleValue === ''"
-        @click="dialog = false,  $store.commit('SET_newCliplist',{
+        @click="dialog = false, $store.commit('SET_newCliplist',{
           title: titleValue,
           color: color
         }), titleValue = ''"
       >
-        Add
+        ADD
+      </v-btn>
+      <v-btn
+      v-if="type.type === 'edit'"
+        color="green darken-1"
+        text
+        :disabled="titleValue === ''"
+        @click="dialog = false, $store.commit('UPDATE_clipList',{
+          id: id,
+          title: titleValue,
+          color: color
+        }), titleValue = ''"
+      >
+        {{type.type}}
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -79,6 +95,7 @@ export default {
   props: ['type'],
   data() {
     return {
+      id: '',
       dialog: false,
       color: '',
       titleValue: '',
@@ -92,7 +109,8 @@ export default {
   methods: {
   },
   created() {
-    if (this.type.data) {
+    if (this.type.type === 'edit') {
+      this.id = this.type.data.id;
       this.color = this.type.data.color;
       this.titleValue = this.type.data.title;
     }

@@ -70,7 +70,6 @@
             </v-card-text>
             <div class="d-flex justify-space-between">
           <span class="text-caption">{{setDate(item.created_at)}}</span>
-          <span class="text-caption">{{item.id}}</span>
           <span class="text-caption">views:{{item.view_count}}</span>
             </div>
           </v-card>

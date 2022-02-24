@@ -18,12 +18,10 @@
         <v-divider></v-divider>
         <v-card-text>
           <v-list class="pt-5">
-            <v-list-item class="pa-1">
-                <AddNewCliplistDialog :type="{type:'pin'}"></AddNewCliplistDialog>
-            </v-list-item>
-            <v-list-item class="pa-1" v-for="(item,index) in $store.state.cliplist" :key="index">
+              <AddNewCliplistDialog :type="{type:'pin',data:{text: 'Add New List'}}"></AddNewCliplistDialog>
+            <v-list-item @click="$store.commit('ADD_pinnedClip',{data: clipData, listIndex:index})" class="pa-1" v-for="(item,index) in $store.state.cliplist" :key="index">
               <div class="cliplist-canvas" :style="{background: item.color}"></div>
-              <v-list-item-content @click="$store.commit('ADD_pinnedClip',{data: clipData, listIndex:index})">
+              <v-list-item-content>
                 <v-list-item-title class="text-title">{{item.title}}</v-list-item-title>
                 <v-list-item-subtitle class="text-caption">{{item.pinnedClips.length}}개</v-list-item-subtitle>
               </v-list-item-content>
@@ -36,7 +34,7 @@
   </div>
 </template>
 <script>
-import AddNewCliplistDialog from './AddNewCliplistDialog.vue';
+import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
 
 export default {
   props: ['clipData'],
