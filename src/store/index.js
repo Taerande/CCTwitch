@@ -55,6 +55,9 @@ export default new Vuex.Store({
         this.commit('SET_SnackBar', { type: response.type, text: response.text, value: true });
       }
     },
+    INIT_currCliplist(state) {
+      state.currentCliplist = {};
+    },
     SET_VidClipData(state, response) {
       state.VidClipData = response;
     },
@@ -116,24 +119,16 @@ export default new Vuex.Store({
       existingCliplist.push(input);
       localStorage.setItem('allCliplists', JSON.stringify(existingCliplist));
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      if (state.currentCliplist === undefined) {
-        state.currentCliplist = state.cliplist['0'];
-      }
       const title = response.title.length > 25 ? `${response.title.substr(0, 24)}...` : response.title;
       this.commit('SET_SnackBar', { type: 'success', text: `ClipList : ${title} 가 추가되었습니다.`, value: true });
     },
     DELETE_cliplist(state, response) {
-      const index = response.belongsTo.findIndex((el) => el.id === response.target.id);
       const temp = JSON.parse(localStorage.getItem('allCliplists'));
+      const index = temp.findIndex((el) => el.id === response.target.id);
       temp.splice(index, 1);
       localStorage.setItem('allCliplists', JSON.stringify(temp));
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      console.log(state.cliplist, index);
-      if (state.cliplist.length === 0 && index === 0) {
-        state.currentCliplist = {};
-      } else {
-        state.currentCliplist = index === 0 ? state.cliplist[0] : state.cliplist[index - 1];
-      }
+      state.currentCliplist = {};
       const title = response.target.title.length > 25 ? `${response.target.title.substr(0, 24)}...` : response.target.title;
       this.commit('SET_SnackBar', { type: 'error', text: `ClipList : ${title}가 삭제되었습니다.`, value: true });
     },
@@ -143,10 +138,13 @@ export default new Vuex.Store({
     },
     DELETE_clip(state, response) {
       const temp = JSON.parse(localStorage.getItem('allCliplists'));
-      temp[response.listIndex].pinnedClips.splice(response.clipIndex, 1);
+      const listindex = state.cliplist.findIndex((el) => el.id === response.belongsTo.id);
+      const clipindex = state.currentCliplist.pinnedClips.findIndex((el) => el.id === response.target.id);
+      temp[listindex].pinnedClips.splice(clipindex, 1);
       localStorage.setItem('allCliplists', JSON.stringify(temp));
+      const title = response.target.title.length > 25 ? `${response.target.title.substr(0, 24)}...` : response.target.title;
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      const title = response.title.length > 25 ? `${response.title.substr(0, 24)}...` : response.title;
+      state.currentCliplist = temp[listindex];
       this.commit('SET_SnackBar', { type: 'error', text: `Clip : ${title}가 삭제되었습니다.`, value: true });
     },
   },

@@ -33,7 +33,7 @@ export default {
   position: fixed;
   margin: 0 auto;
   left: 0;
-  right: 0;
-  bottom: 5%;
+  right: 0%;
+  bottom: 15%;
 }
 </style>

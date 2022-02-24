@@ -47,12 +47,13 @@ export default {
     };
   },
   methods: {
-
-    setData(el) {
-      if (this.$store.state.currentCliplist.id === el.id) {
-        this.$store.commit('SET_currCliplist', { data: '', type: 'info', text: `Cliplist : ${el.title}를 숨깁니다.` });
-      } else {
+    async setData(el) {
+      if (this.$store.state.currentCliplist.id === undefined) {
+        await this.$store.commit('INIT_currCliplist');
         this.$store.commit('SET_currCliplist', { data: el, type: 'info', text: `Cliplist : ${el.title}를 표시합니다.` });
+      } else {
+        await this.$store.commit('INIT_currCliplist');
+        this.$store.commit('SET_currCliplist', { data: '', type: 'info', text: `Cliplist : ${el.title}를 숨깁니다.` });
       }
     },
 
@@ -73,6 +74,7 @@ export default {
   width: 200px;
   height: 200px;
   opacity: 0.5 !important;
+  border: 1px ;
 }
 .cliplist-canvas:hover{
   transform: scale(1.05) !important;
@@ -86,9 +88,6 @@ export default {
   flex-basis: 20%;
 }
 
-.title-table{
-  cursor: pointer;
-}
 div[role="progressbar"]{
   position: relative;
   left: 50%;

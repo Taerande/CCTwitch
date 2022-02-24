@@ -32,30 +32,6 @@
           <v-tab>Analyze</v-tab>
         </v-tabs>
         <v-spacer></v-spacer>
-        <div>
-          <v-btn
-        v-if="!$vuetify.theme.dark"
-        id="dark-mode-switch"
-        dark
-        fab
-        bottom
-        left
-        @click="toggleDarkTheme()"
-        class="v-btn--example"
-        >
-          <v-icon color="yellow">mdi-weather-night</v-icon>
-
-        </v-btn>
-        <v-btn v-else
-        id="dark-mode-switch"
-        dark
-        fab
-        bottom
-        left
-        @click="toggleDarkTheme()"
-        class="v-btn--example">
-          <v-icon color="red">mdi-weather-sunny</v-icon></v-btn>
-        </div>
       </template>
     </v-app-bar>
 </v-card>
@@ -74,10 +50,6 @@ export default {
     };
   },
   methods: {
-    toggleDarkTheme() {
-      this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
-      localStorage.setItem('dark', this.$vuetify.theme.dark);
-    },
   },
   created() {
   },
@@ -88,12 +60,12 @@ export default {
 #app-bar{
   position: sticky;
   top: 0;
-  margin-left: 20%;
-  margin-right: 20%;
+  margin-left: 15%;
+  margin-right: 15%;
 }
 
 #container{
-  margin-left: 20%;
-  margin-right: 20%;
+  margin-left: 15%;
+  margin-right: 15%;
 }
 </style>

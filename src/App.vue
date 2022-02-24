@@ -6,6 +6,7 @@
       <router-view :key="$route.fullPath"/>
     </v-main>
       <SnackBar app></SnackBar>
+      <Footer app></Footer>
   </v-app>
 </template>
 
@@ -13,11 +14,13 @@
 import bookmark from '@/components/layout/bookmark.vue';
 import SnackBar from '@/components/layout/SnackBar.vue';
 import AppBar from '@/components/layout/AppBar.vue';
+import Footer from '@/components/layout/Footer.vue';
 
 export default {
   name: 'App',
   components: {
     AppBar,
+    Footer,
     bookmark,
     SnackBar,
   },
@@ -55,8 +58,8 @@ export default {
 }
 header{
   height: fit-content;
-  padding-left: 20%;
-  padding-right: 20%;
+  padding-left: 15%;
+  padding-right: 15%;
   // background: rgb(119,44,232);
   // background: linear-gradient(90deg, rgba(119,44,232,1) 0%, rgba(119,44,232,0.8911939775910365) 74%, rgba(119,44,232,0.7203256302521008) 100%);
 }
@@ -71,10 +74,6 @@ html, body{
 #app{
   font-family: 'Noto Sans KR', sans-serif;
 
-}
-#container{
-  margin-left: 20%;
-  margin-right: 20%;
 }
 a{
   text-decoration: none !important;

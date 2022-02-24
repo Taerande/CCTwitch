@@ -110,7 +110,7 @@
             <td class="pr-2">
               <DeleteDialog :delete="{type:'clip', data:{
                 target: clip,
-                belongsTo: $store.state.currentCliplist.pinnedClips,
+                belongsTo: $store.state.currentCliplist,
               }}"></DeleteDialog>
             </td>
           </tr>

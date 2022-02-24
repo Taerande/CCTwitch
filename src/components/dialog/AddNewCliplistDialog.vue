@@ -82,7 +82,7 @@
           id: id,
           title: titleValue,
           color: color
-        }), titleValue = ''"
+        })"
       >
         {{type.type}}
       </v-btn>
