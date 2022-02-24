@@ -60,7 +60,7 @@
           </template>
             <iframe
             v-if="item.id === currentId"
-            :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=localhost&autoplay=true`" parent="localhost"
+            :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=twitch-hotclip-tracker.netlify.app&autoplay=true`" parent="twitch-hotclip-tracker.netlify.app"
             preload="auto"
             frameborder="0"
             height="720"
