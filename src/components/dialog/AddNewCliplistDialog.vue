@@ -130,7 +130,7 @@ export default {
 .v-list-item__content{
   padding-left: 10px !important;
 }
-div[role=listitem]:hover{
+div[role=button]:hover{
   cursor: pointer;
   background-color: rgb(0, 0, 0, 0.2) !important;
 }

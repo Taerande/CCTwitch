@@ -4,7 +4,7 @@
     <v-row class="d-flex justify-space-between align-baseline">
       <div class="pt-10 pb-3">
         <span class="text-h3 font-weight-bold">{{$store.state.currentCliplist.title}}</span>
-        <span class="text-subtitle-1">(총 {{$store.state.currentCliplist.pinnedClips.length}}개)</span>
+        <span class="text-subtitle-1">(총 {{$store.state.currentCliplist.pinnedClips.length}} / 30 개)</span>
       </div>
       <div>
         <v-btn-toggle borderless>
@@ -13,7 +13,7 @@
               target: $store.state.currentCliplist,
               belongsTo: $store.state.cliplist,
               }}"></DeleteDialog>
-          <v-btn icon>
+          <v-btn @click="copyCliplist($store.state.currentCliplist)" icon>
             <v-icon>mdi-clipboard-multiple-outline</v-icon>
           </v-btn>
           <v-btn
@@ -96,6 +96,7 @@
               </td>
             </template>
               <iframe
+                class="black d-flex align-center"
                 v-if="clip.id === dialogId"
                 :src="`https://clips.twitch.tv/embed?clip=${clip.id}&parent=localhost&autoplay=true`" parent="localhost"
                 preload="auto"
@@ -107,7 +108,10 @@
             <td>{{setDate(clip.created_at)}}</td>
             <td>{{Math.floor(clip.duration)}}s</td>
             <td>{{clip.view_count}}</td>
-            <td class="pr-2">
+            <td class="pr-2 pt-2 d-flex align-center" style="height:inherit">
+              <v-btn icon @click="copyClip(clip)">
+                <v-icon >mdi-clipboard-multiple-outline</v-icon>
+              </v-btn>
               <DeleteDialog :delete="{type:'clip', data:{
                 target: clip,
                 belongsTo: $store.state.currentCliplist,
@@ -137,10 +141,40 @@ export default {
       nameSort: '',
       viewSort: '',
       createdSort: '',
-
     };
   },
   methods: {
+    async copyCliplist(element) {
+      let clipString = '';
+      await this.$firestore.collection('cliplist').where('id', '==', element.id)
+        .get()
+        .then(async (res) => {
+          if (res.docs.length === 1) {
+            console.log('res', res);
+            clipString = res.docs[0].id;
+          } else {
+            await this.$firestore.collection('cliplist').add(element).then((resp) => {
+              clipString = resp.id;
+            });
+          }
+        });
+      const tempArea = document.createElement('textarea');
+      document.body.appendChild(tempArea);
+      tempArea.value = clipString;
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+      this.$store.commit('SET_SnackBar', { type: 'success', text: `Cliplist String : ${clipString} 가 복사되었습니다.`, value: true });
+    },
+    copyClip(el) {
+      const tempArea = document.createElement('textarea');
+      document.body.appendChild(tempArea);
+      tempArea.value = el.url;
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+      this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip : ${el.title} 가 복사되었습니다.`, value: true });
+    },
     sortByViews() {
       if (this.viewSort === 'asc') {
         this.viewSort = 'desc';

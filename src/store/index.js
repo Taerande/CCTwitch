@@ -49,10 +49,10 @@ export default new Vuex.Store({
     SET_currCliplist(state, response) {
       if (response.data.id === undefined) {
         state.currentCliplist = {};
-        this.commit('SET_SnackBar', { type: response.type, text: response.text, value: true });
+        // this.commit('SET_SnackBar', { type: response.type, text: response.text, value: true });
       } else {
         state.currentCliplist = response.data;
-        this.commit('SET_SnackBar', { type: response.type, text: response.text, value: true });
+        // this.commit('SET_SnackBar', { type: response.type, text: response.text, value: true });
       }
     },
     INIT_currCliplist(state) {
@@ -84,16 +84,20 @@ export default new Vuex.Store({
     },
     ADD_pinnedClip(state, response) {
       const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      if (existingCliplist[response.listIndex].pinnedClips.find((ele) => ele.id === response.data.id)) {
-        const title = response.data.title.length > 25 ? `${response.data.title.substr(0, 24)}...` : response.data.title;
-        this.commit('SET_SnackBar', { type: 'error', text: `ClipList : ${title} 는 이미 있습니다.`, value: true });
+      if (existingCliplist[response.listIndex].pinnedClips.length < 30) {
+        if (existingCliplist[response.listIndex].pinnedClips.find((ele) => ele.id === response.data.id)) {
+          const title = response.data.title.length > 25 ? `${response.data.title.substr(0, 24)}...` : response.data.title;
+          this.commit('SET_SnackBar', { type: 'error', text: `ClipList : ${title} 는 이미 있습니다.`, value: true });
+        } else {
+          existingCliplist[response.listIndex].pinnedClips.push(response.data);
+          localStorage.setItem('allCliplists', JSON.stringify(existingCliplist));
+          state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
+          state.currentCliplist = {};
+          const title = response.data.title.length > 25 ? `${response.data.title.substr(0, 24)}...` : response.data.title;
+          this.commit('SET_SnackBar', { type: 'success', text: `ClipList : ${title} 가 추가되었습니다.`, value: true });
+        }
       } else {
-        existingCliplist[response.listIndex].pinnedClips.push(response.data);
-        localStorage.setItem('allCliplists', JSON.stringify(existingCliplist));
-        state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-        state.currentCliplist = {};
-        const title = response.data.title.length > 25 ? `${response.data.title.substr(0, 24)}...` : response.data.title;
-        this.commit('SET_SnackBar', { type: 'success', text: `ClipList : ${title} 가 추가되었습니다.`, value: true });
+        this.commit('SET_SnackBar', { type: 'error', text: 'ClipList : 클립을 더 이상 저장할 수 없습니다.', value: true });
       }
     },
     UPDATE_clipList(state, response) {
@@ -108,9 +112,11 @@ export default new Vuex.Store({
     },
     SET_newCliplist(state, response) {
       const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      const newId = existingCliplist[existingCliplist.length - 1] === undefined ? 0 : existingCliplist[existingCliplist.length - 1].id + 1;
+      const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
+             + Math.random().toString(16).slice(2)
+             + Date.now().toString(16).slice(4);
       const input = {
-        id: newId,
+        id: uid,
         title: response.title,
         color: response.color,
         pinnedClips: [],

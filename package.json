@@ -5,11 +5,13 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "firebase-deploy": "vue-cli-service build && firebase deploy"
   },
   "dependencies": {
     "axios": "^0.25.0",
     "core-js": "^3.6.5",
+    "firebase": "^9.6.7",
     "prettier": "^2.5.1",
     "vue": "^2.6.11",
     "vue-infinite-loading": "^2.4.5",

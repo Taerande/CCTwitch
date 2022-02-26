@@ -59,8 +59,9 @@
             :src="item.thumbnail_url"></v-img>
           </template>
             <iframe
+            class="black d-flex align-center"
             v-if="item.id === currentId"
-            :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=twitch-hotclip-tracker.netlify.app&autoplay=true`" parent="twitch-hotclip-tracker.netlify.app"
+            :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=localhost&autoplay=true&muted=false&preload=auto`"
             preload="auto"
             frameborder="0"
             height="720"
@@ -166,14 +167,14 @@ export default {
           $state.complete();
         } else if (res.data.pagination.cursor === undefined && res.data.data.length > 0) {
           res.data.data.forEach((el) => {
-            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < 100) {
+            if (el.video_id === this.infiniteData.data.video_id) {
               this.cliplist.push(el);
             }
           });
           $state.complete();
         } else {
           res.data.data.forEach((el) => {
-            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < 100) {
+            if (el.video_id === this.infiniteData.data.video_id) {
               this.cliplist.push(el);
             }
           });
