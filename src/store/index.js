@@ -108,6 +108,15 @@ export default new Vuex.Store({
         this.commit('SET_SnackBar', { type: 'error', text: 'ClipList : 클립을 더 이상 저장할 수 없습니다.', value: true });
       }
     },
+    UPDATE_pinndedClip(state, response) {
+      const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
+      const currentDataIndex = existingCliplist.findIndex((el) => el.id === state.currentCliplist.id);
+      existingCliplist[currentDataIndex].pinnedClips = response;
+      localStorage.setItem('allCliplists', JSON.stringify(existingCliplist));
+      state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
+      state.currentCliplist = existingCliplist[currentDataIndex];
+      this.commit('SET_SnackBar', { type: 'info', text: 'Pinned Clip : 클립 정보를 업데이트 하였습니다.', value: true });
+    },
     UPDATE_clipList(state, response) {
       const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
       const currentDataIndex = existingCliplist.findIndex((el) => el.id === response.id);

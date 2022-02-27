@@ -9,7 +9,6 @@
           <v-col class="d-flex">
           <router-link class="d-flex" :to="{name: 'Home'}">
             <v-img
-              alt="Vuetify Logo"
               class="shrink mr-2"
               contain
               src="@/assets/img/TwitchGlitchBlackOps.png"
@@ -27,19 +26,22 @@
       </v-container>
         <template v-slot:extension>
         <v-tabs align-with-title>
-          <v-tab to="/trending">
+          <v-tab class="text-caption" to="/trending">
             <div>
               <v-icon class="pr-1">mdi-star-shooting-outline</v-icon>
               <span>Trending</span>
             </div>
           </v-tab>
-          <v-tab to="/cliplist">
+          <v-tab class="text-caption" to="/cliplist">
             <div>
               <v-icon class="pr-1">mdi-movie-open-outline</v-icon>
               <span>My Cliplist</span>
             </div>
           </v-tab>
-          <v-tab>Analyze</v-tab>
+          <v-tab class="text-caption">
+              <v-icon class="pr-1">mdi-poll</v-icon>
+              <span>Analyze</span>
+          </v-tab>
         </v-tabs>
         <v-spacer></v-spacer>
       </template>

@@ -77,21 +77,37 @@
         </template>
         </v-text-field>
       </div>
-      <div v-if="result.id !== undefined" class="d-flex justify-center align-center pt-5">
-        <div>
+      <v-container v-if="result.id !== undefined" class="d-flex justify-center align-center pt-5">
+        <v-row>
           <span>{{result.title}}</span>
-        </div>
-        <div v-for="item in result.pinnedClips" :key="item.id">
-          <div>
+        </v-row>
+        <v-row v-for="item in result.pinnedClips" :key="item.id">
+          <v-dialog
+            :v-model="item.id === currentId"
+            @click:outside="currentId = null"
+            width="1280"
+            class="d-flex"
+          >
+          <template v-slot:activator="{ on, attrs }">
+            <v-img
+            width="275"
+            height="156"
+            id="clip-thumbnail"
+            @click="changeId(item.id)"
+            v-bind="attrs"
+            v-on="on"
+            lazy-src="@/assets/img/404.jpg"
+            :src="item.thumbnail_url"></v-img>
+          </template>
             <iframe
-            v-if="item.id !== undefined"
-            :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=localhost`" parent="localhost"
+            class="black d-flex align-center"
+            v-if="item.id === currentId"
+            :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=localhost&autoplay=true&muted=false&preload=auto`"
             preload="auto"
             frameborder="0"
-            height="100"
-            width="160"
+            height="720"
             allowfullscreen="true"></iframe>
-          </div>
+          </v-dialog>
           <div class="pl-10">
             <div class="twitch--text text-h6">{{item.broadcaster_name}}</div>
             <div class="text-h5">{{item.title}}</div>
@@ -100,8 +116,8 @@
               <span> 날짜 : {{setDate(item.created_at)}}</span>
             </div>
           </div>
-        </div>
-      </div>
+        </v-row>
+      </v-container>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -128,6 +144,7 @@ export default {
   props: ['type'],
   data() {
     return {
+      currentId: '',
       switch1: true,
       dialog: false,
       color: '',
@@ -138,6 +155,9 @@ export default {
     };
   },
   methods: {
+    changeId(el) {
+      this.currentId = el;
+    },
     async getCliplist(el) {
       this.$firestore.collection('cliplist').doc(`${el}`).get().then((res) => {
         console.log(res.data());

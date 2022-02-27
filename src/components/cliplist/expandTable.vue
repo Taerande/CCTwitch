@@ -17,6 +17,7 @@
             <v-icon>mdi-clipboard-multiple-outline</v-icon>
           </v-btn>
           <v-btn
+          @click="updateData($store.state.currentCliplist)"
           icon>
             <v-icon>mdi-refresh</v-icon>
           </v-btn>
@@ -129,6 +130,7 @@
 
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
+import axios from 'axios';
 
 export default {
   components: {
@@ -144,13 +146,27 @@ export default {
     };
   },
   methods: {
+    updateData(el) {
+      const idList = [];
+      el.pinnedClips.forEach((element) => {
+        idList.push(element.id);
+      });
+      axios.get('https://api.twitch.tv/helix/clips', {
+        headers: this.$store.state.headerConfig,
+        params: {
+          id: idList,
+          first: 30,
+        },
+      }).then((res) => {
+        this.$store.commit('UPDATE_pinndedClip', res.data.data);
+      });
+    },
     async copyCliplist(element) {
       let clipString = '';
       await this.$firestore.collection('cliplist').where('id', '==', element.id)
         .get()
         .then(async (res) => {
           if (res.docs.length === 1) {
-            console.log('res', res);
             clipString = res.docs[0].id;
           } else {
             await this.$firestore.collection('cliplist').add(element).then((resp) => {
@@ -173,7 +189,7 @@ export default {
       tempArea.select();
       document.execCommand('copy');
       document.body.removeChild(tempArea);
-      this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip : ${el.title} 가 복사되었습니다.`, value: true });
+      this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip URL : ${el.title} 가 복사되었습니다.`, value: true });
     },
     sortByViews() {
       if (this.viewSort === 'asc') {
