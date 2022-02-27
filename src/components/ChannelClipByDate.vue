@@ -6,7 +6,7 @@
     <v-row class="col-12 pa-1 d-flex justify-space-between align-baseline">
       <div class="d-flex align-baseline">
       <h1>Clips</h1>
-      <span class="pl-2 text-caption">(동영상별 최대 100개의 클립을 가져옵니다.)</span>
+      <span class="pl-2 text-caption">(기간별 최대 100개의 클립을 가져옵니다.)</span>
       </div>
       <div>
         <v-icon @click="refresh">mdi-refresh</v-icon>
@@ -68,10 +68,11 @@
             height="720"
             allowfullscreen="true"></iframe>
           </v-dialog>
-          </v-card-text>
+
+            </v-card-text>
             <div class="d-flex justify-space-between">
           <span class="text-caption">{{setDate(item.created_at)}}</span>
-          <span class="text-caption">views:{{item.view_count}}</span>
+          <span class="text-caption">views:{{viewerkFormatter(item.view_count.toString())}}</span>
             </div>
           </v-card>
         </v-lazy>
@@ -108,7 +109,6 @@ export default {
       dialog: false,
       paginationCursor: '',
       infiniteData: {},
-      userInfo: '',
     };
   },
   methods: {
@@ -150,15 +150,27 @@ export default {
       const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
       return dateFormatted;
     },
+    viewerkFormatter(el) {
+      if (el > 999999999) {
+        return `${el.slice(0, -9)},${el.slice(el.length - 9, -6)},${el.slice(el.length - 6, -3)},${el.slice(-3)}`;
+      }
+      if (el > 999999) {
+        return `${el.slice(0, -6)},${el.slice(el.length - 6, -3)},${el.slice(-3)}`;
+      }
+      if (el > 999) {
+        return `${el.slice(0, -3)},${el.slice(-3)}`;
+      }
+      return Math.abs(el);
+    },
 
     async channelInfiniteHandler($state) {
       await axios.get('https://api.twitch.tv/helix/clips', {
         headers: this.$store.state.headerConfig,
         params: {
-          broadcaster_id: this.infiniteData.data.broadcaster_id,
-          started_at: this.infiniteData.data.started_at,
-          ended_at: this.infiniteData.data.ended_at,
-          first: this.infiniteData.data.first,
+          broadcaster_id: this.clips.user_id,
+          started_at: this.$store.state.dateSort.start,
+          ended_at: this.$store.state.dateSort.end,
+          first: 20,
           after: this.paginationCursor,
         },
       }).then((res) => {
@@ -167,14 +179,14 @@ export default {
           $state.complete();
         } else if (res.data.pagination.cursor === undefined && res.data.data.length > 0) {
           res.data.data.forEach((el) => {
-            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < 100) {
+            if (this.cliplist.length < 100) {
               this.cliplist.push(el);
             }
           });
           $state.complete();
         } else {
           res.data.data.forEach((el) => {
-            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < 100) {
+            if (this.cliplist.length < 100) {
               this.cliplist.push(el);
             }
           });
@@ -183,16 +195,6 @@ export default {
       });
     },
 
-  },
-  created() {
-    this.infiniteData.data = {
-      broadcaster_id: this.clips.data.user_id,
-      started_at: this.clips.data.created_at,
-      ended_at: this.getEndDate(this.clips.data.created_at),
-      first: 20,
-      video_id: this.clips.data.id,
-      viewalbe: this.clips.data.viewalbe,
-    };
   },
   computed: {
     getTodayDate() {

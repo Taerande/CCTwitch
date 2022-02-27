@@ -1,8 +1,6 @@
 <template>
   <v-carousel
     @change="emitVidsId(vids[$event])"
-    height="250"
-    width="250"
     hide-delimiters
     v-if="vidlist.length > 0"
   >
@@ -45,7 +43,7 @@
     </v-sheet>
     </v-carousel-item>
   </v-carousel>
-  <div v-else class="d-flex align-center justify-center text-h4">
+  <div v-else class="d-flex align-center text-h4" style="height: 30vh;">
     😅There is no Vids
   </div>
 </template>

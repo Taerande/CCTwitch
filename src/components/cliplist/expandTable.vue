@@ -221,8 +221,11 @@ export default {
 
 };
 </script>
-<style lang="scss">
-th, tr{
+<style lang="scss" scoped>
+tr{
+  height: 56px;
+}
+th{
   height: 56px;
 }
 table{

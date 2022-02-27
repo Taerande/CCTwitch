@@ -16,8 +16,6 @@
           label="Search your Streamer">
         </v-text-field>
     </v-form>
-    <v-icon>mdi-movie-open-outline</v-icon>
-    <v-icon>mdi-star-shooting-outline</v-icon>
     </v-row>
   </v-container>
 </template>

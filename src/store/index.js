@@ -25,8 +25,16 @@ export default new Vuex.Store({
     cliplist: [],
     userInfo: {},
     currentCliplist: {},
+    dateSort: {
+      text: null,
+      start: null,
+      end: null,
+    },
   },
   mutations: {
+    SET_DateSort(state, response) {
+      state.dateSort = response;
+    },
     SET_UserInfo(state, response) {
       state.userInfo = response;
     },

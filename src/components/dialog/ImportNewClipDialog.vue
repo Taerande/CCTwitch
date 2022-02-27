@@ -42,7 +42,6 @@
           width="500"
           class="pt-5"
           append-icon="mdi-magnify"
-          @click:append="test(clipData)"
           hide-details=""
           placeholder="Input Twitch Clip URL or Id"
         >
@@ -57,36 +56,49 @@
         </v-text-field>
       </div>
       <div v-else>
-        <v-img src="@/assets/img/upload-icon.png">
-        </v-img>
+       <v-text-field
+          v-model="cliplistString"
+          :loading="loading"
+          outlined
+          width="500"
+          class="pt-5"
+          append-icon="mdi-magnify"
+          @click:append="getCliplist(cliplistString)"
+          hide-details=""
+          placeholder="Cliplist String"
+        >
+        <template v-slot:progress>
+          <v-progress-linear
+            :indeterminate="false"
+            height="10"
+            :color="success"
+            absolute
+          ></v-progress-linear>
+        </template>
+        </v-text-field>
       </div>
-    </v-card-text>
-    <v-card-text class="d-flex justify-center align-center pt-5">
-      <div v-if="result.id === undefined && loading === false">
-        <v-progress-circular
-          indeterminate
-          size="50"
-          width="5"
-          color="primary"
-        ></v-progress-circular>
-      </div>
-      <div v-if="result.id" class="d-flex justify-center align-center pt-5">
+      <div v-if="result.id !== undefined" class="d-flex justify-center align-center pt-5">
         <div>
-          <iframe
-          v-if="result.id !== undefined"
-          :src="`https://clips.twitch.tv/embed?clip=${result.id}&parent=localhost`" parent="localhost"
-          preload="auto"
-          frameborder="0"
-          height="300"
-          width="400"
-          allowfullscreen="true"></iframe>
+          <span>{{result.title}}</span>
         </div>
-        <div class="pl-10">
-          <div class="twitch--text text-h6">{{result.broadcaster_name}}</div>
-          <div class="text-h5">{{result.title}}</div>
+        <div v-for="item in result.pinnedClips" :key="item.id">
           <div>
-            <span> 조회수 : {{result.view_count}}</span>
-            <span> 날짜 : {{setDate(result.created_at)}}</span>
+            <iframe
+            v-if="item.id !== undefined"
+            :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=localhost`" parent="localhost"
+            preload="auto"
+            frameborder="0"
+            height="100"
+            width="160"
+            allowfullscreen="true"></iframe>
+          </div>
+          <div class="pl-10">
+            <div class="twitch--text text-h6">{{item.broadcaster_name}}</div>
+            <div class="text-h5">{{item.title}}</div>
+            <div>
+              <span> 조회수 : {{item.view_count}}</span>
+              <span> 날짜 : {{setDate(item.created_at)}}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -107,7 +119,7 @@
 </template>
 <script>
 import pinClip from '@/components/pinClip.vue';
-import axios from 'axios';
+// import axios from 'axios';
 
 export default {
   components: {
@@ -122,13 +134,17 @@ export default {
       clipData: '',
       loading: false,
       result: '',
+      cliplistString: '',
     };
   },
   methods: {
-    // extract(el) {
-    //   const regex = /`https://clips.twitch.tv;/`/ ;
-    //   return el.splice(regex);
-    // },
+    async getCliplist(el) {
+      this.$firestore.collection('cliplist').doc(`${el}`).get().then((res) => {
+        console.log(res.data());
+        this.result = res.data();
+        console.log(this.result);
+      });
+    },
     setDate(el) {
       const time = new Date(el).getTime();
       const krTime = time + 9 * 60 * 60 * 1000;
@@ -141,20 +157,20 @@ export default {
       }
       return 'Data File';
     },
-    async test(el) {
-      this.loading = false;
-      console.log(el);
-      axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          id: ['WittyBrightOcelotDxAbomb-NIZR3oY0YzUNXHkw', 'LaconicDoubtfulWombatPRChase-9J9sz-ekCs_1rL5L', 'OnerousAffluentWrenchFUNgineer-XYVPRreBOMTXD6J3'],
-        },
-      }).then((res) => {
-        console.log(res);
-        // this.result = res.data.data['0'];
-        // this.loading = false;
-      });
-    },
+    // async test(el) {
+    //   this.loading = false;
+    //   console.log(el);
+    //   axios.get('https://api.twitch.tv/helix/clips', {
+    //     headers: this.$store.state.headerConfig,
+    //     params: {
+    //       id: ['WittyBrightOcelotDxAbomb-NIZR3oY0YzUNXHkw', 'LaconicDoubtfulWombatPRChase-9J9sz-ekCs_1rL5L', 'OnerousAffluentWrenchFUNgineer-XYVPRreBOMTXD6J3'],
+    //     },
+    //   }).then((res) => {
+    //     console.log(res);
+    //     // this.result = res.data.data['0'];
+    //     // this.loading = false;
+    //   });
+    // },
     searchClip(el) {
       const intervalID = () => { setTimeout(() => { console.log('setInterval'); this.loading = true; }, 3000); };
       if (el.length > 10) {
