@@ -120,8 +120,15 @@ export default new Vuex.Store({
     UPDATE_clipList(state, response) {
       const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
       const currentDataIndex = existingCliplist.findIndex((el) => el.id === response.id);
-      existingCliplist[currentDataIndex].title = response.title;
-      existingCliplist[currentDataIndex].color = response.color;
+      if (response.title) {
+        existingCliplist[currentDataIndex].title = response.title;
+      }
+      if (response.color) {
+        existingCliplist[currentDataIndex].color = response.color;
+      }
+      if (response.updateId) {
+        existingCliplist[currentDataIndex].id = response.updateId;
+      }
       localStorage.setItem('allCliplists', JSON.stringify(existingCliplist));
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
       state.currentCliplist = existingCliplist[currentDataIndex];
@@ -164,11 +171,34 @@ export default new Vuex.Store({
       const listindex = state.cliplist.findIndex((el) => el.id === response.belongsTo.id);
       const clipindex = state.currentCliplist.pinnedClips.findIndex((el) => el.id === response.target.id);
       temp[listindex].pinnedClips.splice(clipindex, 1);
+      state.currentCliplist.pinnedClips.splice(clipindex, 1);
       localStorage.setItem('allCliplists', JSON.stringify(temp));
       const title = response.target.title.length > 25 ? `${response.target.title.substr(0, 24)}...` : response.target.title;
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      state.currentCliplist = temp[listindex];
       this.commit('SET_SnackBar', { type: 'error', text: `Clip : ${title}가 삭제되었습니다.`, value: true });
+    },
+    SORT_cliplist(state, response) {
+      if (response.type === 'views') {
+        if (response.order === 'desc') {
+          state.currentCliplist.pinnedClips.sort((a, b) => b.view_count - a.view_count);
+        } else {
+          state.currentCliplist.pinnedClips.sort((a, b) => a.view_count - b.view_count);
+        }
+      }
+      if (response.type === 'created') {
+        if (response.order === 'desc') {
+          state.currentCliplist.pinnedClips.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        } else {
+          state.currentCliplist.pinnedClips.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        }
+        if (response.type === 'created') {
+          if (response.order === 'desc') {
+            state.currentCliplist.pinnedClips.sort((a, b) => a.broadcaster_name.localeCompare(b.broadcaster_name));
+          } else {
+            state.currentCliplist.pinnedClips.sort((a, b) => b.broadcaster_name.localeCompare(a.broadcaster_name));
+          }
+        }
+      }
     },
   },
   actions: {

@@ -62,7 +62,7 @@
           </th>
           <th style="width: 5%;"><span></span></th>
         </thead>
-        <tbody>
+        <tbody v-show="tableloading">
           <tr v-for="clip in $store.state.currentCliplist.pinnedClips" :key="clip.id">
             <v-dialog
             :v-model="dialogId === clip.id"
@@ -120,6 +120,9 @@
             </td>
           </tr>
         </tbody>
+        <tbody v-show="!tableloading">
+          <v-progress-circular indeterminate></v-progress-circular>
+        </tbody>
       </table>
     </v-row>
   </v-row>
@@ -139,6 +142,7 @@ export default {
   },
   data() {
     return {
+      tableloading: true,
       dialogId: '',
       nameSort: '',
       viewSort: '',
@@ -161,19 +165,47 @@ export default {
         this.$store.commit('UPDATE_pinndedClip', res.data.data);
       });
     },
+    compareArray(a, b) {
+      return a.length === b.length && a.every((value, index) => value === b[index].id);
+    },
     async copyCliplist(element) {
+      this.tableloading = false;
       let clipString = '';
       await this.$firestore.collection('cliplist').where('id', '==', element.id)
         .get()
         .then(async (res) => {
-          if (res.docs.length === 1) {
+          if (res.empty) {
+            const templist = [];
+            element.pinnedClips.forEach((el) => templist.push(el.id));
+            await this.$firestore.collection('cliplist').add({
+              id: element.id,
+              title: element.title,
+              color: element.color,
+              pinnedClips: templist,
+            }).then((resp) => {
+              clipString = resp.id;
+            });
+          } else if (this.compareArray(res.docs[0].data().pinnedClips, element.pinnedClips)) {
             clipString = res.docs[0].id;
           } else {
-            await this.$firestore.collection('cliplist').add(element).then((resp) => {
+            const templist = [];
+            const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
+             + Math.random().toString(16).slice(2)
+             + Date.now().toString(16).slice(4);
+            element.pinnedClips.forEach((el) => templist.push(el.id));
+            await this.$firestore.collection('cliplist').add({
+              id: uid,
+              title: element.title,
+              color: element.color,
+              pinnedClips: templist,
+            }).then(async (resp) => {
+              await this.$store.commit('INIT_currCliplist');
+              this.$store.commit('UPDATE_clipList', { id: element.id, updateId: uid });
               clipString = resp.id;
             });
           }
         });
+      this.tableloading = true;
       const tempArea = document.createElement('textarea');
       document.body.appendChild(tempArea);
       tempArea.value = clipString;
@@ -194,28 +226,28 @@ export default {
     sortByViews() {
       if (this.viewSort === 'asc') {
         this.viewSort = 'desc';
-        this.$store.state.currentCliplist.pinnedClips.sort((a, b) => b.view_count - a.view_count);
+        this.$store.commit('SORT_cliplist', { type: 'views', order: 'desc' });
       } else {
         this.viewSort = 'asc';
-        this.$store.state.currentCliplist.pinnedClips.sort((a, b) => a.view_count - b.view_count);
+        this.$store.commit('SORT_cliplist', { type: 'views', order: 'asc' });
       }
     },
     sortByCreated() {
       if (this.createdSort === 'asc') {
         this.createdSort = 'desc';
-        this.$store.state.currentCliplist.pinnedClips.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        this.$store.commit('SORT_cliplist', { type: 'created', order: 'desc' });
       } else {
         this.createdSort = 'asc';
-        this.$store.state.currentCliplist.pinnedClips.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        this.$store.commit('SORT_cliplist', { type: 'created', order: 'asc' });
       }
     },
     sortByName() {
       if (this.nameSort === 'asc') {
         this.nameSort = 'desc';
-        this.$store.state.currentCliplist.pinnedClips.sort((a, b) => a.broadcaster_name.localeCompare(b.broadcaster_name));
+        this.$store.commit('SORT_cliplist', { type: 'name', order: 'desc' });
       } else {
         this.nameSort = 'asc';
-        this.$store.state.currentCliplist.pinnedClips.sort((a, b) => b.broadcaster_name.localeCompare(a.broadcaster_name));
+        this.$store.commit('SORT_cliplist', { type: 'name', order: 'asc' });
       }
     },
     setDate(el) {

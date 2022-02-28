@@ -15,6 +15,7 @@ const Search = () => import(/* webpackChunkName: "search" */ '@/views/Search.vue
 const Channel = () => import(/* webpackChunkName: "channel" */ '@/views/Channel.vue');
 const Trending = () => import(/* webpackChunkName: "trending" */ '@/views/Trending.vue');
 const Cliplist = () => import(/* webpackChunkName: "cliplist" */ '@/views/Cliplist.vue');
+const test = () => import(/* webpackChunkName: "test" */ '@/views/test.vue');
 
 const routes = [
   {
@@ -46,6 +47,11 @@ const routes = [
     path: '/cliplist',
     name: 'Cliplist',
     component: Cliplist,
+  },
+  {
+    path: '/test',
+    name: 'test',
+    component: test,
   },
 ];
 
