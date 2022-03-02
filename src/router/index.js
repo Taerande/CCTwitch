@@ -16,6 +16,7 @@ const Channel = () => import(/* webpackChunkName: "channel" */ '@/views/Channel.
 const Trending = () => import(/* webpackChunkName: "trending" */ '@/views/Trending.vue');
 const Cliplist = () => import(/* webpackChunkName: "cliplist" */ '@/views/Cliplist.vue');
 const test = () => import(/* webpackChunkName: "test" */ '@/views/test.vue');
+const Import = () => import(/* webpackChunkName: "Import" */ '@/views/Import.vue');
 
 const routes = [
   {
@@ -47,6 +48,11 @@ const routes = [
     path: '/cliplist',
     name: 'Cliplist',
     component: Cliplist,
+  },
+  {
+    path: '/import/:id',
+    name: 'import',
+    component: Import,
   },
   {
     path: '/test',

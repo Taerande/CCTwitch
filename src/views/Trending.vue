@@ -71,7 +71,7 @@ export default {
       } else {
         [...toggleClips].forEach((item) => {
           item.classList.add('hidden');
-          this.$store.commit('SET_SnackBar', { type: 'success', text: `Filter : ${el.display_name} 님을 숨깁니다.`, value: true });
+          this.$store.commit('SET_SnackBar', { type: 'error', text: `Filter : ${el.display_name} 님을 숨깁니다.`, value: true });
         });
       }
     },

@@ -23,7 +23,7 @@
             icon
         v-if="!$vuetify.theme.dark"
         @click="toggleDarkTheme()">
-          <v-icon color="yellow">mdi-weather-night</v-icon>
+          <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
 
         </v-btn>
         <v-btn v-else
@@ -47,7 +47,7 @@ export default {
     return {
       icons: [
         { icon: 'mdi-home' },
-        { icon: 'mdi-mail' },
+        { icon: 'mdi-email' },
         { icon: 'mdi-twitch' },
         { icon: 'mdi-play' },
       ],

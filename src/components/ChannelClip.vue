@@ -17,10 +17,12 @@
     <v-col
       v-for="(item, index) in this.cliplist"
       :key="index"
-      lg="3"
+      xs="12"
+      sm="6"
       md="4"
-      sm="12"
-      class="pa-2 clip-item"
+      lg="3"
+      xl="3"
+      class="pa-3 clip-item"
       :class="item.broadcaster_id"
 
       >
@@ -31,48 +33,48 @@
           :options="{ threshold: 0.5}">
           <v-card>
             <v-card-title class="pa-0">
-              <v-container>
-              <v-row class="d-flex justify-end align-center">
-                <pinClip name="channelClipPin" :clipData="item"></pinClip>
-              </v-row>
-              <v-row class="d-flex justify-center">
-                <span class="text-body-2 text-truncate">{{item.title}}</span>
-              </v-row>
-              </v-container>
-
             </v-card-title>
             <v-card-text class="d-flex justify-center align-center pa-0">
           <v-dialog
             :v-model="item.id === currentId"
             @click:outside="currentId = null"
-            width="1280"
-            class="d-flex"
+            max-width="1280"
           >
           <template v-slot:activator="{ on, attrs }">
             <v-img
-            width="275"
-            height="156"
+            :aspect-ratio="16/9"
+            width="400"
             id="clip-thumbnail"
             @click="changeId(item.id)"
             v-bind="attrs"
             v-on="on"
             lazy-src="@/assets/img/404.jpg"
-            :src="item.thumbnail_url"></v-img>
+            :src="item.thumbnail_url">
+              <v-container fluid fill-height class="d-flex align-content-space-between">
+                <v-row class="d-flex justify-space-between align-center pl-1" style="background-color: rgba( 0, 0, 0, 0.5 )">
+                  <v-avatar size="25">
+                    <v-img :src="userProfileImg" lazy-src="@/assets/img/404.jpg" alt="profile_img"></v-img>
+                  </v-avatar>
+                  <span style="max-width: 150px;" class="white--text text-body-2 text-truncate">{{item.title}}</span>
+                  <pinClip name="channelClipPin" :clipData="item"></pinClip>
+                </v-row>
+                <v-row class="d-flex justify-space-between">
+                  <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">{{setDate(item.created_at)}}</span>
+                  <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">views:{{viewerkFormatter(item.view_count)}}</span>
+                </v-row>
+              </v-container>
+            </v-img>
           </template>
             <iframe
             class="black d-flex align-center"
             v-if="item.id === currentId"
-            :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=localhost&autoplay=true&muted=false&preload=auto`"
+            :src="`https://clips.twitch.tv/embed?clip=${currentId}&parent=localhost&autoplay=true&muted=false&preload=auto`"
             preload="auto"
             frameborder="0"
             height="720"
             allowfullscreen="true"></iframe>
           </v-dialog>
           </v-card-text>
-            <div class="d-flex justify-space-between">
-          <span class="text-caption">{{setDate(item.created_at)}}</span>
-          <span class="text-caption">views:{{item.view_count}}</span>
-            </div>
           </v-card>
         </v-lazy>
       </v-sheet>
@@ -93,7 +95,7 @@ import infiniteLoading from 'vue-infinite-loading';
 import pinClip from '@/components/pinClip.vue';
 
 export default {
-  props: ['clips'],
+  props: ['clips','userProfileImg'],
   components: {
     infiniteLoading,
     pinClip,
@@ -112,6 +114,19 @@ export default {
     };
   },
   methods: {
+    viewerkFormatter(el) {
+      const num = el.toString();
+      if (num > 999999999) {
+        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
+      }
+      if (num > 999999) {
+        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
+      }
+      if (num > 999) {
+        return `${num.slice(0, -3)},${num.slice(-3)}`;
+      }
+      return Math.abs(num);
+    },
     shuffle() {
       const playlist = [...this.cliplist];
       let listLength = playlist.length;
@@ -194,7 +209,7 @@ export default {
       viewalbe: this.clips.data.viewalbe,
     };
   },
-  computed: {
+computed: {
     getTodayDate() {
       return new Date().toISOString();
     },
@@ -204,12 +219,6 @@ export default {
 <style lang="scss" scoped>
 #clip-thumbnail{
   cursor: pointer;
-  border-radius: 3%;
+  border-radius: 3px;
 }
-.clip-item:hover{
-  transform: scale(1.05) !important;
-  transition: all 0.1s;
-  transition-timing-function: ease;
-}
-
 </style>

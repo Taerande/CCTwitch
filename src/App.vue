@@ -85,5 +85,17 @@ a{
 div[role="dialog"]{
   box-shadow: none;
 }
+::-webkit-scrollbar {
+  width: 7px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--twitch-color);
+  border-radius: 5px;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-track {
+  background-color: rgb(255,255,255,0.1);
+  border-radius: 5px;
+}
 
 </style>

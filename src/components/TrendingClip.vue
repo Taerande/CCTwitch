@@ -19,9 +19,10 @@
       v-for="(item, index) in this.cliplist"
       :key="index"
       lg="3"
-      md="4"
-      sm="12"
-      class="pa-2 clip-item"
+      md="6"
+      sm="6"
+      xs="12"
+      class="pa-3 clip-item"
       :class="[item.broadcaster_id, $store.state.likedStreamer.find( ele => ele.id == item.broadcaster_id) === undefined ? 'hidden': '']"
       >
         <v-sheet v-if="$store.state.likedStreamer.find( ele => ele.id == item.broadcaster_id)">
@@ -29,18 +30,6 @@
             :options="{ threshold: 0.1}">
             <v-card>
               <v-card-title class="pa-0">
-                <v-container>
-                <v-row class="d-flex justify-space-between align-center">
-                  <v-avatar size="30">
-                    <v-img :src="$store.state.likedStreamer.find( ele => ele.id == item.broadcaster_id).thumbnail" lazy-src="@/assets/img/404.jpg" alt="profile_img"></v-img>
-                    </v-avatar>
-                    <pinClip name="tredingClipPin" :clipData="item"></pinClip>
-                </v-row>
-                <v-row class="d-flex justify-center">
-                  <span class="text-body-2">{{item.title.length >18 ? `${item.title.substr(0,17)}...` : item.title }}</span>
-                </v-row>
-                </v-container>
-
               </v-card-title>
               <v-card-text class="d-flex justify-center align-center pa-0">
             <v-dialog
@@ -50,30 +39,39 @@
             >
             <template v-slot:activator="{ on, attrs }">
               <v-img
-              width="275"
-              height="156"
+              :aspect-ratio="16/9"
+              width="400"
               id="clip-thumbnail"
               @click="changeId(item.id)"
               v-bind="attrs"
               v-on="on"
               lazy-src="@/assets/img/404.jpg"
-              :src="item.thumbnail_url"></v-img>
+              :src="item.thumbnail_url">
+              <v-container fluid fill-height class="d-flex align-content-space-between">
+                <v-row class="d-flex justify-space-between align-center pl-1 py-2" style="background-color: rgba( 0, 0, 0, 0.5 )">
+                  <v-avatar size="25">
+                    <v-img :src="$store.state.likedStreamer.find( ele => ele.id == item.broadcaster_id).thumbnail" lazy-src="@/assets/img/404.jpg" alt="profile_img"></v-img>
+                  </v-avatar>
+                  <div style="max-width: 150px;" class="white--text text-body-2 text-truncate">{{item.title}}</div>
+                  <pinClip name="channelClipPin" :clipData="item"></pinClip>
+                </v-row>
+                <v-row class="d-flex justify-space-between">
+                  <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">{{setDate(item.created_at)}}</span>
+                  <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">views:{{viewerkFormatter(item.view_count)}}</span>
+                </v-row>
+              </v-container>
+              </v-img>
             </template>
               <iframe
+              class="black d-flex align-center"
               v-if="item.id === currentId"
-              :src="`https://clips.twitch.tv/embed?clip=${item.id}&parent=localhost&autoplay=true`" parent="localhost"
+              :src="`https://clips.twitch.tv/embed?clip=${currentId}&parent=localhost&autoplay=true`" parent="localhost"
               preload="auto"
               frameborder="0"
               height="720"
               allowfullscreen="true"></iframe>
             </v-dialog>
-
-              </v-card-text>
-              <div class="d-flex justify-space-between">
-            <span class="text-caption">{{setDate(item.created_at)}}</span>
-            <span class="text-caption">{{item.id}}</span>
-            <span class="text-caption">views:{{item.view_count}}</span>
-              </div>
+            </v-card-text>
             </v-card>
           </v-lazy>
         </v-sheet>
@@ -111,9 +109,23 @@ export default {
       infiniteData: {},
       userInfo: '',
       isShuffled: false,
+      nameSort:'',
     };
   },
   methods: {
+    viewerkFormatter(el) {
+      const num = el.toString();
+      if (num > 999999999) {
+        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
+      }
+      if (num > 999999) {
+        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
+      }
+      if (num > 999) {
+        return `${num.slice(0, -3)},${num.slice(-3)}`;
+      }
+      return Math.abs(num);
+    },
     shuffle() {
       const playlist = [...this.cliplist];
       let listLength = playlist.length;
@@ -135,8 +147,14 @@ export default {
       console.timeEnd('meusussre end');
       this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 조회수순으로 정렬합니다.', value: true });
     },
-    sortByName() {
-      this.cliplist.sort((a, b) => a.id.localeCompare(b.id));
+    sortByName(){
+      if (this.nameSort === 'asc') {
+        this.nameSort = 'desc';
+        this.$store.commit('SORT_cliplist', { data: this.cliplist, type: 'name', order: 'desc' });
+      } else {
+        this.nameSort = 'asc';
+        this.$store.commit('SORT_cliplist', { data: this.cliplist, type: 'name', order: 'asc' });
+      }
     },
     changeId(el) {
       this.currentId = el;
@@ -178,25 +196,19 @@ export default {
       }).catch((error) => console.log(error));
     },
 
-    // async trendingInfiniteHandler($state) {
-    //   if (this.cliplist.length >= 100) {
-    //     $state.complete();
-    //   } else if (this.paginationCursor === undefined && this.cliplist.length > 0) {
-    //     const promise = this.$store.state.likedStreamer.map((target, index) => (target.login === 'ohsunny0731'
-    //       ? this.trendingGetClipInfinite(target, index)
-    //       : null));
-    //     console.log('list length', promise);
-    //     await Promise.all(promise);
-    //     $state.complete();
-    //   } else {
-    //     const promise = this.$store.state.likedStreamer.map((target, index) => (target.login === 'ohsunny0731'
-    //       ? this.trendingGetClipInfinite(target, index)
-    //       : null));
-    //     console.log('else', promise);
-    //     await Promise.all(promise);
-    //     $state.loaded();
-    //   }
-    // },
+    async trendingInfiniteHandler($state) {
+      if (this.cliplist.length >= 100) {
+        $state.complete();
+      } else if (this.paginationCursor === undefined && this.cliplist.length > 0) {
+        const promise = this.$store.state.likedStreamer.map(this.trendingGetClipInfinite);
+        await Promise.all(promise);
+        $state.complete();
+      } else {
+        const promise = this.$store.state.likedStreamer.map(this.trendingGetClipInfinite);
+        await Promise.all(promise);
+        $state.loaded();
+      }
+    },
   },
   computed: {
     getTodayDate() {
@@ -208,15 +220,5 @@ export default {
 <style lang="scss" scoped>
 #clip-thumbnail{
   cursor: pointer;
-  border-radius: 3%;
 }
-.v-dialog{
-  box-shadow: none !important;
-}
-.clip-item:hover{
-  transform: scale(1.05) !important;
-  transition: all 0.1s;
-  transition-timing-function: ease;
-}
-
 </style>

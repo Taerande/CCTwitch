@@ -4,13 +4,14 @@
   max-width="290">
   <template v-slot:activator="{ on, attrs }">
     <v-btn
-    text
-    outlined
+      text
+      outlined
       v-if="type.type === 'add'"
       class="text-caption"
       color="success"
       v-bind="attrs"
       v-on="on"
+      :disabled="$store.state.cliplist.length >= 20"
     >
     Add New List
     </v-btn>
@@ -18,8 +19,10 @@
     v-else-if="type.type === 'pin'"
     v-bind="attrs"
     v-on="on"
+    :disabled="$store.state.cliplist.length >= 20"
     >
       <div
+      :disabled="$store.state.cliplist.length >= 20"
       class="twitch cliplist-canvas d-flex justify-center align-center">
         <v-icon large>mdi-plus</v-icon>
       </div>
@@ -133,5 +136,8 @@ export default {
 div[role=button]:hover{
   cursor: pointer;
   background-color: rgb(0, 0, 0, 0.2) !important;
+}
+div[disabled=disabled]{
+  opacity: 0.4 !important;
 }
 </style>

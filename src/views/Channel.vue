@@ -48,59 +48,7 @@
   <v-row class="d-flex pt-3 align-baseline">
     {{userInfo.data.description}}
   </v-row>
-  <v-row class="d-flex align-center py-3">
-    <v-btn class="text-caption mr-3" :color="clipSort === 'vids' ? 'success' : ''" @click="clipSort = 'vids', $store.commit('SET_DateSort',{text: null, start: null, end: null})">Sort By Vids</v-btn>
-      <v-menu
-      v-model="menu"
-       offset-y>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            class="text-caption"
-            :color="clipSort === 'date' ? 'success' : ''"
-            v-bind="attrs"
-            v-on="on"
-          >
-            {{$store.state.dateSort.text === null ? "Sort By Date" : $store.state.dateSort.text}}
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="changeDateSort({
-            text: '24Hours',
-            start: todayBeforeDay,
-            end: today,
-          })">
-            <v-list-item-title>24Hour</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="changeDateSort({
-            text: 'Week',
-            start: todayBeforeWeek,
-            end: today,
-          })">
-            <v-list-item-title>Week</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="changeDateSort({
-            text: 'Month',
-            start: todayBeforeMonth,
-            end: today,
-          })">
-            <v-list-item-title>Month</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="changeDateSort({
-            text: 'All',
-            start: null,
-            end: null,
-          })">
-            <v-list-item-title>All</v-list-item-title>
-          </v-list-item>
-          <v-list-item>
-            <DatePickerDialog :dateInfo="{min : userInfo.data.created_at, max : today }" @ApplyDate="changeDateSort"></DatePickerDialog>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <div v-if="this.clipSort === 'date'" class="pl-3 red--text text-caption">
-       <v-icon color="red" size="1rem">mdi-calendar-range</v-icon> {{setDateFormat($store.state.dateSort)}}
-      </div>
-  </v-row>
+  <SortButton @changeSort="changeDateSort" :userInfo="userInfo" :clipSort="clipSort"></SortButton>
   <v-row
   v-if="this.clipSort === 'vids'"
   id="vidCarousel"
@@ -114,6 +62,7 @@
       <v-row v-if="carsouelId == item.data.id">
         <clips
         v-if="carsouelId == item.data.id"
+        :userProfileImg="userInfo.data.profile_image_url"
         :clips="{
           'data': item.data,
         }"></clips>
@@ -124,6 +73,7 @@
   class="d-flex justify-center align-center pa-0"
   v-if="this.clipSort === 'date'">
     <clipsByDate
+    :userProfileImg="userInfo.data.profile_image_url"
     :clips="{user_id: userInfo.data.id}"></clipsByDate>
   </v-row>
 </v-container>
@@ -133,15 +83,14 @@ import axios from 'axios';
 import clips from '../components/ChannelClip.vue';
 import clipsByDate from '../components/ChannelClipByDate.vue';
 import vids from '../components/vids.vue';
-import DatePickerDialog from '../components/dialog/DatePickerDialog.vue';
+import SortButton from '../components/Channel/SortButton.vue';
 
 export default {
   components: {
-    clips, vids, DatePickerDialog, clipsByDate,
+    clips, vids, clipsByDate, SortButton,
   },
   data() {
     return {
-      menu: false,
       dataLoading: false,
       vidLists: [],
       carsouelId: 123123,
@@ -152,35 +101,15 @@ export default {
         viewer_count: '',
       },
       clipSort: 'vids',
-      datelength: '',
     };
   },
   methods: {
-    setDateFormat(el) {
-      if (el.text === 'All') {
-        return 'All';
-      }
-      return `${el.start.substr(0, 10)} ~ ${el.end.substr(0, 10)}`;
-    },
-    async changeDateSort(el) {
-      const asd = () => {
-        this.clipSort = '';
-      };
-      await asd();
-      this.clipSort = 'date';
-      this.menu = false;
-      this.$store.commit('SET_DateSort', el);
-    },
-    like(el) {
-      this.$store.commit('SET_LikedStreamer', el);
-    },
-    deleteFav(el) {
-      this.$store.commit('DELETE_LikedStreamer', el);
+    changeDateSort(el) {
+      this.clipSort = el;
     },
     changeCarsouelId(currentId) {
       this.carsouelId = currentId;
     },
-
     async getVid(userId) {
       await axios.get('https://api.twitch.tv/helix/videos', {
         headers: this.$store.state.headerConfig,
@@ -230,6 +159,12 @@ export default {
         });
       });
     },
+    like(el) {
+      this.$store.commit('SET_LikedStreamer', el);
+    },
+    deleteFav(el) {
+      this.$store.commit('DELETE_LikedStreamer', el);
+    },
     kFormatter(el) {
       if (el > 999999) {
         return `${(Math.abs(el) / 1000000).toFixed(1)}M`;
@@ -255,27 +190,6 @@ export default {
       await this.getUserInfo(this.$route.query.q);
       await this.getVid(this.userInfo.data.id);
       this.dataLoading = true;
-    },
-
-  },
-  computed: {
-    today() {
-      return new Date().toISOString();
-    },
-    todayBeforeDay() {
-      const d = new Date();
-      d.setDate(d.getDate() - 1);
-      return d.toISOString();
-    },
-    todayBeforeWeek() {
-      const d = new Date();
-      d.setDate(d.getDate() - 7);
-      return d.toISOString();
-    },
-    todayBeforeMonth() {
-      const d = new Date();
-      d.setMonth(d.getMonth() - 1);
-      return d.toISOString();
     },
 
   },

@@ -1,8 +1,11 @@
 <template>
 <v-container fluid>
   <v-row class="d-flex align-center pt-5">
-     <v-col>
-      <h1>My Cliplists</h1>
+     <v-col class="d-flex align-baseline">
+      <h1 class="pr-3">My Cliplists</h1>
+      <div class="text-caption">
+        <span :class="$store.state.cliplist.length === 20 ? 'red--text' : ''">{{$store.state.cliplist.length}}</span> / 20
+      </div>
     </v-col>
     <v-col class="d-flex justify-end align-center">
       <ImportNewClipDialog></ImportNewClipDialog>
@@ -48,12 +51,10 @@ export default {
   },
   methods: {
     async setData(el) {
-      if (this.$store.state.currentCliplist.id === undefined) {
+      if (this.$store.state.currentCliplist.id === el.id) {
         await this.$store.commit('INIT_currCliplist');
-        this.$store.commit('SET_currCliplist', { data: el, type: 'info', text: `Cliplist : ${el.title}를 표시합니다.` });
       } else {
-        await this.$store.commit('INIT_currCliplist');
-        this.$store.commit('SET_currCliplist', { data: '', type: 'info', text: `Cliplist : ${el.title}를 숨깁니다.` });
+        this.$store.commit('SET_currCliplist', { data: el, type: 'info', text: `Cliplist : ${el.title}를 표시합니다.` });
       }
     },
 
@@ -88,10 +89,4 @@ export default {
   flex-basis: 20%;
 }
 
-div[role="progressbar"]{
-  position: relative;
-  left: 50%;
-  top: 10%;
-  transform: translateX(-50%);
-}
 </style>

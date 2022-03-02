@@ -1,41 +1,17 @@
 <template>
-<v-expand-transition name="expand">
-  <v-row class="d-block" v-if="Object.keys($store.state.currentCliplist).length > 0 && $store.state.currentCliplist !== undefined">
+  <v-row class="d-block" v-if="Object.keys(result).length > 0 && result !== undefined">
     <v-row class="d-flex justify-space-between align-baseline">
       <div class="pt-10 pb-3">
-        <span class="text-h3 font-weight-bold">{{$store.state.currentCliplist.title}}</span>
-        <span class="text-subtitle-1">(총 {{$store.state.currentCliplist.pinnedClips.length}} / 100 개)</span>
+        <span class="text-h3 font-weight-bold">{{result.title}}</span>
+        <span class="text-subtitle-1">(총 {{result.pinnedClips.length}} / 100 개)</span>
       </div>
       <div>
-        <v-btn-toggle borderless>
-          <DeleteDialog
-          :delete="{type:'cliplist', data:{
-              target: $store.state.currentCliplist,
-              belongsTo: $store.state.cliplist,
-              }}"></DeleteDialog>
-          <v-btn @click="copyCliplist($store.state.currentCliplist)" icon>
-            <v-icon>mdi-clipboard-multiple-outline</v-icon>
-          </v-btn>
-          <v-btn
-          @click="updateData($store.state.currentCliplist)"
-          icon>
-            <v-icon>mdi-refresh</v-icon>
-          </v-btn>
-          <AddNewCliplistDialog :type="{type:'edit', data:{
-            text: 'Edit Cliplist',
-            id: $store.state.currentCliplist.id,
-            color: $store.state.currentCliplist.color,
-            title: $store.state.currentCliplist.title,
-          }}"></AddNewCliplistDialog>
-          <v-btn icon @click="resetData()">
-            <v-icon>mdi-chevron-down</v-icon>
-          </v-btn>
-       </v-btn-toggle>
-        </div>
+        <v-btn color="success" text @click="addNewCliplist">Save</v-btn>
+      </div>
     </v-row>
     <v-row>
       <table border="0" cellspacing="0" cellpadding="0" :class="theme">
-        <thead :style="{background:$store.state.currentCliplist.color}">
+        <thead :style="{background:result.color}">
           <th style="width: 10%;">썸네일</th>
           <th style="width: 30%;">제목</th>
           <th style="width: 15%;">
@@ -63,7 +39,7 @@
           <th style="width: 5%;"><span></span></th>
         </thead>
         <tbody>
-            <tr v-for="clip in setCurrList($store.state.currentCliplist.pinnedClips)" :key="clip.id">
+            <tr v-for="(clip,index) in setCurrList(result.pinnedClips)" :key="clip.id">
               <v-dialog
               :v-model="dialogId === clip.id"
               @click:outside="dialogId = ''"
@@ -112,9 +88,10 @@
                 <v-btn icon @click="copyClip(clip)">
                   <v-icon >mdi-clipboard-multiple-outline</v-icon>
                 </v-btn>
-                <DeleteDialog :delete="{type:'clip', data:{
+                <DeleteDialog @delImportedClip="delImportedClip" :delete="{type:'importedClip', data:{
                   target: clip,
-                  belongsTo: $store.state.currentCliplist,
+                  belongsTo: result,
+                  index: index + (page - 1 ) * 10 ,
                 }}"></DeleteDialog>
               </td>
             </tr>
@@ -131,24 +108,21 @@
         color="twitch"
         v-model="page"
         :total-visible="7"
-        :length="Math.ceil($store.state.currentCliplist.pinnedClips.length / 10)">
+        :length="Math.ceil(result.pinnedClips.length / 10)">
         </v-pagination>
       </v-row>
     </v-row>
   </v-row>
-  </v-expand-transition>
 </template>
 
 <script>
 
-import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
-import axios from 'axios';
 
 export default {
+  props:['result'],
   components: {
     DeleteDialog,
-    AddNewCliplistDialog,
   },
   data() {
     return {
@@ -162,6 +136,14 @@ export default {
     };
   },
   methods: {
+    async addNewCliplist(){
+      await this.$store.commit('SET_newCliplist',this.result);
+      this.$router.push({path: '/cliplist'})
+    },
+    delImportedClip(el){
+      this.result.pinnedClips.splice(el.index, 1);
+      this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip : ${el.title} 가 삭제되었습니다.`, value: true });
+    },
     setCurrList(el){
       return el.slice((this.page-1)*10, this.page*10);
     },
@@ -178,71 +160,6 @@ export default {
       }
       return Math.abs(num);
     },
-    updateData(el) {
-      const idList = [];
-      el.pinnedClips.forEach((element) => {
-        idList.push(element.id);
-      });
-      axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          id: idList,
-          first: 100,
-        },
-      }).then((res) => {
-        this.$store.commit('UPDATE_pinndedClip', res.data.data);
-      });
-    },
-    compareArray(a, b) {
-      const result = a.length === b.length && a.every((value) => b.includes(value));
-      return result;
-    },
-    async copyCliplist(element) {
-      let clipString = '';
-      this.tableloading = true;
-      setTimeout(async () => {
-        await this.$firestore.collection('cliplist').where('id', '==', element.id)
-          .get()
-          .then(async (res) => {
-            const templist = [];
-            element.pinnedClips.forEach((el) => templist.push(el.id));
-            if (res.empty) {
-              await this.$firestore.collection('cliplist').add({
-                id: element.id,
-                title: element.title,
-                color: element.color,
-                pinnedClips: templist,
-              }).then((resp) => {
-                clipString = resp.id;
-              });
-            } else if (this.compareArray(res.docs[0].data().pinnedClips, templist)) {
-              clipString = res.docs[0].id;
-            } else {
-              const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
-               + Math.random().toString(16).slice(2)
-               + Date.now().toString(16).slice(4);
-              await this.$firestore.collection('cliplist').add({
-                id: uid,
-                title: element.title,
-                color: element.color,
-                pinnedClips: templist,
-              }).then(async (resp) => {
-                await this.$store.commit('INIT_currCliplist');
-                await this.$store.commit('UPDATE_clipList', { id: element.id, updateId: uid });
-                clipString = resp.id;
-              });
-            }
-          });
-        const tempArea = document.createElement('textarea');
-        document.body.appendChild(tempArea);
-        tempArea.value = clipString;
-        tempArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempArea);
-        this.tableloading = false;
-        this.$store.commit('SET_SnackBar', { type: 'success', text: `Cliplist String : ${clipString} 가 복사되었습니다.`, value: true });
-      }, 1500);
-    },
     copyClip(el) {
       const tempArea = document.createElement('textarea');
       document.body.appendChild(tempArea);
@@ -256,30 +173,30 @@ export default {
       this.page = 1;
       if (this.viewSort === 'asc') {
         this.viewSort = 'desc';
-        this.$store.commit('SORT_cliplist', { data: this.$store.state.currentCliplist.pinnedClips, type: 'views', order: 'desc' });
+        this.$store.commit('SORT_cliplist', { data: this.result.pinnedClips, type: 'views', order: 'desc' });
       } else {
         this.viewSort = 'asc';
-        this.$store.commit('SORT_cliplist', { data:this.$store.state.currentCliplist.pinnedClips, type: 'views', order: 'asc' });
+        this.$store.commit('SORT_cliplist', { data:this.result.pinnedClips, type: 'views', order: 'asc' });
       }
     },
     sortByCreated() {
       this.page = 1;
       if (this.createdSort === 'asc') {
         this.createdSort = 'desc';
-        this.$store.commit('SORT_cliplist', { data:this.$store.state.currentCliplist.pinnedClips, type: 'created', order: 'desc' });
+        this.$store.commit('SORT_cliplist', { data:this.result.pinnedClips, type: 'created', order: 'desc' });
       } else {
         this.createdSort = 'asc';
-        this.$store.commit('SORT_cliplist', { data: this.$store.state.currentCliplist.pinnedClips ,type: 'created', order: 'asc' });
+        this.$store.commit('SORT_cliplist', { data: this.result.pinnedClips ,type: 'created', order: 'asc' });
       }
     },
     sortByName() {
       this.page = 1;
       if (this.nameSort === 'asc') {
         this.nameSort = 'desc';
-        this.$store.commit('SORT_cliplist', { data:this.$store.state.currentCliplist.pinnedClips, type: 'name', order: 'desc' });
+        this.$store.commit('SORT_cliplist', { data:this.result.pinnedClips, type: 'name', order: 'desc' });
       } else {
         this.nameSort = 'asc';
-        this.$store.commit('SORT_cliplist', { data: this.$store.state.currentCliplist.pinnedClips, type: 'name', order: 'asc' });
+        this.$store.commit('SORT_cliplist', { data: this.result.pinnedClips, type: 'name', order: 'asc' });
       }
     },
     setDate(el) {
@@ -287,9 +204,6 @@ export default {
       const krTime = time + 9 * 60 * 60 * 1000;
       const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
       return dateFormatted;
-    },
-    resetData() {
-      this.$store.commit('SET_currCliplist', {data: ''});
     },
   },
   computed: {

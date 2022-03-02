@@ -16,13 +16,13 @@
           <span>내 플레이리스트에 추가</span>
         </v-card-title>
         <v-card-subtitle class="d-flex justify-center pt-2 text-caption">
-          리스트당 최대 30개의 클립을 기록할 수 있습니다.
+          리스트당 최대 100개의 클립을 기록할 수 있습니다.
         </v-card-subtitle>
         <v-divider></v-divider>
         <v-card-text>
           <v-list class="pt-5">
               <AddNewCliplistDialog :type="{type:'pin',data:{text: 'Add New List'}}"></AddNewCliplistDialog>
-            <v-list-item :disabled="item.pinnedClips.length >= 30" @click="$store.commit('ADD_pinnedClip',{data: clipData, listIndex:index})" class="pa-1" v-for="(item,index) in $store.state.cliplist" :key="index">
+            <v-list-item :disabled="item.pinnedClips.length >= 100" @click="addNewClip({data: clipData, listIndex:index})" class="pa-1" v-for="(item,index) in $store.state.cliplist" :key="index">
                 <div class="cliplist-canvas" :style="{background: item.color}"></div>
                 <v-list-item-content>
                   <v-list-item-title class="text-title">{{item.title}}</v-list-item-title>
@@ -50,6 +50,10 @@ export default {
     };
   },
   methods: {
+    async addNewClip(el){
+      await this.$store.commit('ADD_pinnedClip',el)
+      this.$emit('init',this.$store.state.snackbar.type)
+    }
 
   },
 
