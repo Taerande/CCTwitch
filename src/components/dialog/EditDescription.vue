@@ -22,6 +22,7 @@
           auto-grow
           color="twitch"
           name="input-7-4"
+          :placeholder="this.edit.data.description"
           label="Write down description."
         ></v-textarea>
     </v-card-text>
@@ -49,8 +50,8 @@ export default {
       this.dialog = false;
     }
   },
-  created(){
-    this.description = this.edit.data.descripotion;
+  mounted(){
+    this.description = this.edit.data.description;
   }
 
 }

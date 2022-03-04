@@ -148,18 +148,15 @@ export default new Vuex.Store({
       const temp = JSON.parse(localStorage.getItem('allCliplists'));
       const listindex = state.cliplist.findIndex((el) => el.id === state.currentCliplist.id);
       const clipindex = state.currentCliplist.pinnedClips.findIndex((el) => el.id === response.target.id);
-      // const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
-      // + Math.random().toString(16).slice(2)
-      // + Date.now().toString(16).slice(4);
+      const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
+      + Math.random().toString(16).slice(2)
+      + Date.now().toString(16).slice(4);
       let input = response.target;
       input = {...input, ...{description: response.data}};
-
-
-      console.log(listindex);
-      console.log(clipindex);
-
       temp[listindex].pinnedClips.splice(clipindex, 1, input);
+      temp[listindex].id = uid;
       state.currentCliplist.pinnedClips.splice(clipindex, 1, input);
+      state.currentCliplist.id = uid;
       localStorage.setItem('allCliplists', JSON.stringify(temp));
       const title = response.target.title.length > 25 ? `${response.target.title.substr(0, 24)}...` : response.target.title;
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));

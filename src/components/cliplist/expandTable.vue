@@ -116,8 +116,8 @@
                     v-bind="attrs"
                     >mdi-note-outline</v-icon>
                   </template>
-                  <v-card color="primary" class="pa-0 ma-0" max-width="500px">
-                    <v-card-text>
+                  <v-card flat color="primary" class="pa-0 ma-0" max-width="500px">
+                    <v-card-text class="ma-0 pa-0">
                       {{clip.description}}
                     </v-card-text>
                   </v-card>
