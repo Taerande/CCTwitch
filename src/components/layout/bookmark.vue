@@ -2,10 +2,10 @@
  <div id="bookmark" v-if="this.$store.state.likedStreamer">
       <v-card>
         <v-card-title class="d-flex justify-center align-center pa-2 pb-0 ma-0">
-          Liked Streamer
+          <span class="text-body-1">Liked Streamer</span>
         </v-card-title>
           <div class="d-flex grey--text justify-end pr-2 pb-1 text-caption">
-            <span :class="this.$store.state.likedStreamer.length == 10 ? 'red--text' : ''">
+            <span class="text-caption" :class="this.$store.state.likedStreamer.length == 10 ? 'red--text' : ''">
             {{this.$store.state.likedStreamer.length}} / 10
             </span></div>
         <v-divider></v-divider>
@@ -21,10 +21,8 @@
                 q: item.login
                 },
                 params: item}">
-                <span class="twitch--text">
-                  <span class="pr-1">
+                <span class="twitch--text pr-1">
                   {{ item.display_name }}
-                  </span>
                 </span>
               </router-link>
             </div>
@@ -64,9 +62,9 @@ export default {
 
 #bookmark{
   position: fixed;
-  width: 180px;
-  top: 180px;
-  right: 3%;
+  width: 150px;
+  top: 150px;
+  right: 1%;
 }
 
 </style>

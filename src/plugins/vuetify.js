@@ -14,4 +14,11 @@ export default new Vuetify({
       },
     },
   },
+  breakpoint: {
+    thresholds: {
+      pc: 1280,
+      tb: 768,
+      mb: 480,
+    },
+  }
 });

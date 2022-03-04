@@ -2,8 +2,8 @@
   <v-app>
     <AppBar app></AppBar>
     <bookmark app></bookmark>
-    <v-main id="container" app>
-      <router-view :key="$route.fullPath"/>
+    <v-main class="app-container" app>
+      <router-view class="mx-auto" :key="$route.fullPath"/>
     </v-main>
       <SnackBar app></SnackBar>
       <Footer app></Footer>
@@ -55,47 +55,95 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&display=swap');
 :root {
   --twitch-color: rgb(119,44,232);
-}
+};
 header{
   height: fit-content;
   padding-left: 15%;
   padding-right: 15%;
-  // background: rgb(119,44,232);
-  // background: linear-gradient(90deg, rgba(119,44,232,1) 0%, rgba(119,44,232,0.8911939775910365) 74%, rgba(119,44,232,0.7203256302521008) 100%);
-}
+};
 .col, .row, .container{
-  padding: 0 !important;
-  margin: 0 !important;
-}
+  padding: 0px !important;
+  margin: 0px !important;
+};
 html, body{
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;
-}
+};
 #app{
   font-family: 'Noto Sans KR', sans-serif;
 
-}
+};
 a{
   text-decoration: none !important;
   color: inherit !important;
-}
+};
 .hidden{
   display: none;
-}
+};
 div[role="dialog"]{
   box-shadow: none;
-}
+};
 ::-webkit-scrollbar {
-  width: 7px;
-}
+  width: 8px;
+};
 ::-webkit-scrollbar-thumb {
   background-color: var(--twitch-color);
   border-radius: 5px;
   background-clip: padding-box;
-}
+};
 ::-webkit-scrollbar-track {
   background-color: rgb(255,255,255,0.1);
   border-radius: 5px;
-}
+};
+main{
+  margin-right:15%;
+  margin-left: 15%;
+};
+
+@media screen and (max-width: 1280px) and (min-width: 769px) {
+  html{
+    font-size: 80%;
+  }
+  header{
+    padding-left: 3%;
+    padding-right: 3%;
+  };
+  main{
+    margin-right:3%;
+    margin-left: 3%;
+  };
+  #container{
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+  };
+  #bookmark{
+    display: none;
+  };
+};
+@media screen and (max-width: 768px) {
+  html{
+    font-size: 70%;
+  }
+  header{
+    padding-left: 3%;
+    padding-right: 3%;
+  };
+  main{
+    margin-right:3%;
+    margin-left: 3%;
+  };
+  #container{
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+  };
+  #bookmark{
+    display: none;
+  };
+};
+
 
 </style>

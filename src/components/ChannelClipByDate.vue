@@ -17,10 +17,7 @@
     <v-col
       v-for="(item, index) in this.cliplist"
       :key="index"
-      lg="3"
-      md="6"
-      sm="6"
-      xs="12"
+      cols="12" lg="3" md="4" sm="6" xs="12"
       class="pa-3 clip-item"
       :class="item.broadcaster_id"
 
@@ -46,7 +43,7 @@
             :aspect-ratio="16/9"
             width="400"
             id="clip-thumbnail"
-            @click="changeId(item.id)"
+            @click="currentId = null, currentId = item.id"
             v-bind="attrs"
             v-on="on"
             lazy-src="@/assets/img/404.jpg"
@@ -57,7 +54,7 @@
                     <v-img :src="userProfileImg" lazy-src="@/assets/img/404.jpg" alt="profile_img"></v-img>
                   </v-avatar>
                   <span style="max-width: 150px;" class="white--text text-body-2 text-truncate">{{item.title}}</span>
-                  <pinClip name="channelClipPin" :clipData="item"></pinClip>
+                  <pinClip name="channelClipPin" :clipData="{data:item}"></pinClip>
                 </v-row>
                 <v-row class="d-flex justify-space-between">
                   <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">{{setDate(item.created_at)}}</span>
@@ -177,7 +174,7 @@ export default {
         },
       }).then((res) => {
         this.paginationCursor = res.data.pagination.cursor;
-        if (this.cliplist.length >= 100) {
+        if (this.cliplist.length >= 100 || res.data.data.length === 0) {
           $state.complete();
         } else if (res.data.pagination.cursor === undefined && res.data.data.length > 0) {
           res.data.data.forEach((el) => {

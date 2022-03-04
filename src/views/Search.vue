@@ -1,72 +1,65 @@
 <template>
 <v-container>
-  <v-row
-    v-if="dataLoading == false"
-      class="ma-auto pa-0 justify-center align-center"
-      style="position:absolute; top:25%; left:48%;">
-   <v-progress-circular
-      indeterminate
-      size="100"
-      color="purple"
-    ></v-progress-circular>
+  <v-row class="align-center pt-10 pl-3 pb-3">
+    <span class="text-h5 font-weight-bold">Search : {{this.$route.query.q}} </span>
   </v-row>
+  <v-divider></v-divider>
   <v-row
-  class="ma-auto pa-0 justify-center align-center"
-  v-for="item in $store.state.searchList"
-  :key="item.id">
-  <v-col cols="6">
-
-     <v-card
-     dark>
-       <v-card-title>
-          <v-badge
-            v-if="item.broadcaster_type == 'partner'"
-            bordered
-            color="rgb(119,44,232)"
-            icon="mdi-check"
-            overlap
-            >
-          <v-avatar
-          size="50">
-              <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
-          </v-avatar>
-        </v-badge>
-        <v-avatar
-        size="50"
-        v-else>
-            <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
-        </v-avatar>
-
-       <div
-       class="pl-3"
-       ><router-link :to="{name: 'Channel',
-     query:{
-       q: item.broadcaster_login
-     }
-     }">
-        <div class="white--text">
-       {{item.display_name}} / {{kFormatter(item.follower_count)}}
-        </div>
-     </router-link>
-        <div v-if="item.is_live">
-          <v-icon color="red">mdi-broadcast</v-icon>
-          <span class="red--text text-body-2 pa-1">LIVE</span>
-        </div>
-        <div v-else>
-          <v-icon color="blue">mdi-broadcast-off</v-icon>
-          <span class="blue--text text-body-2 pa-1">OFF</span>
-        </div>
-       </div>
-       <v-btn v-if="$store.state.likedStreamer.find(ele =>
-          ele.id == item.id)" icon @click="deleteFav({index:$store.state.likedStreamer.findIndex(el => el.id == item.id), display_name: item.display_name})">
-          <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
-        </v-btn>
-       <v-btn v-else icon @click="like({id:item.id ,login: item.broadcaster_login, display_name: item.display_name, thumbnail:item.thumbnail_url, broadcaster_type:item.broadcaster_type, follower_count: item.follower_count, is_checked:true,})">
-          <v-icon>mdi-star</v-icon>
-        </v-btn>
-       </v-card-title>
-     </v-card>
-  </v-col>
+  class="pa-0 pt-3 d-flex">
+    <v-col cols="12" xl="2" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
+    v-for="item in $store.state.searchList"
+    :key="item.id">
+      <v-card outlined class="rounded-xl" width="300px">
+        <v-card-title class="justify-space-between align-center">
+            <router-link class="d-flex" :to="{name: 'Channel', query:{
+            q: item.broadcaster_login}}">
+            <div aria-label="avatar" class="flex-direction: column">
+              <v-badge
+                v-if="item.broadcaster_type == 'partner'"
+                bordered
+                color="rgb(119,44,232)"
+                icon="mdi-check"
+                overlap>
+                <v-avatar
+                outline
+                color="black"
+                size="50">
+                    <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
+                </v-avatar>
+                </v-badge>
+              <v-avatar size="50" v-else>
+                <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
+              </v-avatar>
+              <div class="black rounded-xl d-flex justify-center" v-if="item.is_live">
+                <v-icon size="13" color="red">mdi-broadcast</v-icon>
+                <span class="red--text text-caption">LIVE</span>
+              </div>
+              <div class="black rounded-xl d-flex justify-center" v-else>
+                <v-icon  size="13" color="blue">mdi-broadcast-off</v-icon>
+                <span class="blue--text text-caption">OFF</span>
+              </div>
+            </div>
+            <div aria-label="streamer info" class="pl-3" style="max-width:130px">
+              <div class="text-truncate">
+                {{item.display_name}}
+              </div>
+              <div class="text-caption text-truncate">
+              Followers: {{kFormatter(item.follower_count)}}
+              </div>
+            </div>
+          </router-link>
+          <div>
+            <v-btn v-if="$store.state.likedStreamer.find(ele =>
+                ele.id == item.id)" icon @click="deleteFav({index:$store.state.likedStreamer.findIndex(el => el.id == item.id), display_name: item.display_name})">
+                <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
+              </v-btn>
+            <v-btn v-else icon @click="like({id:item.id ,login: item.broadcaster_login, display_name: item.display_name, thumbnail:item.thumbnail_url, broadcaster_type:item.broadcaster_type, follower_count: item.follower_count, is_checked:false,})">
+                <v-icon>mdi-star</v-icon>
+            </v-btn>
+          </div>
+        </v-card-title>
+      </v-card>
+    </v-col>
   </v-row>
 </v-container>
 </template>

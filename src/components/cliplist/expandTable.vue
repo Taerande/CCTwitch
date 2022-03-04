@@ -36,31 +36,32 @@
     <v-row>
       <table border="0" cellspacing="0" cellpadding="0" :class="theme">
         <thead :style="{background:$store.state.currentCliplist.color}">
-          <th style="width: 10%;">썸네일</th>
-          <th style="width: 30%;">제목</th>
-          <th style="width: 15%;">
+          <th>썸네일</th>
+          <th>제목</th>
+          <th>
             <div class="canSort d-inline" @click="sortByName()">
               <span>채널</span>
               <v-icon v-show="this.nameSort === 'asc'">mdi-sort-ascending</v-icon>
               <v-icon v-show="this.nameSort === 'desc' || this.nameSort === '' ">mdi-sort-descending</v-icon>
             </div>
           </th>
-          <th style="width: 20%;">
+          <th>
             <div class="canSort d-inline" @click="sortByCreated()">
               <span>날짜</span>
               <v-icon v-show="this.createdSort === 'asc'">mdi-sort-ascending</v-icon>
               <v-icon v-show="this.createdSort === 'desc' || this.createdSort === '' ">mdi-sort-descending</v-icon>
             </div>
           </th>
-          <th style="width: 15%;">길이</th>
-          <th style="width: 10%;">
+          <th>길이</th>
+          <th>
             <div class="canSort d-inline" @click="sortByViews()">
               <span>시청수</span>
               <v-icon v-show="this.viewSort === 'asc'">mdi-sort-ascending</v-icon>
               <v-icon v-show="this.viewSort === 'desc' || this.viewSort === '' ">mdi-sort-descending</v-icon>
             </div>
           </th>
-          <th style="width: 5%;"><span></span></th>
+          <th>메모</th>
+          <th><span></span></th>
         </thead>
         <tbody>
             <tr v-for="clip in setCurrList($store.state.currentCliplist.pinnedClips)" :key="clip.id">
@@ -84,12 +85,11 @@
                   :src="clip.thumbnail_url"></v-img>
                 </td>
                 <td
-                class="canSort"
                 style="text-align:start;"
                 @click="dialogId = clip.id"
                 v-on="on"
                 >
-                <div style="width: 40rem; margin-right:auto;" class="twitch--text title-table text-truncate">
+                <div style="width: 40rem; margin-right:auto;" class="canSort twitch--text title-table text-truncate">
                   {{clip.title}}
                 </div>
 
@@ -108,17 +108,27 @@
               <td>{{setDate(clip.created_at)}}</td>
               <td>{{Math.floor(clip.duration)}}s</td>
               <td>{{viewerkFormatter(clip.view_count)}}</td>
-              <td class="d-flex align-center" style="height:inherit">
-                <v-btn icon @click="copyClip(clip)">
-                  <v-icon >mdi-clipboard-multiple-outline</v-icon>
-                </v-btn>
-                <DeleteDialog :delete="{type:'clip', data:{
-                  target: clip,
-                  belongsTo: $store.state.currentCliplist,
-                }}"></DeleteDialog>
+              <td>
+                <v-tooltip bottom color="primary" v-if="clip.description">
+                  <template v-slot:activator="{on, attrs}">
+                    <v-icon
+                    v-on="on"
+                    v-bind="attrs"
+                    >mdi-note-outline</v-icon>
+                  </template>
+                  <v-card color="primary" class="pa-0 ma-0" max-width="500px">
+                    <v-card-text>
+                      {{clip.description}}
+                    </v-card-text>
+                  </v-card>
+                </v-tooltip>
+              </td>
+              <td class="d-flex align-center pr-3" style="height:inherit">
+                <clipMenuVue :clip="clip"></clipMenuVue>
               </td>
             </tr>
         </tbody>
+
         <v-dialog no-click-animation persistent width="500px" v-model="tableloading">
           <v-progress-linear color="primary" height="35" indeterminate>
             <span class="white--text">Import String 생성중</span>
@@ -126,15 +136,21 @@
 
         </v-dialog>
       </table>
-      <v-row class="d-flex justify-center pt-5">
-        <v-pagination
-        color="twitch"
-        v-model="page"
-        :total-visible="7"
-        :length="Math.ceil($store.state.currentCliplist.pinnedClips.length / 10)">
-        </v-pagination>
-      </v-row>
+      <v-container fluid>
+        <v-row v-if="$store.state.currentCliplist.pinnedClips.length === 0" class="d-flex justify-center align-center pt-10">
+            <span class="text-h4">🤐There is no Clip</span>
+          </v-row>
+        <v-row class="d-flex justify-center pt-5">
+          <v-pagination
+          color="twitch"
+          v-model="page"
+          :total-visible="7"
+          :length="Math.ceil($store.state.currentCliplist.pinnedClips.length / 10)">
+          </v-pagination>
+        </v-row>
+      </v-container>
     </v-row>
+
   </v-row>
   </v-expand-transition>
 </template>
@@ -144,14 +160,17 @@
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import axios from 'axios';
+import clipMenuVue from './clipMenu.vue';
 
 export default {
   components: {
     DeleteDialog,
     AddNewCliplistDialog,
+    clipMenuVue,
   },
   data() {
     return {
+      currentTooltipId:'',
       tableloading: false,
       dialogId: '',
       nameSort: '',
@@ -201,57 +220,55 @@ export default {
       let clipString = '';
       this.tableloading = true;
       setTimeout(async () => {
-        await this.$firestore.collection('cliplist').where('id', '==', element.id)
-          .get()
-          .then(async (res) => {
-            const templist = [];
-            element.pinnedClips.forEach((el) => templist.push(el.id));
-            if (res.empty) {
-              await this.$firestore.collection('cliplist').add({
-                id: element.id,
-                title: element.title,
-                color: element.color,
-                pinnedClips: templist,
-              }).then((resp) => {
-                clipString = resp.id;
-              });
-            } else if (this.compareArray(res.docs[0].data().pinnedClips, templist)) {
-              clipString = res.docs[0].id;
-            } else {
-              const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
-               + Math.random().toString(16).slice(2)
-               + Date.now().toString(16).slice(4);
-              await this.$firestore.collection('cliplist').add({
-                id: uid,
-                title: element.title,
-                color: element.color,
-                pinnedClips: templist,
-              }).then(async (resp) => {
-                await this.$store.commit('INIT_currCliplist');
-                await this.$store.commit('UPDATE_clipList', { id: element.id, updateId: uid });
-                clipString = resp.id;
-              });
-            }
-          });
-        const tempArea = document.createElement('textarea');
-        document.body.appendChild(tempArea);
-        tempArea.value = clipString;
-        tempArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempArea);
-        this.tableloading = false;
-        this.$store.commit('SET_SnackBar', { type: 'success', text: `Cliplist String : ${clipString} 가 복사되었습니다.`, value: true });
-      }, 1500);
+        if(element.pinnedClips.length > 0) {
+          await this.$firestore.collection('cliplist').where('id', '==', element.id)
+            .get()
+            .then(async (res) => {
+              const templist = [];
+              element.pinnedClips.forEach((el) => templist.push(el.id));
+              if (res.empty) {
+                await this.$firestore.collection('cliplist').add({
+                  id: element.id,
+                  title: element.title,
+                  color: element.color,
+                  pinnedClips: templist,
+                }).then((resp) => {
+                  clipString = resp.id;
+                });
+              } else if (this.compareArray(res.docs[0].data().pinnedClips, templist)) {
+                clipString = res.docs[0].id;
+              } else {
+                const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
+                 + Math.random().toString(16).slice(2)
+                 + Date.now().toString(16).slice(4);
+                await this.$firestore.collection('cliplist').add({
+                  id: uid,
+                  title: element.title,
+                  color: element.color,
+                  pinnedClips: templist,
+                }).then(async (resp) => {
+                  await this.$store.commit('INIT_currCliplist');
+                  await this.$store.commit('UPDATE_clipList', { id: element.id, updateId: uid });
+                  clipString = resp.id;
+                });
+              }
+            });
+          const tempArea = document.createElement('textarea');
+          document.body.appendChild(tempArea);
+          tempArea.value = clipString;
+          tempArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempArea);
+          this.tableloading = false;
+          this.$store.commit('SET_SnackBar', { type: 'success', text: `Cliplist : ${clipString} 가 복사되었습니다.`, value: true });
+        }
+        else {
+          this.tableloading = false;
+          this.$store.commit('SET_SnackBar', { type: 'error', text: `Cliplist : 리스트에 클립이 없습니다.`, value: true });
+        }
+      }, 1000);
     },
-    copyClip(el) {
-      const tempArea = document.createElement('textarea');
-      document.body.appendChild(tempArea);
-      tempArea.value = el.url;
-      tempArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempArea);
-      this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip URL : ${el.title} 가 복사되었습니다.`, value: true });
-    },
+
     sortByViews() {
       this.page = 1;
       if (this.viewSort === 'asc') {

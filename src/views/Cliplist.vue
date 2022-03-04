@@ -17,14 +17,19 @@
   <expandTable></expandTable>
   <v-row class="d-flex pt-10" v-if="$store.state.cliplist.length">
     <v-col class="custom5cols pa-3" v-for="(item, listIndex) in $store.state.cliplist" :key="listIndex">
-      <div @click="setData(item)" class="cliplist-canvas" :style="{background: item.color, opacity: $store.state.currentCliplist.id === item.id ? '1 !important' : ''}">
+      <v-card class="cliplist-canvas" :style="{background: item.color, opacity: $store.state.currentCliplist.id === item.id ? '1 !important' : ''}" @click="setData(item)">
+        <v-card-title>
         <div class="text-h5 pa-5 text-truncate">
         #{{listIndex+1}}  {{item.title}}
         </div>
-        <div class="text-caption pa-5">
-          {{item.pinnedClips.length}}개의 클립
-        </div>
-      </div>
+        </v-card-title>
+        <v-card-text>
+         <div class="text-caption pa-5">
+            {{item.pinnedClips.length}}개의 클립
+          </div>
+        </v-card-text>
+        <v-card-actions></v-card-actions>
+      </v-card>
     </v-col>
   </v-row>
   <v-row v-else class="d-flex justify-center align-center" style="height:60vh;">
@@ -68,12 +73,10 @@ export default {
 
 .cliplist-canvas{
   cursor: pointer;
-  border-radius: 5%;
+  border-radius: 3%;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  width: 200px;
-  height: 200px;
   opacity: 0.5 !important;
   border: 1px ;
 }
@@ -84,7 +87,7 @@ export default {
   transition-timing-function: ease;
 }
 .custom5cols {
-  width: 20%;
+  // width: 20%;
   max-width: 20%;
   flex-basis: 20%;
 }

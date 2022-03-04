@@ -3,8 +3,7 @@
     padless>
     <v-divider></v-divider>
     <v-card
-      class="py-2"
-      id="container"
+      class="py-2 app-container"
       flat
       tile>
       <v-card-text class="d-flex pa-0 py-2 white--text align-center justify-center">

@@ -41,6 +41,7 @@
             width="500"
             @click:append="getClip(clipData)"
             class="pt-5"
+            prepend-icon="mdi-link-variant"
             append-icon="mdi-magnify"
             hide-details=""
             placeholder="Input Twitch Clip URL or Id"
@@ -67,6 +68,9 @@
             hide-details=""
             placeholder="Cliplist String"
           >
+          <template v-slot:prepend-inner>
+            <v-icon>mdi-link-variant</v-icon>
+          </template>
           <template v-slot:progress>
             <v-progress-linear
               :indeterminate="false"

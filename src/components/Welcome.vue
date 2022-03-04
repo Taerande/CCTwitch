@@ -1,13 +1,13 @@
 <template>
-  <v-container>
-    <v-row class="text-center">
+  <v-container fluid fill-height>
+    <v-row class="text-center pt-10">
       <v-col cols="12">
         <h1 class="display-4 font-weight-bold mb-3">
           Find Your Streamer
         </h1>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row class="d-flex justify-center align-center pt-10">
       <search></search>
     </v-row>
     <v-row>
@@ -45,11 +45,11 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.row{
-  margin: 0;
-  display: flex !important;
-  justify-content: center !important;
-  padding-top: 50px !important;
-}
+// .row{
+//   margin: 0;
+//   display: flex !important;
+//   justify-content: center !important;
+//   padding-top: 50px !important;
+// }
 
 </style>

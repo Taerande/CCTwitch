@@ -1,46 +1,52 @@
 <template>
-  <div>
-    <v-dialog
-    scrollable
-    width="400px">
-      <template v-slot:activator="{on, attrs}">
-        <v-btn
-          v-on="on"
-          v-bind="attrs"
-          icon>
-          <v-icon size="20" color="red">mdi-pin</v-icon>
-        </v-btn>
-      </template>
-      <v-card width="400px" height="600px">
-        <v-card-title class="d-flex justify-center">
-          <span>내 플레이리스트에 추가</span>
-        </v-card-title>
-        <v-card-subtitle class="d-flex justify-center pt-2 text-caption">
-          리스트당 최대 100개의 클립을 기록할 수 있습니다.
-        </v-card-subtitle>
-        <v-divider></v-divider>
-        <v-card-text>
-          <v-list class="pt-5">
-              <AddNewCliplistDialog :type="{type:'pin',data:{text: 'Add New List'}}"></AddNewCliplistDialog>
-            <v-list-item :disabled="item.pinnedClips.length >= 100" @click="addNewClip({data: clipData, listIndex:index})" class="pa-1" v-for="(item,index) in $store.state.cliplist" :key="index">
-                <div class="cliplist-canvas" :style="{background: item.color}"></div>
-                <v-list-item-content>
-                  <v-list-item-title class="text-title">{{item.title}}</v-list-item-title>
-                  <v-list-item-subtitle class="text-caption">{{item.pinnedClips.length}}개</v-list-item-subtitle>
-                </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
-      </v-card>
+  <v-dialog
+  scrollable
+  width="400px">
+    <template v-slot:activator="{on, attrs}">
+      <v-list-item
+      v-on="on"
+      v-bind="attrs"
+      v-if="clipType === 'menu'">
+        <v-icon>mdi-pin-outline</v-icon>
+        <span class="text-caption pl-1">클립 추가</span>
+      </v-list-item>
+      <v-btn
+        v-else
+        v-on="on"
+        v-bind="attrs"
+        icon>
+        <v-icon size="20" color="red">mdi-pin</v-icon>
+      </v-btn>
+    </template>
+    <v-card width="400px" height="600px">
+      <v-card-title class="d-flex justify-center">
+        <span>내 플레이리스트에 추가</span>
+      </v-card-title>
+      <v-card-subtitle class="d-flex justify-center pt-2 text-caption">
+        리스트당 최대 100개의 클립을 기록할 수 있습니다.
+      </v-card-subtitle>
+      <v-divider></v-divider>
+      <v-card-text>
+        <v-list class="pt-5">
+            <AddNewCliplistDialog :type="{type:'pin',data:{text: 'Add New List'}}"></AddNewCliplistDialog>
+          <v-list-item :disabled="item.pinnedClips.length >= 100" @click="addNewClip({data: clipData.data, listIndex:index})" class="pa-1" v-for="(item,index) in $store.state.cliplist" :key="index">
+              <div class="cliplist-canvas" :style="{background: item.color}"></div>
+              <v-list-item-content>
+                <v-list-item-title class="text-title">{{item.title}}</v-list-item-title>
+                <v-list-item-subtitle class="text-caption">{{item.pinnedClips.length}}개</v-list-item-subtitle>
+              </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+    </v-card>
 
-    </v-dialog>
-  </div>
+  </v-dialog>
 </template>
 <script>
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
 
 export default {
-  props: ['clipData'],
+  props:['clipData'],
   components: {
     AddNewCliplistDialog,
   },
@@ -56,6 +62,11 @@ export default {
     }
 
   },
+  computed:{
+    clipType(){
+      return this.clipData.type;
+    }
+  }
 
 };
 </script>

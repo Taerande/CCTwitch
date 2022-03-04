@@ -30,10 +30,17 @@ export default new Vuex.Store({
       start: null,
       end: null,
     },
+    userList:[]
   },
   mutations: {
     SET_DateSort(state, response) {
       state.dateSort = response;
+    },
+    SET_isChecked(state, response) {
+      console.log(response);
+      const targetIndex = state.likedStreamer.findIndex((el) =>
+        el.id === response.target.id)
+      state.likedStreamer[targetIndex].is_checked = response.data;
     },
     SET_UserInfo(state, response) {
       state.userInfo = response;
@@ -50,10 +57,10 @@ export default new Vuex.Store({
     SET_SearchList(state, response) {
       state.searchList = response;
     },
-    SET_Pagination(state, response) {
-      const index = state.likedStreamer.findIndex((el) => el === response.data);
-      state.likedStreamer[index].pagination = response.pagination;
-    },
+    // SET_Pagination(state, response) {
+    //   const index = state.likedStreamer.findIndex((el) => el === response.data);
+    //   state.likedStreamer[index].pagination = response.pagination;
+    // },
     SET_currCliplist(state, response) {
       if (response.data.id === undefined) {
         state.currentCliplist = {};
@@ -100,8 +107,8 @@ export default new Vuex.Store({
         } else {
           existingCliplist[response.listIndex].pinnedClips.push(response.data);
           localStorage.setItem('allCliplists', JSON.stringify(existingCliplist));
+          state.currentCliplist = existingCliplist[response.listIndex];
           state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-          state.currentCliplist = {};
           const title = response.data.title.length > 25 ? `${response.data.title.substr(0, 24)}...` : response.data.title;
           this.commit('SET_SnackBar', { type: 'success', text: `ClipList : ${title} 가 추가되었습니다.`, value: true });
         }
@@ -136,6 +143,28 @@ export default new Vuex.Store({
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
       state.currentCliplist = existingCliplist[currentDataIndex];
       this.commit('SET_SnackBar', { type: 'success', text: `Clip Title : ${response.title} 으로 변경되었습니다..`, value: true });
+    },
+    UPDATE_clipDescription(state, response){
+      const temp = JSON.parse(localStorage.getItem('allCliplists'));
+      const listindex = state.cliplist.findIndex((el) => el.id === state.currentCliplist.id);
+      const clipindex = state.currentCliplist.pinnedClips.findIndex((el) => el.id === response.target.id);
+      // const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
+      // + Math.random().toString(16).slice(2)
+      // + Date.now().toString(16).slice(4);
+      let input = response.target;
+      input = {...input, ...{description: response.data}};
+
+
+      console.log(listindex);
+      console.log(clipindex);
+
+      temp[listindex].pinnedClips.splice(clipindex, 1, input);
+      state.currentCliplist.pinnedClips.splice(clipindex, 1, input);
+      localStorage.setItem('allCliplists', JSON.stringify(temp));
+      const title = response.target.title.length > 25 ? `${response.target.title.substr(0, 24)}...` : response.target.title;
+      state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
+      this.commit('SET_SnackBar', { type: 'info', text: `Clip : ${title}에 메모가 변경되었습니다.`, value: true });
+
     },
     SET_newCliplist(state, response) {
       let input;

@@ -9,6 +9,8 @@
       color="rgb(119,44,232)"
       @click:append="searchChannel($store.state.searchString)"
       outlined
+      size="50"
+      height="50"
       label="Search your Streamer" prepend-icon="mdi-twitch" append-icon="mdi-magnify">
       </v-text-field>
     </v-form>

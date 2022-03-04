@@ -4,12 +4,20 @@
   v-model="dialog"
   max-width="500">
   <template v-slot:activator="{ on, attrs }">
-    <div
+    <v-list-item
+    v-bind="attrs"
+    v-on="on"
+    v-if="deleteDefaultData.type === 'clip'">
+      <v-icon>mdi-delete-outline</v-icon>
+      <span class="text-caption pl-1">클립 삭제</span>
+    </v-list-item>
+   <div
+    v-else
     v-bind="attrs"
     v-on="on">
       <v-btn
       icon>
-      <v-icon>mdi-trash-can</v-icon>
+      <v-icon>mdi-delete-outline</v-icon>
       </v-btn>
     </div>
   </template>
@@ -34,7 +42,11 @@
 </template>
 <script>
 export default {
-  props: ['delete'],
+  props: {
+    delete:{
+      type:Object
+    }
+  },
   data() {
     return {
       dialog: false,
@@ -57,6 +69,11 @@ export default {
         this.$emit('delImportedClip', {index: this.delete.data.index, title: this.delete.data.target.title});
       }
     },
+  },
+  computed:{
+    deleteDefaultData(){
+      return this.delete
+    }
   },
   created() {
   },
