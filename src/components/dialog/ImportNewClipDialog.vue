@@ -6,40 +6,24 @@
     max-width="1280">
     <template v-slot:activator="{ on, attrs }">
       <v-btn
-        outlined
-        text
-        class="text-caption mr-3"
-        color="success"
+        icon
         v-bind="attrs"
         v-on="on"
       >
-      Import Clip Data
+      <v-icon>mdi-clipboard-plus-outline</v-icon>
       </v-btn>
     </template>
-    <v-card height="700" fill-height class="justify-center">
-      <v-card-title class="d-flex justify-center text-h5">
-        <span class="left-element" style="margin-right:auto, opacity:0">none</span>
-        <div>
-          <div> Import Clip Data </div>
-          <div class="d-flex justify-center align-baseline twitch--text text-body-1"> {{dataType(switch1)}} </div>
-        </div>
-        <v-switch
-        class="right-element"
-        style="margin-left:auto"
-        v-model="switch1"
-        flat
-        :label="dataType(switch1)"
-      ></v-switch>
+    <v-card class="justify-center overflow-auto">
+      <v-card-title class="twitch text-h5 font-weight-bold">
+        <div>Twitch 클립 가져오기</div>
       </v-card-title>
-      <v-card-text
-      class="d-flex justify-center">
-        <div v-if="switch1">
+      <v-card-text class="d-flex justify-center">
           <v-text-field
-            v-model="clipData"
-            :loading="loading"
+            v-model="clipUrl"
+            :loading="importLoading"
             outlined
             width="500"
-            @click:append="getClip(clipData)"
+            @click:append="getClip(clipUrl)"
             class="pt-5"
             prepend-icon="mdi-link-variant"
             append-icon="mdi-magnify"
@@ -48,61 +32,92 @@
           >
           <template v-slot:progress>
             <v-progress-linear
-              :indeterminate="false"
-              height="10"
-              :color="success"
+              v-if="importLoading"
+              color="twitch"
+              indeterminate
+              height="4"
               absolute
             ></v-progress-linear>
           </template>
           </v-text-field>
-        </div>
-        <div v-else>
-        <v-text-field
-            v-model="cliplistString"
-            :loading="loading"
-            outlined
-            width="500"
-            class="pt-5"
-            append-icon="mdi-magnify"
-            @click:append="getCliplist(cliplistString)"
-            hide-details=""
-            placeholder="Cliplist String"
-          >
-          <template v-slot:prepend-inner>
-            <v-icon>mdi-link-variant</v-icon>
-          </template>
-          <template v-slot:progress>
-            <v-progress-linear
-              :indeterminate="false"
-              height="10"
-              :color="success"
-              absolute
-            ></v-progress-linear>
-          </template>
-          </v-text-field>
-        </div>
-        <v-container v-if="switch1" class="d-flex justify-center align-center pt-5">
-          <div class="blue--text">{{clipResult}}</div>
+      </v-card-text>
+      <v-dialog
+        v-model="clipDialog"
+        max-width="960px"
+        transition="dialog-transition"
+      >
+        <v-card>
+          <v-card-title primary-title>
+            {{clipResult.title}}
+          </v-card-title>
+          <v-card-text class="d-flex justify-center align-center">
+            <iframe v-if="clipDialog" class="black" :src="`${clipResult.embed_url}&parent=localhost&autoplay=false&muted=false&preload=auto`" width="100%"
+            height="400" frameborder="0"></iframe>
+            <v-container fluid>
+              <v-row>
+                <v-icon color="twitch">mdi-eye-outline</v-icon>
+                <span>{{clipResult.view_count}}</span>
+              </v-row>
+              <v-row>{{clipResult.title}}</v-row>
+              <v-row>{{clipResult.created_at}}</v-row>
 
-          <v-progress-circular v-if="importLoading" indeterminate></v-progress-circular>
-        </v-container>
-        <v-container fluid fill-height v-else class="d-flex justify-center align-center pt-5">
-          <ImportDataExpansion pansion v-if="result.title" :result="result"></ImportDataExpansion>
-          <v-progress-circular v-if="importLoading" indeterminate></v-progress-circular>
-        </v-container>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer/>
+            <v-btn text color="error" @click="clipDialog = false">Close</v-btn>
+            <v-btn text color="success" :disabled="inQue" @click="addToCliplist(clipResult)">Add</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-card-text>
+        <v-list>
+          <v-list-item class="mx-3 py-1" v-for="(item,index) in pinnedClipslist" :key="index">
+            <v-list-item-content>
+              <v-dialog
+              :v-model="item.id === currentId"
+              @click:outside="currentId = null"
+              max-width="1280"
+              max-height="720"
+              >
+              <template v-slot:activator="{on, attrs}">
+                <v-list-item-title
+                v-on="on"
+                @click="currentId = null, currentId = item.id"
+                v-bind="attrs"
+                class="d-flex align-center">
+                <div class="d-flex align-center">
+                  <v-img
+                  max-width="70"
+                  :src="item.thumbnail_url"></v-img>
+                  <span class="pl-3 text-truncate text-caption font-weight-black twitch--text">{{item.title}}</span>
+                </div>
+                </v-list-item-title>
+              </template>
+              <div class="black d-flex justify-end">
+                <v-btn color="error" icon @click="currentId = null"><v-icon>mdi-close</v-icon></v-btn>
+              </div>
+              <iframe
+                class="black d-flex align-center mx-auto"
+                v-if="item.id === currentId"
+                :src="`https://clips.twitch.tv/embed?clip=${currentId}&parent=localhost&autoplay=true&muted=false&preload=auto`"
+                preload="auto"
+                frameborder="0"
+                width="1280"
+                height="720"
+                allowfullscreen="true"></iframe>
+            </v-dialog>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-btn icon>
+                <v-icon color="error" @click="deleteClip(item, index)">mdi-close</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <pinClip v-if="switch1" @init="initailize" name="importedClipPin" :clipData="result"></pinClip>
-        <v-btn
-        v-else
-        text
-        color="success"
-        @click="addCliplist"
-        :disabled="this.result.title === undefined"
-        >
-        Add
-        </v-btn>
         <v-btn
           color="red darken-1"
           text
@@ -110,97 +125,90 @@
         >
           Close
         </v-btn>
+        <v-btn
+        text
+        color="success"
+        @click="addCliplist()"
+        :disabled="this.pinnedClipslist.length === 0"
+        >
+        Add
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 <script>
-import pinClip from '@/components/pinClip.vue';
-import ImportDataExpansion from '@/components/ImportDataExpansion.vue';
 import axios from 'axios';
-
+import clipdb from '@/assets/clipdata.json'
 export default {
   components: {
-    pinClip,
-    ImportDataExpansion,
   },
   props: ['type'],
   data() {
     return {
+      clipdb: clipdb,
+      clipDialog: false,
       currentId: '',
-      switch1: true,
       dialog: false,
       color: '',
-      clipData: '',
-      loading: false,
+      clipUrl: '',
       result:'',
       clipResult:'',
-      cliplistString: '',
       pinnedClipslist:[],
       importLoading: false,
+      inQue:false,
     };
   },
   methods: {
-    initailize(el){
-      if(el === 'success'){
-        this.dialog = false;
-        this.clipData = '';
-      }
+    initailize(){
+      this.dialog = false;
+      this.pinnedClipslist = [];
+    },
+    deleteClip(item, index){
+      this.pinnedClipslist.splice(index, 1);
+       this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : ${item.title}을 목록에서 삭제합니다.`, value: true });
+    },
+    async addToCliplist(el){
+      await this.pinnedClipslist.push(el);
+      this.$store.commit('SET_SnackBar', { type: 'success', text: `Import : ${el.title}을 추가합니다.`, value: true });
+      this.clipDialog = false;
+      this.clipUrl = '';
     },
     async addCliplist(){
-      await this.$store.commit('SET_newCliplist',this.result);
-      if(this.$store.state.snackbar.type === 'error'){
-        this.dialog = true;
-        }else{
-        this.dialog = false;
-      }
-    },
-    changeId(el) {
-      this.currentId = el;
-    },
-    async getCliplist(el) {
-      this.importLoading = true;
-      this.result = '';
-      let tempData;
-      if(el){
-        const fireData = await this.$firestore.collection('cliplist').doc(el).get();
-        if(fireData.exists){
-          tempData = fireData.data();
-          await this.getClip(tempData.pinnedClips);
-          this.result = {
-            id: tempData.id,
-            title: tempData.title,
-            color: tempData.color,
-            pinnedClips: this.pinnedClipslist
-          };
-          console.log(this.result);
-          this.importLoading = false;
-        } else {
-          this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : Data가 없습니다.`, value: true });
-          this.importLoading = false;
-        }
-      } else{
-        this.importLoading = false;
-        this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : Import String이 올바르지 않습니다.`, value: true });
-      }
-    },
-
+      let listIndex = this.$store.state.cliplist.findIndex(element => this.$store.state.currentCliplist.id === element.id);
+      await this.pinnedClipslist.forEach( async element => {
+        await this.$store.commit('ADD_pinnedClip', {data: element, listIndex:listIndex})});
+      this.initailize();
+      },
     async getClip(el) {
-      await axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          id: el,
-        },
-      }).then((res) => {
-        if(res.data.data.length > 1){
-          this.pinnedClipslist = res.data.data;
-        } else if(res.data.data.length === 1){
-          this.clipResult = res.data.data['0'];
-        } else {
-           this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : 클립을 가져올 수 없습니다.`, value: true });
-        }
-        this.loading = false;
-      });
+      this.inQue = false;
+      this.importLoading = true;
+      let clipId = el.trim();
+      let isInvolved = this.pinnedClipslist.find(element => element.id === clipId);
+      let isIn = this.$store.state.currentCliplist.pinnedClips.find(element => element.id === clipId);
+      console.log(isInvolved, 'isInvolved');
+      console.log(isIn,'isIn');
+      if(isInvolved || isIn){
+        this.inQue = true;
+        this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : 이미 추가된 클립입니다.`, value: true });
+        this.importLoading = false;
+      } else {
+        await axios.get('https://api.twitch.tv/helix/clips', {
+          headers: this.$store.state.headerConfig,
+          params: {
+            id: clipId,
+          },
+        }).then((res) => {
+          if(res.data.data.length > 0){
+            this.clipResult = res.data.data[0];
+            this.clipDialog = true;
+          } else {
+             this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : 클립을 가져올 수 없습니다.`, value: true });
+          }
+            this.importLoading = false;
+        });
+      }
+
     },
      setDate(el) {
       const time = new Date(el).getTime();
@@ -236,18 +244,11 @@ div[role=listitem]:hover{
   cursor: pointer;
   background-color: rgb(0, 0, 0, 0.2) !important;
 }
-.left-element{
-    visibility: hidden;
-    margin-right: auto;
-    width: 200px;
-}
-.right-element{
-  margin-left: auto;
-  width: 200px;
-
-}
 .v-text-field{
-  width: 500px;
+  width: 200px;
 }
-
+.v-list-item{
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--twitch-color);
+}
 </style>

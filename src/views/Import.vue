@@ -9,40 +9,40 @@ import axios from 'axios';
 import ImportExpandTable from '@/components/cliplist/ImportExpandTable.vue';
 
 export default {
-  components:{
-    ImportExpandTable
+  components: {
+    ImportExpandTable,
   },
   data() {
     return {
       importLoading: true,
-      pinnedClipslist:'',
-      result:'',
-    }
+      pinnedClipslist: '',
+      result: '',
+    };
   },
-  methods:{
+  methods: {
     async getCliplist(el) {
       this.importLoading = true;
       this.result = '';
       let tempData;
-      if(el){
+      if (el) {
         const fireData = await this.$firestore.collection('cliplist').doc(el).get();
-        if(fireData.exists){
+        if (fireData.exists) {
           tempData = fireData.data();
           await this.getClip(tempData.pinnedClips);
           this.result = {
             id: tempData.id,
             title: tempData.title,
             color: tempData.color,
-            pinnedClips: this.pinnedClipslist
+            pinnedClips: this.pinnedClipslist,
           };
           this.importLoading = false;
         } else {
-          this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : Data가 없습니다.`, value: true });
+          this.$store.commit('SET_SnackBar', { type: 'error', text: 'Import : Data가 없습니다.', value: true });
           this.importLoading = false;
         }
-      } else{
+      } else {
         this.importLoading = false;
-        this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : Import String이 올바르지 않습니다.`, value: true });
+        this.$store.commit('SET_SnackBar', { type: 'error', text: 'Import : Import String이 올바르지 않습니다.', value: true });
       }
     },
 
@@ -53,24 +53,23 @@ export default {
           id: el,
         },
       }).then((res) => {
-        if(res.data.data.length > 1){
+        if (res.data.data.length > 1) {
           this.pinnedClipslist = res.data.data;
-        } else if(res.data.data.length === 1){
+        } else if (res.data.data.length === 1) {
           this.clipResult = res.data.data['0'];
         } else {
-          this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : 클립을 가져올 수 없습니다.`, value: true });
+          this.$store.commit('SET_SnackBar', { type: 'error', text: 'Import : 클립을 가져올 수 없습니다.', value: true });
           this.importLoading = false;
         }
       });
     },
-    async postProcess(){
+    async postProcess() {
       await this.getCliplist(this.$route.params.id);
-
-    }
+    },
   },
-  created(){
+  created() {
     this.postProcess();
-  }
+  },
 
 };
 </script>

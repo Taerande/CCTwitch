@@ -1,72 +1,55 @@
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
-    <v-row
-      v-for="item in items" :key="item.id"
-    >
-      <v-dialog
-      hide-overlay
-      attach
-      origin="top right"
-      :value="currId === item.id">
-      <template v-slot:activator="{on, attrs}">
-        <v-btn v-bind="attrs" v-on="on" @click="currId = item.id">
-          Click Here
-        </v-btn>
-      </template>
-          <v-card>
-            <v-card-title>{{item.title}}</v-card-title>
-            <v-card-text>{{item.text}}</v-card-text>
-          </v-card>
+<v-container>
+  <v-row v-for="(item,i) in items" :key="i">
+    <v-btn @click="addSnackBar()">{{item.data}}</v-btn>
+  </v-row>
 
-      </v-dialog>
-    </v-row>
-  </div>
+  <v-snackbar
+  id="snack-bar"
+  timeout="1500"
+  v-model="$store.state.snackbar.value"
+  :color="$store.state.snackbar.type">
+    <div class="d-flex justify-space-between align-center">
+      <div>
+        {{ $store.state.snackbar.text }}
+      </div>
+      <v-btn
+        icon
+        @click="$store.commit('SET_SnackBar',{value: false})">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+    </div>
+  </v-snackbar>
+
+</v-container>
 </template>
 <script>
 export default {
   data() {
     return {
-      currId: '',
-      dialog: false,
       items: [
-        {
-          id: 1,
-          title: '1123',
-          text: 'asdfczㄴㅁㅇㄹㄴㅁㅇㄹ',
-        },
-        {
-          id: 2,
-          title: 'ㅁㄴㅇㄹ',
-          text: 'asdfczㄴㅁㅇㄹㄴㅁㅇㄹ',
-        },
-        {
-          id: 3,
-          title: '11ㅋㅊㅌㅍ23',
-          text: 'asdfczㄴㅁㅇㄹㄴㅁㅇㄹ',
-        },
-        {
-          id: 4,
-          title: '11ㄹㄹ23',
-          text: 'asdfczㄴㅁㅇㄹㄴㅁㅇㄹ',
-        },
-        {
-          id: 5,
-          title: '112ㄹㄹ3',
-          text: 'asdfczㄴㅁㅇㄹㄴㅁㅇㄹ',
-        },
-        {
-          id: 6,
-          title: '1121233',
-          text: 'asdfczㄴㅁㅇㄹㄴㅁㅇㄹ',
-        },
+        { data: '1st Snack', type: 'info', value: true },
+        { data: '2nd Snack', type: 'error', value: true },
+        { data: '3rd Snack', type: 'success', value: true },
+        { data: '4th Snack', type: 'primary', value: true },
       ],
+      snackbarQue: [],
     };
   },
+  methods: {
+    addSnackBar() {
 
+    },
+
+  },
 };
 </script>
-
-<style lang="">
-
+<style lang="scss" scoped>
+#snack-bar{
+  position: fixed;
+  margin: 0 auto;
+  left: 0;
+  right: 0%;
+  bottom: 85%;
+}
 </style>

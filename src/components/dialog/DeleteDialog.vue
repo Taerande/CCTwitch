@@ -11,26 +11,24 @@
       <v-icon>mdi-delete-outline</v-icon>
       <span class="text-caption pl-1">클립 삭제</span>
     </v-list-item>
-   <div
+    <v-btn
     v-else
     v-bind="attrs"
-    v-on="on">
-      <v-btn
-      icon>
+    v-on="on"
+    icon>
       <v-icon>mdi-delete-outline</v-icon>
-      </v-btn>
-    </div>
+    </v-btn>
   </template>
   <v-card class="justify-center">
     <v-card-title class="text-h5 error text-uppercase">
       <span>DELETE {{this.delete.type}}</span>
     </v-card-title>
     <v-card-text class="d-flex align-center justify-center pt-5">
-      <span class="text-uppercase">{{this.delete.type}} : </span>
-      <span class="twitch--text pl-1 text-title">
+      <span class="text-uppercase">{{this.delete.type}}|</span>
+      <span class="twitch--text pl-1 text-title text-truncate">
         {{this.delete.data.target.title.length > 25 ? `${this.delete.data.target.title.substr(0, 24)}...` : this.delete.data.target.title}}</span>
         <span class="red--text" v-if="this.delete.type === 'cliplist'">[{{this.delete.data.target.pinnedClips.length}}개]</span>
-      <span>을 삭제하시겠습니까?</span>
+      <div class="pl-1">을 삭제합니다.</div>
     </v-card-text>
     <v-card-actions class="pb-3 pt-0">
       <v-spacer></v-spacer>
@@ -43,9 +41,9 @@
 <script>
 export default {
   props: {
-    delete:{
-      type:Object
-    }
+    delete: {
+      type: Object,
+    },
   },
   data() {
     return {
@@ -65,15 +63,16 @@ export default {
         await this.$store.commit('DELETE_cliplist', data);
         this.btnLoading = false;
         this.dialog = false;
+        this.$router.push({ path: '/cliplist' });
       } else if (type === 'importedClip') {
-        this.$emit('delImportedClip', {index: this.delete.data.index, title: this.delete.data.target.title});
+        this.$emit('delImportedClip', { index: this.delete.data.index, title: this.delete.data.target.title });
       }
     },
   },
-  computed:{
-    deleteDefaultData(){
-      return this.delete
-    }
+  computed: {
+    deleteDefaultData() {
+      return this.delete;
+    },
   },
   created() {
   },

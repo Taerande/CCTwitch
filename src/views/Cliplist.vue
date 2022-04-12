@@ -1,68 +1,19 @@
 <template>
 <v-container fluid>
-  <v-row class="d-flex align-center pt-5">
-     <v-col class="d-flex align-baseline">
-      <h1 class="pr-3">My Cliplists</h1>
-      <div class="text-caption">
-        <span :class="$store.state.cliplist.length === 20 ? 'red--text' : ''">{{$store.state.cliplist.length}}</span> / 20
-      </div>
-    </v-col>
-    <v-col class="d-flex justify-end align-center">
-      <ImportNewClipDialog></ImportNewClipDialog>
-      <AddNewCliplistDialog :type="{type:'add', data:{
-        text: 'Add New Cliplist'
-      }}"></AddNewCliplistDialog>
-    </v-col>
-  </v-row>
-  <expandTable></expandTable>
-  <v-row class="d-flex pt-10" v-if="$store.state.cliplist.length">
-    <v-col class="custom5cols pa-3" v-for="(item, listIndex) in $store.state.cliplist" :key="listIndex">
-      <v-card class="cliplist-canvas" :style="{background: item.color, opacity: $store.state.currentCliplist.id === item.id ? '1 !important' : ''}" @click="setData(item)">
-        <v-card-title>
-        <div class="text-h5 pa-5 text-truncate">
-        #{{listIndex+1}}  {{item.title}}
-        </div>
-        </v-card-title>
-        <v-card-text>
-         <div class="text-caption pa-5">
-            {{item.pinnedClips.length}}개의 클립
-          </div>
-        </v-card-text>
-        <v-card-actions></v-card-actions>
-      </v-card>
-    </v-col>
-  </v-row>
-  <v-row v-else class="d-flex justify-center align-center" style="height:60vh;">
-    <h1>😥There is no cliplist</h1>
-  </v-row>
+  <router-view></router-view>
 </v-container>
 </template>
 
 <script>
-import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
-import ImportNewClipDialog from '@/components/dialog/ImportNewClipDialog.vue';
-import expandTable from '@/components/cliplist/expandTable.vue';
 
 export default {
   components: {
-    expandTable,
-    AddNewCliplistDialog,
-    ImportNewClipDialog,
   },
   data() {
     return {
-      loading: false,
     };
   },
   methods: {
-    async setData(el) {
-      if (this.$store.state.currentCliplist.id === el.id) {
-        await this.$store.commit('INIT_currCliplist');
-      } else {
-        this.$store.commit('SET_currCliplist', { data: el, type: 'info', text: `Cliplist : ${el.title}를 표시합니다.` });
-      }
-    },
-
   },
 
   created() {
@@ -91,5 +42,27 @@ export default {
   max-width: 20%;
   flex-basis: 20%;
 }
+
+//  <v-col
+//       cols="12" lg="3" md="4" sm="6" xs="12"
+//       v-for="clip in setCurrList($store.state.currentCliplist.pinnedClips)" :key="clip.id">
+//         <v-card>
+//           <v-card-title class="d-flex justify-space-between">
+//             <div>
+//               <span class="text-truncate">{{clip.title}}</span>
+//               <clipMenuVue :clip="clip"></clipMenuVue>
+//             </div>
+//           </v-card-title>
+//           <v-card-text>
+//             <div>
+//               <v-img
+//               :src="clip.thumbnail_url">
+//               </v-img>
+//             </div>
+//             {{clip.description}}
+//           </v-card-text>
+//         </v-card>
+
+//       </v-col>
 
 </style>

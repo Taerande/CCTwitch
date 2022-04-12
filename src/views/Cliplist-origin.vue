@@ -137,8 +137,8 @@
 
 <script>
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
-import AddNewClipDialog from '@/components/dialog/AddNewClipDialog.vue';
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
+import AddNewClipDialog from '@/components/dialog/AddNewClipDialog.vue';
 
 export default {
   components: {

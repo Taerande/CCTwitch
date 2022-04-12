@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex">
+  <div>
     <v-form
     class="d-flex align-center justify-center"
     @submit.prevent="searchChannel($store.state.searchString)">
@@ -9,6 +9,7 @@
       color="rgb(119,44,232)"
       @click:append="searchChannel($store.state.searchString)"
       outlined
+      hide-details
       size="50"
       height="50"
       label="Search your Streamer" prepend-icon="mdi-twitch" append-icon="mdi-magnify">

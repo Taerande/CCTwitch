@@ -1,5 +1,7 @@
 <template>
-<v-menu offset-x>
+<v-menu
+:nudge-left="this.$vuetify.breakpoint.xs ? '140' : '0'"
+offset-x>
   <template v-slot:activator="{on, attrs}">
     <v-btn v-bind="attrs" v-on="on" icon>
       <v-icon>mdi-dots-vertical</v-icon>
@@ -15,6 +17,10 @@
     <DeleteDialog
       :delete="{type:'clip', data:{target: clip, belongsTo: $store.state.currentCliplist,}}">
     </DeleteDialog>
+    <v-list-item @click="downloadClip(clip)">
+      <v-icon>mdi-download</v-icon>
+      <span class="text-caption pl-1">클립 저장</span>
+    </v-list-item>
   </v-list>
 </v-menu>
 </template>
@@ -24,11 +30,11 @@ import pinClipVue from '../pinClip.vue';
 import EditDescriptionVue from '../dialog/EditDescription.vue';
 
 export default {
-  props:['clip'],
-  components:{
+  props: ['clip'],
+  components: {
     DeleteDialog,
     pinClipVue,
-    EditDescriptionVue
+    EditDescriptionVue,
   },
   methods: {
     copyClip(el) {
@@ -40,9 +46,13 @@ export default {
       document.body.removeChild(tempArea);
       this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip URL : ${el.title} 가 복사되었습니다.`, value: true });
     },
+    downloadClip(el) {
+      const target = `${el.thumbnail_url.split('-preview')[0]}.mp4`;
+      window.open(target);
+    },
   },
 
-}
+};
 </script>
 <style lang="scss" scoped>
 

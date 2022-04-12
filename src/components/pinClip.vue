@@ -1,5 +1,6 @@
 <template>
   <v-dialog
+  v-model="dialog"
   scrollable
   width="400px">
     <template v-slot:activator="{on, attrs}">
@@ -38,6 +39,12 @@
           </v-list-item>
         </v-list>
       </v-card-text>
+      <v-card-actions class="d-flex justify-end pa-3">
+        <v-spacer></v-spacer>
+        <v-btn depressed @click="dialog = false">
+          <span class="error--text text-break">Close</span>
+        </v-btn>
+      </v-card-actions>
     </v-card>
 
   </v-dialog>
@@ -52,7 +59,7 @@ export default {
   },
   data() {
     return {
-
+      dialog: false,
     };
   },
   methods: {

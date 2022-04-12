@@ -1,17 +1,17 @@
 <template>
-<v-container>
+<v-container fluid >
   <v-row class="align-center pt-10 pl-3 pb-3">
     <span class="text-h5 font-weight-bold">Search : {{this.$route.query.q}} </span>
   </v-row>
   <v-divider></v-divider>
   <v-row
   class="pa-0 pt-3 d-flex">
-    <v-col cols="12" xl="2" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
+    <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in $store.state.searchList"
     :key="item.id">
-      <v-card outlined class="rounded-xl" width="300px">
-        <v-card-title class="justify-space-between align-center">
-            <router-link class="d-flex" :to="{name: 'Channel', query:{
+      <v-card outlined class="rounded-xl" width="400px">
+        <v-card-title>
+          <router-link class="d-flex" :to="{name: 'Channel', query:{
             q: item.broadcaster_login}}">
             <div aria-label="avatar" class="flex-direction: column">
               <v-badge
@@ -23,11 +23,11 @@
                 <v-avatar
                 outline
                 color="black"
-                size="50">
+                size="40">
                     <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
                 </v-avatar>
                 </v-badge>
-              <v-avatar size="50" v-else>
+              <v-avatar size="40" v-else>
                 <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
               </v-avatar>
               <div class="black rounded-xl d-flex justify-center" v-if="item.is_live">
@@ -48,6 +48,7 @@
               </div>
             </div>
           </router-link>
+          <v-spacer></v-spacer>
           <div>
             <v-btn v-if="$store.state.likedStreamer.find(ele =>
                 ele.id == item.id)" icon @click="deleteFav({index:$store.state.likedStreamer.findIndex(el => el.id == item.id), display_name: item.display_name})">
@@ -114,7 +115,6 @@ export default {
         });
       }).catch((error) => console.log(error));
       this.$store.commit('SET_SearchList', lists);
-      this.dataLoading = true;
     },
     kFormatter(el) {
       if (el > 999999) {

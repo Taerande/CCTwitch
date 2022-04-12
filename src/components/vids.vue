@@ -1,17 +1,18 @@
 <template>
   <v-carousel
-    @change="emitVidsId(vids[$event])"
+    v-model="model"
+    max-height="600"
+    :aspect-ratio="16/9"
     hide-delimiters
     v-if="vidlist.length > 0"
   >
     <v-carousel-item
       v-for="(item, index) in vidlist"
       :key="index"
+      :aspect-ratio="16/9"
       lazy-src="@/assets/img/404.jpg"
-      :src="setThumbnailSize(item.data.thumbnail_url, index) || '@/assets/img/404.jpg'"
-
-    @mouseover="hoverOpen = true"
-    @mouseout="hoverOpen = false"
+      :src="setThumbnailSize(item.data.thumbnail_url, index*1) || '@/assets/img/404.jpg'"
+      @click="openVidsListDialog"
     >
     <v-sheet
     class="pa-5"
@@ -25,19 +26,17 @@
           <span v-if="item.data.is_live" class="pl-1 red--text text-caption">OnAir</span>
           <v-spacer></v-spacer>
           <v-btn v-if="item.data.is_live"
-          v-show="hoverOpen"
-          outlined
           small
-          depressed
           id="urlBtn"
-          @click="pushToTwitchVids(`https://www.twitch.tv/${item.data.user_login}`)">이동</v-btn>
+          class="white--text"
+          color="twitch"
+          @click.stop.prevent="pushToTwitchVids(`https://www.twitch.tv/${item.data.user_login}`,item.data.title)">이동</v-btn>
           <v-btn v-else
-          v-show="hoverOpen"
-          outlined
           small
-          depressed
+          class="white--text"
+          color="twitch"
           id="urlBtn"
-          @click="pushToTwitchVids(item.data.url)">이동</v-btn>
+          @click.stop.prevent="pushToTwitchVids(item.data.url,item.data.title)">이동</v-btn>
         </div>
       </div>
     </v-sheet>
@@ -51,25 +50,22 @@
 import axios from 'axios';
 
 export default {
-  props: ['vids'],
+  props: ['vids','carsouelId'],
   data() {
     return {
       vidlist: [],
-      hoverOpen: false,
-      currentId: '',
       currentPage: null,
     };
   },
   methods: {
+    openVidsListDialog(){
+      this.$emit('openVidsListDialog')
+    },
     setDate(el) {
       const time = new Date(el).getTime();
       const krTime = time + 9 * 60 * 60 * 1000;
       const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
       return dateFormatted;
-    },
-    emitVidsId(el) {
-      this.currentId = el.data.id;
-      this.$emit('emitVidId', el.data.id);
     },
     setThumbnailSize(el, index) {
       if (el === '') {
@@ -78,11 +74,10 @@ export default {
       }
       const width = /%{width}/;
       const height = /%{height}/;
-      return el.replace(width, '600').replace(height, '400');
+      return el.replace(width, '1280').replace(height, '720');
     },
-    pushToTwitchVids(url) {
-      // eslint-disable-next-line no-alert
-      if (window.confirm('해당 영상으로 이동하시겠습니까?')) {
+    pushToTwitchVids(url, title) {
+      if (window.confirm(`${title} 영상으로 이동하시겠습니까?`)) {
         window.open(url);
       }
     },
@@ -114,6 +109,16 @@ export default {
       }
 
       return '1분 미만';
+    },
+  },
+  computed:{
+    model:{
+      get(){
+        return this.carsouelId;
+      },
+      set(newValue){
+        this.$emit('emitVidId',newValue);
+      }
     },
   },
   mounted() {

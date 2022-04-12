@@ -6,7 +6,7 @@
     <v-row class="col-12 pa-1 d-flex justify-space-between align-baseline">
       <div class="d-flex align-baseline">
       <h1>Clips</h1>
-      <span class="pl-2 text-caption">(동영상별 최대 100개의 클립을 가져옵니다.)</span>
+      <span class="pl-2 text-caption">(동영상별 최대 {{$store.state.clipCount}}개의 클립을 가져옵니다.)</span>
       </div>
       <div>
         <v-icon @click="refresh">mdi-refresh</v-icon>
@@ -17,7 +17,7 @@
     <v-col
       v-for="(item, index) in this.cliplist"
       :key="index"
-      cols="12" lg="3" md="4" sm="6" xs="12"
+      cols="12" xl="3" lg="3" md="4" sm="6" xs="12"
       class="pa-3 clip-item"
       :class="item.broadcaster_id"
 
@@ -27,50 +27,12 @@
         <v-lazy
           v-model="item.id"
           :options="{ threshold: 0.5}">
-          <v-card>
+          <v-card flat>
             <v-card-title class="pa-0">
             </v-card-title>
             <v-card-text class="d-flex justify-center align-center pa-0">
-          <v-dialog
-            :v-model="item.id === currentId"
-            @click:outside="currentId = null"
-            max-width="1280"
-          >
-          <template v-slot:activator="{ on, attrs }">
-            <v-img
-            :aspect-ratio="16/9"
-            width="400"
-            id="clip-thumbnail"
-            @click="currentId = null, currentId = item.id"
-            v-bind="attrs"
-            v-on="on"
-            lazy-src="@/assets/img/404.jpg"
-            :src="item.thumbnail_url">
-              <v-container fluid fill-height class="d-flex align-content-space-between">
-                <v-row class="d-flex justify-space-between align-center pl-1" style="background-color: rgba( 0, 0, 0, 0.5 )">
-                  <v-avatar size="25">
-                    <v-img :src="userProfileImg" lazy-src="@/assets/img/404.jpg" alt="profile_img"></v-img>
-                  </v-avatar>
-                  <span style="max-width: 150px;" class="white--text text-body-2 text-truncate">{{item.title}}</span>
-                  <pinClip name="channelClipPin" :clipData="{data:item}"></pinClip>
-                </v-row>
-                <v-row class="d-flex justify-space-between">
-                  <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">{{setDate(item.created_at)}}</span>
-                  <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">views:{{viewerkFormatter(item.view_count)}}</span>
-                </v-row>
-              </v-container>
-            </v-img>
-          </template>
-            <iframe
-            class="black d-flex align-center"
-            v-if="item.id === currentId"
-            :src="`https://clips.twitch.tv/embed?clip=${currentId}&parent=localhost&autoplay=true&muted=false&preload=auto`"
-            preload="auto"
-            frameborder="0"
-            height="720"
-            allowfullscreen="true"></iframe>
-          </v-dialog>
-          </v-card-text>
+              <clipIframeDialog :clipData="item" :userProfileImg="userProfileImg"></clipIframeDialog>
+            </v-card-text>
           </v-card>
         </v-lazy>
       </v-sheet>
@@ -88,13 +50,13 @@
 <script>
 import axios from 'axios';
 import infiniteLoading from 'vue-infinite-loading';
-import pinClip from '@/components/pinClip.vue';
+import clipIframeDialog from '@/components/dialog/ClipIframeDialog';
 
 export default {
   props: ['clips','userProfileImg'],
   components: {
+    clipIframeDialog,
     infiniteLoading,
-    pinClip,
   },
   data() {
     return {
@@ -152,7 +114,7 @@ export default {
     },
     getEndDate(el) {
       const startedAt = new Date(el).getTime();
-      const endedAt = new Date(startedAt + 5 * 24 * 60 * 60 * 1000);
+      const endedAt = new Date(startedAt + 7 * 24 * 60 * 60 * 1000);
       return endedAt.toISOString();
     },
     setDate(el) {
@@ -168,24 +130,24 @@ export default {
         params: {
           broadcaster_id: this.infiniteData.data.broadcaster_id,
           started_at: this.infiniteData.data.started_at,
-          ended_at: this.infiniteData.data.ended_at,
+          ended_at: this.getEndDate(this.infiniteData.data.started_at),
           first: this.infiniteData.data.first,
           after: this.paginationCursor,
         },
       }).then((res) => {
         this.paginationCursor = res.data.pagination.cursor;
-        if (this.cliplist.length >= 100 || res.data.data.length === 0) {
+        if (this.cliplist.length >= this.$store.state.clipCount || res.data.data.length === 0) {
           $state.complete();
         } else if (res.data.pagination.cursor === undefined && res.data.data.length > 0) {
           res.data.data.forEach((el) => {
-            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < 100) {
+            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < this.$store.state.clipCount) {
               this.cliplist.push(el);
             }
           });
           $state.complete();
         } else {
           res.data.data.forEach((el) => {
-            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < 100) {
+            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < this.$store.state.clipCount) {
               this.cliplist.push(el);
             }
           });
@@ -199,7 +161,7 @@ export default {
     this.infiniteData.data = {
       broadcaster_id: this.clips.data.user_id,
       started_at: this.clips.data.created_at,
-      ended_at: this.getEndDate(this.clips.data.created_at),
+      ended_at: new Date().toISOString(),
       first: 20,
       video_id: this.clips.data.id,
       viewalbe: this.clips.data.viewalbe,
