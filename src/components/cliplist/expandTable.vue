@@ -269,10 +269,7 @@ export default {
       }
     },
     setDate(el) {
-      const time = new Date(el).getTime();
-      const krTime = time + 9 * 60 * 60 * 1000;
-      const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
-      return dateFormatted;
+      return this.$moment(el).format('ll').substring(2);
     },
     resetData() {
       this.$store.commit('SET_currCliplist', { data: '' });

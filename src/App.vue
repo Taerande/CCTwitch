@@ -3,6 +3,7 @@
     <AppBar app></AppBar>
     <bookmark app></bookmark>
     <v-main class="app-container" app>
+      <v-progress-circular v-if="this.$store.state.firbaseLoaded" class="absolute-center" color="twitch" size="60" width="6" indeterminate></v-progress-circular>
       <router-view class="mx-auto" :key="$route.fullPath" />
     </v-main>
     <SnackBar app></SnackBar>
@@ -52,6 +53,13 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&display=swap');
 :root {
   --twitch-color: rgb(119, 44, 232);
+}
+.absolute-center{
+  position: absolute;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+  z-index: 500;
 }
 header {
   height: fit-content;

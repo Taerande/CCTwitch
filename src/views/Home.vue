@@ -8,6 +8,13 @@
       </v-col>
       <Search class="pt-6"></Search>
     </v-row>
+    <v-row>
+      <v-col>
+        <v-card>
+          {{ $store.state.userInfo }}
+        </v-card>
+      </v-col>
+    </v-row>
     <v-row class="pt-10">
       <v-col>
         <v-card flat class="error">

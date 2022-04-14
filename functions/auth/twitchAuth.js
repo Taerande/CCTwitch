@@ -17,6 +17,7 @@ app.get('/signin/twitch/callback', async (req, res) => {
   const clientId = process.env.TWITCH_CLIENT_ID;
   const clientSecret = process.env.TWITCH_CLIENT_SECRET;
   const redirectUri = process.env.TWITCH_CLIENT_REDIRECTION_URI;
+  const frontendUrl = process.env.VUE_APP_EMBED_PARERNT_DEV;
   const code = req.query.code;
   const getUserInfo = async (auth) => {
     const endpoint = "https://api.twitch.tv/helix/users";
@@ -92,7 +93,7 @@ app.get('/signin/twitch/callback', async (req, res) => {
     await authenticateUser(userInfo, id);
     const token = await getAuthToken(id);
     // res.send(token);
-    res.redirect('http://localhost:8080/?token='+token);
+    res.redirect(frontendUrl+'/?token='+token);
   } catch (err) {
     console.error(err);
   }

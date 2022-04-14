@@ -48,20 +48,15 @@
       >
         <v-card>
           <v-card-title primary-title>
-            {{clipResult.title}}
+            <div>
+              {{clipResult.title}}
+            </div>
+            <v-spacer></v-spacer>
+            <div>{{setDate(clipResult.created_at)}}</div>
           </v-card-title>
           <v-card-text class="d-flex justify-center align-center">
-            <iframe v-if="clipDialog" class="black" :src="`${clipResult.embed_url}&parent=localhost&autoplay=false&muted=false&preload=auto`" width="100%"
+            <iframe v-if="clipDialog" class="black" :src="`${clipResult.embed_url}&parent=localhost&autoplay=false&muted=false&preload=auto`" width="200%"
             height="400" frameborder="0"></iframe>
-            <v-container fluid>
-              <v-row>
-                <v-icon color="twitch">mdi-eye-outline</v-icon>
-                <span>{{clipResult.view_count}}</span>
-              </v-row>
-              <v-row>{{clipResult.title}}</v-row>
-              <v-row>{{clipResult.created_at}}</v-row>
-
-            </v-container>
           </v-card-text>
           <v-card-actions>
             <v-spacer/>
@@ -160,6 +155,25 @@ export default {
     };
   },
   methods: {
+     viewerkFormatter(el) {
+      const num = el.toString()
+      if (num > 999999999) {
+        return `${num.slice(0, -9)},${num.slice(
+          num.length - 9,
+          -6,
+        )},${num.slice(num.length - 6, -3)},${num.slice(-3)}`
+      }
+      if (num > 999999) {
+        return `${num.slice(0, -6)},${num.slice(
+          num.length - 6,
+          -3,
+        )},${num.slice(-3)}`
+      }
+      if (num > 999) {
+        return `${num.slice(0, -3)},${num.slice(-3)}`
+      }
+      return Math.abs(num)
+    },
     initailize(){
       this.dialog = false;
       this.pinnedClipslist = [];
@@ -210,11 +224,8 @@ export default {
       }
 
     },
-     setDate(el) {
-      const time = new Date(el).getTime();
-      const krTime = time + 9 * 60 * 60 * 1000;
-      const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
-      return dateFormatted;
+    setDate(el) {
+      return this.$moment(el).format('ll');
     },
     dataType(el) {
       if (el) {

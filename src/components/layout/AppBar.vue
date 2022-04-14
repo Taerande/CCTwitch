@@ -95,19 +95,61 @@
       </div>
       </router-link>
     </template>
-    <SingInDialog></SingInDialog>
-    <v-btn color="success" @click="logOut">logOut</v-btn>
+    <v-menu offset-y v-if="$store.state.userInfo">
+      <template v-slot:activator="{ on }">
+        <v-avatar
+          color="twitch"
+          v-on="on"
+          size="36"
+        >
+          <img
+          :src="$store.state.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
+          </v-avatar>
+      </template>
+      <v-card tile>
+        <v-card-title class="px-3 d-flex justify-center">
+          <v-avatar
+            size="48"
+          >
+            <img
+            :src="$store.state.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
+          </v-avatar>
+          <span class="text-subtitle px-3">{{$store.state.userInfo.displayName}}</span>
+        </v-card-title>
+        <v-divider class="mx-3"></v-divider>
+        <v-card-text class="ma-0 pa-0">
+          <v-list>
+            <v-list-item>
+              <v-icon class="pr-2">mdi-playlist-check</v-icon>
+              <span class="text-button">클립목록</span>
+            </v-list-item>
+            <v-list-item>
+              <v-icon class="pr-2">mdi-account-group</v-icon>
+              <span class="text-button">팔로우</span>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
+        <v-divider class="mx-3"></v-divider>
+        <v-card-actions class="d-flex justify-center">
+          <v-list-item>
+            <v-icon class="pr-1">mdi-logout</v-icon>
+            <span @click="logOut" class="text-subtitle-2 text-lg-body-1 pr-1">로그아웃</span>
+          </v-list-item>
+        </v-card-actions>
+      </v-card>
+    </v-menu>
+    <SignInDialog v-else></SignInDialog>
   </v-app-bar>
 </template>
 <script>
 
 import SearchBar from '@/components/SearchBar.vue';
-import SingInDialog from '@/components/dialog/SingInDialog.vue';
+import SignInDialog from '@/components/dialog/SignInDialog.vue';
 
 export default {
   components: {
     SearchBar,
-    SingInDialog,
+    SignInDialog,
   },
   data() {
     return {
@@ -117,6 +159,9 @@ export default {
   methods: {
     logOut(){
       this.$firebase.auth().signOut().then( () => console.log('log Out success'));
+      this.$store.commit('SET_UserInfo', null);
+      this.$router.push('/')
+      this.$store.commit('SET_SnackBar',{type: 'error', text:'로그아웃', value:true})
     },
     closeDialog(){
       this.dialog = false;

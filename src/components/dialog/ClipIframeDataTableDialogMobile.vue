@@ -14,7 +14,7 @@
           <div class="pl-2" style="width:15rem;">
             <div class="text-truncate">{{clipData.title}}</div>
             <div class="text-caption d-flex align-center"><v-icon class="pr-1" x-small>mdi-eye</v-icon> {{viewerkFormatter(clipData.view_count)}}</div>
-            <div class="text-caption">{{clipData.created_at}}</div>
+            <div class="text-caption">{{setDate(clipData.created_at)}}</div>
           </div>
       </v-col>
     </v-row>
@@ -24,6 +24,7 @@
     <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
   </div>
   <iframe
+    id="clipIframe"
     class="black d-flex align-center"
     v-if="dialog"
     :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=false`"
@@ -44,6 +45,9 @@ export default {
     }
   },
   methods: {
+    setDate(el){
+      return this.$moment(el).fromNow();
+    },
     setTimeHMSformat(item){
       const hour = Math.floor(item/3600);
       const min = Math.floor((item%3600)/60);

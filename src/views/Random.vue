@@ -1,7 +1,7 @@
 <template>
 <v-container>
   <v-row v-for="(item,i) in items" :key="i">
-    <v-btn @click="addSnackBar()">{{item.data}}</v-btn>
+    <v-btn @click="addSnackBar(item)">{{item.text}}</v-btn>
   </v-row>
 
   <v-snackbar
@@ -24,59 +24,25 @@
 </v-container>
 </template>
 <script>
-import axios from 'axios'
 
 export default {
   data() {
     return {
       items: [
-        { data: '1st Snack', type: 'info', value: true },
-        { data: '2nd Snack', type: 'error', value: true },
-        { data: '3rd Snack', type: 'success', value: true },
-        { data: '4th Snack', type: 'primary', value: true },
+        { text: '1st Snack', type: 'info', value: true },
+        { text: '2nd Snack', type: 'error', value: true },
+        { text: '3rd Snack', type: 'success', value: true },
+        { text: '4th Snack', type: 'primary', value: true },
       ],
       snackbarQue: [],
     };
   },
   methods: {
-    getuserInfo(){
-
-    },
-    postProcess(){
-
+    addSnackBar(el){
+      this.$store.commit('SET_SnackBar', el);
     }
-
   },
   mounted() {
-    const accessToken = document.location.hash.split('&')[0].split('=')[1];
-    axios.get('https://id.twitch.tv/oauth2/userinfo',{
-      headers:{
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      }
-    }).then((res) =>{
-      this.$firebase.auth().createUserWithEmailAndPassword(res.data.email, 'twitch:'+res.data.sub).then( async () => {
-        const user = await this.$firebase.auth().currentUser;
-        user.updateProfile({
-          displayName: res.data.preferred_username,
-          photoURL: res.data.picture
-        }).then(() => {
-          this.$store.commit('SET_UserInfo', user);
-        })
-      })
-      .catch( async () => {
-        await this.$firebase.auth().signInWithEmailAndPassword(res.data.email,'twitch:'+res.data.sub).then(() => console.log('sign up success'));
-        const user = await this.$firebase.auth().currentUser;
-        user.updateProfile({
-          displayName: res.data.preferred_username,
-          photoURL: res.data.picture
-        }).then(() => {
-          this.$store.commit('SET_UserInfo', user);
-        })
-        });
-      }).then(() => {
-        this.$router.push('/');
-      })
   },
 
 };

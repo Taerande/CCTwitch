@@ -5,7 +5,7 @@
       v-for="(item, index) in $store.state.snackbarArr"
       :key="index"
       :timeout="-1"
-      :style="{ 'margin-bottom': `${index * 70 + 600}px` }"
+      :style="{ 'margin-bottom': `${index * 70 + 70}px` }"
       v-model="item.value"
       :color="item.type"
     >

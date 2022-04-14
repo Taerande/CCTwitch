@@ -62,10 +62,8 @@ export default {
       this.$emit('openVidsListDialog')
     },
     setDate(el) {
-      const time = new Date(el).getTime();
-      const krTime = time + 9 * 60 * 60 * 1000;
-      const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
-      return dateFormatted;
+      const date = this.$moment(el).format('ll');
+      return date;
     },
     setThumbnailSize(el, index) {
       if (el === '') {

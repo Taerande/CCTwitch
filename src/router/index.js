@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import About from '../views/About.vue';
+import store from '../store';
 // import Channel from '../views/Channel.vue';
 // import Search from '../views/Search.vue';
 
@@ -99,5 +100,16 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes,
 });
+
+
+router.beforeEach((to, from, next) => {
+  store.commit('SET_FirebaseLoad', true)
+  if(store.state.firbaseLoaded) next()
+})
+router.afterEach((to, from) => {
+  setTimeout(()=>{
+    store.commit('SET_FirebaseLoad', false)
+  },500)
+})
 
 export default router;

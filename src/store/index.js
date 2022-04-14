@@ -5,8 +5,11 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    globalLan:'ko',
+    redirectUri:process.env.VUE_APP_TWITCH_REDIRECTURI_DEV,
     embedUrl:process.env.VUE_APP_EMBED_PARERNT_DEV,
     clipCount:300,
+    firbaseLoaded: false,
     snackbarArr:[],
     snackbar: {
       type: 'error',
@@ -26,7 +29,7 @@ export default new Vuex.Store({
     likedStreamer: [],
     pinnedClips: [],
     cliplist: [],
-    userInfo: {},
+    userInfo: null,
     currentCliplist: {
       id:'',
       title:'',
@@ -43,10 +46,18 @@ export default new Vuex.Store({
     isSaved: '',
   },
   mutations: {
+    SET_FirebaseLoad(state, payload){
+      state.firbaseLoaded = payload
+    },
     SET_SnackBar(state,response){
-      state.snackbarArr.push(response);
-      setTimeout(() =>{
-        state.snackbarArr.splice(0,1)} , 3000);
+      if(state.snackbarArr.length >= 3){
+        state.snackbarArr.push(response);
+        state.snackbarArr.splice(0,1);
+      } else {
+        state.snackbarArr.push(response);
+        setTimeout(() =>{
+          state.snackbarArr.splice(0,1)} , 3000);
+      }
     },
     DELETE_snackBar(state, response){
       state.snackbarArr.splice(response,1);

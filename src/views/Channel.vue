@@ -119,7 +119,7 @@
                     <div class="text-caption">
                       {{ getDurationTime(item.data.duration) }}
                     </div>
-                    <div class="text-caption">{{ item.data.created_at }}</div>
+                    <div class="text-caption">{{ setDate(item.data.created_at) }}</div>
                   </div>
                 </v-col>
               </v-row>
@@ -205,6 +205,10 @@ export default {
     }
   },
   methods: {
+    setDate(el){
+      const date = this.$moment(el).format('ll');
+      return date;
+    },
     viewerkFormatter(el) {
       const num = el.toString()
       if (num > 999999999) {

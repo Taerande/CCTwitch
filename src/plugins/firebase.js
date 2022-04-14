@@ -4,17 +4,21 @@ import firebase from 'firebase/compat/app';
 import firebaseConfig from '../../firebaseConfig';
 import 'firebase/compat/firestore';
 import 'firebase/compat/auth';
+import store from '../store'
+import router from '../router';
 
 firebase.initializeApp(firebaseConfig);
 
 Vue.prototype.$firebase = firebase;
 Vue.prototype.$firestore = firebase.firestore();
-// firebase.firestore().collection('test').add({ test: 'success' });
+
 firebase.auth().onAuthStateChanged((user) => {
+  console.log(user);
+  // store.commit('SET_FirebaseLoad', true)
   if (user) {
-    console.log('log in', user);
-    // var uid = user.uid;
+    // store.commit('SET_FirebaseLoad', true)
+    store.commit('SET_UserInfo',user)
+    router.push('/')
   } else {
-    console.log('not log in');
   }
   });

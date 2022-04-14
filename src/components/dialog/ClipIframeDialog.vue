@@ -35,6 +35,7 @@
       <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
     </div>
       <iframe
+      id="clipIframe"
       @keydown.esc="dialog = false"
       v-if="dialog"
       class="black d-flex align-center"
@@ -75,10 +76,13 @@ export default {
       }
     },
     setDate(el) {
-      const time = new Date(el).getTime();
-      const krTime = time + 9 * 60 * 60 * 1000;
-      const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
-      return dateFormatted;
+      // const time = new Date(el).getTime();
+      // const krTime = time + 9 * 60 * 60 * 1000;
+      // const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
+      // return dateFormatted;
+      const c = this.$moment(el).fromNow();
+
+      return c;
     },
      viewerkFormatter(el) {
       const num = el.toString();
