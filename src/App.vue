@@ -56,7 +56,7 @@ export default {
 }
 .absolute-center{
   position: absolute;
-  top:50%;
+  top:50vh;
   left:50%;
   transform: translate(-50%, -50%);
   z-index: 500;

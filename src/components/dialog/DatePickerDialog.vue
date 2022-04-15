@@ -12,6 +12,8 @@
     <v-card class="justify-center">
       <v-card-title class="info">
         Select Date
+        <v-spacer></v-spacer>
+        <v-icon @click="dialog = false" color="error">mdi-close</v-icon>
       </v-card-title>
       <v-card-text class="pt-5">
         <v-date-picker
@@ -24,8 +26,8 @@
           :min="this.dateInfo.min"
           :max="this.dateInfo.max"
         ></v-date-picker>
-        <div v-if="dates[0] !== undefined">
-          {{`${dates[0]=== undefined ? '' : dates[0]}~${dates[1]=== undefined ? '' : dates[1]}`}}
+        <div v-if="dates[0] !== undefined" class="d-flex justify-center pt-3 text-title red--text">
+          {{`${dates[0]=== undefined ? '' : this.$moment(dates[0]).format('ll')} ~ ${dates[1]=== undefined ? '' : this.$moment(dates[1]).format('ll')}`}}
         </div>
       </v-card-text>
       <v-card-actions>
@@ -53,9 +55,10 @@ export default {
       await orderDates();
       this.$emit('ApplyDate', {
         text: 'Custom Period',
-        start: new Date(el[0]).toISOString(),
-        end: new Date(el[1]).toISOString(),
+        start: this.$moment(el[0]).toISOString(),
+        end: this.$moment(el[1]).add(86399,'seconds').toISOString(),
       });
+      console.log(this.$store.state.dateSort);
     },
   },
   mounted() {

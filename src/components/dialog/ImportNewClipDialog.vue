@@ -68,40 +68,8 @@
       <v-card-text>
         <v-list>
           <v-list-item class="mx-3 py-1" v-for="(item,index) in pinnedClipslist" :key="index">
-            <v-list-item-content>
-              <v-dialog
-              :v-model="item.id === currentId"
-              @click:outside="currentId = null"
-              max-width="1280"
-              max-height="720"
-              >
-              <template v-slot:activator="{on, attrs}">
-                <v-list-item-title
-                v-on="on"
-                @click="currentId = null, currentId = item.id"
-                v-bind="attrs"
-                class="d-flex align-center">
-                <div class="d-flex align-center">
-                  <v-img
-                  max-width="70"
-                  :src="item.thumbnail_url"></v-img>
-                  <span class="pl-3 text-truncate text-caption font-weight-black twitch--text">{{item.title}}</span>
-                </div>
-                </v-list-item-title>
-              </template>
-              <div class="black d-flex justify-end">
-                <v-btn color="error" icon @click="currentId = null"><v-icon>mdi-close</v-icon></v-btn>
-              </div>
-              <iframe
-                class="black d-flex align-center mx-auto"
-                v-if="item.id === currentId"
-                :src="`https://clips.twitch.tv/embed?clip=${currentId}&parent=localhost&autoplay=true&muted=false&preload=auto`"
-                preload="auto"
-                frameborder="0"
-                width="1280"
-                height="720"
-                allowfullscreen="true"></iframe>
-            </v-dialog>
+            <v-list-item-content class="pa-0 ma-0">
+              <ImportedClipIframeDialog :clipData="item"></ImportedClipIframeDialog>
             </v-list-item-content>
             <v-list-item-action>
               <v-btn icon>
@@ -135,8 +103,10 @@
 <script>
 import axios from 'axios';
 import clipdb from '@/assets/clipdata.json'
+import ImportedClipIframeDialog from '@/components/dialog/importedClipIframeDialog';
 export default {
   components: {
+    ImportedClipIframeDialog,
   },
   props: ['type'],
   data() {

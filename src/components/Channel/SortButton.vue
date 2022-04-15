@@ -37,6 +37,13 @@
           <v-list-item-title>Month</v-list-item-title>
         </v-list-item>
         <v-list-item @click="changeDateSort({
+          text: 'Year',
+          start: todayBeforeYear,
+          end: today,
+        })">
+          <v-list-item-title>Year</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="changeDateSort({
           text: 'All',
           start: null,
           end: null,
@@ -49,7 +56,7 @@
       </v-list>
     </v-menu>
     <div v-if="this.clipSort === 'date'" class="pl-3 red--text text-caption">
-      <v-icon color="red" size="1rem">mdi-calendar-range</v-icon> {{setDateFormat($store.state.dateSort)}}
+      <v-icon color="error" size="1rem">mdi-calendar-range</v-icon> {{setDateFormat($store.state.dateSort)}}
     </div>
   </v-row>
 </template>
@@ -70,9 +77,9 @@ export default {
   methods: {
     setDateFormat(el) {
       if (el.text === 'All') {
-        return 'All';
+        return '전체';
       }
-      return `${el.start.substr(0, 10)} ~ ${el.end.substr(0, 10)}`;
+      return `${this.$moment(el.start).format('ll')} ~ ${this.$moment(el.end).format('ll')}`;
     },
     async changeDateSort(el) {
       const asd = () => {
@@ -93,22 +100,19 @@ export default {
   },
   computed: {
     today() {
-      return new Date().toISOString();
+      return this.$moment().toISOString();
     },
     todayBeforeDay() {
-      const d = new Date();
-      d.setDate(d.getDate() - 1);
-      return d.toISOString();
+      return this.$moment().subtract(1, 'd').toISOString();
     },
     todayBeforeWeek() {
-      const d = new Date();
-      d.setDate(d.getDate() - 7);
-      return d.toISOString();
+      return this.$moment().subtract(7, 'd').toISOString();
     },
     todayBeforeMonth() {
-      const d = new Date();
-      d.setMonth(d.getMonth() - 1);
-      return d.toISOString();
+      return this.$moment().subtract(1, 'month').toISOString();
+    },
+    todayBeforeYear() {
+      return this.$moment().subtract(1, 'year').toISOString();
     },
 
   },

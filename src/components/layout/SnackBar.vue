@@ -2,6 +2,7 @@
   <div>
     <v-snackbar
       app
+      width="100%"
       v-for="(item, index) in $store.state.snackbarArr"
       :key="index"
       :timeout="-1"

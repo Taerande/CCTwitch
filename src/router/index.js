@@ -104,12 +104,14 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   store.commit('SET_FirebaseLoad', true)
-  if(store.state.firbaseLoaded) next()
+  if(store.state.firbaseLoaded) {
+    setTimeout( () => {
+      next()
+    }, 500)
+  }
 })
 router.afterEach((to, from) => {
-  setTimeout(()=>{
-    store.commit('SET_FirebaseLoad', false)
-  },500)
+  store.commit('SET_FirebaseLoad', false)
 })
 
 export default router;
