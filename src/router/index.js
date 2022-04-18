@@ -93,6 +93,7 @@ const routes = [
     name: 'Random',
     component: Random,
   },
+  // { path: '*', beforeEnter: (to, from, next) => { next('/') } },
 ];
 
 const router = new VueRouter({

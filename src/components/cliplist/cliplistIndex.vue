@@ -4,14 +4,14 @@
       <v-row class="d-flex justify-space-between align-baseline">
         <div class="pt-10 pb-3">
           <span class="text-h3 font-weight-bold pr-3">{{$store.state.currentCliplist.title}}</span>
-          <span class="text-subtitle-1">(총 {{$store.state.currentCliplist.pinnedClips.length}} / 100 개)</span>
+          <span class="text-subtitle-1">(총 {{$store.state.currentCliplist.cliplist.length}} / 100 개)</span>
         </div>
     </v-row>
     <v-row class="d-block">
       <div class="pl-1">
        : {{$store.state.currentCliplist.description}}
       </div>
-      <div v-if="$store.state.isSaved" class="d-flex justify-end">
+      <div class="d-flex justify-end">
             <ImportNewClipDialogVue></ImportNewClipDialogVue>
             <DeleteDialog
             :delete="{type:'cliplist', data:{
@@ -36,9 +36,6 @@
             <v-btn icon @click="resetData(), $router.push({path: '/cliplist'})">
               <v-icon>mdi-undo-variant</v-icon>
             </v-btn>
-        </div>
-        <div v-else>
-          <v-btn color="success" @click="saveCliplist" text>save</v-btn>
         </div>
       <v-dialog no-click-animation persistent width="300px" v-model="tableloading">
         <v-progress-linear color="primary" height="35" indeterminate>
@@ -87,10 +84,6 @@ export default {
     };
   },
   methods: {
-    async saveCliplist(){
-      await this.$store.commit('SET_newCliplist', this.$store.state.currentCliplist);
-      await this.$store.commit('SET_isSaved', this.$store.state.currentCliplist.id);
-    },
     viewerkFormatter(el) {
       const num = el.toString();
       if (num > 999999999) {
@@ -210,24 +203,8 @@ export default {
     },
   },
   async mounted() {
-    await this.$store.commit('SET_isSaved', this.$route.params.id);
-    if (!this.$store.state.isSaved) {
-      const fireData = await this.$firestore.collection('cliplist').where('id', '==', this.$route.params.id).get();
-      if (!fireData.empty) {
-        let tempIdList = [];
-        let tempDescList = [];
-        fireData.docs[0].data().pinnedClips.forEach((element) => tempIdList.push(element.id));
-        fireData.docs[0].data().pinnedClips.forEach((element) => tempDescList.push(element.description));
-        await this.getClip(tempIdList, tempDescList);
-        this.currList = fireData.docs[0].data();
-        this.currList.pinnedClips = this.pinnedClipslist;
-        this.$store.commit('SET_currCliplist', {data:this.currList});
-      } else {
-        this.currList.id = null;
-      }
-    } else {
-      await this.$store.commit('SET_currCliplist',{data: this.$store.state.isSaved});
-    }
+    const fireData = await this.$firestore.collection('cliplist').doc(this.$route.params.id).get();
+    this.$store.commit('SET_currCliplist', {data:fireData.data()});
   },
 
 };

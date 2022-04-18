@@ -3,7 +3,7 @@
   <v-row class="pt-5 justify-center align-baseline">
     <div class="py-3">
       <span class="text-h3 font-weight-bold pr-3">My Cliplists</span>
-      <span class="text-subtitle-1" :class="$store.state.cliplist.length === 20 ? 'red--text' : ''">{{$store.state.cliplist.length}} / 20</span>
+      <!-- <span class="text-subtitle-1" :class="$store.state.cliplist.length === 20 ? 'red--text' : ''">{{$store.state.cliplist.length}} / 20</span> -->
     </div>
     <v-spacer v-if="!$vuetify.breakpoint.smAndDown"></v-spacer>
     <div>
@@ -13,10 +13,11 @@
       }}"></AddNewCliplistDialog>
     </div>
   </v-row>
-  <v-row class="d-flex pt-10" v-if="$store.state.cliplist.length">
+  <v-row class="d-flex pt-10">
+     <!-- v-if="$store.state.cliplist.length" -->
     <v-col
      cols="12" xl="2" lg="3" md="4" sm="6" xs="12"
-     class="pa-3" v-for="(item, listIndex) in $store.state.cliplist" :key="listIndex">
+     class="pa-3" v-for="(item, listIndex) in cliplist" :key="listIndex">
       <v-card class="cliplist-canvas" :color="item.color" @click="setData(item)">
         <v-card-title>
         <div class="text-h5 pa-5 text-truncate">
@@ -28,16 +29,16 @@
         </v-card-text>
         <v-card-text>
          <div class="text-caption pa-5">
-            {{item.pinnedClips.length}}개의 클립
+            <!-- {{item.pinnedClips.length}}개의 클립 -->
           </div>
         </v-card-text>
         <v-card-actions></v-card-actions>
       </v-card>
     </v-col>
   </v-row>
-  <v-row v-else class="d-flex justify-center align-center" style="height:60vh;">
+  <!-- <v-row v-else class="d-flex justify-center align-center" style="height:60vh;">
     <h1>😥There is no cliplist</h1>
-  </v-row>
+  </v-row> -->
 </v-container>
 </template>
 
@@ -52,6 +53,17 @@ export default {
   },
   data() {
     return {
+      cliplist: [{
+        id:'',
+        color:'',
+        title:'',
+        clip:[
+          {
+            id:'',
+            description:'',
+          }
+        ]
+      }],
       loading: false,
     };
   },
@@ -67,8 +79,24 @@ export default {
     },
 
   },
+  async created() {
+    const user = this.$firebase.auth().currentUser;
+    const sn = await this.$firestore.collection('cliplist').where('authorId','==',user.uid).get();
 
-  created() {
+    this.cliplist = await sn.docs.map( v => {
+      const item = v.data()
+      return {
+        id: v.id,
+        title: item.title,
+        description: item.description,
+        createdAt: item.createdAt,
+        color: item.color,
+      }
+    })
+
+
+
+
   },
 };
 </script>

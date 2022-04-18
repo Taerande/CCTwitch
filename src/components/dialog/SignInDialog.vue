@@ -66,7 +66,7 @@ export default {
           url = authWindow && authWindow.location && authWindow.location.search;
         } catch (e) {}
         if (url) {
-          // console.log(url);
+          console.log(url);
           const parsedCode = url.split('?token=')[1];
           // const code = parsedCode.code;
           authWindow.close();

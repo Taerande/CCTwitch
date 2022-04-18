@@ -116,7 +116,7 @@
       color="twitch"
       v-model="page"
       :total-visible="7"
-      :length="Math.ceil(($store.state.currentCliplist.pinnedClips.length || 0) / 10)">
+      :length="Math.ceil(($store.state.currentCliplist.cliplist.length || 0) / 10)">
       </v-pagination>
     </v-row>
     <v-dialog no-click-animation persistent v-model="tableloading">

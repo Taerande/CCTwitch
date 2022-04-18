@@ -3,12 +3,12 @@ const admin = require('firebase-admin')
 const axios = require('axios')
 const cors = require('cors')
 
-var serviceAccount = require("../twitchhotclip-firebase-adminsdk-2ku0j-3bb7c712e3.json");
+// var serviceAccount = require("../twitchhotclip-firebase-adminsdk-2ku0j-3bb7c712e3.json");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://twitchhotclip-default-rtdb.asia-southeast1.firebasedatabase.app"
-});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   databaseURL: "https://twitchhotclip-default-r.asia-southeast1.firebasedatabase.app"
+// });
 
 
 app.use(cors())
@@ -16,7 +16,7 @@ app.use(cors())
 app.get('/signin/twitch/callback', async (req, res) => {
   const clientId = process.env.TWITCH_CLIENT_ID;
   const clientSecret = process.env.TWITCH_CLIENT_SECRET;
-  const redirectUri = process.env.TWITCH_CLIENT_REDIRECTION_URI;
+  const redirectUri = process.env.TWITCH_CLIENT_REDIRECTION_URI_DEV;
   const frontendUrl = process.env.VUE_APP_EMBED_PARERNT_DEV;
   const code = req.query.code;
   const getUserInfo = async (auth) => {
@@ -37,7 +37,7 @@ app.get('/signin/twitch/callback', async (req, res) => {
     try {
       return await admin
         .database()
-        .ref(`/user/${id}`)
+        .ref(`/users/${id}`)
         .set(userInfo);
     } catch (err) {
       throw err;
@@ -83,7 +83,10 @@ app.get('/signin/twitch/callback', async (req, res) => {
       `grant_type=authorization_code&`,
       `redirect_uri=${redirectUri}`).
       then((res) =>
-      data = res.data);
+      data = res.data)
+      .catch(()=>{
+        res.redirect(frontendUrl+'/error')
+      });
 
     const userData = await getUserInfo(data);
     const userInfo = userData.data[0];
