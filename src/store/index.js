@@ -49,6 +49,9 @@ export default new Vuex.Store({
     SET_FirebaseLoad(state, payload){
       state.firbaseLoaded = payload
     },
+    INIT_SnackBar(state){
+      state.snackbarArr = [];
+    },
     SET_SnackBar(state,response){
       if(state.snackbarArr.length >= 3){
         state.snackbarArr.push(response);

@@ -38,6 +38,7 @@ export default {
       const code = await this.getCode(codeUri);
       this.$firebase.auth().signInWithCustomToken(code);
       this.dialog = false;
+      this.$router.push({path:'/'});
       this.$store.commit('SET_SnackBar',{type: 'info', text:'로그인 성공', value:true})
 
     },

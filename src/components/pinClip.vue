@@ -30,11 +30,11 @@
       <v-card-text>
         <v-list class="pt-5">
             <AddNewCliplistDialog :type="{type:'pin',data:{text: 'Add New List'}}"></AddNewCliplistDialog>
-          <v-list-item :disabled="item.pinnedClips.length >= 100" @click="addNewClip({data: clipData.data, listIndex:index})" class="pa-1" v-for="(item,index) in $store.state.cliplist" :key="index">
+          <v-list-item :disabled="item.cliplist.length >= 100" @click="addNewClip(item.id)" class="pa-1" v-for="(item,index) in cliplist" :key="index">
               <div class="cliplist-canvas" :style="{background: item.color}"></div>
               <v-list-item-content>
                 <v-list-item-title class="text-title">{{item.title}}</v-list-item-title>
-                <v-list-item-subtitle class="text-caption">{{item.pinnedClips.length}}개</v-list-item-subtitle>
+                <v-list-item-subtitle class="text-caption">{{item.cliplist.length}}개</v-list-item-subtitle>
               </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -59,21 +59,55 @@ export default {
   },
   data() {
     return {
+      cliplist:[],
+      unsubscribe: null,
       dialog: false,
     };
   },
   methods: {
     async addNewClip(el){
-      await this.$store.commit('ADD_pinnedClip',el)
-      this.$emit('init',this.$store.state.snackbar.type)
+      let target = this.$firestore.collection('cliplist').doc(el);
+      target.update({
+        cliplist: this.$firebase.firestore.FieldValue.arrayUnion(this.clipData.data.id)
+      }).then( ( res ) => {
+        console.log('success',res);
+        this.$store.commit('SET_SnackBar',{type:'success', text:`${this.clipData.data.title}을 추가했습니다.`, value:true})
+      })
+      .catch( (error) => {
+        console.log('error',error);
+        this.$store.commit('SET_SnackBar',{type:'error', text:`${this.clipData.data.title}은 이미 있습니다.`, value:true})
+      })
+      // this.$emit('init',this.$store.state.snackbar.type)
     }
 
+  },
+  async created() {
+    this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userInfo.uid).onSnapshot((sn) => {
+      if(sn.empty){
+        this.cliplist = []
+        return
+      }
+      this.cliplist = sn.docs.map( v => {
+        const item = v.data()
+        return {
+          id: v.id,
+          title: item.title,
+          description: item.description,
+          createdAt: item.createdAt,
+          color: item.color,
+          cliplist: item.cliplist,
+        }
+      })
+    });
   },
   computed:{
     clipType(){
       return this.clipData.type;
     }
-  }
+  },
+  destroyed() {
+    if(this.unsubscribe) this.unsubscribe()
+  },
 
 };
 </script>

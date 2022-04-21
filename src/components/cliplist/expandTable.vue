@@ -1,7 +1,10 @@
 <template>
   <v-row class="pb-5">
+    <div>
+      {{this.clipListData}}
+    </div>
     <table v-if="$vuetify.breakpoint.smAndUp" border="0" cellspacing="0" cellpadding="0" :class="theme">
-      <thead :style="{background:$store.state.currentCliplist.color}">
+      <thead :style="{background:this.clipListData.color}">
         <th class="table-thumbnail">썸네일</th>
         <th class="table-title text-center">제목</th>
         <th class="table-channel">
@@ -102,7 +105,7 @@
           </tr>
         </tbody>
     </table>
-    <v-container v-else v-for="clip in setCurrList(currList)" :key="clip.id">
+    <v-container v-else v-for="clip in setCurrList(this.clipListData.cliplist)" :key="clip.id">
         <v-container class="d-flex justify-space-between py-3">
           <ClipIframeDataTableDialogMobile :clipData="clip"></ClipIframeDataTableDialogMobile>
           <div class="d-flex align-center">
@@ -112,12 +115,12 @@
         <v-divider></v-divider>
     </v-container>
     <v-row class="d-flex justify-center pt-10">
-      <v-pagination
+      <!-- <v-pagination
       color="twitch"
       v-model="page"
       :total-visible="7"
-      :length="Math.ceil(($store.state.currentCliplist.cliplist.length || 0) / 10)">
-      </v-pagination>
+      :length="Math.ceil((this.clipListData.cliplist.length || 0) / 10)">
+      </v-pagination> -->
     </v-row>
     <v-dialog no-click-animation persistent v-model="tableloading">
       <v-progress-linear color="primary" height="35" indeterminate>
@@ -134,6 +137,7 @@ import ClipIframeDataTableDialogMobile from '../dialog/ClipIframeDataTableDialog
 import clipMenuVue from './clipMenu.vue';
 
 export default {
+  props:['clipListData'],
   components: {
     clipMenuVue,
     ClipIframeDataTableDialog,
@@ -186,57 +190,57 @@ export default {
       const result = a.length === b.length && a.every((value) => b.includes(value));
       return result;
     },
-    async copyCliplist(element) {
-      let clipString = '';
-      this.tableloading = true;
-      setTimeout(async () => {
-        if (element.pinnedClips.length > 0) {
-          await this.$firestore.collection('cliplist').where('id', '==', element.id)
-            .get()
-            .then(async (res) => {
-              const templist = [];
-              element.pinnedClips.forEach((el) => templist.push(el.id));
-              if (res.empty) {
-                await this.$firestore.collection('cliplist').add({
-                  id: element.id,
-                  title: element.title,
-                  color: element.color,
-                  pinnedClips: templist,
-                }).then((resp) => {
-                  clipString = resp.id;
-                });
-              } else if (this.compareArray(res.docs[0].data().pinnedClips, templist)) {
-                clipString = res.docs[0].id;
-              } else {
-                const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
-                 + Math.random().toString(16).slice(2)
-                 + Date.now().toString(16).slice(4);
-                await this.$firestore.collection('cliplist').add({
-                  id: uid,
-                  title: element.title,
-                  color: element.color,
-                  pinnedClips: templist,
-                }).then(async (resp) => {
-                  await this.$store.commit('INIT_currCliplist');
-                  await this.$store.commit('UPDATE_clipList', { id: element.id, updateId: uid });
-                  clipString = resp.id;
-                });
-              }
-            });
-          const tempArea = document.createElement('textarea');
-          document.body.appendChild(tempArea);
-          tempArea.value = clipString;
-          tempArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(tempArea);
-          this.tableloading = false;
-          this.$store.commit('SET_SnackBar', { type: 'success', text: `Cliplist : ${clipString} 가 복사되었습니다.`, value: true });
-        } else {
-          this.tableloading = false;
-          this.$store.commit('SET_SnackBar', { type: 'error', text: 'Cliplist : 리스트에 클립이 없습니다.', value: true });
-        }
-      }, 1000);
-    },
+    // async copyCliplist(element) {
+    //   let clipString = '';
+    //   this.tableloading = true;
+    //   setTimeout(async () => {
+    //     if (element.pinnedClips.length > 0) {
+    //       await this.$firestore.collection('cliplist').where('id', '==', element.id)
+    //         .get()
+    //         .then(async (res) => {
+    //           const templist = [];
+    //           element.pinnedClips.forEach((el) => templist.push(el.id));
+    //           if (res.empty) {
+    //             await this.$firestore.collection('cliplist').add({
+    //               id: element.id,
+    //               title: element.title,
+    //               color: element.color,
+    //               pinnedClips: templist,
+    //             }).then((resp) => {
+    //               clipString = resp.id;
+    //             });
+    //           } else if (this.compareArray(res.docs[0].data().pinnedClips, templist)) {
+    //             clipString = res.docs[0].id;
+    //           } else {
+    //             const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
+    //              + Math.random().toString(16).slice(2)
+    //              + Date.now().toString(16).slice(4);
+    //             await this.$firestore.collection('cliplist').add({
+    //               id: uid,
+    //               title: element.title,
+    //               color: element.color,
+    //               pinnedClips: templist,
+    //             }).then(async (resp) => {
+    //               await this.$store.commit('INIT_currCliplist');
+    //               await this.$store.commit('UPDATE_clipList', { id: element.id, updateId: uid });
+    //               clipString = resp.id;
+    //             });
+    //           }
+    //         });
+    //       const tempArea = document.createElement('textarea');
+    //       document.body.appendChild(tempArea);
+    //       tempArea.value = clipString;
+    //       tempArea.select();
+    //       document.execCommand('copy');
+    //       document.body.removeChild(tempArea);
+    //       this.tableloading = false;
+    //       this.$store.commit('SET_SnackBar', { type: 'success', text: `Cliplist : ${clipString} 가 복사되었습니다.`, value: true });
+    //     } else {
+    //       this.tableloading = false;
+    //       this.$store.commit('SET_SnackBar', { type: 'error', text: 'Cliplist : 리스트에 클립이 없습니다.', value: true });
+    //     }
+    //   }, 1000);
+    // },
 
     sortByViews() {
       this.page = 1;
@@ -279,14 +283,7 @@ export default {
     theme() {
       return this.$vuetify.theme.dark ? 'dark-table' : 'light-table';
     },
-    currList:{
-      get(){
-        return this.$store.state.currentCliplist.pinnedClips
-      },
-      set(value){
-        this.$store.commit('UPDATE_List', value)
-      }
-    }
+
   },
 
 };

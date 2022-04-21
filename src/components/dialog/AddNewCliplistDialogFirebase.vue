@@ -4,6 +4,9 @@
     max-width="800">
     <template v-slot:activator="{ on, attrs }">
       <v-btn
+        text
+        outlined
+        class="text-caption"
         color="success"
         v-on="on"
         v-bind="attrs"
@@ -92,7 +95,7 @@ export default {
       this.form.color = '';
     },
     saveCliplist(){
-      this.form.createdAt = this.$moment().toString();
+      this.form.createdAt = this.$moment().toISOString();
       this.form.authorName = this.$store.state.userInfo.displayName || '';
       this.form.authorId = this.$store.state.userInfo.uid || '';
       this.$firestore.collection('cliplist').add(this.form);

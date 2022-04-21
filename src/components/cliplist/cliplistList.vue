@@ -3,73 +3,67 @@
   <v-row class="pt-5 justify-center align-baseline">
     <div class="py-3">
       <span class="text-h3 font-weight-bold pr-3">My Cliplists</span>
-      <!-- <span class="text-subtitle-1" :class="$store.state.cliplist.length === 20 ? 'red--text' : ''">{{$store.state.cliplist.length}} / 20</span> -->
     </div>
-    <v-spacer v-if="!$vuetify.breakpoint.smAndDown"></v-spacer>
+    <v-spacer></v-spacer>
     <div>
-      <ImportNewClipDialog></ImportNewClipDialog>
-      <AddNewCliplistDialog :type="{type:'add', data:{
-        text: 'Add New Cliplist'
-      }}"></AddNewCliplistDialog>
+      <AddNewCliplistDialog :type="{type:'add'}"></AddNewCliplistDialog>
     </div>
   </v-row>
-  <v-row class="d-flex pt-10">
-     <!-- v-if="$store.state.cliplist.length" -->
+  <v-row class="d-flex pt-10" v-if="cliplist.length > 0">
     <v-col
      cols="12" xl="2" lg="3" md="4" sm="6" xs="12"
      class="pa-3" v-for="(item, listIndex) in cliplist" :key="listIndex">
-      <v-card class="cliplist-canvas" :color="item.color" @click="setData(item)">
-        <v-card-title>
-        <div class="text-h5 pa-5 text-truncate">
-        #{{listIndex+1}}  {{item.title}}
-        </div>
+      <v-card class="cliplist-canvas" outlined :color="item.color" @click="setData(item)">
+        <v-card-title class="justify-center">
+          <span class="text-h6 pa-5 text-truncate">
+            {{item.title}}
+          </span>
+          <v-spacer></v-spacer>
+          <v-icon :color="item.isPublic ? 'info' : 'red'">{{item.isPublic ? 'mdi-earth' : 'mdi-lock'}}</v-icon>
         </v-card-title>
         <v-card-text class="text-center text-h4 text-truncate">
-          {{item.description}}
+          <v-row class="text-caption">
+            {{item.cliplist.length}}개의 클립
+          </v-row>
+          <div>
+            {{item.description}}
+          </div>
         </v-card-text>
         <v-card-text>
          <div class="text-caption pa-5">
-            <!-- {{item.pinnedClips.length}}개의 클립 -->
           </div>
         </v-card-text>
         <v-card-actions></v-card-actions>
       </v-card>
     </v-col>
   </v-row>
-  <!-- <v-row v-else class="d-flex justify-center align-center" style="height:60vh;">
+  <v-row v-else class="d-flex justify-center align-center" style="height:60vh;">
     <h1>😥There is no cliplist</h1>
-  </v-row> -->
+  </v-row>
+  <v-row><v-btn color="success" @click="sorting">sort</v-btn></v-row>
 </v-container>
 </template>
 
 <script>
-import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
-import ImportNewClipDialog from '@/components/dialog/ImportNewClipDialog.vue';
+import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog';
 
 export default {
   components: {
     AddNewCliplistDialog,
-    ImportNewClipDialog,
   },
   data() {
     return {
-      cliplist: [{
-        id:'',
-        color:'',
-        title:'',
-        clip:[
-          {
-            id:'',
-            description:'',
-          }
-        ]
-      }],
+      cliplist: [],
       loading: false,
+      unsubscribe: null,
     };
   },
   methods: {
-    async setData(el) {
-      await this.$store.commit('SET_currCliplist', {data:el});
+    sorting(){
+       this.cliplist.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    },
+    setData(el) {
+      // await this.$store.commit('SET_currCliplist', {data:el});
       this.$router.push({ path: `clip/${el.id}`});
       // if (this.$store.state.currentCliplist.id === el.id) {
       //   await this.$store.commit('INIT_currCliplist');
@@ -80,23 +74,30 @@ export default {
 
   },
   async created() {
-    const user = this.$firebase.auth().currentUser;
-    const sn = await this.$firestore.collection('cliplist').where('authorId','==',user.uid).get();
-
-    this.cliplist = await sn.docs.map( v => {
-      const item = v.data()
-      return {
-        id: v.id,
-        title: item.title,
-        description: item.description,
-        createdAt: item.createdAt,
-        color: item.color,
+    console.log(this.$store.state.userInfo);
+    this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userInfo.uid).onSnapshot((sn) => {
+      if(sn.empty){
+        this.cliplist = []
+        return
       }
-    })
-
-
-
-
+      this.cliplist = sn.docs.map( v => {
+        const item = v.data()
+        return {
+          id: v.id,
+          title: item.title,
+          description: item.description,
+          createdAt: item.createdAt,
+          isPublic: item.isPublic,
+          color: item.color,
+          cliplist: item.cliplist,
+        }
+      })
+    });
+  },
+  mounted() {
+  },
+  destroyed() {
+    if(this.unsubscribe) this.unsubscribe()
   },
 };
 </script>

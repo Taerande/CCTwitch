@@ -11,7 +11,6 @@
       color="success"
       v-bind="attrs"
       v-on="on"
-      :disabled="$store.state.cliplist.length >= 20"
     >
     Add New List
     </v-btn>
@@ -39,20 +38,40 @@
     </v-btn>
   </template>
   <v-card class="justify-center">
-    <v-card-title class="text-h5 primary">
-      {{type.data.text}}
+    <v-card-title class="text-h5" :style="{background:form.color}">
+      Add New Cliplist
     </v-card-title>
     <v-card-text class="justify-center">
-      <div>
-        <v-color-picker hide-canvas hide-inputs v-model="color"></v-color-picker>
+      <div class="pa-5">
+        <div class="d-flex justify-center pa-3">
+          <v-color-picker
+          hide-canvas
+          hide-sliders
+          hide-inputs
+          show-swatches
+          :swatches="swatches"
+          v-model="form.color"></v-color-picker>
+          <v-spacer></v-spacer>
+          <div class="d-flex align-center">
+            <v-switch
+            v-model="form.isPublic">
+            <template v-slot:label>
+              <div class="pa-3">
+                <v-icon :color="form.isPublic ? 'info' : 'error'">{{form.isPublic ? 'mdi-earth' : 'mdi-lock'}}</v-icon>
+                <span :class="form.isPublic ? 'info--text' : 'error--text'">{{form.isPublic ? '공개' : '비공개'}}</span>
+              </div>
+            </template>
+            </v-switch>
+          </div>
+        </div>
           <v-text-field
-            v-model="title"
+            v-model="form.title"
             outlined
             size="50"
             full-width
             class="pt-5"
             counter
-            maxlength="20"
+            maxlength="150"
             filled
             flat
             :rules="[rules.required, rules.counter]"
@@ -62,31 +81,27 @@
           ></v-text-field>
       </div>
         <v-textarea
-        v-model="description"
+        v-model="form.description"
         filled
         no-resize
         counter
-        maxlength="100"
+        maxlength="500"
         :rules="[rules.descCounter]"
         size="0"
         name="input-7-4"
-        :placeholder="description"
+        :placeholder="form.description"
         label="Write down description."
       ></v-textarea>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="error" text @click="dialog =false">CLOSE</v-btn>
+      <v-btn color="error" text @click="dialog = false">CLOSE</v-btn>
       <v-btn
       v-if="type.type === 'add' || type.type==='pin'"
         color="green darken-1"
         text
-        :disabled="title === ''"
-        @click="dialog = false, $store.commit('SET_newCliplist',{
-          title: title,
-          color: color,
-          description: description
-        }), initInput()"
+        :disabled="form.title === ''"
+        @click="saveCliplist(), dialog = false"
       >
         ADD
       </v-btn>
@@ -94,13 +109,8 @@
       v-if="type.type === 'edit'"
         color="green darken-1"
         text
-        :disabled="title === ''"
-        @click="dialog = false, $store.commit('UPDATE_clipList',{
-          id: id,
-          title: title,
-          color: color,
-          description: description
-        })"
+        :disabled="form.title === ''"
+        @click=" initInput(), dialog = false"
       >
         {{type.type}}
       </v-btn>
@@ -113,23 +123,60 @@ export default {
   props: ['type'],
   data() {
     return {
-      description: '',
-      id: '',
-      dialog: false,
-      color: '',
-      title: '',
+      dialog:false,
+      form:{
+        isPublic:false,
+        description: '',
+        color: '',
+        title: '',
+        cliplist:[],
+        createdAt:'',
+        authorName:'',
+        authorId:'',
+      },
       rules: {
         required: (value) => !!value || 'Required.',
-        counter: (value) => value.length <= 20 || 'Max 20 characters',
-        descCounter: (value) => value.length <= 100 || 'Max 100 characters',
+        counter: (value) => value.length <= 150 || 'Max 150 characters',
+        descCounter: (value) => value.length <= 500 || 'Max 500 characters',
       },
-
+      swatches:[
+         ['#FFCDD2','#E57373','#E53935','#C62828'],
+         ['#F8BBD0','#F06292','#D81B60','#AD1457'],
+         ['#E1BEE7','#BA68C8','#8E24AA','#6A1B9A'],
+         ['#D1C4E9','#9575CD','#5E35B1','#4527A0'],
+         ['#C5CAE9','#7986CB','#3949AB','#283593'],
+         ['#BBDEFB','#64B5F6','#1E88E5','#1565C0'],
+         ['#B3E5FC','#4FC3F7','#039BE5','#0277BD'],
+         ['#B2EBF2','#4DD0E1','#00ACC1','#00838F'],
+         ['#B2DFDB','#4DB6AC','#00897B','#00695C'],
+         ['#C8E6C9','#81C784','#43A047','#2E7D32'],
+         ['#DCEDC8','#AED581','#7CB342','#558B2F'],
+         ['#F0F4C3','#DCE775','#C0CA33','#9E9D24'],
+         ['#FFF9C4','#FFF176','#FDD835','#F9A825'],
+         ['#FFECB3','#FFD54F','#FFB300','#FF8F00'],
+         ['#FFE0B2','#FFB74D','#FB8C00','#EF6C00'],
+         ['#FFCCBC','#FF8A65','#F4511E','#D84315'],
+         ['#D7CCC8','#A1887F','#6D4C41','#4E342E'],
+         ['#CFD8DC','#90A4AE','#546E7A','#37474F'],
+         ['#F5F5F5','#E0E0E0','#757575','#424242'],
+       ]
     };
   },
   methods: {
     initInput(){
-      this.description = '';
-      this.title = '';
+      this.form.description = '';
+      this.form.title = '';
+      this.form.color = '';
+      this.form.isPublic = false;
+      this.form.cliplist =[];
+    },
+    async saveCliplist(){
+      this.form.createdAt = this.$moment().toISOString();
+      this.form.authorName = this.$store.state.userInfo.displayName || '';
+      this.form.authorId = this.$store.state.userInfo.uid || '';
+      await this.$firestore.collection('cliplist').add(this.form);
+      await this.$store.commit('SET_SnackBar',{type:'info', text:`${this.form.title}이 생성 되었습니다.`, value:true});
+      this.initInput();
     }
   },
   created() {

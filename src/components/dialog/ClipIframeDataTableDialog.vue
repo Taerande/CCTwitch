@@ -20,13 +20,13 @@
     @click="dialogId = clipData.id"
     v-on="on"
     >
-      <span style="width: 5rem;" class="canSort twitch--text title-table text-truncate">
+      <span style="width: 5rem;" class="canSort title-table text-truncate">
         {{clipData.title}}
       </span>
     </td>
   </template>
   <div class="black d-flex justify-end">
-     <v-btn :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
+     <v-btn dark :disabled="clipData.video_id.length === 0" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
     <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
   </div>
   <iframe

@@ -24,11 +24,12 @@
       <span>DELETE {{this.delete.type}}</span>
     </v-card-title>
     <v-card-text class="d-flex align-center justify-center pt-5">
-      <span class="text-uppercase">{{this.delete.type}}|</span>
       <span class="twitch--text pl-1 text-title text-truncate">
         {{this.delete.data.target.title.length > 25 ? `${this.delete.data.target.title.substr(0, 24)}...` : this.delete.data.target.title}}</span>
-        <span class="red--text" v-if="this.delete.type === 'cliplist'">[{{this.delete.data.target.pinnedClips.length}}개]</span>
+        <span class="red--text" v-if="this.delete.type === 'cliplist'">[{{this.delete.data.target.cliplist.length}}개]</span>
       <div class="pl-1">을 삭제합니다.</div>
+      <div>{{this.delete.data.target}}</div>
+      <div>{{this.$router.params}}</div>
     </v-card-text>
     <v-card-actions class="pb-3 pt-0">
       <v-spacer></v-spacer>
@@ -60,7 +61,9 @@ export default {
         this.btnLoading = false;
         this.dialog = false;
       } else if (type === 'cliplist') {
-        await this.$store.commit('DELETE_cliplist', data);
+        // await this.$firestore.collection('')
+        this.$emit('DeleteCliplist');
+        // await this.$store.commit('DELETE_cliplist', data);
         this.btnLoading = false;
         this.dialog = false;
         this.$router.push({ path: '/cliplist' });

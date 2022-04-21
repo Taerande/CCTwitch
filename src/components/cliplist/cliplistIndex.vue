@@ -1,54 +1,58 @@
 <template>
-  <v-container fluid fill-height>
-    <v-container v-if="$store.state.currentCliplist">
-      <v-row class="d-flex justify-space-between align-baseline">
-        <div class="pt-10 pb-3">
-          <span class="text-h3 font-weight-bold pr-3">{{$store.state.currentCliplist.title}}</span>
-          <span class="text-subtitle-1">(총 {{$store.state.currentCliplist.cliplist.length}} / 100 개)</span>
-        </div>
-    </v-row>
-    <v-row class="d-block">
-      <div class="pl-1">
-       : {{$store.state.currentCliplist.description}}
+<v-container fluid fill-height>
+  <v-row class="d-flex justify-space-between align-baseline">
+    <div class="pt-10 pb-3">
+      <span class="text-h3 font-weight-bold pr-3">{{cliplist.title}}</span>
+      <span class="text-subtitle-1">(총 {{ cliplist.cliplist.length }} / 100 개)</span>
+    </div>
+  </v-row>
+  <v-row class="d-block">
+    <div class="pl-1">
+      {{cliplist.description}}
+    </div>
+    <div class="d-flex justify-end">
+      <ImportNewClipDialogVue></ImportNewClipDialogVue>
+      <DeleteDialog
+      @DeleteCliplist="deleteCliplist"
+      :delete="{
+        type:'cliplist',
+        data:{
+          target: cliplist,
+          }
+        }">
+      </DeleteDialog>
+      <v-btn @click="copyCliplist(cliplist)" icon>
+        <v-icon>mdi-share-variant-outline</v-icon>
+      </v-btn>
+      <v-btn
+      @click="updateData(cliplist)"
+      icon>
+        <v-icon>mdi-refresh</v-icon>
+      </v-btn>
+      <AddNewCliplistDialog :type="{
+        type:'edit',
+        data:{
+          text: 'Edit Cliplist',
+          id: cliplist.id,
+          color: cliplist.color,
+          title: cliplist.title,
+          description: cliplist.description,
+          }
+        }">
+      </AddNewCliplistDialog>
+      <v-btn icon @click="resetData(), $router.push({path: '/cliplist'})">
+        <v-icon>mdi-undo-variant</v-icon>
+      </v-btn>
       </div>
-      <div class="d-flex justify-end">
-            <ImportNewClipDialogVue></ImportNewClipDialogVue>
-            <DeleteDialog
-            :delete="{type:'cliplist', data:{
-                target: $store.state.currentCliplist,
-                belongsTo: $store.state.cliplist,
-                }}"></DeleteDialog>
-            <v-btn @click="copyCliplist($store.state.currentCliplist)" icon>
-              <v-icon>mdi-share-variant-outline</v-icon>
-            </v-btn>
-            <v-btn
-            @click="updateData($store.state.currentCliplist)"
-            icon>
-              <v-icon>mdi-refresh</v-icon>
-            </v-btn>
-            <AddNewCliplistDialog :type="{type:'edit', data:{
-              text: 'Edit Cliplist',
-              id: $store.state.currentCliplist.id,
-              color: $store.state.currentCliplist.color,
-              title: $store.state.currentCliplist.title,
-              description: $store.state.currentCliplist.description,
-            }}"></AddNewCliplistDialog>
-            <v-btn icon @click="resetData(), $router.push({path: '/cliplist'})">
-              <v-icon>mdi-undo-variant</v-icon>
-            </v-btn>
-        </div>
-      <v-dialog no-click-animation persistent width="300px" v-model="tableloading">
-        <v-progress-linear color="primary" height="35" indeterminate>
-          <span class="white--text">Import String 생성중</span>
-        </v-progress-linear>
-      </v-dialog>
-    </v-row>
-    <expandTableVue></expandTableVue>
-    </v-container>
-    <v-container v-else style="height:60vh;" class="d-flex justify-center align-center">
-      <v-alert rounded="pill" class="d-inline-block" type="error">🤐 저장 혹은 공유된 클립 모음이 없습니다.</v-alert>
-    </v-container>
+  </v-row>
+  <expandTableVue
+    v-if="cliplist.cliplist.length >0"
+  :clipListData="{id:cliplist.cliplist, color:cliplist.color}">
+  </expandTableVue>
+  <v-container v-else style="height:60vh;" class="d-flex justify-center align-center">
+    <v-alert rounded="pill" class="d-inline-block" type="error">🤐 저장 혹은 공유된 클립 모음이 없습니다.</v-alert>
   </v-container>
+</v-container>
 </template>
 
 <script>
@@ -56,7 +60,7 @@
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import axios from 'axios';
-import expandTableVue from './expandTable.vue';
+import expandTableVue from './expandTableFB';
 import ImportNewClipDialogVue from '../dialog/ImportNewClipDialog.vue';
 export default {
   components: {
@@ -67,6 +71,17 @@ export default {
   },
   data() {
     return {
+      cliplist: {
+        id:'',
+        title:'',
+        description:'',
+        color:'',
+        createdAt:'',
+        authorId:'',
+        authorName:'',
+        cliplist:[],
+      },
+      unsubscribe: null,
       currentTooltipId: '',
       tableloading: false,
       dialogId: '',
@@ -84,6 +99,11 @@ export default {
     };
   },
   methods: {
+    async deleteCliplist(){
+      await this.$firestore.collection('cliplist').doc(this.$route.params.id).delete();
+      this.$router.push({path:'/cliplist'});
+      this.$store.commit('SET_SnackBar',{type:'error', text:`${this.cliplist.title}클립 모음집이 삭제되었습니다.`, value:true});
+    },
     viewerkFormatter(el) {
       const num = el.toString();
       if (num > 999999999) {
@@ -116,58 +136,18 @@ export default {
       const result = a.length === b.length && a.every((value) => b.includes(value));
       return result;
     },
-    async copyCliplist(element) {
-      let clipString = '';
-      this.tableloading = true;
-      setTimeout(async () => {
-        if (element.pinnedClips.length > 0) {
-          await this.$firestore.collection('cliplist').where('id', '==', element.id)
-            .get()
-            .then(async (res) => {
-              const templist = [];
-              element.pinnedClips.forEach((el) => templist.push({ id: el.id, description: el.description || '' }));
-              if (res.empty) {
-                await this.$firestore.collection('cliplist').add({
-                  id: element.id,
-                  description: element.description || '',
-                  title: element.title,
-                  color: element.color,
-                  pinnedClips: templist,
-                }).then((resp) => {
-                  clipString = resp.id;
-                });
-              } else if (this.compareArray(res.docs[0].data().pinnedClips, templist)) {
-                clipString = res.docs[0].id;
-              } else {
-                const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
-                 + Math.random().toString(16).slice(2)
-                 + Date.now().toString(16).slice(4);
-                await this.$firestore.collection('cliplist').add({
-                  id: uid,
-                  description: element.description || '',
-                  title: element.title,
-                  color: element.color,
-                  pinnedClips: templist,
-                }).then(async (resp) => {
-                  await this.$store.commit('INIT_currCliplist');
-                  await this.$store.commit('UPDATE_clipList', { id: element.id, updateId: uid });
-                  clipString = resp.id;
-                });
-              }
-            });
-          const tempArea = document.createElement('textarea');
-          document.body.appendChild(tempArea);
-          tempArea.value = clipString;
-          tempArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(tempArea);
-          this.tableloading = false;
-          this.$store.commit('SET_SnackBar', { type: 'success', text: `Cliplist : ${clipString} 가 복사되었습니다.`, value: true });
-        } else {
-          this.tableloading = false;
-          this.$store.commit('SET_SnackBar', { type: 'error', text: 'Cliplist : 리스트에 클립이 없습니다.', value: true });
-        }
-      }, 1000);
+    copyCliplist(element) {
+      if (element.cliplist.length > 0) {
+        const tempArea = document.createElement('textarea');
+        document.body.appendChild(tempArea);
+        tempArea.value = window.location;
+        tempArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempArea);
+        this.$store.commit('SET_SnackBar', { type: 'success', text: `Cliplist : ${element.title} 가 복사되었습니다.`, value: true });
+      } else {
+        this.$store.commit('SET_SnackBar', { type: 'error', text: 'Cliplist : 리스트에 클립이 없습니다.', value: true });
+      }
     },
     setDate(el) {
       const time = new Date(el).getTime();
@@ -203,8 +183,26 @@ export default {
     },
   },
   async mounted() {
-    const fireData = await this.$firestore.collection('cliplist').doc(this.$route.params.id).get();
-    this.$store.commit('SET_currCliplist', {data:fireData.data()});
+    this.unsubscribe = await this.$firestore.collection('cliplist').doc(this.$route.params.id).onSnapshot((sn) => {
+      const item = sn.data();
+      if(sn.empty){
+        this.cliplist = []
+        return
+      }
+      this.cliplist = {
+        id: sn.id,
+        title: item.title,
+        description: item.description,
+        color: item.color,
+        createdAt: item.createdAt,
+        authorId: item.authorId,
+        authorName: item.authorName,
+        cliplist: item.cliplist,
+      }
+    })
+  },
+  destroyed() {
+    if(this.unsubscribe) this.unsubscribe();
   },
 
 };
