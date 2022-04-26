@@ -1,5 +1,6 @@
 <template>
   <v-dialog
+  v-if="$store.state.userInfo"
   v-model="dialog"
   scrollable
   width="400px">
@@ -46,16 +47,18 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-
   </v-dialog>
+  <SignInDialogVue v-else :type="{parent:'pinclip'}"></SignInDialogVue>
 </template>
 <script>
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
+import SignInDialogVue from './dialog/SignInDialog.vue';
 
 export default {
   props:['clipData'],
   components: {
     AddNewCliplistDialog,
+    SignInDialogVue,
   },
   data() {
     return {
@@ -82,23 +85,25 @@ export default {
 
   },
   async created() {
-    this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userInfo.uid).onSnapshot((sn) => {
-      if(sn.empty){
-        this.cliplist = []
-        return
-      }
-      this.cliplist = sn.docs.map( v => {
-        const item = v.data()
-        return {
-          id: v.id,
-          title: item.title,
-          description: item.description,
-          createdAt: item.createdAt,
-          color: item.color,
-          cliplist: item.cliplist,
+    if(this.$store.state.userInfo){
+      this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userInfo.uid).onSnapshot((sn) => {
+        if(sn.empty){
+          this.cliplist = []
+          return
         }
-      })
-    });
+        this.cliplist = sn.docs.map( v => {
+          const item = v.data()
+          return {
+            id: v.id,
+            title: item.title,
+            description: item.description,
+            createdAt: item.createdAt,
+            color: item.color,
+            cliplist: item.cliplist,
+          }
+        })
+      });
+    }
   },
   computed:{
     clipType(){

@@ -1,7 +1,8 @@
 <template>
 <v-dialog persistent no-click-animation v-model="dialog" max-width="900" @keydown.esc="dialog = false">
   <template v-slot:activator="{on}">
-    <v-btn v-on="on" class="twitch">
+    <v-icon v-if="type.parent == 'pinclip'" v-on="on" small color="error">mdi-pin-outline</v-icon>
+    <v-btn v-else v-on="on" class="twitch">
       <span>로그인</span>
     </v-btn>
   </template>
@@ -25,6 +26,7 @@
 import crypto from "crypto";
 
 export default {
+  props:['type'],
   data() {
     return {
       dialog:false,
@@ -34,11 +36,12 @@ export default {
     async AuthenticateWithTwitch(){
       const state = crypto.randomBytes(16).toString("hex");
       const codeUri =
-      `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&force_verify	=true&redirect_uri=`+this.$store.state.redirectUri+`/signin/twitch/callback&scope=openid+user%3Aread%3Aemail&state=${state}&claims={"id_token":{"email":null,"email_verified":null},"userinfo":{"preferred_username":null,"email":null,"email_verified":null,"picture":null}}`;
+      `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&force_verify	=true&redirect_uri=`+this.$store.state.redirectUri+`/signin/twitch/callback&scope=openid+user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}&claims={"id_token":{"email":null,"email_verified":null},"userinfo":{"preferred_username":null,"email":null,"email_verified":null,"picture":null}}`;
       const code = await this.getCode(codeUri);
-      this.$firebase.auth().signInWithCustomToken(code);
+      await this.$firebase.auth().signInWithCustomToken(code.token);
+      localStorage.setItem('twitchAuthToken', JSON.stringify(code.twitchToken));
+      this.$store.commit('SET_TwitchOAuthToken', JSON.stringify(code.twitchToken).slice(1,-1));
       this.dialog = false;
-      this.$router.push({path:'/'});
       this.$store.commit('SET_SnackBar',{type: 'info', text:'로그인 성공', value:true})
 
     },
@@ -64,19 +67,21 @@ export default {
 
       setInterval(async () => {
         try {
-          url = authWindow && authWindow.location && authWindow.location.search;
+          url = authWindow && authWindow.location && authWindow.location.search
         } catch (e) {}
         if (url) {
-          console.log(url);
-          const parsedCode = url.split('?token=')[1];
+          const parsedCode = {
+            'token' : url.split('?token=')[1].split('?twitchToken=')[0],
+            'twitchToken' : url.split('?token=')[1].split('?twitchToken=')[1],
+          }
           // const code = parsedCode.code;
           authWindow.close();
           resolve(parsedCode);
         }
       }, 500);
     });
-    }
-}
+    },
+  },
 }
 </script>
 <style lang="scss" scoped>

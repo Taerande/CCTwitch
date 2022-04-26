@@ -15,6 +15,8 @@ const db = admin.database()
 
 exports.twitchAuth = functions.region('asia-northeast3').https.onRequest(require('./auth/twitchAuth.js'));
 
+exports.twitchTokenValidation = functions.region('asia-northeast3').https.onRequest(require('./auth/twitchAppAccessToken.js'));
+
 exports.deleteUser = functions.region('asia-southeast1').auth.user().onDelete(async (user) => {
   const {uid} = user
   db.ref('users').child(uid).remove()

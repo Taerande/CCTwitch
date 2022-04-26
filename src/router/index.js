@@ -19,10 +19,10 @@ const Cliplist = () => import(/* webpackChunkName: "cliplist" */ '@/views/Clipli
 const cliplistList = () => import(/* webpackChunkName: "cliplistList" */ '@/components/cliplist/cliplistList.vue');
 const cliplistIndex = () => import(/* webpackChunkName: "cliplistIndex" */ '@/components/cliplist/cliplistIndex.vue');
 const test = () => import(/* webpackChunkName: "test" */ '@/views/test.vue');
-const Import = () => import(/* webpackChunkName: "import" */ '@/views/Import.vue');
 const Liked = () => import(/* webpackChunkName: "liked" */ '@/views/Liked.vue');
-const Analysis = () => import(/* webpackChunkName: "liked" */ '@/views/Analysis.vue');
-const Random = () => import(/* webpackChunkName: "liked" */ '@/views/Random.vue');
+// const Analysis = () => import(/* webpackChunkName: "Analysis" */ '@/views/Analysis.vue');
+// const Random = () => import(/* webpackChunkName: "Random" */ '@/views/Random.vue');
+const PageNotFound = () => import(/* webpackChunkName: "PageNotFound" */ '@/views/PageNotFound.vue');
 
 const routes = [
   {
@@ -69,11 +69,6 @@ const routes = [
     component: cliplistList,
   },
   {
-    path: '/import/:id',
-    name: 'Import',
-    component: Import,
-  },
-  {
     path: '/test',
     name: 'Test',
     component: test,
@@ -83,24 +78,29 @@ const routes = [
     name: 'Liked',
     component: Liked,
   },
+  // {
+  //   path: '/analysis',
+  //   name: 'Analysis',
+  //   component: Analysis,
+  // },
+  // {
+  //   path: '/random',
+  //   name: 'Random',
+  //   component: Random,
+  // },
   {
-    path: '/analysis',
-    name: 'Analysis',
-    component: Analysis,
-  },
-  {
-    path: '/random',
-    name: 'Random',
-    component: Random,
-  },
+    path: '*',
+    name: 'PageNotFound',
+    component : PageNotFound,
+  }
   // { path: '*', beforeEnter: (to, from, next) => { next('/') } },
 ];
 
 const router = new VueRouter({
   mode: 'history',
-  base: process.env.BASE_URL,
   routes,
 });
+// base: process.env.BASE_URL,
 
 
 router.beforeEach((to, from, next) => {

@@ -35,34 +35,19 @@
         </th>
       </thead>
       <tbody>
-          <tr v-for="clip in setCurrList(resultData)" :key="clip.id">
+          <tr v-for="clip in setCurrList($store.state.currentCliplist)" :key="clip.id">
             <ClipIframeDataTableDialog :clipData="clip"></ClipIframeDataTableDialog>
             <td class="table-channel">{{clip.broadcaster_name}}</td>
             <td class="table-date">{{setDate(clip.created_at)}}</td>
             <td class="table-duration">{{Math.floor(clip.duration)}}</td>
             <td class="table-views">{{viewerkFormatter(clip.view_count)}}</td>
-            <!-- <td class="table-description pr-3">
-              <v-tooltip bottom color="primary" v-if="clip.description">
-                <template v-slot:activator="{on, attrs}">
-                  <v-icon
-                  v-on="on"
-                  v-bind="attrs"
-                  >mdi-note-outline</v-icon>
-                </template>
-                <v-card flat color="primary" class="pa-0 ma-0" max-width="500px">
-                  <v-card-text class="ma-0 pa-0">
-                    {{clip.description}}
-                  </v-card-text>
-                </v-card>
-              </v-tooltip>
-            </td> -->
             <td class="d-flex align-center justify-center table-menu" style="height:inherit">
-              <clipMenuVue :clip="clip"></clipMenuVue>
+              <clipMenuVue :clip="{clipData:clip, listData:clipListData}"></clipMenuVue>
             </td>
           </tr>
         </tbody>
     </table>
-    <v-container v-else v-for="clip in setCurrList(resultData)" :key="clip.id">
+    <v-container v-else v-for="clip in setCurrList($store.state.currentCliplist)" :key="clip.id">
         <v-container class="d-flex justify-space-between py-3">
           <ClipIframeDataTableDialogMobile :clipData="clip"></ClipIframeDataTableDialogMobile>
           <div class="d-flex align-center">
@@ -76,7 +61,7 @@
       color="twitch"
       v-model="page"
       :total-visible="7"
-      :length="Math.ceil((resultData.length || 0) / 10)">
+      :length="Math.ceil(($store.state.currentCliplist.length || 0) / this.perPage)">
       </v-pagination>
     </v-row>
   </v-row>
@@ -106,11 +91,12 @@ export default {
       createdSort: '',
       lengthSort: '',
       page: 1,
+      perPage: 20,
     };
   },
   methods: {
     setCurrList(el) {
-      return el === undefined ? el=[] : el.slice((this.page - 1) * 10, this.page * 10);
+      return el === undefined ? el=[] : el.slice((this.page - 1) * this.perPage, this.page * this.perPage);
     },
     viewerkFormatter(el) {
       const num = el.toString();
@@ -125,52 +111,52 @@ export default {
       }
       return Math.abs(num);
     },
-    sortByViews() {
-      this.page = 1;
-      if (this.viewSort === 'asc') {
-        this.viewSort = 'desc';
-        this.resultData.sort((a, b) => a.view_count - b.view_count);
-      } else {
-        this.viewSort = 'asc';
-        this.resultData.sort((a, b) => b.view_count - a.view_count);
-      }
-    },
-    sortByLength() {
-      this.page = 1;
-      if (this.lengthSort === 'asc') {
-        this.lengthSort = 'desc';
-        this.resultData.sort((a, b) => a.duration - b.duration);
-      } else {
-        this.lengthSort = 'asc';
-        this.resultData.sort((a, b) => b.duration - a.duration);
-      }
-    },
-    sortByCreated() {
-      this.page = 1;
-      if (this.createdSort === 'asc') {
-        this.createdSort = 'desc';
-        this.resultData.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      } else {
-        this.createdSort = 'asc';
-        this.resultData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      }
-    },
-    sortByName() {
-      this.page = 1;
-      if (this.nameSort === 'asc') {
-        this.nameSort = 'desc';
-        this.resultData.sort((a, b) => b.broadcaster_name.localeCompare(a.broadcaster_name));
-      } else {
-        this.nameSort = 'asc';
-        this.resultData.sort((a, b) => a.broadcaster_name.localeCompare(b.broadcaster_name));
-      }
-    },
+    // sortByViews() {
+    //   this.page = 1;
+    //   if (this.viewSort === 'asc') {
+    //     this.viewSort = 'desc';
+    //     this.resultData.sort((a, b) => a.view_count - b.view_count);
+    //   } else {
+    //     this.viewSort = 'asc';
+    //     this.resultData.sort((a, b) => b.view_count - a.view_count);
+    //   }
+    // },
+    // sortByLength() {
+    //   this.page = 1;
+    //   if (this.lengthSort === 'asc') {
+    //     this.lengthSort = 'desc';
+    //     this.resultData.sort((a, b) => a.duration - b.duration);
+    //   } else {
+    //     this.lengthSort = 'asc';
+    //     this.resultData.sort((a, b) => b.duration - a.duration);
+    //   }
+    // },
+    // sortByCreated() {
+    //   this.page = 1;
+    //   if (this.createdSort === 'asc') {
+    //     this.createdSort = 'desc';
+    //     this.resultData.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    //   } else {
+    //     this.createdSort = 'asc';
+    //     this.resultData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    //   }
+    // },
+    // sortByName() {
+    //   this.page = 1;
+    //   if (this.nameSort === 'asc') {
+    //     this.nameSort = 'desc';
+    //     this.resultData.sort((a, b) => b.broadcaster_name.localeCompare(a.broadcaster_name));
+    //   } else {
+    //     this.nameSort = 'asc';
+    //     this.resultData.sort((a, b) => a.broadcaster_name.localeCompare(b.broadcaster_name));
+    //   }
+    // },
     setDate(el) {
       return this.$moment(el).format('ll').substring(2);
     },
-    resetData() {
-      this.$store.commit('SET_currCliplist', { data: '' });
-    },
+    // resetData() {
+    //   this.$store.commit('SET_currCliplist', { data: '' });
+    // },
   },
   computed: {
     theme() {
@@ -189,11 +175,15 @@ export default {
     await axios.get('https://api.twitch.tv/helix/clips', {
       headers: this.$store.state.headerConfig,
       params: {
-        id: [...this.clipListData.id],
+        id: [...this.clipListData.cliplist],
       },
     }).then((res) => {
-      this.resultData = res.data.data;
+      this.$store.commit('SET_CurrentClipList', res.data.data);
     });
+  },
+  destroyed() {
+    this.$store.commit('SET_CurrentClipList', []);
+    this.$store.commit('SET_CurrentListData','');
   },
 
 };

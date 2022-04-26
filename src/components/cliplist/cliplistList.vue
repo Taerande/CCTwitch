@@ -1,5 +1,5 @@
 <template>
-<v-container fluid>
+<v-container fluid v-if="loading">
   <v-row class="pt-5 justify-center align-baseline">
     <div class="py-3">
       <span class="text-h3 font-weight-bold pr-3">My Cliplists</span>
@@ -13,7 +13,7 @@
     <v-col
      cols="12" xl="2" lg="3" md="4" sm="6" xs="12"
      class="pa-3" v-for="(item, listIndex) in cliplist" :key="listIndex">
-      <v-card class="cliplist-canvas" outlined :color="item.color" @click="setData(item)">
+      <v-card class="cliplist-canvas" @click="setData(item)">
         <v-card-title class="justify-center">
           <span class="text-h6 pa-5 text-truncate">
             {{item.title}}
@@ -21,6 +21,7 @@
           <v-spacer></v-spacer>
           <v-icon :color="item.isPublic ? 'info' : 'red'">{{item.isPublic ? 'mdi-earth' : 'mdi-lock'}}</v-icon>
         </v-card-title>
+        <v-progress-linear value="100" :color="item.color"></v-progress-linear>
         <v-card-text class="text-center text-h4 text-truncate">
           <v-row class="text-caption">
             {{item.cliplist.length}}개의 클립
@@ -37,10 +38,14 @@
       </v-card>
     </v-col>
   </v-row>
-  <v-row v-else class="d-flex justify-center align-center" style="height:60vh;">
+  <!-- <v-row v-else class="d-flex justify-center align-center" style="height:60vh;">
     <h1>😥There is no cliplist</h1>
-  </v-row>
-  <v-row><v-btn color="success" @click="sorting">sort</v-btn></v-row>
+  </v-row> -->
+</v-container>
+<v-container v-else>
+  <v-alert type="error" :value="true" class="absolute-center">
+    저장된 클립모음이 없습니다.
+  </v-alert>
 </v-container>
 </template>
 
@@ -74,25 +79,27 @@ export default {
 
   },
   async created() {
-    console.log(this.$store.state.userInfo);
-    this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userInfo.uid).onSnapshot((sn) => {
-      if(sn.empty){
-        this.cliplist = []
-        return
-      }
-      this.cliplist = sn.docs.map( v => {
-        const item = v.data()
-        return {
-          id: v.id,
-          title: item.title,
-          description: item.description,
-          createdAt: item.createdAt,
-          isPublic: item.isPublic,
-          color: item.color,
-          cliplist: item.cliplist,
+    if(this.$store.state.userInfo){
+      this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userInfo.uid).onSnapshot((sn) => {
+        if(sn.empty){
+          this.cliplist = []
+          return
         }
-      })
-    });
+        this.cliplist = sn.docs.map( v => {
+          const item = v.data()
+          return {
+            id: v.id,
+            title: item.title,
+            description: item.description,
+            createdAt: item.createdAt,
+            isPublic: item.isPublic,
+            color: item.color,
+            cliplist: item.cliplist,
+          }
+        })
+      });
+      this.loading = true;
+    }
   },
   mounted() {
   },

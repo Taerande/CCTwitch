@@ -25,27 +25,24 @@
     </v-card-title>
     <v-card-text class="d-flex align-center justify-center pt-5">
       <span class="twitch--text pl-1 text-title text-truncate">
-        {{this.delete.data.target.title.length > 25 ? `${this.delete.data.target.title.substr(0, 24)}...` : this.delete.data.target.title}}</span>
-        <span class="red--text" v-if="this.delete.type === 'cliplist'">[{{this.delete.data.target.cliplist.length}}개]</span>
-      <div class="pl-1">을 삭제합니다.</div>
-      <div>{{this.delete.data.target}}</div>
-      <div>{{this.$router.params}}</div>
+        <span class="text-uppercase">
+          {{this.delete.type}}
+        </span>: {{this.delete.data.target.title.length > 25 ? `${this.delete.data.target.title.substr(0, 24)}...` : this.delete.data.target.title}}</span>
+        <span v-if="this.delete.type === 'cliplist'">[<span class="red--text">{{this.delete.data.target.cliplist.length}}</span>]개 을 삭제합니다.</span>
+      <!-- <div>{{this.delete.data.target}}</div>
+      <div>{{this.$router.params}}</div> -->
     </v-card-text>
     <v-card-actions class="pb-3 pt-0">
       <v-spacer></v-spacer>
       <v-btn text class="error" @click="dialog = !dialog">Cancel</v-btn>
-      <v-btn :loading="false" text class="success" @click="btnLoading = true, DeleteData(curType, curData)">OK</v-btn>
+      <v-btn :loading="btnLoading" text class="success" @click="btnLoading = true, DeleteData(curType, curData)">OK</v-btn>
     </v-card-actions>
   </v-card>
 </v-dialog>
 </template>
 <script>
 export default {
-  props: {
-    delete: {
-      type: Object,
-    },
-  },
+  props: ['delete'],
   data() {
     return {
       dialog: false,
@@ -57,9 +54,17 @@ export default {
   methods: {
     async DeleteData(type, data) {
       if (type === 'clip') {
-        await this.$store.commit('DELETE_clip', data);
-        this.btnLoading = false;
-        this.dialog = false;
+        let target = await this.$firestore.collection('cliplist').doc(data.belongsTo);
+        await target.update({
+          cliplist: this.$firebase.firestore.FieldValue.arrayRemove(data.target.id)
+        }).then(async () => {
+          console.log('cliplist',this.$store.state.currentCliplist);
+          console.log('target clip',data.target);
+          await this.$store.commit('DELETE_Clip',data.target.id);
+          this.btnLoading = false;
+          this.dialog = false;
+          this.$store.commit('SET_SnackBar', {type:'error', text:`클립 : ${data.target.title}을 삭제하였습니다.`, value:true});
+        }).catch((e) => console.error(e.message));
       } else if (type === 'cliplist') {
         // await this.$firestore.collection('')
         this.$emit('DeleteCliplist');

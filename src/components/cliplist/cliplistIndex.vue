@@ -3,15 +3,27 @@
   <v-row class="d-flex justify-space-between align-baseline">
     <div class="pt-10 pb-3">
       <span class="text-h3 font-weight-bold pr-3">{{cliplist.title}}</span>
-      <span class="text-subtitle-1">(총 {{ cliplist.cliplist.length }} / 100 개)</span>
+      <span class="text-subtitle-1">
+        <v-icon>mdi-</v-icon>
+        (총 {{ cliplist.cliplist.length }} / 100 개)</span>
     </div>
   </v-row>
   <v-row class="d-block">
     <div class="pl-1">
       {{cliplist.description}}
     </div>
-    <div class="d-flex justify-end">
-      <ImportNewClipDialogVue></ImportNewClipDialogVue>
+    <div class="d-flex pa-3">
+      <div class="d-flex align-center">
+        <v-avatar
+          size="36">
+          <img :src="userInfo.profile_image_url" alt="alt">
+        </v-avatar>
+        <div class="pl-3">
+          <div>{{userInfo.display_name}}</div>
+        </div>
+      </div>
+      <v-spacer></v-spacer>
+      <ImportNewClipDialogVue :parent="cliplist"></ImportNewClipDialogVue>
       <DeleteDialog
       @DeleteCliplist="deleteCliplist"
       :delete="{
@@ -24,30 +36,18 @@
       <v-btn @click="copyCliplist(cliplist)" icon>
         <v-icon>mdi-share-variant-outline</v-icon>
       </v-btn>
-      <v-btn
-      @click="updateData(cliplist)"
-      icon>
-        <v-icon>mdi-refresh</v-icon>
-      </v-btn>
-      <AddNewCliplistDialog :type="{
+      <AddNewCliplistDialog
+      v-if="$store.state.currentListData"
+      :type="{
         type:'edit',
-        data:{
-          text: 'Edit Cliplist',
-          id: cliplist.id,
-          color: cliplist.color,
-          title: cliplist.title,
-          description: cliplist.description,
-          }
+        data: cliplist,
         }">
       </AddNewCliplistDialog>
-      <v-btn icon @click="resetData(), $router.push({path: '/cliplist'})">
-        <v-icon>mdi-undo-variant</v-icon>
-      </v-btn>
-      </div>
+    </div>
   </v-row>
   <expandTableVue
-    v-if="cliplist.cliplist.length >0"
-  :clipListData="{id:cliplist.cliplist, color:cliplist.color}">
+  v-if="cliplist.cliplist.length >0"
+  :clipListData="cliplist">
   </expandTableVue>
   <v-container v-else style="height:60vh;" class="d-flex justify-center align-center">
     <v-alert rounded="pill" class="d-inline-block" type="error">🤐 저장 혹은 공유된 클립 모음이 없습니다.</v-alert>
@@ -81,6 +81,7 @@ export default {
         authorName:'',
         cliplist:[],
       },
+      userInfo:'',
       unsubscribe: null,
       currentTooltipId: '',
       tableloading: false,
@@ -99,6 +100,16 @@ export default {
     };
   },
   methods: {
+    async getUserInfo(item){
+      await axios.get('https://api.twitch.tv/helix/users',{
+          headers: this.$store.state.headerConfig,
+          params:{
+            id: item.split('twitch:')[1],
+          }
+        }).then( res => {
+          this.userInfo = res.data.data[0];
+        });
+    },
     async deleteCliplist(){
       await this.$firestore.collection('cliplist').doc(this.$route.params.id).delete();
       this.$router.push({path:'/cliplist'});
@@ -116,21 +127,6 @@ export default {
         return `${num.slice(0, -3)},${num.slice(-3)}`;
       }
       return Math.abs(num);
-    },
-    updateData(el) {
-      const idList = [];
-      el.pinnedClips.forEach((element) => {
-        idList.push(element.id);
-      });
-      axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          id: idList,
-          first: 100,
-        },
-      }).then((res) => {
-        this.$store.commit('UPDATE_pinndedClip', res.data.data);
-      });
     },
     compareArray(a, b) {
       const result = a.length === b.length && a.every((value) => b.includes(value));
@@ -154,9 +150,6 @@ export default {
       const krTime = time + 9 * 60 * 60 * 1000;
       const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
       return dateFormatted;
-    },
-    resetData() {
-      this.$store.commit('INIT_currCliplist');
     },
     async getClip(id, description) {
       await axios.get('https://api.twitch.tv/helix/clips', {
@@ -185,10 +178,20 @@ export default {
   async mounted() {
     this.unsubscribe = await this.$firestore.collection('cliplist').doc(this.$route.params.id).onSnapshot((sn) => {
       const item = sn.data();
+      this.getUserInfo(item.authorId);
       if(sn.empty){
         this.cliplist = []
         return
       }
+      this.$store.commit('SET_CurrentListData', {
+        id: sn.id,
+        title: item.title,
+        description: item.description,
+        color: item.color,
+        isPublic: item.isPublic,
+        authorId: item.authorId,
+        authorName: item.authorName,
+      });
       this.cliplist = {
         id: sn.id,
         title: item.title,
@@ -200,6 +203,8 @@ export default {
         cliplist: item.cliplist,
       }
     })
+    this.loading = true;
+
   },
   destroyed() {
     if(this.unsubscribe) this.unsubscribe();

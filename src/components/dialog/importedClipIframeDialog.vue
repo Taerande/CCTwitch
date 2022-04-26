@@ -5,14 +5,14 @@
   height="720"
   max-width="1280">
   <template v-slot:activator="{ on, attrs }">
-    <v-container fluid fill-height class="d-flex align-center">
+    <v-container fluid fill-height class="d-flex align-center" v-on="on">
       <v-img
+      v-on="on"
       :aspect-ratio="16/9"
       max-width="130"
       id="clip-thumbnail"
       @click="dialog = true"
       v-bind="attrs"
-      v-on="on"
       lazy-src="@/assets/img/404.jpg"
       :src="clipData.thumbnail_url">
       </v-img>

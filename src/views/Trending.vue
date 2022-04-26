@@ -1,5 +1,5 @@
 <template>
-<v-container>
+<v-container v-if="loading">
   <v-row class="pb-5">
     <v-col>Trending Page</v-col>
   </v-row>
@@ -10,12 +10,16 @@
   <v-row class="pt-15">
     <v-col cols="3" class="pa-3" v-for="item in items" :key="item.id">
       <v-card outlined @click="$router.push({path:`clip/${item.id}`})">
-        <v-card-title class="d-flex" :style="{background:item.color}">
+        <v-card-title class="d-flex">
           <div>
             {{item.title}}
           </div>
           <v-spacer></v-spacer>
+          <div>
+            {{setDate(item.createdAt)}}
+          </div>
         </v-card-title>
+        <v-progress-linear value="100" :color="item.color"></v-progress-linear>
         <v-card-text>
           <div class="d-flex align-center py-3">
             <v-avatar
@@ -61,6 +65,10 @@
     </v-col>
   </v-row>
 </v-container>
+
+<v-container v-else fluid fill-height>
+  <v-progress-circular class="absolute-center" color="twitch" size="60" width="6" indeterminate></v-progress-circular>
+</v-container>
 </template>
 
 <script>
@@ -72,6 +80,7 @@ export default {
   },
   data() {
     return {
+      loading:false,
       items:null,
     };
   },
@@ -80,14 +89,14 @@ export default {
       return this.$moment(el).format('lll');
     },
     async loadData(){
-      const sn = await this.$firestore.collection('cliplist').where('isPublic','==',true).get();
+      const sn = await this.$firestore.collection('cliplist').where('isPublic','==',true).orderBy("createdAt","desc").get();
       this.items = await sn.docs.map( v => {
         const item = v.data();
         return {
           id: v.id,
           title: item.title,
           description: item.description,
-          createdAt: item.createdAt,
+          createdAt: item.createdAt.toDate(),
           userInfo: item.authorId,
           cliplist: item.cliplist,
           color: item.color
@@ -110,6 +119,7 @@ export default {
     this.items.forEach((item) => {
       this.getUserInfo(item);
     })
+    this.loading = true;
   },
 }
 </script>

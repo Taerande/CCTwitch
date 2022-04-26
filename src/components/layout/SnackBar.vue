@@ -8,9 +8,9 @@
       :timeout="-1"
       :style="{ 'margin-bottom': `${index * 70 + 70}px` }"
       v-model="item.value"
-      :color="item.type"
+      color="grey darken-3"
     >
-      <div class="d-flex justify-space-between align-center">
+      <div class="d-flex justify-space-between align-center" :class="`${item.type}--text`">
         {{ item.text }}
         <v-btn icon @click="deleteSnacks(index)">
           <v-icon>mdi-close</v-icon>

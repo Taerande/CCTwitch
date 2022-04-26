@@ -100,7 +100,6 @@
               </v-tooltip>
             </td>
             <td class="d-flex align-center justify-end pr-3 table-menu" style="height:inherit" v-if="$store.state.isSaved">
-              <clipMenuVue :clip="clip"></clipMenuVue>
             </td>
           </tr>
         </tbody>

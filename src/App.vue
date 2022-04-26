@@ -16,6 +16,7 @@ import bookmark from '@/components/layout/bookmark.vue'
 import SnackBar from '@/components/layout/SnackBar.vue'
 import AppBar from '@/components/layout/AppBar.vue'
 import Footer from '@/components/layout/Footer.vue'
+import axios from 'axios'
 
 export default {
   name: 'App',
@@ -46,7 +47,31 @@ export default {
     }
     this.$store.commit('INIT_localStorage')
     this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'))
-  },
+
+    // 백엔드에서 처리 해야댐.. twitch auth validation
+    if(localStorage.getItem('twitchAppAccessToken')){
+      axios.get('https://id.twitch.tv/oauth2/validate',{
+        headers:{
+          Authorization: `OAuth ${localStorage.getItem('twitchAppAccessToken').slice(1,-1)}`
+        }
+      }).then((res) => {
+        //정상
+
+      }).catch((error) => {
+        //비정상, 앱엑세스 토큰 재발급 Backend 처리
+        axios.get(this.$store.state.appTokenURL).then((res) => {
+          localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
+        });
+      })
+    } else {
+      //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
+      axios.get(this.$store.state.appTokenURL)
+      .then((res) => {
+        //받아온 엑세스토큰 로컬스토리지에 저장
+        localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
+        });
+      }
+  }
 }
 </script>
 <style lang="scss">
@@ -56,7 +81,7 @@ export default {
 }
 .absolute-center{
   position: absolute;
-  top:50vh;
+  top:40vh;
   left:50%;
   transform: translate(-50%, -50%);
   z-index: 500;
@@ -90,8 +115,13 @@ a {
 div[role='dialog'] {
   box-shadow: none;
 }
+main {
+  margin-right: 15%;
+  margin-left: 15%;
+}
+
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 ::-webkit-scrollbar-thumb {
   background-color: var(--twitch-color);
@@ -102,11 +132,10 @@ div[role='dialog'] {
   background-color: rgb(245, 245, 245);
   border-radius: 5px;
 }
-main {
-  margin-right: 15%;
-  margin-left: 15%;
-}
 
+html.overflow-y-hidden{
+  overflow-y:scroll !important;
+}
 @media screen and (max-width: 1264px) and (min-width: 960px) {
   header {
     padding-left: 3%;

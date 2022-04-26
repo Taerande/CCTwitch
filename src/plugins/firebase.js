@@ -5,7 +5,6 @@ import firebaseConfig from '../../firebaseConfig';
 import 'firebase/compat/firestore';
 import 'firebase/compat/auth';
 import store from '../store'
-import router from '../router';
 
 firebase.initializeApp(firebaseConfig);
 

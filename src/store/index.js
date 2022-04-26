@@ -6,6 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     globalLan:'ko',
+    appTokenURL:process.env.VUE_APP_TWITCH_APPTOKEN_ISSUE_DEV,
     redirectUri:process.env.VUE_APP_TWITCH_REDIRECTURI_DEV,
     embedUrl:process.env.VUE_APP_EMBED_PARERNT_DEV,
     clipCount:300,
@@ -19,8 +20,9 @@ export default new Vuex.Store({
     searchString: null,
     searchBar: false,
     searchList: [],
+    twitchOAuthToken: '',
     headerConfig: {
-      Authorization: process.env.VUE_APP_TWTITCH_OAUTH,
+      Authorization: 'Bearer e3mq4qudwfzqkcz1uc5nb84menag54',
       'Client-id': process.env.VUE_APP_TWITCH_CLIENT_ID,
       Accept: process.env.VUE_APP_TWITCH_HEADER_ACCEPT,
     },
@@ -30,13 +32,8 @@ export default new Vuex.Store({
     pinnedClips: [],
     cliplist: [],
     userInfo: null,
-    currentCliplist: {
-      id:'',
-      title:'',
-      description:'',
-      color:'',
-      pinnedClips:[],
-    },
+    currentCliplist:[],
+    currentListData:'',
     dateSort: {
       text: null,
       start: null,
@@ -46,6 +43,15 @@ export default new Vuex.Store({
     isSaved: '',
   },
   mutations: {
+    SET_TwitchOAuthToken(state, payload){
+      state.twitchOAuthToken = `Bearer ${payload}`;
+    },
+    SET_TwitchAppAccessToken(state,payload){
+      state.headerConfig.Authorization = `Bearer ${payload}`;
+    },
+    SET_CurrentListData(state, payload){
+      state.currentListData = payload;
+    },
     SET_FirebaseLoad(state, payload){
       state.firbaseLoaded = payload
     },
@@ -99,9 +105,8 @@ export default new Vuex.Store({
     //   const index = state.likedStreamer.findIndex((el) => el === response.data);
     //   state.likedStreamer[index].pagination = response.pagination;
     // },
-    SET_currCliplist(state, response) {
-      state.currentCliplist = response.data;
-      window.scrollTo(0, 0);
+    SET_CurrentClipList(state, response) {
+      state.currentCliplist = response;
     },
     INIT_currCliplist(state) {
       state.currentCliplist = {
@@ -114,6 +119,9 @@ export default new Vuex.Store({
     },
     SET_VidClipData(state, response) {
       state.VidClipData = response;
+    },
+    ADD_CurrentCliplist(state, payload){
+      state.currentCliplist = [...state.currentCliplist, ...payload];
     },
     DELETE_LikedStreamer(state, response) {
       const temp = JSON.parse(localStorage.getItem('alllikes'));
@@ -269,21 +277,9 @@ export default new Vuex.Store({
       state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
       state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
     },
-    DELETE_clip(state, response) {
-      const temp = JSON.parse(localStorage.getItem('allCliplists'));
-      const listindex = state.cliplist.findIndex((el) => el.id === response.belongsTo.id);
-      const clipindex = state.currentCliplist.pinnedClips.findIndex((el) => el.id === response.target.id);
-      const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
-      + Math.random().toString(16).slice(2)
-      + Date.now().toString(16).slice(4);
-      temp[listindex].pinnedClips.splice(clipindex, 1);
-      temp[listindex].id = uid;
-      state.currentCliplist.pinnedClips.splice(clipindex, 1);
-      state.currentCliplist.id = uid;
-      localStorage.setItem('allCliplists', JSON.stringify(temp));
-      const title = response.target.title.length > 25 ? `${response.target.title.substr(0, 24)}...` : response.target.title;
-      state.cliplist = JSON.parse(localStorage.getItem('allCliplists'));
-      this.commit('SET_SnackBar', { type: 'error', text: `Clip : ${title}가 삭제되었습니다.`, value: true });
+    DELETE_Clip(state, response) {
+      let index = state.currentCliplist.findIndex( (element) => element.id === response);
+      state.currentCliplist.splice(index,1);
     },
     DELETE_importedClip(state, response) {
       const clipindex = state.currentCliplist.pinnedClips.findIndex((el) => el.id === response.target.id);

@@ -1,5 +1,6 @@
 <template>
 <v-menu
+v-if="$store.state.userInfo"
 :nudge-left="this.$vuetify.breakpoint.xs ? '140' : '0'"
 offset-x>
   <template v-slot:activator="{on, attrs}">
@@ -8,33 +9,34 @@ offset-x>
     </v-btn>
   </template>
   <v-list>
-    <EditDescriptionVue :edit="{type:'clip', data:clip}"></EditDescriptionVue>
-    <v-list-item @click="copyClip(clip)">
+    <v-list-item @click="copyClip(clip.clipData)">
       <v-icon>mdi-clipboard-multiple-outline</v-icon>
       <span class="text-caption pl-1">URL 복사</span>
     </v-list-item>
-    <pinClipVue :clipData="{data:clip, type:'menu'}"></pinClipVue>
+    <pinClipVue
+      v-if="$store.state.userInfo"
+      :clipData="{data:clip.clipData, type:'menu'}"></pinClipVue>
     <DeleteDialog
-      :delete="{type:'clip', data:{target: clip, belongsTo: $store.state.currentCliplist,}}">
+      v-if="clip.listData.authorId === $store.state.userInfo.uid"
+      :delete="{type:'clip', data:{target: clip.clipData, belongsTo: clip.listData.id}}">
     </DeleteDialog>
-    <v-list-item @click="downloadClip(clip)">
+    <v-list-item @click="downloadClip(clip.clipData)">
       <v-icon>mdi-download</v-icon>
       <span class="text-caption pl-1">클립 저장</span>
     </v-list-item>
   </v-list>
 </v-menu>
+<v-icon v-else>mdi-lock</v-icon>
 </template>
 <script>
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import pinClipVue from '../pinClip.vue';
-import EditDescriptionVue from '../dialog/EditDescription.vue';
 
 export default {
   props: ['clip'],
   components: {
     DeleteDialog,
     pinClipVue,
-    EditDescriptionVue,
   },
   methods: {
     copyClip(el) {
@@ -47,9 +49,16 @@ export default {
       this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip URL : ${el.title} 가 복사되었습니다.`, value: true });
     },
     downloadClip(el) {
-      const target = `${el.thumbnail_url.split('-preview')[0]}.mp4`;
-      window.open(target);
+      let target = `${el.thumbnail_url.split('-preview')[0]}.mp4`;
+      let a = document.createElement('A');
+      a.href = target;
+      a.download = target.substr(target.lastIndexOf('/') + 1);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     },
+  },
+  created() {
   },
 
 };

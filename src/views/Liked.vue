@@ -4,7 +4,8 @@
     <span class="text-h3 font-weight-bold">Liked:</span>
   </v-row>
   <v-row class="d-flex justify-start pb-5">
-<v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
+    <v-subheader>Recent Streamer</v-subheader>
+    <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="(item, index) in currlist"
     :key="item.id">
       <v-card outlined class="rounded-xl" width="400px">
@@ -55,8 +56,33 @@
       </v-card>
     </v-col>
   </v-row>
-  <v-row>
-    <v-subheader>Recent Clips</v-subheader>
+  <v-subheader>Follow Streamer On Live</v-subheader>
+  <v-row class="d-flex justify-start pb-5">
+    <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
+    v-for="item in followResult[0]"
+    :key="item.id">
+      <v-card outlined>
+        <v-avatar
+          size="40"
+        >
+          <img :src="item.profile_image_url" alt="alt">
+        </v-avatar>
+      </v-card>
+    </v-col>
+  </v-row>
+  <v-subheader>Follow All</v-subheader>
+  <v-row class="d-flex justify-start pb-5">
+    <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
+    v-for="item in followResult[1]"
+    :key="item.to_id">
+      <v-card outlined>
+        <v-avatar
+          size="40"
+        >
+          <img :src="item.profile_image_url" alt="alt">
+        </v-avatar>
+      </v-card>
+    </v-col>
   </v-row>
 </v-container>
 </template>
@@ -64,42 +90,36 @@
 <script>
 import axios from 'axios';
 import StarBtnDialogVue from '../components/dialog/StarBtnDialog.vue';
-// import LikedClip from '../components/LikedClip.vue';
 export default {
   components: {
     StarBtnDialogVue,
-    // LikedClip,
   },
   data() {
     return {
       currlist:[],
-      dialog:[],
+      dialog:'',
+      followResult:[],
       clips: [],
-      userInfo: [],
+      followStream:[],
+      followList:[],
+      streamFollowList:[],
+      following:[],
       dataLoading: false,
       searchUserList:[],
       check: false,
       searching: false,
     };
   },
-  // toggleClip(el) {
-  //     const toggleClips = document.getElementsByClassName(el.id);
-  //     const check = [...toggleClips][0].classList.contains('hidden');
-  //     const target = this.$store.state.likedStreamer.find((ele) => ele.id === el.id);
-  //     target.is_checked = check;
-  //     if (check) {
-  //       [...toggleClips].forEach((item) => {
-  //         item.classList.remove('hidden');
-  //         this.$store.commit('SET_SnackBar', { type: 'success', text: `Filter : ${el.display_name} 님을 노출합니다.`, value: false });
-  //       });
-  //     } else {
-  //       [...toggleClips].forEach((item) => {
-  //         item.classList.add('hidden');
-  //         this.$store.commit('SET_SnackBar', { type: 'error', text: `Filter : ${el.display_name} 님을 숨깁니다.`, value: true });
-  //       });
-  //     }
-  //   },
   methods: {
+    setThumbnailSize(el, index) {
+      if (el === '') {
+        this.getLiveThumbnail(this.vidlist[index], index);
+        return this.vidlist[index].data.thumbnail_url;
+      }
+      const width = /%{width}/;
+      const height = /%{height}/;
+      return el.replace(width, '1280').replace(height, '720');
+    },
     sortByFollower(element){
       return element.sort((a,b) => b.follower_count - a.follower_count);
     },
@@ -155,38 +175,62 @@ export default {
       }
       return Math.abs(el);
     },
-    async getStreamData(element, index){
-    axios.get('https://api.twitch.tv/helix/streams', {
-      params: {
-        user_login: element.login,
+    async getUserInfo(element) {
+      await axios.get('https://api.twitch.tv/helix/users',{
+        params: {
+          id : element,
         },
-      headers: this.$store.state.headerConfig,
-      }).then((respp) => {
-        if(respp.data.data.length > 0 ){
-          this.currlist[index].is_live = respp.data.data['0'].type;
-          this.currlist[index].viewer_count = respp.data.data['0'].viewer_count;
-        }else {
-          this.currlist[index].is_live = '';
-          this.currlist[index].viewer_count = '';
+        headers:this.$store.state.headerConfig,
+      }).then( (res) => {
+        console.log(element);
+        console.log(res);
+        // element.userInfo = res.data.data;
+      })
+    },
+    async getFollowList(){
+     await axios.get('https://api.twitch.tv/helix/users/follows',{
+        params:{
+          from_id: this.$store.state.userInfo.uid.split('twitch:')[1],
+          first: 100,
+        },
+        headers:this.$store.state.headerConfig,
+      }).then((res) => {
+        this.followList = res.data.data.map( v => {
+          return v.to_id;
+        })
+        this.getUserInfo([...this.followList]);
+    })
+    },
+    async getStreamFollowList(){
+      const token = localStorage.getItem('twitchAuthToken');
+      await axios.get('https://api.twitch.tv/helix/streams/followed',{
+        params:{
+          user_id: this.$store.state.userInfo.uid.split('twitch:')[1]
+        },
+        headers:{
+          Authorization: `Bearer ${token.split(/"/)[1]}`,
+          'client-id': process.env.VUE_APP_TWITCH_CLIENT_ID,
         }
-      });
+      }).then((res) => {
+        this.streamFollowList = res.data.data.map( v => {
+          return v.user_id;
+        });
+        this.getUserInfo([...this.streamFollowList])
+      })
     },
     async postProcess(){
-      this.currlist = this.$store.state.likedStreamer;
-      await this.currlist.forEach((element,index) =>{
-      this.getStreamData(element,index);
-      });
+      await this.getStreamFollowList();
+      await this.getFollowList();
     }
-
+        // Authoriation: `Bearer ${this.$store.state.twitchAuthToken}`
   },
   computed: {
     getTodayDate() {
       return new Date().toISOString();
     },
   },
-  mounted() {
-    this.postProcess();
-
+  async created() {
+    await this.postProcess();
 
   },
 };

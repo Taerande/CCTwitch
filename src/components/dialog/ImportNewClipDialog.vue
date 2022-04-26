@@ -35,7 +35,7 @@
               v-if="importLoading"
               color="twitch"
               indeterminate
-              height="4"
+              height="6"
               absolute
             ></v-progress-linear>
           </template>
@@ -91,7 +91,7 @@
         <v-btn
         text
         color="success"
-        @click="addCliplist()"
+        @click="addToFireStoreCliplist()"
         :disabled="this.pinnedClipslist.length === 0"
         >
         Add
@@ -108,7 +108,7 @@ export default {
   components: {
     ImportedClipIframeDialog,
   },
-  props: ['type'],
+  props: ['type','parent'],
   data() {
     return {
       clipdb: clipdb,
@@ -118,7 +118,7 @@ export default {
       color: '',
       clipUrl: '',
       result:'',
-      clipResult:'',
+      clipResult:[],
       pinnedClipslist:[],
       importLoading: false,
       inQue:false,
@@ -152,26 +152,49 @@ export default {
       this.pinnedClipslist.splice(index, 1);
        this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : ${item.title}을 목록에서 삭제합니다.`, value: true });
     },
-    async addToCliplist(el){
-      await this.pinnedClipslist.push(el);
+    addToCliplist(el){
+      this.pinnedClipslist.push(el);
       this.$store.commit('SET_SnackBar', { type: 'success', text: `Import : ${el.title}을 추가합니다.`, value: true });
       this.clipDialog = false;
       this.clipUrl = '';
     },
-    async addCliplist(){
-      let listIndex = this.$store.state.cliplist.findIndex(element => this.$store.state.currentCliplist.id === element.id);
-      await this.pinnedClipslist.forEach( async element => {
-        await this.$store.commit('ADD_pinnedClip', {data: element, listIndex:listIndex})});
-      this.initailize();
+    async addToFireStoreCliplist(){
+      let objectData = this.pinnedClipslist.map( (v) => {
+        return v.id;
+      })
+      let intersection = this.pinnedClipslist.filter( x => this.$store.state.currentCliplist.includes(x));
+
+      if(intersection.length === 0){
+        let target = this.$firestore.collection('cliplist').doc(this.parent.id);
+        target.update({
+          cliplist: this.$firebase.firestore.FieldValue.arrayUnion(...objectData)
+        }).then( () => {
+          this.$store.commit('ADD_CurrentCliplist', this.pinnedClipslist)
+          this.$store.commit('SET_SnackBar',{type:'success', text: this.pinnedClipslist.length > 1 ? `${this.pinnedClipslist[0].title}외 ${this.pinnedClipslist.length - 1}개의 클립을 추가했습니다.` : `${this.pinnedClipslist[0].title}을 추가했습니다.`, value:true})
+          this.pinnedClipslist = [];
+          this.dialog = false;
+        })
+        .catch( () => {
+          this.$store.commit('SET_SnackBar',{type:'error', text:`Something wrong`, value:true})
+        })
+      }else {
+        this.$store.commit('SET_SnackBar',{type:'error', text:`중복된 클립이 존재합니다.`, value:true})
+      }
+
+
       },
     async getClip(el) {
       this.inQue = false;
       this.importLoading = true;
-      let clipId = el.trim();
-      let isInvolved = this.pinnedClipslist.find(element => element.id === clipId);
-      let isIn = this.$store.state.currentCliplist.pinnedClips.find(element => element.id === clipId);
-      console.log(isInvolved, 'isInvolved');
-      console.log(isIn,'isIn');
+      let preClipId = el.trim();
+      let resultId = null;
+      if(preClipId.match('twitch.tv/')){
+        resultId = preClipId.split('.tv/')[1].split('?')[0];
+      }else{
+        resultId = preClipId.split('?')[0];
+      }
+      let isInvolved = this.pinnedClipslist.find(element => element.id === resultId);
+      let isIn = this.parent.cliplist.find(element => element === resultId);
       if(isInvolved || isIn){
         this.inQue = true;
         this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : 이미 추가된 클립입니다.`, value: true });
@@ -180,7 +203,7 @@ export default {
         await axios.get('https://api.twitch.tv/helix/clips', {
           headers: this.$store.state.headerConfig,
           params: {
-            id: clipId,
+            id: resultId,
           },
         }).then((res) => {
           if(res.data.data.length > 0){
@@ -222,7 +245,7 @@ export default {
   padding-left: 10px !important;
 }
 div[role=listitem]:hover{
-  cursor: pointer;
+  cursor: pointersection;
   background-color: rgb(0, 0, 0, 0.2) !important;
 }
 .v-text-field{

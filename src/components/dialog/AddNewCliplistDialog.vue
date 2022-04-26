@@ -12,16 +12,14 @@
       v-bind="attrs"
       v-on="on"
     >
-    Add New List
+    새 플레이 리스트 만들기
     </v-btn>
     <v-list-item class="align-center pa-1 py-2"
     v-else-if="type.type === 'pin'"
     v-bind="attrs"
     v-on="on"
-    :disabled="$store.state.cliplist.length >= 20"
     >
       <div
-      :disabled="$store.state.cliplist.length >= 20"
       class="twitch cliplist-canvas d-flex justify-center align-center">
         <v-icon large>mdi-plus</v-icon>
       </div>
@@ -34,12 +32,12 @@
     v-bind="attrs"
     v-on="on"
     icon>
-    <v-icon>mdi-note-edit-outline</v-icon>
+    <v-icon>mdi-pencil-outline</v-icon>
     </v-btn>
   </template>
   <v-card class="justify-center">
     <v-card-title class="text-h5" :style="{background:form.color}">
-      Add New Cliplist
+      Cliplist Information
     </v-card-title>
     <v-card-text class="justify-center">
       <div class="pa-5">
@@ -95,7 +93,7 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="error" text @click="dialog = false">CLOSE</v-btn>
+      <v-btn color="error" text @click="setDefaultValue">CLOSE</v-btn>
       <v-btn
       v-if="type.type === 'add' || type.type==='pin'"
         color="green darken-1"
@@ -110,9 +108,9 @@
         color="green darken-1"
         text
         :disabled="form.title === ''"
-        @click=" initInput(), dialog = false"
+        @click="updateClipListData(), dialog = false"
       >
-        {{type.type}}
+      Edit
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -125,11 +123,11 @@ export default {
     return {
       dialog:false,
       form:{
+        cliplist:[],
         isPublic:false,
         description: '',
         color: '',
         title: '',
-        cliplist:[],
         createdAt:'',
         authorName:'',
         authorId:'',
@@ -168,24 +166,49 @@ export default {
       this.form.title = '';
       this.form.color = '';
       this.form.isPublic = false;
-      this.form.cliplist =[];
     },
     async saveCliplist(){
-      this.form.createdAt = this.$moment().toISOString();
+      this.form.cliplist = [];
+      this.form.createdAt = new Date();
       this.form.authorName = this.$store.state.userInfo.displayName || '';
       this.form.authorId = this.$store.state.userInfo.uid || '';
       await this.$firestore.collection('cliplist').add(this.form);
       await this.$store.commit('SET_SnackBar',{type:'info', text:`${this.form.title}이 생성 되었습니다.`, value:true});
       this.initInput();
+    },
+    async updateClipListData(){
+      let target = this.$firestore.collection('cliplist').doc(this.$store.state.currentListData.id);
+      target.update({
+        updatedAt : new Date(),
+        title : this.form.title,
+        color : this.form.color,
+        description : this.form.description,
+        isPublic : this.form.isPublic,
+      }).then(() => {
+        this.$store.commit('SET_SnackBar',{type:'info', text:`${this.$store.state.currentListData.title}을 수정했습니다.`, value:true});
+        this.dialog = false;
+      })
+
+
+    },
+    setDefaultValue(){
+      if (this.type.type === 'edit') {
+        this.form.isPublic = this.$store.state.currentListData.isPublic;
+        this.form.description = this.$store.state.currentListData.description;
+        this.form.color = this.$store.state.currentListData.color;
+        this.form.title = this.$store.state.currentListData.title;
+      }
+      this.dialog = false;
     }
   },
-  created() {
-    if (this.type.type === 'edit') {
-      this.id = this.type.data.id;
-      this.color = this.type.data.color;
-      this.title = this.type.data.title;
-      this.description = this.type.data.description;
-    }
+  mounted() {
+    this.setDefaultValue();
+    document.addEventListener("keydown", (e) => {
+        if (e.key === 'Escape') {
+            this.$emit('close');
+            this.setDefaultValue();
+        }
+    })
   },
 
 };
