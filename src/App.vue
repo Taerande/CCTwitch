@@ -37,6 +37,10 @@ export default {
  async created() {
     const likesInit = JSON.parse(localStorage.getItem('alllikes'))
     const cliplistInit = JSON.parse(localStorage.getItem('allCliplists'))
+    const userInfo = localStorage.getItem('userInfo');
+    if(userInfo){
+      this.$store.commit('SET_UserInfo',userInfo)
+    }
     if (likesInit === null) {
       const likes = []
       localStorage.setItem('alllikes', JSON.stringify(likes))
@@ -121,7 +125,7 @@ main {
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 6px;
 }
 ::-webkit-scrollbar-thumb {
   background-color: var(--twitch-color);

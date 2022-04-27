@@ -1,7 +1,7 @@
 <template>
 <v-container fluid>
   <v-row class="py-5">
-    <span class="text-h3 font-weight-bold">Liked:</span>
+    <span class="text-h3 font-weight-bold">Streamer</span>
   </v-row>
   <v-row class="d-flex justify-start pb-5">
     <v-subheader>Recent Streamer</v-subheader>
@@ -57,32 +57,64 @@
     </v-col>
   </v-row>
   <v-subheader>Follow Streamer On Live</v-subheader>
-  <v-row class="d-flex justify-start pb-5">
+  <v-row class="d-flex justify-start pb-5" v-if="islogin">
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
-    v-for="item in followResult[0]"
+    v-for="item in streamerList.stream"
     :key="item.id">
-      <v-card outlined>
-        <v-avatar
-          size="40"
-        >
-          <img :src="item.profile_image_url" alt="alt">
-        </v-avatar>
+      <v-card outlined class="rounded-xl pa-0" width="280px">
+        <v-card-text class="d-flex align-center justify-space-between pa-2">
+          <div>
+            <v-avatar
+              size="36"
+            >
+              <img :src="item.userInfo.profile_image_url" alt="alt">
+            </v-avatar>
+          </div>
+          <div class="text-truncate" style="width:150px;">
+            <div class="text-truncate" style="width:150px;">{{item.userInfo.display_name}}
+              <span class="text-caption">
+                ({{item.title}})
+              </span>
+            </div>
+            <div class="text-truncate text-caption" style="width:150px;">{{item.game_name}}</div>
+          </div>
+          <div>
+            <div class="error--text text-caption"><v-icon color="error" x-small class="pr-1">mdi-circle</v-icon>{{viewerkFormatter(item.viewer_count)}}</div>
+          </div>
+        </v-card-text>
       </v-card>
     </v-col>
   </v-row>
+  <v-row v-else class="d-flex justify-center">
+    <v-alert type="error">
+      <div>
+        로그인이 필수입니다.
+      </div>
+    </v-alert>
+  </v-row>
   <v-subheader>Follow All</v-subheader>
-  <v-row class="d-flex justify-start pb-5">
+  <v-row class="d-flex justify-start pb-5" v-if="islogin">
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
-    v-for="item in followResult[1]"
+    v-for="item in streamerList.follow"
     :key="item.to_id">
-      <v-card outlined>
+    <v-card class="rounded-xl" outlined>
+      <v-card-title>
         <v-avatar
           size="40"
         >
           <img :src="item.profile_image_url" alt="alt">
         </v-avatar>
-      </v-card>
+        <span>{{item.display_name}}</span>
+      </v-card-title>
+    </v-card>
     </v-col>
+  </v-row>
+  <v-row v-else class="d-flex justify-center">
+    <v-alert type="error">
+      <div>
+        로그인이 필수입니다.
+      </div>
+    </v-alert>
   </v-row>
 </v-container>
 </template>
@@ -90,6 +122,7 @@
 <script>
 import axios from 'axios';
 import StarBtnDialogVue from '../components/dialog/StarBtnDialog.vue';
+
 export default {
   components: {
     StarBtnDialogVue,
@@ -97,17 +130,15 @@ export default {
   data() {
     return {
       currlist:[],
-      dialog:'',
-      followResult:[],
       clips: [],
-      followStream:[],
+      streamerList:{
+        follow:[],
+        stream:[],
+        liked:[],
+      },
       followList:[],
       streamFollowList:[],
-      following:[],
-      dataLoading: false,
-      searchUserList:[],
-      check: false,
-      searching: false,
+      islogin: false,
     };
   },
   methods: {
@@ -122,23 +153,6 @@ export default {
     },
     sortByFollower(element){
       return element.sort((a,b) => b.follower_count - a.follower_count);
-    },
-    initData(){
-      this.searchUserList.forEach((element) =>{
-        this.$store.commit('SET_isChecked', {target:element, data: false})
-      })
-      this.searchUserList = [];
-    },
-    toggleClip(el) {
-      const userIdx =  this.searchUserList.findIndex((ele) => ele.id === el.id);
-      if (!el.is_checked) {
-        this.searchUserList.push(el);
-        this.$store.commit('SET_isChecked', {target:el, data:true})
-      } else {
-        this.searchUserList.splice(userIdx,1);
-        this.$store.commit('SET_isChecked', {target:el, data:false})
-        // this.searchUserList.push(el)
-      }
     },
     getEndDate(el) {
       const startedAt = new Date(el).getTime();
@@ -175,53 +189,60 @@ export default {
       }
       return Math.abs(el);
     },
-    async getUserInfo(element) {
-      await axios.get('https://api.twitch.tv/helix/users',{
+    getUserInfo(element) {
+      return axios.get('https://api.twitch.tv/helix/users',{
         params: {
           id : element,
         },
         headers:this.$store.state.headerConfig,
-      }).then( (res) => {
-        console.log(element);
-        console.log(res);
-        // element.userInfo = res.data.data;
-      })
+      });
     },
-    async getFollowList(){
+    async getFollowList(userInfo){
      await axios.get('https://api.twitch.tv/helix/users/follows',{
         params:{
-          from_id: this.$store.state.userInfo.uid.split('twitch:')[1],
+          from_id: userInfo.uid.split('twitch:')[1],
           first: 100,
         },
         headers:this.$store.state.headerConfig,
-      }).then((res) => {
+      }).then( async (res) => {
+        console.log(res.data.data);
         this.followList = res.data.data.map( v => {
           return v.to_id;
         })
-        this.getUserInfo([...this.followList]);
+        const result = await this.getUserInfo([...this.followList]);
+        this.streamerList.follow = result.data.data.sort((a,b) => b.view_count - a.view_count);
     })
     },
-    async getStreamFollowList(){
+    async getStreamFollowList(userInfo){
       const token = localStorage.getItem('twitchAuthToken');
       await axios.get('https://api.twitch.tv/helix/streams/followed',{
         params:{
-          user_id: this.$store.state.userInfo.uid.split('twitch:')[1]
+          user_id: userInfo.uid.split('twitch:')[1]
         },
         headers:{
           Authorization: `Bearer ${token.split(/"/)[1]}`,
           'client-id': process.env.VUE_APP_TWITCH_CLIENT_ID,
         }
-      }).then((res) => {
+      }).then(async (res) => {
         this.streamFollowList = res.data.data.map( v => {
           return v.user_id;
         });
-        this.getUserInfo([...this.streamFollowList])
-      })
-    },
+        const result = await this.getUserInfo([...this.streamFollowList]);
+        res.data.data.forEach((element) => {
+          const index = result.data.data.findIndex((v) => v.id === element.user_id);
+          element.userInfo = result.data.data[index];
+        })
+        this.streamerList.stream = res.data.data;
+        })
+      },
     async postProcess(){
-      await this.getStreamFollowList();
-      await this.getFollowList();
-    }
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      if(userInfo){
+        this.islogin = true;
+        await this.getStreamFollowList(userInfo);
+        await this.getFollowList(userInfo);
+      }
+    },
         // Authoriation: `Bearer ${this.$store.state.twitchAuthToken}`
   },
   computed: {
@@ -229,10 +250,10 @@ export default {
       return new Date().toISOString();
     },
   },
-  async created() {
+  async mounted() {
     await this.postProcess();
+  }
 
-  },
 };
 </script>
 <style lang="scss">

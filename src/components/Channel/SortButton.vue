@@ -2,13 +2,12 @@
 <v-row class="d-flex align-center py-3">
     <v-btn class="text-caption mr-3" :color="clipSort === 'vids' ? 'success' : ''" @click="changeSortType(), $store.commit('SET_DateSort',{text: null, start: null, end: null})">Sort By Vids</v-btn>
     <v-menu
-    v-model="menu"
+      v-model="menu"
       offset-y>
-      <template v-slot:activator="{ on, attrs }">
+      <template v-slot:activator="{ on }">
         <v-btn
           class="text-caption"
           :color="clipSort === 'date' ? 'success' : ''"
-          v-bind="attrs"
           v-on="on"
         >
           {{$store.state.dateSort.text === null ? "Sort By Date" : $store.state.dateSort.text}}
@@ -58,7 +57,7 @@
     <div v-if="this.clipSort === 'date'" class="pl-3 red--text text-caption">
       <v-icon color="error" size="1rem">mdi-calendar-range</v-icon> {{setDateFormat($store.state.dateSort)}}
     </div>
-  </v-row>
+</v-row>
 </template>
 
 <script>

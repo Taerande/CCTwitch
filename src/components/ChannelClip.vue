@@ -13,12 +13,12 @@
         <v-icon @click="shuffle">mdi-shuffle</v-icon>
       </div>
     </v-row>
-  <v-row>
+  <v-row class="d-flex justify-space-between">
     <v-col
       v-for="(item, index) in this.cliplist"
       :key="index"
       cols="12" xl="3" lg="3" md="4" sm="6" xs="12"
-      class="pa-3 clip-item"
+      class="ma-3 clip-item"
       :class="item.broadcaster_id"
 
       >

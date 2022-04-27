@@ -13,7 +13,7 @@
         <v-icon @click="shuffle">mdi-shuffle</v-icon>
       </div>
     </v-row>
-  <v-row>
+  <v-row class="d-flex justify-center">
     <v-col
       v-for="(item, index) in this.cliplist"
       :key="index"
@@ -117,7 +117,6 @@ export default {
       return Math.abs(num);
     },
     async channelInfiniteHandler($state) {
-      console.log(this.$store.state.dateSort);
       await axios.get('https://api.twitch.tv/helix/clips', {
         headers: this.$store.state.headerConfig,
         params: {

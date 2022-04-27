@@ -18,17 +18,17 @@
           </v-icon>
         </v-btn>
         <div>
-            <v-btn
-            icon
-        v-if="!$vuetify.theme.dark"
-        @click="toggleDarkTheme()">
-          <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
+          <v-btn
+          icon
+          v-if="!$vuetify.theme.dark"
+          @click="toggleDarkTheme()">
+            <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
 
-        </v-btn>
-        <v-btn v-else
-        icon
-        @click="toggleDarkTheme()">
-          <v-icon color="red">mdi-weather-sunny</v-icon></v-btn>
+          </v-btn>
+          <v-btn v-else
+          icon
+          @click="toggleDarkTheme()">
+            <v-icon color="red">mdi-weather-sunny</v-icon></v-btn>
         </div>
       </v-card-text>
 

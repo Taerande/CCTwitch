@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar dark app flat color="twitch">
+  <v-app-bar app flat>
     <v-container
     class="align-center justify-center">
       <v-row class="d-flex align-center">
@@ -24,7 +24,7 @@
               </v-card-title>
               <v-card-text>
                 <v-list>
-                  <div class="text-caption pl-5 pt-8">Search</div>
+                  <div class="text-caption pl-5">Search</div>
                   <v-divider class="my-3"></v-divider>
                     <v-text-field
                       @keydown.enter="$store.commit('SET_SnackBar',{type:'info', text:'Success', value:true})"
@@ -36,39 +36,63 @@
                       placeholder="Find streamer"
                       solo
                     ></v-text-field>
-                  <div class="text-caption pl-5 pt-8">Menu</div>
+                  <div class="text-caption pl-5 pt-3">Menu</div>
                   <v-divider class="my-3"></v-divider>
-                  <v-list-item to="/">
+                  <v-list-item to="/" @click="drawer = false">
                     <v-icon color="twitch" class="pr-1">mdi-home</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Home</span>
                   </v-list-item>
-                  <v-list-item to="/trending">
+                  <v-list-item to="/trending" @click="drawer = false">
                     <v-icon color="green" class="pr-1">mdi-trending-up</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Trend</span>
                   </v-list-item>
-                  <v-list-item to="/cliplist">
+                  <v-list-item to="/cliplist" @click="drawer = false">
                     <v-icon color="blue" class="pr-1">mdi-playlist-check</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Cliplist</span>
                   </v-list-item>
-                  <v-list-item to="/liked">
+                  <v-list-item to="/liked" @click="drawer = false">
                     <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Liked</span>
                   </v-list-item>
                   <div class="text-caption pl-5 pt-8">User</div>
                   <v-divider class="my-3"></v-divider>
-                  <v-card flat>
-                    <v-card-text v-if="$store.state.userInfo">
+                  <v-card flat v-if="$store.state.userinfo.userInfo">
+                    <v-card-text>
                       <v-avatar
                       size="24">
                         <img
-                          :src="$store.state.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
+                          :src="$store.state.userinfo.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
                       </v-avatar>
-                    <span class="text-subtitle px-3">{{$store.state.userInfo.displayName}}</span>
+                    <span class="text-subtitle px-1">{{$store.state.userinfo.userInfo.displayName}}</span>
                     <div class="d-flex justify-center px-10 pt-5">
-                      <v-btn width="100%" color="error">Logout</v-btn>
+                      <v-btn width="100%" @click="logOut" :loading="logoutLoading" color="error">Logout</v-btn>
                     </div>
                     </v-card-text>
                   </v-card>
+                  <v-card flat v-else>
+                    <div class="d-flex justify-center px-10 pt-5">
+                     <SignInDialog @close-signin-dialog="closeDialog" :type="{parent:'quickMenu'}"></SignInDialog>
+                    </div>
+                  </v-card>
+                  <div class="text-caption pl-5 pt-8">Option</div>
+                  <v-divider class="my-3"></v-divider>
+                  <div>
+                    <v-btn
+                    depressed
+                    outlined
+                    v-if="!$vuetify.theme.dark"
+                    @click="toggleDarkTheme()">
+                      <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
+                      <span>Dark Mode</span>
+                    </v-btn>
+                    <v-btn v-else
+                    depressed
+                    class="text-capitalize text-caption"
+                    @click="toggleDarkTheme()">
+                      <v-icon color="red">mdi-weather-sunny</v-icon>
+                      <span>Dark Theme</span>
+                    </v-btn>
+                  </div>
                 </v-list>
               </v-card-text>
             </v-card>
@@ -112,46 +136,13 @@
         </div>
       </v-row>
     </v-container>
-    <v-menu offset-y v-if="$store.state.userInfo">
-      <template v-slot:activator="{ on }">
-        <v-btn icon v-on="on">
-          <v-icon>mdi-menu</v-icon>
-        </v-btn>
-      </template>
-      <v-card tile>
-        <v-card-title class="px-3 d-flex justify-center">
-          <v-avatar
-            size="48"
-          >
-            <img
-            :src="$store.state.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
-          </v-avatar>
-          <span class="text-subtitle px-3">{{$store.state.userInfo.displayName}}</span>
-        </v-card-title>
-        <v-divider class="mx-3"></v-divider>
-        <v-card-text class="ma-0 pa-0">
-          <v-list>
-            <v-list-item>
-              <router-link class="ma-0 pa-0" to="/cliplist">
-                <v-icon class="pr-2">mdi-playlist-check</v-icon>
-                <span class="text-button">클립목록</span>
-              </router-link>
-            </v-list-item>
-            <v-list-item>
-              <v-icon class="pr-2">mdi-account-group</v-icon>
-              <span class="text-button">팔로우</span>
-            </v-list-item>
-          </v-list>
-        </v-card-text>
-        <v-divider class="mx-3"></v-divider>
-        <v-card-actions class="d-flex justify-center">
-          <v-list-item>
-            <v-icon class="pr-1">mdi-logout</v-icon>
-            <span @click="logOut" class="text-subtitle-2 text-lg-body-1 pr-1">로그아웃</span>
-          </v-list-item>
-        </v-card-actions>
-      </v-card>
-    </v-menu>
+    <v-avatar
+      v-if="$store.state.userinfo.userInfo"
+      size="36"
+    >
+      <img
+      :src="$store.state.userinfo.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
+    </v-avatar>
     <SignInDialog :type="{parent:'appbar'}" v-else></SignInDialog>
     <template v-slot:extension v-if="$vuetify.breakpoint.mdAndUp">
       <router-link to="/trending">
@@ -194,21 +185,34 @@ export default {
   },
   data() {
     return {
-      drawer: false,
       dialog: false,
+      logoutLoading: false,
+      drawer: false,
     };
   },
   methods: {
-    logOut(){
-      this.$firebase.auth().signOut().then( () => console.log('log Out success'));
-      this.$store.commit('SET_UserInfo', null);
-      if(this.$route.path !== '/'){
-        this.$router.push({path:'/'})
-      }
+    toggleDarkTheme() {
+      this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
+      localStorage.setItem('dark', this.$vuetify.theme.dark);
+    },
+    async logOut(){
+      this.logoutLoading = true;
+      await setTimeout( async () => {
+        await this.$firebase.auth().signOut().then(() =>{
+        this.logoutLoading = false;
+        this.$store.commit('SET_UserInfo', null);
+        localStorage.removeItem('userInfo');
+        if(this.$route.path !== '/'){
+          this.$router.push({path:'/'})
+        }
+      });
+      this.closeDialog();
       this.$store.commit('SET_SnackBar',{type: 'error', text:'로그아웃', value:true})
+      }, 500);
     },
     closeDialog(){
-      this.dialog = false;
+      console.log('close');
+      this.drawer = false;
     },
     searchChannel(el) {
       this.$store.state.searchQuery = el;
@@ -221,7 +225,7 @@ export default {
           q: el,
         },
       });
-      this.dialog = false;
+      this.drawer = false;
     },
   },
   created() {
@@ -236,7 +240,9 @@ export default {
 .v-toolbar__extension{
   padding-top: 0px !important;
 }
-
+.v-text-field__details{
+  display: none;
+}
 #app-bar{
   position: sticky;
   top: 0;
@@ -248,7 +254,7 @@ export default {
   margin: 24px;
   overflow-y: auto;
   pointer-events: auto;
-  transition: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   width: 100%;
   z-index: inherit;
   box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
@@ -256,7 +262,7 @@ export default {
 .v-dialog--fullscreen.drawer{
   border-radius: 5px;
   margin: 0;
-  height: 70vh;
+  height: 70%;
   position: fixed;
   overflow-y: auto;
   top: 30%;
@@ -267,10 +273,10 @@ export default {
   .v-dialog--fullscreen.drawer{
   border-radius: 10px;
   margin: 0;
-  height: 50vh;
+  height: 70%;
   position: fixed;
   overflow-y: auto;
-  top: 50%;
+  top: 30%;
   left: 0;
   width: 100%;
 }

@@ -96,12 +96,11 @@ app.get('/signin/twitch/callback', async (req, res) => {
     await updateUser(userInfo, id);
     await authenticateUser(userInfo, id);
     const token = await getAuthToken(id);
-    // res.send(token);
-    res.redirect(frontendUrl+'/?token='+token+'?twitchToken='+twtitchAccessToken);
+    res.redirect(frontendUrl+'/?token='+token+'&twitchToken='+twtitchAccessToken);
   } catch (err) {
     console.error(err);
   }
 
 })
 
-  module.exports = app
+module.exports = app

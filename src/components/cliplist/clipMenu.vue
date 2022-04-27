@@ -1,6 +1,6 @@
 <template>
 <v-menu
-v-if="$store.state.userInfo"
+v-if="$store.state.userinfo.userInfo"
 :nudge-left="this.$vuetify.breakpoint.xs ? '140' : '0'"
 offset-x>
   <template v-slot:activator="{on, attrs}">
@@ -14,10 +14,10 @@ offset-x>
       <span class="text-caption pl-1">URL 복사</span>
     </v-list-item>
     <pinClipVue
-      v-if="$store.state.userInfo"
+      v-if="$store.state.userinfo.userInfo"
       :clipData="{data:clip.clipData, type:'menu'}"></pinClipVue>
     <DeleteDialog
-      v-if="clip.listData.authorId === $store.state.userInfo.uid"
+      v-if="clip.listData.authorId === $store.state.userinfo.userInfo.uid"
       :delete="{type:'clip', data:{target: clip.clipData, belongsTo: clip.listData.id}}">
     </DeleteDialog>
     <v-list-item @click="downloadClip(clip.clipData)">

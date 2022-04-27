@@ -2,18 +2,19 @@
 <v-dialog persistent no-click-animation v-model="dialog" max-width="900" @keydown.esc="dialog = false">
   <template v-slot:activator="{on}">
     <v-icon v-if="type.parent == 'pinclip'" v-on="on" small color="error">mdi-pin-outline</v-icon>
-    <v-btn v-else v-on="on" class="twitch">
+    <v-btn v-on="on" :loading="loginLoading" v-else-if="type.parent == 'quickMenu'" width="100%" dark color="twitch">Login</v-btn>
+    <v-btn v-else v-on="on" class="twitch" :loading="loginLoading">
       <span>로그인</span>
     </v-btn>
   </template>
   <v-card class="pa-5">
     <v-card-title class="d-flex justify-center">
       <span class="px-3">로그인</span>
-      <v-btn class="absolute-right" color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
+      <v-btn class="absolute-right" color="error" icon @click="closeDialog"><v-icon>mdi-close</v-icon></v-btn>
     </v-card-title>
     <v-card-text>
       <v-row class="d-flex justify-center py-5">
-        <v-btn x-large dark color="twitch" depressed rounded class="mx-3" @click="AuthenticateWithTwitch">
+        <v-btn x-large dark color="twitch" depressed rounded class="mx-3" @click="AuthenticateWithTwitch" :loading="loginLoading">
           <v-icon large>mdi-twitch</v-icon>
           <span>트위치로 로그인하기</span>
         </v-btn>
@@ -29,11 +30,17 @@ export default {
   props:['type'],
   data() {
     return {
+      loginLoading: false,
       dialog:false,
     }
   },
   methods: {
+    closeDialog(){
+      this.loginLoading = false;
+      this.dialog = false;
+    },
     async AuthenticateWithTwitch(){
+      this.loginLoading = true;
       const state = crypto.randomBytes(16).toString("hex");
       const codeUri =
       `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&force_verify	=true&redirect_uri=`+this.$store.state.redirectUri+`/signin/twitch/callback&scope=openid+user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}&claims={"id_token":{"email":null,"email_verified":null},"userinfo":{"preferred_username":null,"email":null,"email_verified":null,"picture":null}}`;
@@ -41,6 +48,11 @@ export default {
       await this.$firebase.auth().signInWithCustomToken(code.token);
       localStorage.setItem('twitchAuthToken', JSON.stringify(code.twitchToken));
       this.$store.commit('SET_TwitchOAuthToken', JSON.stringify(code.twitchToken).slice(1,-1));
+      if(this.type.parent === 'quickMenu'){
+        console.log('hi');
+        this.$emit('close-signin-dialog');
+      }
+      this.loginLoading = false;
       this.dialog = false;
       this.$store.commit('SET_SnackBar',{type: 'info', text:'로그인 성공', value:true})
 
@@ -71,16 +83,19 @@ export default {
         } catch (e) {}
         if (url) {
           const parsedCode = {
-            'token' : url.split('?token=')[1].split('?twitchToken=')[0],
-            'twitchToken' : url.split('?token=')[1].split('?twitchToken=')[1],
+            'token' : url.split('?token=')[1].split('&twitchToken=')[0],
+            'twitchToken' : url.split('?token=')[1].split('&twitchToken=')[1],
           }
-          // const code = parsedCode.code;
           authWindow.close();
           resolve(parsedCode);
         }
-      }, 500);
+      }, 100);
     });
     },
+  },
+  mounted() {
+    console.log();
+
   },
 }
 </script>

@@ -11,7 +11,7 @@
     <v-row>
       <v-col>
         <v-card>
-          {{ $store.state.userInfo }}
+          {{ $store.state.userinfo.userInfo }}
         </v-card>
       </v-col>
     </v-row>

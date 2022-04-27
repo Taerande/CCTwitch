@@ -170,8 +170,8 @@ export default {
     async saveCliplist(){
       this.form.cliplist = [];
       this.form.createdAt = new Date();
-      this.form.authorName = this.$store.state.userInfo.displayName || '';
-      this.form.authorId = this.$store.state.userInfo.uid || '';
+      this.form.authorName = this.$store.state.userinfo.userInfo.displayName || '';
+      this.form.authorId = this.$store.state.userinfo.userInfo.uid || '';
       await this.$firestore.collection('cliplist').add(this.form);
       await this.$store.commit('SET_SnackBar',{type:'info', text:`${this.form.title}이 생성 되었습니다.`, value:true});
       this.initInput();

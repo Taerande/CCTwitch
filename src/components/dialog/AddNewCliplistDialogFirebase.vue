@@ -96,8 +96,8 @@ export default {
     },
     saveCliplist(){
       this.form.createdAt = this.$moment().toISOString();
-      this.form.authorName = this.$store.state.userInfo.displayName || '';
-      this.form.authorId = this.$store.state.userInfo.uid || '';
+      this.form.authorName = this.$store.state.userinfo.userInfo.displayName || '';
+      this.form.authorId = this.$store.state.userinfo.userInfo.uid || '';
       this.$firestore.collection('cliplist').add(this.form);
     }
   },

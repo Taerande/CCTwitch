@@ -79,8 +79,9 @@ export default {
 
   },
   async created() {
-    if(this.$store.state.userInfo){
-      this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userInfo.uid).onSnapshot((sn) => {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    if(userInfo){
+      this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',userInfo.uid).onSnapshot((sn) => {
         if(sn.empty){
           this.cliplist = []
           return

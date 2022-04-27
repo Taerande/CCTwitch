@@ -180,7 +180,7 @@ import axios from 'axios'
 import clips from '../components/ChannelClip.vue'
 import clipsByDate from '../components/ChannelClipByDate.vue'
 import vids from '../components/vids.vue'
-import SortButton from '../components/Channel/SortButton.vue'
+import SortButton from '../components/Channel/SortButton'
 
 export default {
   components: {

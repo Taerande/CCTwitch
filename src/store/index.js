@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { userinfo } from './modules/auth';
 
 Vue.use(Vuex);
 
@@ -31,7 +32,6 @@ export default new Vuex.Store({
     likedStreamer: [],
     pinnedClips: [],
     cliplist: [],
-    userInfo: null,
     currentCliplist:[],
     currentListData:'',
     dateSort: {
@@ -85,9 +85,6 @@ export default new Vuex.Store({
     SET_isChecked(state, response) {
       const targetIndex = state.likedStreamer.findIndex((el) => el.id === response.target.id);
       state.likedStreamer[targetIndex].is_checked = response.data;
-    },
-    SET_UserInfo(state, response) {
-      state.userInfo = response;
     },
     // SET_SnackBar(state, response) {
     //   state.snackbar.type = response.type;
@@ -317,5 +314,6 @@ export default new Vuex.Store({
   actions: {
   },
   modules: {
+    userinfo: userinfo,
   },
 });

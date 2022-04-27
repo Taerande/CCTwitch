@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-  v-if="$store.state.userInfo"
+  v-if="$store.state.userinfo.userInfo"
   v-model="dialog"
   scrollable
   width="400px">
@@ -85,8 +85,8 @@ export default {
 
   },
   async created() {
-    if(this.$store.state.userInfo){
-      this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userInfo.uid).onSnapshot((sn) => {
+    if(this.$store.state.userinfo.userInfo){
+      this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userinfo.userInfo.uid).onSnapshot((sn) => {
         if(sn.empty){
           this.cliplist = []
           return
