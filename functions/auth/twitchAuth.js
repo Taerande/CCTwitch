@@ -10,14 +10,13 @@ const cors = require('cors')
 //   databaseURL: "https://twitchhotclip-default-r.asia-southeast1.firebasedatabase.app"
 // });
 
-
-app.use(cors())
+app.use(cors());
+const clientId = process.env.TWITCH_CLIENT_ID;
+const clientSecret = process.env.TWITCH_CLIENT_SECRET;
+const redirectUri = process.env.TWITCH_CLIENT_REDIRECTION_URI_DEV;
+const frontendUrl = process.env.VUE_APP_EMBED_PARERNT_DEV;
 
 app.get('/signin/twitch/callback', async (req, res) => {
-  const clientId = process.env.TWITCH_CLIENT_ID;
-  const clientSecret = process.env.TWITCH_CLIENT_SECRET;
-  const redirectUri = process.env.TWITCH_CLIENT_REDIRECTION_URI_DEV;
-  const frontendUrl = process.env.VUE_APP_EMBED_PARERNT_DEV;
   const code = req.query.code;
   const getUserInfo = async (auth) => {
     const endpoint = "https://api.twitch.tv/helix/users";
@@ -91,16 +90,16 @@ app.get('/signin/twitch/callback', async (req, res) => {
     const userData = await getUserInfo(data);
     const userInfo = userData.data[0];
     const id = `twitch:${userInfo.id}`;
-    const twtitchAccessToken = data.access_token;
+    const twitchOAuthToken = Buffer.from(JSON.stringify(data)).toString('base64');
 
     await updateUser(userInfo, id);
     await authenticateUser(userInfo, id);
     const token = await getAuthToken(id);
-    res.redirect(frontendUrl+'/?token='+token+'&twitchToken='+twtitchAccessToken);
+    res.redirect(frontendUrl+'/?token='+token+'&twitchOAuthToken='+twitchOAuthToken);
   } catch (err) {
     console.error(err);
   }
 
-})
+});
 
 module.exports = app

@@ -17,6 +17,8 @@ exports.twitchAuth = functions.region('asia-northeast3').https.onRequest(require
 
 exports.twitchTokenValidation = functions.region('asia-northeast3').https.onRequest(require('./auth/twitchAppAccessToken.js'));
 
+exports.twitchOauthToken = functions.region('asia-northeast3').https.onRequest(require('./auth/twitchOAuthToken.js'));
+
 exports.deleteUser = functions.region('asia-southeast1').auth.user().onDelete(async (user) => {
   const {uid} = user
   db.ref('users').child(uid).remove()
