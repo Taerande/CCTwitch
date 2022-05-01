@@ -5,7 +5,7 @@
   v-model="dialog">
   <template v-slot:activator="{ on }">
     <td
-    class="pa-2 canSort table-thumbnail"
+    class="ma-2 canSort table-thumbnail"
     v-on="on"
     >
       <v-img

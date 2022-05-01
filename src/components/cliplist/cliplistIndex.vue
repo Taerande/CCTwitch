@@ -46,7 +46,7 @@
     </div>
   </v-row>
   <expandTableVue
-  v-if="cliplist.cliplist.length >0"
+  v-if="cliplist.cliplist.length > 0"
   :clipListData="cliplist">
   </expandTableVue>
   <v-container v-else style="height:60vh;" class="d-flex justify-center align-center">

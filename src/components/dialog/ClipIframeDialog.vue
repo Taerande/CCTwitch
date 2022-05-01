@@ -29,7 +29,7 @@
       </v-container>
     </v-img>
   </template>
-    <div class="black d-flex justify-end">
+    <div class="black d-flex justify-end" v-if="dialog">
       <v-btn :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
       <pinClip name="channelClipPin" :clipData="{data:clipData}"></pinClip>
       <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>

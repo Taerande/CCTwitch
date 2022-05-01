@@ -18,7 +18,7 @@ const Trending = () => import(/* webpackChunkName: "trending" */ '@/views/Trendi
 const Cliplist = () => import(/* webpackChunkName: "cliplist" */ '@/views/Cliplist.vue');
 const cliplistList = () => import(/* webpackChunkName: "cliplistList" */ '@/components/cliplist/cliplistList.vue');
 const cliplistIndex = () => import(/* webpackChunkName: "cliplistIndex" */ '@/components/cliplist/cliplistIndex.vue');
-const Liked = () => import(/* webpackChunkName: "liked" */ '@/views/Liked.vue');
+const streamer = () => import(/* webpackChunkName: "streamer" */ '@/views/Streamer.vue');
 // const Analysis = () => import(/* webpackChunkName: "Analysis" */ '@/views/Analysis.vue');
 // const Random = () => import(/* webpackChunkName: "Random" */ '@/views/Random.vue');
 const PageNotFound = () => import(/* webpackChunkName: "PageNotFound" */ '@/views/PageNotFound.vue');
@@ -68,9 +68,9 @@ const routes = [
     component: cliplistList,
   },
   {
-    path: '/liked',
-    name: 'Liked',
-    component: Liked,
+    path: '/streamer',
+    name: 'streamer',
+    component: streamer,
   },
   // {
   //   path: '/analysis',

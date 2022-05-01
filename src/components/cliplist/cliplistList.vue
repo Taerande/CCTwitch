@@ -1,5 +1,5 @@
 <template>
-<v-container fluid v-if="loading">
+<v-container>
   <v-row class="pt-5 justify-center align-baseline">
     <div class="py-3">
       <span class="text-h3 font-weight-bold pr-3">My Cliplists</span>
@@ -9,7 +9,10 @@
       <AddNewCliplistDialog :type="{type:'add'}"></AddNewCliplistDialog>
     </div>
   </v-row>
-  <v-row class="d-flex pt-10" v-if="cliplist.length > 0">
+  <v-row v-if="loading" class="absolute-center">
+    <v-progress-circular indeterminate></v-progress-circular>
+  </v-row>
+  <v-row class="d-flex pt-10" v-else-if="cliplist.length > 0 && !loading">
     <v-col
      cols="12" xl="2" lg="3" md="4" sm="6" xs="12"
      class="pa-3" v-for="(item, listIndex) in cliplist" :key="listIndex">
@@ -38,14 +41,11 @@
       </v-card>
     </v-col>
   </v-row>
-  <!-- <v-row v-else class="d-flex justify-center align-center" style="height:60vh;">
-    <h1>😥There is no cliplist</h1>
-  </v-row> -->
-</v-container>
-<v-container v-else>
-  <v-alert type="error" :value="true" class="absolute-center">
-    저장된 클립모음이 없습니다.
-  </v-alert>
+  <v-row v-else-if="cliplist.length === 0 && !loading" class="absolute-center">
+    <v-alert type="error">
+      Data Not Found
+    </v-alert>
+  </v-row>
 </v-container>
 </template>
 
@@ -79,28 +79,30 @@ export default {
 
   },
   async created() {
+    this.loading = true;
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-    if(userInfo){
-      this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',userInfo.uid).onSnapshot((sn) => {
-        if(sn.empty){
-          this.cliplist = []
-          return
-        }
-        this.cliplist = sn.docs.map( v => {
-          const item = v.data()
-          return {
-            id: v.id,
-            title: item.title,
-            description: item.description,
-            createdAt: item.createdAt,
-            isPublic: item.isPublic,
-            color: item.color,
-            cliplist: item.cliplist,
+      if(userInfo){
+        this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',userInfo.uid).onSnapshot( async (sn) => {
+          if(sn.empty){
+            this.cliplist = []
+            return
           }
-        })
-      });
-      this.loading = true;
-    }
+          this.cliplist = await sn.docs.map( v => {
+            const item = v.data()
+            return {
+              id: v.id,
+              title: item.title,
+              description: item.description,
+              createdAt: item.createdAt,
+              isPublic: item.isPublic,
+              color: item.color,
+              cliplist: item.cliplist,
+            }
+          });
+          this.cliplist.sort((a,b) => b.createdAt - a.createdAt);
+        });
+      }
+    this.loading = false;
   },
   mounted() {
   },

@@ -3,12 +3,21 @@
     <AppBar app></AppBar>
     <bookmark app></bookmark>
     <v-main class="app-container" app>
-      <v-progress-circular v-if="this.$store.state.firbaseLoaded" class="absolute-center" color="twitch" size="60" width="6" indeterminate></v-progress-circular>
-      <router-view class="mx-auto" :key="$route.fullPath" />
+      <v-progress-circular v-if="this.$store.state.firebaseLoaded" class="absolute-center" color="twitch" size="60" width="6" indeterminate></v-progress-circular>
+      <v-container class="absolute-center" v-else-if="!initData">
+        <v-row>
+          <v-progress-circular class="mx-auto" indeterminate color="twitch" width="8" size="60"></v-progress-circular>
+        </v-row>
+        <v-row class="d-flex justify-center pa-10">
+          <div class="text-h5">Welcome to CCTwitch</div>
+        </v-row>
+      </v-container>
+      <router-view v-else class="mx-auto" :key="$route.fullPath" />
     </v-main>
     <SnackBar app></SnackBar>
     <Footer app></Footer>
   </v-app>
+
 </template>
 
 <script>
@@ -27,7 +36,9 @@ export default {
     SnackBar,
   },
   data() {
-    return {}
+    return {
+      initData: false,
+    }
   },
   methods: {
     searchBarToggle() {
@@ -35,46 +46,49 @@ export default {
     },
   },
  async created() {
-    const likesInit = JSON.parse(localStorage.getItem('alllikes'))
-    const cliplistInit = JSON.parse(localStorage.getItem('allCliplists'))
-    const userInfo = localStorage.getItem('userInfo');
-    if(userInfo){
-      this.$store.commit('SET_UserInfo',userInfo)
-    }
-    if (likesInit === null) {
-      const likes = []
-      localStorage.setItem('alllikes', JSON.stringify(likes))
-    }
-    if (cliplistInit === null) {
-      const likes = []
-      localStorage.setItem('allCliplists', JSON.stringify(likes))
-    }
-    this.$store.commit('INIT_localStorage')
-    this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'))
+    // const likesInit = JSON.parse(localStorage.getItem('alllikes'))
+    // const cliplistInit = JSON.parse(localStorage.getItem('allCliplists'))
+    // const userInfo = localStorage.getItem('userInfo');
+    // if(userInfo){
+    //   this.$store.commit('SET_UserInfo',userInfo)
+    // }
+    // if (likesInit === null) {
+    //   const likes = []
+    //   localStorage.setItem('alllikes', JSON.stringify(likes))
+    // }
+    // if (cliplistInit === null) {
+    //   const likes = []
+    //   localStorage.setItem('allCliplists', JSON.stringify(likes))
+    // }
+    // this.$store.commit('INIT_localStorage')
+    // this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'))
 
-    // 백엔드에서 처리 해야댐.. twitch auth validation
-    if(localStorage.getItem('twitchAppAccessToken')){
-      axios.get('https://id.twitch.tv/oauth2/validate',{
-        headers:{
-          Authorization: `OAuth ${localStorage.getItem('twitchAppAccessToken').slice(1,-1)}`
-        }
-      }).then((res) => {
-        //정상
+    // // 백엔드에서 처리 해야댐.. twitch auth validation
+    // if(localStorage.getItem('twitchAppAccessToken')){
+    //   await axios.get('https://id.twitch.tv/oauth2/validate',{
+    //     headers:{
+    //       Authorization: `OAuth ${localStorage.getItem('twitchAppAccessToken').slice(1,-1)}`
+    //       }
+    //   }).then((res) => {
+    //     //정상
 
-      }).catch((error) => {
-        //비정상, 앱엑세스 토큰 재발급 Backend 처리
-        axios.get(this.$store.state.appTokenURL).then((res) => {
-          localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
-        });
-      })
-    } else {
-      //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
-      axios.get(this.$store.state.appTokenURL)
-      .then((res) => {
-        //받아온 엑세스토큰 로컬스토리지에 저장
-        localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
-        });
-      }
+    //   }).catch(async (error) => {
+    //     //비정상, 앱엑세스 토큰 재발급 Backend 처리
+    //     await axios.get(this.$store.state.appTokenURL).then((res) => {
+    //       console.log('비정상',res);
+    //       localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
+    //     });
+    //   })
+    // } else {
+    //   //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
+    //   await axios.get(this.$store.state.appTokenURL)
+    //   .then((res) => {
+    //     console.log('토큰없어',res);
+    //     //받아온 엑세스토큰 로컬스토리지에 저장
+    //     localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
+    //     });
+    // }
+    this.initData = true;
   }
 }
 </script>
@@ -88,7 +102,6 @@ export default {
   top:40vh;
   left:50%;
   transform: translate(-50%, -50%);
-  z-index: 500;
 }
 header {
   height: fit-content;

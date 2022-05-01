@@ -1,5 +1,5 @@
 <template>
-<v-container v-if="loading">
+<v-container>
   <v-row class="pb-5">
     <v-col>Trending Page</v-col>
   </v-row>
@@ -7,7 +7,10 @@
     <v-btn color="success" @click="loadData">Load Data</v-btn>
     <AddNewCliplistDialog></AddNewCliplistDialog>
   </v-row>
-  <v-row class="pt-15">
+  <v-row v-if="loading" class="absolute-center">
+    <v-progress-circular indeterminate></v-progress-circular>
+  </v-row>
+  <v-row class="pt-15" v-else-if="items.length > 0 && !loading">
     <v-col cols="3" class="pa-3" v-for="item in items" :key="item.id">
       <v-card outlined @click="$router.push({path:`clip/${item.id}`})">
         <v-card-title class="d-flex">
@@ -55,20 +58,17 @@
               </v-card>
             </v-list-item>
           </v-list>
-          <v-alert v-else type="error" class="rounded-xl">
-            <span>
-              저장된 클립이 없습니다.
-            </span>
-          </v-alert>
         </v-card-text>
       </v-card>
     </v-col>
   </v-row>
+  <v-row v-else-if="items.length === 0 && !loading" class="absolute-center">
+    <v-alert type="error" class="rounded-xl">
+      Data Not Found
+    </v-alert>
+  </v-row>
 </v-container>
 
-<v-container v-else fluid fill-height>
-  <v-progress-circular class="absolute-center" color="twitch" size="60" width="6" indeterminate></v-progress-circular>
-</v-container>
 </template>
 
 <script>
@@ -81,7 +81,7 @@ export default {
   data() {
     return {
       loading:false,
-      items:null,
+      items:[],
     };
   },
   methods: {
@@ -89,6 +89,7 @@ export default {
       return this.$moment(el).format('lll');
     },
     async loadData(){
+      this.loading = true;
       const sn = await this.$firestore.collection('cliplist').where('isPublic','==',true).orderBy("createdAt","desc").get();
       this.items = await sn.docs.map( v => {
         const item = v.data();
@@ -116,10 +117,10 @@ export default {
   },
   async created() {
     await this.loadData();
-    this.items.forEach((item) => {
+    await this.items.forEach((item) => {
       this.getUserInfo(item);
     })
-    this.loading = true;
+    this.loading = false;
   },
 }
 </script>

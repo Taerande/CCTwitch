@@ -43,11 +43,15 @@ export default {
       this.loginLoading = true;
       const state = crypto.randomBytes(16).toString("hex");
       const codeUri =
-      `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&force_verify	=true&redirect_uri=`+this.$store.state.redirectUri+`/signin/twitch/callback&scope=openid+user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}&claims={"id_token":{"email":null,"email_verified":null},"userinfo":{"preferred_username":null,"email":null,"email_verified":null,"picture":null}}`;
+      `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&force_verify	=true&redirect_uri=`+this.$store.state.redirectUri+`/signin/twitch/callback&scope=user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}&claims={"userinfo":{"preferred_username":null,"email":null,"email_verified":null,"picture":null}}`;
       const code = await this.getCode(codeUri);
-      await this.$firebase.auth().signInWithCustomToken(code.token);
-      localStorage.setItem('twitchAuthToken', JSON.stringify(code.twitchToken));
-      this.$store.commit('SET_TwitchOAuthToken', JSON.stringify(code.twitchToken).slice(1,-1));
+      const twitchOAuthToken = JSON.stringify(Buffer.from(code.twitchOAuthToken, 'base64').toString());
+
+      await this.$firebase.auth().setPersistence(this.$firebase.auth.Auth.Persistence.LOCAL).then(() => {
+        return this.$firebase.auth().signInWithCustomToken(code.token);
+      })
+
+      localStorage.setItem('twitchOAuthToken', JSON.parse(twitchOAuthToken));
       if(this.type.parent === 'quickMenu'){
         console.log('hi');
         this.$emit('close-signin-dialog');
@@ -83,8 +87,8 @@ export default {
         } catch (e) {}
         if (url) {
           const parsedCode = {
-            'token' : url.split('?token=')[1].split('&twitchToken=')[0],
-            'twitchToken' : url.split('?token=')[1].split('&twitchToken=')[1],
+            'token' : url.split('?token=')[1].split('&twitchOAuthToken=')[0],
+            'twitchOAuthToken' : url.split('?token=')[1].split('&twitchOAuthToken=')[1],
           }
           authWindow.close();
           resolve(parsedCode);

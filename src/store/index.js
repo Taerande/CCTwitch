@@ -6,12 +6,13 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    backendUrl: process.env.VUE_APP_BACKEND_URL_DEV,
     globalLan:'ko',
     appTokenURL:process.env.VUE_APP_TWITCH_APPTOKEN_ISSUE_DEV,
     redirectUri:process.env.VUE_APP_TWITCH_REDIRECTURI_DEV,
     embedUrl:process.env.VUE_APP_EMBED_PARERNT_DEV,
     clipCount:300,
-    firbaseLoaded: false,
+    firebaseLoaded: false,
     snackbarArr:[],
     snackbar: {
       type: 'error',
@@ -57,6 +58,16 @@ export default new Vuex.Store({
     },
     INIT_SnackBar(state){
       state.snackbarArr = [];
+    },
+    SWAPUP_currentCliplist(state, payload){
+      let temp = state.currentCliplist[payload]
+      state.currentCliplist[payload] = state.currentCliplist[payload + 1]
+      state.currentCliplist[payload + 1] = temp;
+    },
+    SWAPDOWN_currentCliplist(state, payload){
+      let temp = state.currentCliplist[payload]
+      state.currentCliplist[payload] = state.currentCliplist[payload - 1]
+      state.currentCliplist[payload - 1] = temp;
     },
     SET_SnackBar(state,response){
       if(state.snackbarArr.length >= 3){
@@ -116,6 +127,9 @@ export default new Vuex.Store({
     },
     SET_VidClipData(state, response) {
       state.VidClipData = response;
+    },
+    ADD_ClipInCurrentCliplist(state, payload){
+      state.currentCliplist.push(payload);
     },
     ADD_CurrentCliplist(state, payload){
       state.currentCliplist = [...state.currentCliplist, ...payload];

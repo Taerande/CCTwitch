@@ -4,7 +4,7 @@
     class="align-center justify-center">
       <v-row class="d-flex align-center">
         <div class="d-flex">
-          <v-btn dark icon @click="drawer = !drawer">
+          <v-btn icon @click="drawer = !drawer">
             <v-icon>mdi-menu</v-icon>
           </v-btn>
           <v-dialog
@@ -50,9 +50,9 @@
                     <v-icon color="blue" class="pr-1">mdi-playlist-check</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Cliplist</span>
                   </v-list-item>
-                  <v-list-item to="/liked" @click="drawer = false">
+                  <v-list-item to="/streamer" @click="drawer = false">
                     <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
-                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Liked</span>
+                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
                   </v-list-item>
                   <div class="text-caption pl-5 pt-8">User</div>
                   <v-divider class="my-3"></v-divider>
@@ -157,15 +157,15 @@
         <span class="text-subtitle-2 text-lg-body-1 pr-1">Cliplist</span>
       </div>
       </router-link>
-      <router-link class="ma-0 pa-0" to="/liked">
+      <router-link class="ma-0 pa-0" to="/streamer">
       <div class="px-2 rounded-pill"
       :style="{
-        background: $route.path === '/liked' ? 'rgb(119,44,232,0.4)' : '',
-        font: $route.path === '/liked' ? '1rem' : '3rem'
+        background: $route.path === '/streamer' ? 'rgb(119,44,232,0.4)' : '',
+        font: $route.path === '/streamer' ? '1rem' : '3rem'
       }"
       >
         <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
-        <span class="text-subtitle-2 text-lg-body-1 pr-1">Liked</span>
+        <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
       </div>
       </router-link>
     </template>

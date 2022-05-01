@@ -31,7 +31,7 @@
       <v-card-text>
         <v-list class="pt-5">
             <AddNewCliplistDialog :type="{type:'pin',data:{text: 'Add New List'}}"></AddNewCliplistDialog>
-          <v-list-item :disabled="item.cliplist.length >= 100" @click="addNewClip(item.id)" class="pa-1" v-for="(item,index) in cliplist" :key="index">
+          <v-list-item :disabled="item.cliplist.length >= 100" @click="addNewClip(item, index)" class="pa-1" v-for="(item,index) in cliplist" :key="index">
               <div class="cliplist-canvas" :style="{background: item.color}"></div>
               <v-list-item-content>
                 <v-list-item-title class="text-title">{{item.title}}</v-list-item-title>
@@ -68,19 +68,19 @@ export default {
     };
   },
   methods: {
-    async addNewClip(el){
-      let target = this.$firestore.collection('cliplist').doc(el);
-      target.update({
-        cliplist: this.$firebase.firestore.FieldValue.arrayUnion(this.clipData.data.id)
-      }).then( ( res ) => {
-        console.log('success',res);
-        this.$store.commit('SET_SnackBar',{type:'success', text:`${this.clipData.data.title}을 추가했습니다.`, value:true})
-      })
-      .catch( (error) => {
-        console.log('error',error);
-        this.$store.commit('SET_SnackBar',{type:'error', text:`${this.clipData.data.title}은 이미 있습니다.`, value:true})
-      })
-      // this.$emit('init',this.$store.state.snackbar.type)
+    async addNewClip(el, index){
+      //중복체크
+      const isInvolved =  this.cliplist[index].cliplist.find((element) => this.clipData.data.id === element);
+      if(isInvolved){
+         this.$store.commit('SET_SnackBar',{type:'error', text:`${this.clipData.data.title}은 이미 있습니다.`, value:true})
+      } else {
+        let target = this.$firestore.collection('cliplist').doc(el.id);
+        target.update({
+          cliplist: this.$firebase.firestore.FieldValue.arrayUnion(this.clipData.data.id)
+        }).then(() => {
+          this.$store.commit('SET_SnackBar',{type:'success', text:`${this.clipData.data.title}을 추가했습니다.`, value:true})
+        })
+      }
     }
 
   },

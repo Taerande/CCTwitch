@@ -4,15 +4,19 @@
   max-width="1280"
   v-model="dialog">
   <template v-slot:activator="{ on }">
-   <v-row v-on="on" class="d-flex align-center justify-start">
+   <v-row class="d-flex align-center justify-start">
       <v-col class="d-flex overflow-x-hidden">
         <v-img
-          max-width="120"
+          v-on="on"
+          class="clip-thumbnail"
+          max-width="160"
           :src="clipData.thumbnail_url || '@/assets/img/404.jpg'"
           lazy-src="@/assets/img/404.jpg">
+          <span class="duration grey darken-4 pa-1 text-caption text-weight-bold align-center">{{clipData.duration}}</span>
           </v-img>
-          <div class="pl-2" style="width:15rem;">
+          <div class="pl-2" style="width:20rem;">
             <div class="text-truncate">{{clipData.title}}</div>
+            <div class="text-truncate">{{clipData.broadcaster_name}}</div>
             <div class="text-caption d-flex align-center"><v-icon class="pr-1" x-small>mdi-eye</v-icon> {{viewerkFormatter(clipData.view_count)}}</div>
             <div class="text-caption">{{setDate(clipData.created_at)}}</div>
           </div>
@@ -105,7 +109,12 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-#clip-thumbnail{
+.clip-thumbnail{
   cursor: pointer;
+}
+.duration{
+  position: inherit;
+  top: 50%;
+  left: 50%;
 }
 </style>

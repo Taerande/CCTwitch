@@ -5,6 +5,7 @@
   </v-row>
   <v-divider></v-divider>
   <v-row
+  v-if="$store.state.searchList.length > 0 && !dataLoading"
   class="pa-0 pt-3 d-flex">
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in $store.state.searchList"
@@ -62,6 +63,9 @@
       </v-card>
     </v-col>
   </v-row>
+  <v-row v-else class="absolute-center">
+    <v-progress-circular indeterminate></v-progress-circular>
+  </v-row>
 </v-container>
 </template>
 
@@ -82,6 +86,7 @@ export default {
       this.$store.commit('SET_LikedStreamer', el);
     },
     async searchChannel(el) {
+      this.dataLoading = true;
       const lists = [];
       await axios.get('https://api.twitch.tv/helix/search/channels', {
         params: {
@@ -114,6 +119,7 @@ export default {
           }
         });
       }).catch((error) => console.log(error));
+      this.dataLoading = false;
       this.$store.commit('SET_SearchList', lists);
     },
     kFormatter(el) {

@@ -1,7 +1,14 @@
 <template>
   <v-row class="pb-5">
+    <v-row>
+      <v-spacer></v-spacer>
+      <playAllClipsDialog></playAllClipsDialog>
+    </v-row>
     <table v-if="$vuetify.breakpoint.smAndUp" border="0" cellspacing="0" cellpadding="0" :class="theme">
       <thead :style="{background:this.clipListData.color}">
+        <th>
+          <v-icon @click="draggable = !draggable">mdi-pencil</v-icon>
+        </th>
         <th class="table-thumbnail">썸네일</th>
         <th class="table-title text-center">제목</th>
         <th class="table-channel">
@@ -34,29 +41,45 @@
           메뉴
         </th>
       </thead>
-      <tbody>
-          <tr v-for="clip in setCurrList($store.state.currentCliplist)" :key="clip.id">
-            <ClipIframeDataTableDialog :clipData="clip"></ClipIframeDataTableDialog>
-            <td class="table-channel">{{clip.broadcaster_name}}</td>
-            <td class="table-date">{{setDate(clip.created_at)}}</td>
-            <td class="table-duration">{{Math.floor(clip.duration)}}</td>
-            <td class="table-views">{{viewerkFormatter(clip.view_count)}}</td>
-            <td class="d-flex align-center justify-center table-menu" style="height:inherit">
-              <clipMenuVue :clip="{clipData:clip, listData:clipListData}"></clipMenuVue>
-            </td>
-          </tr>
-        </tbody>
+      <tbody v-if="dataLoading">
+        <tr v-for="(clip, clipIndex) in currList" :key="clip.id">
+          <td>
+            <div v-if="draggable" class="d-flex flex-column">
+              <v-btn v-show="clipIndex > 0" @click="swapIndexUp(clipIndex)" color="error" icon>
+                <v-icon large>mdi-menu-up</v-icon>
+              </v-btn>
+              <v-btn  v-show="clipIndex < $store.state.currentCliplist.length - 1" color="success" @click="swapIndexDown(clipIndex)" icon>
+                <v-icon large>mdi-menu-down</v-icon>
+              </v-btn>
+            </div>
+          </td>
+          <ClipIframeDataTableDialog :clipData="clip"></ClipIframeDataTableDialog>
+          <td class="table-channel">{{clip.broadcaster_name}}</td>
+          <td class="table-date">{{setDate(clip.created_at)}}</td>
+          <td class="table-duration">{{Math.floor(clip.duration)}}</td>
+          <td class="table-views">{{viewerkFormatter(clip.view_count)}}</td>
+          <td class="d-flex align-center justify-center table-menu" style="height:inherit">
+            <clipMenuVue :clip="{clipData:clip, listData:clipListData}"></clipMenuVue>
+          </td>
+        </tr>
+      </tbody>
+      <v-row v-else class="pt-3">
+        <v-progress-circular class="horizontalCenter pt-3" indeterminate></v-progress-circular>
+      </v-row>
     </table>
-    <v-container v-else v-for="clip in setCurrList($store.state.currentCliplist)" :key="clip.id">
-        <v-container class="d-flex justify-space-between py-3">
-          <ClipIframeDataTableDialogMobile :clipData="clip"></ClipIframeDataTableDialogMobile>
-          <div class="d-flex align-center">
-            <clipMenuVue :clip="clip"></clipMenuVue>
-          </div>
-        </v-container>
-        <v-divider></v-divider>
+    <v-container v-else>
+    <v-progress-linear value="100" :color="clipListData.color"></v-progress-linear>
+      <v-container v-for="clip in currList" :key="clip.id">
+          <v-row class="justify-space-between py-3">
+            <ClipIframeDataTableDialogMobile :clipData="clip"></ClipIframeDataTableDialogMobile>
+            <div class="d-flex align-center">
+              <clipMenuVue :clip="{clipData:clip, listData:clipListData}"></clipMenuVue>
+            </div>
+          </v-row>
+          <v-divider></v-divider>
+      </v-container>
     </v-container>
-    <v-row class="d-flex justify-center pt-10">
+    <v-row class="d-flex justify-center pt-15">
       <v-pagination
       color="twitch"
       v-model="page"
@@ -72,16 +95,19 @@ import axios from 'axios';
 import ClipIframeDataTableDialog from '../dialog/ClipIframeDataTableDialog';
 import ClipIframeDataTableDialogMobile from '../dialog/ClipIframeDataTableDialogMobile';
 import clipMenuVue from './clipMenu.vue';
+import playAllClipsDialog from '../dialog/playAllClipsDialog';
 
 export default {
   props:['clipListData'],
   components: {
+    playAllClipsDialog,
     clipMenuVue,
     ClipIframeDataTableDialog,
     ClipIframeDataTableDialogMobile,
   },
   data() {
     return {
+      draggable: false,
       resultData: [],
       currentTooltipId: '',
       tableloading: false,
@@ -89,12 +115,21 @@ export default {
       nameSort: '',
       viewSort: '',
       createdSort: '',
+      dataLoading: false,
       lengthSort: '',
       page: 1,
       perPage: 20,
     };
   },
   methods: {
+    swapIndexDown(el){
+      console.log('down',el);
+      this.$store.commit('SWAPDOWN_currentCliplist', el)
+    },
+    swapIndexUp(el){
+      console.log('up',el);
+      this.$store.commit('SWAPUP_currentCliplist', el)
+    },
     setCurrList(el) {
       return el === undefined ? el=[] : el.slice((this.page - 1) * this.perPage, this.page * this.perPage);
     },
@@ -164,10 +199,11 @@ export default {
     },
     currList:{
       get(){
-        return this.$store.state.currentCliplist.pinnedClips
+        return this.$store.state.currentCliplist
       },
-      set(value){
-        this.$store.commit('UPDATE_List', value)
+      set(value, old){
+        console.log(value, old);
+        // this.$store.commit('SET_CurrentClipList', value)
       }
     }
   },
@@ -177,13 +213,39 @@ export default {
       params: {
         id: [...this.clipListData.cliplist],
       },
-    }).then((res) => {
-      this.$store.commit('SET_CurrentClipList', res.data.data);
+    }).then(async (res) => {
+      let result = new Array(res.data.data.length);
+      await res.data.data.forEach((element) => {
+        const index = this.clipListData.cliplist.findIndex((v) => v === element.id);
+        result[index] = element;
+      })
+      const idArr = res.data.data.map((v) => {
+        return v.id
+      });
+      this.$store.commit('SET_CurrentClipList', result);
+      let diff = this.clipListData.cliplist.filter( x => !idArr.includes(x))
+      if(res.data.data.length !== this.clipListData.cliplist.length)
+      {
+        for( let i = 0; i < diff.length; i++){
+          console.log({id:'asdfsdf', title:'클립정보를 찾을 수 없습니다.'});
+          this.$store.commit('ADD_ClipInCurrentCliplist',
+          {
+            id:diff[i],
+            video_id: null,
+            thumbnail_url: "@/assets/img/404.jpg",
+            title:'클립정보를 찾을 수 없습니다.',
+            broadcaster_name: '',
+            created_at: new Date(),
+            duration: 0,
+            view_count:0,
+            })
+        }
+      }
     });
+    this.dataLoading = true;
   },
   destroyed() {
     this.$store.commit('SET_CurrentClipList', []);
-    this.$store.commit('SET_CurrentListData','');
   },
 
 };
@@ -205,10 +267,10 @@ tbody tr:nth-child(2n+1) {
   background-color: rgb(255,255,255,0.05)
 }
 .dark-table tr:hover{
-  background-color: rgb(255,255,255,0.2)
+  background-color: rgb(255,255,255,0.2);
 }
 .light-table tr:hover{
-  background-color: rgb(0,0,0,0.2)
+  background-color: rgb(0,0,0,0.2);
 }
 td{
   text-align: center;
@@ -234,5 +296,13 @@ table{
 .table-thumbnail, .table-title, .table-channel, .table-date, .table-duration, .table-views, .table-description{
   max-width: 20rem;
 
+}
+.horizontalCenter{
+  position: absolute;
+  left:50%;
+  transform: translate(-50%);
+}
+.dragHidden{
+  display: hidden;
 }
 </style>

@@ -3,8 +3,12 @@
   <v-row class="py-5">
     <span class="text-h3 font-weight-bold">Streamer</span>
   </v-row>
-  <v-row class="d-flex justify-start pb-5">
-    <v-subheader>Recent Streamer</v-subheader>
+  <v-divider></v-divider>
+  <v-subheader>Like</v-subheader>
+  <v-row v-if="loading.liked" class="d-flex justify-center align-center pa-10">
+    <v-progress-circular indeterminate></v-progress-circular>
+  </v-row>
+  <v-row class="d-flex justify-start pb-5" v-if="currlist.length > 0 && !loading.liked">
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="(item, index) in currlist"
     :key="item.id">
@@ -56,24 +60,48 @@
       </v-card>
     </v-col>
   </v-row>
-  <v-subheader>Follow Streamer On Live</v-subheader>
-  <v-row class="d-flex justify-start pb-5" v-if="islogin">
+  <v-row v-else-if="currlist.length === 0 && !loading.liked" class="d-flex justify-center pa-10">
+    <v-alert type="error">
+      <div>
+        좋아요를 누른 스트리머가 없습니다.
+      </div>
+    </v-alert>
+  </v-row>
+  <v-divider></v-divider>
+  <v-subheader>On Live</v-subheader>
+  <v-row v-if="loading.stream" class="d-flex justify-center align-center pa-10">
+    <v-progress-circular indeterminate></v-progress-circular>
+  </v-row>
+  <v-row class="d-flex justify-start pa-10" v-if="streamerList.stream.length > 0 && !loading.stream">
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in streamerList.stream"
     :key="item.id">
-      <v-card outlined class="rounded-xl pa-0" width="280px">
+      <v-card dark outlined class="rounded-xl pa-0" width="280px">
         <v-card-text class="d-flex align-center justify-space-between pa-2">
           <div>
+            <v-badge
+            v-if="item.userInfo.broadcaster_type === 'partner'"
+            color="twitch"
+            icon="mdi-check"
+            overlap
+            >
+              <v-avatar
+                size="36"
+              >
+                <img :src="item.userInfo.profile_image_url" alt="alt">
+              </v-avatar>
+            </v-badge>
             <v-avatar
+              v-else
               size="36"
             >
               <img :src="item.userInfo.profile_image_url" alt="alt">
             </v-avatar>
           </div>
-          <div class="text-truncate" style="width:150px;">
+          <div class="text-truncate pl-2" style="width:150px;">
             <div class="text-truncate" style="width:150px;">{{item.userInfo.display_name}}
               <span class="text-caption">
-                ({{item.title}})
+                {{item.title}}
               </span>
             </div>
             <div class="text-truncate text-caption" style="width:150px;">{{item.game_name}}</div>
@@ -85,34 +113,71 @@
       </v-card>
     </v-col>
   </v-row>
-  <v-row v-else class="d-flex justify-center">
+  <v-row v-else-if="streamerList.stream.length === 0 && !loading.stream" class="d-flex justify-center pa-10">
     <v-alert type="error">
       <div>
-        로그인이 필수입니다.
+        생방송중인 스트리머가 없습니다.
       </div>
     </v-alert>
   </v-row>
-  <v-subheader>Follow All</v-subheader>
-  <v-row class="d-flex justify-start pb-5" v-if="islogin">
+  <v-divider></v-divider>
+  <v-subheader>All</v-subheader>
+  <v-row v-if="loading.follow" class="d-flex justify-center align-center pa-10">
+    <v-progress-circular indeterminate></v-progress-circular>
+  </v-row>
+  <v-row class="d-flex justify-start pa-10" v-if="streamerList.follow.length > 0 && !loading.follow">
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in streamerList.follow"
     :key="item.to_id">
-    <v-card class="rounded-xl" outlined>
-      <v-card-title>
-        <v-avatar
-          size="40"
-        >
-          <img :src="item.profile_image_url" alt="alt">
-        </v-avatar>
-        <span>{{item.display_name}}</span>
-      </v-card-title>
-    </v-card>
+      <v-hover v-slot="{ hover }">
+        <v-card dark class="rounded-xl pa-0" outlined width="280px"
+        :style="{'filter': hover ? 'grayscale(10%)' : 'none', 'opacity': hover ? '0.8' : '1'}"
+        :img="item.offline_image_url">
+          <v-card-text class="d-flex align-center justify-space-between pa-2">
+            <v-expand-x-transition>
+              <div
+                v-if="hover"
+                class="d-flex pa-0 ma-0 transition-slow-in-fast-out v-card--reveal white--text"
+                style="height: 100%; filter:none;"
+              >
+              <v-icon color="twitch" @click="pushToTwitchVids(`https://www.twitch.tv/${item.login}`,item.display_name)">mdi-twitch</v-icon>
+              <router-link :to="`/channel?q=${item.login}`">
+                <v-icon>mdi-magnify</v-icon>
+              </router-link>
+              </div>
+            </v-expand-x-transition>
+            <div>
+              <v-badge
+                x-small
+                v-if="item.broadcaster_type === 'partner'"
+                color="twitch"
+                icon="mdi-check"
+                overlap
+                outline
+                >
+                  <v-avatar
+                    size="36"
+                  >
+                    <img :src="item.profile_image_url" alt="alt">
+                  </v-avatar>
+              </v-badge>
+              <v-avatar
+                v-else
+                size="36"
+              >
+                <img :src="item.profile_image_url" alt="alt">
+              </v-avatar>
+            </div>
+            <span class="text-weight-bold white--text text-stroke">{{item.display_name}}</span>
+          </v-card-text>
+        </v-card>
+      </v-hover>
     </v-col>
   </v-row>
-  <v-row v-else class="d-flex justify-center">
+  <v-row v-else-if="streamerList.follow.length === 0 && !loading.follow" class="d-flex justify-center pa-10">
     <v-alert type="error">
       <div>
-        로그인이 필수입니다.
+        팔로우중인 스트리머가 없습니다.
       </div>
     </v-alert>
   </v-row>
@@ -129,6 +194,11 @@ export default {
   },
   data() {
     return {
+      loading:{
+        follow: false,
+        stream: false,
+        liked: false,
+      },
       currlist:[],
       clips: [],
       streamerList:{
@@ -142,6 +212,11 @@ export default {
     };
   },
   methods: {
+    pushToTwitchVids(url, title) {
+      if (window.confirm(`${title} 영상으로 이동하시겠습니까?`)) {
+        window.open(url);
+      }
+    },
     setThumbnailSize(el, index) {
       if (el === '') {
         this.getLiveThumbnail(this.vidlist[index], index);
@@ -189,8 +264,8 @@ export default {
       }
       return Math.abs(el);
     },
-    getUserInfo(element) {
-      return axios.get('https://api.twitch.tv/helix/users',{
+    async getUserInfo(element) {
+      return await axios.get('https://api.twitch.tv/helix/users',{
         params: {
           id : element,
         },
@@ -198,6 +273,7 @@ export default {
       });
     },
     async getFollowList(userInfo){
+      this.loading.follow = true;
      await axios.get('https://api.twitch.tv/helix/users/follows',{
         params:{
           from_id: userInfo.uid.split('twitch:')[1],
@@ -205,42 +281,82 @@ export default {
         },
         headers:this.$store.state.headerConfig,
       }).then( async (res) => {
-        console.log(res.data.data);
-        this.followList = res.data.data.map( v => {
-          return v.to_id;
-        })
-        const result = await this.getUserInfo([...this.followList]);
-        this.streamerList.follow = result.data.data.sort((a,b) => b.view_count - a.view_count);
+        if(res.data.data.length > 0){
+          this.followList = await res.data.data.map( v => {
+            return v.to_id;
+          })
+          const result = await this.getUserInfo([...this.followList]);
+          this.streamerList.follow = result.data.data.sort((a,b) => b.view_count - a.view_count);
+        } else {
+          this.streamerList.follow = [];
+        }
+    }).then(() => {
+      this.loading.follow = false;
     })
     },
     async getStreamFollowList(userInfo){
-      const token = localStorage.getItem('twitchAuthToken');
+      this.loading.stream = true;
+      const token = JSON.parse(localStorage.getItem('twitchOAuthToken'));
       await axios.get('https://api.twitch.tv/helix/streams/followed',{
         params:{
           user_id: userInfo.uid.split('twitch:')[1]
         },
         headers:{
-          Authorization: `Bearer ${token.split(/"/)[1]}`,
+          Authorization: `Bearer ${token.access_token}`,
           'client-id': process.env.VUE_APP_TWITCH_CLIENT_ID,
         }
       }).then(async (res) => {
-        this.streamFollowList = res.data.data.map( v => {
+        this.streamFollowList = await res.data.data.map( v => {
           return v.user_id;
         });
-        const result = await this.getUserInfo([...this.streamFollowList]);
-        res.data.data.forEach((element) => {
-          const index = result.data.data.findIndex((v) => v.id === element.user_id);
-          element.userInfo = result.data.data[index];
-        })
+        if(res.data.data.length > 0){
+          const result = await this.getUserInfo([...this.streamFollowList]);
+          res.data.data.forEach((element) => {
+            const index = result.data.data.findIndex((v) => v.id === element.user_id);
+            element.userInfo = result.data.data[index];
+          })
+        }
         this.streamerList.stream = res.data.data;
         })
+        .then(() => {
+          this.loading.stream = false;
+        }).catch(() => {
+          // 에러 발생, refresh token으로 OAuth Token 재발급
+          axios.post(`${this.$store.state.backendUrl}/twitchOauthToken/oauthtoken/issue`,
+          {
+            refresh_token : token.refresh_token
+          }
+          ,{
+            headers: { 'Content-Type': 'application/json'}
+          }).then(async (res) => {
+            await localStorage.setItem('twitchOAuthToken', JSON.stringify(res.data));
+            this.getStreamFollowList(userInfo);
+          }).catch(() => {
+            // refresh token도 망가졌음, 로그아웃 후 새롭게 로그인 유도
+            this.logOut();
+          });
+        })
       },
+    async logOut(){
+      await this.$firebase.auth().signOut().then(() =>{
+        this.$store.commit('SET_UserInfo', null);
+        localStorage.removeItem('userInfo');
+        localStorage.removeItem('twitchOAuthToken');
+        if(this.$route.path !== '/'){
+          this.$router.push({path:'/'})
+        }
+      });
+      this.$store.commit('SET_SnackBar',{type: 'error', text:'로그인정보가 잘못되었습니다. 다시 로그인 해주세요', value:true})
+    },
     async postProcess(){
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if(userInfo){
+      const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
+      if(userInfo && twitchOAuthToken){
         this.islogin = true;
-        await this.getStreamFollowList(userInfo);
-        await this.getFollowList(userInfo);
+        this.getStreamFollowList(userInfo);
+        this.getFollowList(userInfo);
+      } else {
+        this.$store.commit('SET_SnackBar', {type:'error', text:'로그인 정보가 잘못되었습니다. 다시 로그인 해주세요', value:true});
       }
     },
         // Authoriation: `Bearer ${this.$store.state.twitchAuthToken}`
@@ -278,5 +394,20 @@ export default {
   width: 20%;
   max-width: 20%;
   flex-basis: 20%;
+}
+.text-stroke {
+  text-shadow:
+  -1px -1px 0 #000,
+  1px -1px 0 #000,
+  -1px 1px 0 #000,
+  1px 1px 0 #000;
+}
+.v-card--reveal {
+  align-items: center;
+  bottom: 0;
+  filter: none;
+  justify-content: center;
+  position: absolute;
+  width: 100%;
 }
 </style>
