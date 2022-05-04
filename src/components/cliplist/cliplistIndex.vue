@@ -7,8 +7,30 @@
         <v-icon>mdi-</v-icon>
         (총 {{ cliplist.cliplist.length }} / 100 개)</span>
     </div>
+    <v-spacer></v-spacer>
+    <ImportNewClipDialogVue :parent="cliplist"></ImportNewClipDialogVue>
+    <DeleteDialog
+    @DeleteCliplist="deleteCliplist"
+    :delete="{
+      type:'cliplist',
+      data:{
+        target: cliplist,
+        }
+      }">
+    </DeleteDialog>
+    <v-btn @click="copyCliplist(cliplist)" icon>
+      <v-icon>mdi-share-variant-outline</v-icon>
+    </v-btn>
+    <AddNewCliplistDialog
+    v-if="$store.state.currentListData"
+    :type="{
+      type:'edit',
+      data: cliplist,
+      }">
+    </AddNewCliplistDialog>
   </v-row>
   <v-row class="d-block">
+  <v-divider></v-divider>
     <div class="pl-1">
       {{cliplist.description}}
     </div>
@@ -23,27 +45,9 @@
         </div>
       </div>
       <v-spacer></v-spacer>
-      <ImportNewClipDialogVue :parent="cliplist"></ImportNewClipDialogVue>
-      <DeleteDialog
-      @DeleteCliplist="deleteCliplist"
-      :delete="{
-        type:'cliplist',
-        data:{
-          target: cliplist,
-          }
-        }">
-      </DeleteDialog>
-      <v-btn @click="copyCliplist(cliplist)" icon>
-        <v-icon>mdi-share-variant-outline</v-icon>
-      </v-btn>
-      <AddNewCliplistDialog
-      v-if="$store.state.currentListData"
-      :type="{
-        type:'edit',
-        data: cliplist,
-        }">
-      </AddNewCliplistDialog>
+
     </div>
+  <v-divider></v-divider>
   </v-row>
   <expandTableVue
   v-if="cliplist.cliplist.length > 0"
@@ -60,7 +64,7 @@
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import axios from 'axios';
-import expandTableVue from './expandTableFB';
+import expandTableVue from './expandTableVid';
 import ImportNewClipDialogVue from '../dialog/ImportNewClipDialog.vue';
 export default {
   components: {

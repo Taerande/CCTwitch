@@ -349,7 +349,7 @@ export default {
       this.$store.commit('SET_SnackBar',{type: 'error', text:'로그인정보가 잘못되었습니다. 다시 로그인 해주세요', value:true})
     },
     async postProcess(){
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const userInfo = this.$store.state.userinfo.userInfo;
       const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
       if(userInfo && twitchOAuthToken){
         this.islogin = true;

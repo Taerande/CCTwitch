@@ -29,7 +29,9 @@
       </v-container>
     </v-img>
   </template>
-    <div class="black d-flex justify-end" v-if="dialog">
+    <div class="black d-flex justify-end align-center" v-if="dialog">
+      <span class="white--text pl-5">{{this.$moment(clipData.created_at).format('ll')}}</span>
+      <v-spacer></v-spacer>
       <v-btn :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
       <pinClip name="channelClipPin" :clipData="{data:clipData}"></pinClip>
       <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>

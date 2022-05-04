@@ -12,8 +12,14 @@
       hide-details
       size="50"
       height="50"
-      label="Search your Streamer" prepend-icon="mdi-twitch" append-icon="mdi-magnify">
+      label="Search your Streamer" append-icon="mdi-magnify">
       </v-text-field>
+      <template v-slot:prepend>
+        <div>
+          <v-icon>mdi-twitch</v-icon>
+
+        </div>
+      </template>
     </v-form>
   </div>
 </template>

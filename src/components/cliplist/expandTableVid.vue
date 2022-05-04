@@ -1,105 +1,63 @@
 <template>
-  <v-row class="pb-5">
-    <v-row>
-      <v-spacer></v-spacer>
-      <playAllClipsDialog></playAllClipsDialog>
-    </v-row>
-    <table v-if="$vuetify.breakpoint.smAndUp" border="0" cellspacing="0" cellpadding="0" :class="theme">
-      <thead :style="{background:this.clipListData.color, color: textColor}">
-        <th>
-          <v-icon :color="textColor" @click="saveOrder()">mdi-drag</v-icon>
-        </th>
-        <th class="table-thumbnail">썸네일</th>
-        <th class="table-title text-center">제목</th>
-        <th class="table-channel">
-          <div class="canSort d-inline" @click="sortByName()">
-            <span>채널</span>
-            <v-icon v-show="this.nameSort === 'asc'">mdi-sort-ascending</v-icon>
-            <v-icon v-show="this.nameSort === 'desc' || this.nameSort === '' ">mdi-sort-descending</v-icon>
-          </div>
-        </th>
-        <th class="table-date">
-          <div class="canSort d-inline" @click="sortByCreated()">
-            <span>날짜</span>
-            <v-icon v-show="this.createdSort === 'asc'">mdi-sort-ascending</v-icon>
-            <v-icon v-show="this.createdSort === 'desc' || this.createdSort === '' ">mdi-sort-descending</v-icon>
-          </div>
-        </th>
-        <th class="table-duration canSort" @click="sortByLength()">
-          <span>길이</span>
-          <v-icon v-show="this.lengthSort === 'asc'">mdi-sort-ascending</v-icon>
-          <v-icon v-show="this.lengthSort === 'desc' || this.lengthSort === '' ">mdi-sort-descending</v-icon>
-        </th>
-        <th class="table-views">
-          <div class="canSort d-inline" @click="sortByViews()">
-            <span>시청수</span>
-            <v-icon v-show="this.viewSort === 'asc'">mdi-sort-ascending</v-icon>
-            <v-icon v-show="this.viewSort === 'desc' || this.viewSort === '' ">mdi-sort-descending</v-icon>
-          </div>
-        </th>
-        <th class="d-flex align-center justify-center table-menu">
-          메뉴
-        </th>
-      </thead>
-      <tbody v-if="dataLoading">
-        <tr v-for="(clip, clipIndex) in currList" :key="clip.id" style="height: 100px;">
-          <td class="d-flex justify-center">
-            <div v-if="draggable" class="d-flex flex-column align-center justify-center">
-              <v-btn v-show="clipIndex > 0" @click="swapIndexUp(clipIndex)" color="error" icon>
-                <v-icon large>mdi-menu-up</v-icon>
-              </v-btn>
-              <v-btn  v-show="clipIndex < $store.state.currentCliplist.length - 1" color="success" @click="swapIndexDown(clipIndex)" icon>
-                <v-icon large>mdi-menu-down</v-icon>
-              </v-btn>
-            </div>
-          </td>
-          <ClipIframeDataTableDialog :clipData="clip"></ClipIframeDataTableDialog>
-          <td
-          class="table-title">
-            <span style="width: 5rem;" class="canSort title-table text-truncate">
-              {{clip.title}}
-            </span>
-          </td>
-          <td class="table-channel">{{clip.broadcaster_name}}</td>
-          <td class="table-date">{{setDate(clip.created_at)}}</td>
-          <td class="table-duration">{{Math.floor(clip.duration)}}</td>
-          <td class="table-views">{{viewerkFormatter(clip.view_count)}}</td>
-          <td class="d-flex align-center justify-center table-menu" style="height:inherit">
-            <clipMenuVue :clip="{clipData:clip, listData:clipListData}"></clipMenuVue>
-          </td>
-        </tr>
-      </tbody>
-      <v-row v-else class="pt-3">
-        <v-progress-circular class="horizontalCenter pt-3" indeterminate></v-progress-circular>
-      </v-row>
-    </table>
-    <v-container v-else>
-    <v-progress-linear value="100" :color="clipListData.color"></v-progress-linear>
-      <v-container v-for="clip in currList" :key="clip.id">
-          <v-row class="justify-space-between py-3">
-            <ClipIframeDataTableDialogMobile :clipData="clip"></ClipIframeDataTableDialogMobile>
-            <div class="d-flex align-center">
-              <clipMenuVue :clip="{clipData:clip, listData:clipListData}"></clipMenuVue>
-            </div>
-          </v-row>
-          <v-divider></v-divider>
-      </v-container>
-    </v-container>
-    <v-row class="d-flex justify-center pt-15">
-      <v-pagination
-      color="twitch"
-      v-model="page"
-      :total-visible="7"
-      :length="Math.ceil(($store.state.currentCliplist.length || 0) / this.perPage)">
-      </v-pagination>
-    </v-row>
+<v-container fluid fill-height>
+  <v-row>
+    <v-spacer></v-spacer>
+    <playAllClipsDialog></playAllClipsDialog>
   </v-row>
+  <v-row class="d-flex">
+    <v-col
+      @mouseover="hovering = true"
+      @mouseleave="hovering = false"
+      :cols="$vuetify.breakpoint.mdAndUp ? 8 : 12" style="position:relative;">
+      <v-sheet v-if="hovering" class="controller-panel px-10 d-flex justify-space-between align-center" width="100%" height="0">
+        <v-btn text :style="vidIndex === 0 ? 'background:rgba(0,0,0,0)' : 'background:rgba(0,0,0,0.5)'" x-large>
+          <v-icon v-if="vidIndex > 0" @click="prevVid()" size="80" color="white"> mdi-rotate-180 mdi-skip-next-outline</v-icon>
+        </v-btn>
+        <v-btn text :style="vidIndex === currList.length-1 ? 'background:rgba(0,0,0,0)' : 'background:rgba(0,0,0,0.5)'" x-large>
+          <v-icon v-if="vidIndex < currList.length-1" @click="nextVid()" size="80" color="white">mdi-skip-next-outline</v-icon>
+        </v-btn>
+      </v-sheet>
+      <iframe
+      :src="`https://clips.twitch.tv/embed?clip=${currList[vidIndex].id}&parent=${$store.state.embedUrl}&autoplay=true&muted=false&preload=auto`"
+      preload="auto"
+      frameborder="0"
+      :height="$vuetify.breakpoint.mdAndUp ? 720 : 500"
+      width="100%"
+      allowfullscreen="true"></iframe>
+
+    </v-col>
+    <v-col :cols="$vuetify.breakpoint.mdAndUp ? 4 : 12" class="overflow-y-auto overflow-x-hidden" :style="{height : $vuetify.breakpoint.mdAndUp ? '720px' : '300px'}">
+      <v-card class="pa-0 ma-0" flat>
+        <v-card-title class="d-flex align-center pb-10 rounded-0" :style="{background: clipListData.color, color:textColor}">
+          <span>asdf</span>
+          <v-spacer></v-spacer>
+          <v-icon :color="textColor" class="pr-1">mdi-playlist-play</v-icon>
+          <span>{{currList.length}}개</span>
+        </v-card-title>
+        <v-card-text v-for="(clip,index) in currList" :key="clip.id" class="pa-0 ma-0">
+          <v-container class="d-flex my-3 pa-2 px-3" flat @click="vidIndex = index" :class="vidIndex === index ? 'grey darken-3 white--text' : ''">
+            <v-img max-width="150" :src="clip.thumbnail_url" lazy-src="@/assets/img/404.jpg"></v-img>
+            <div class="pl-2">
+              <div class="text-truncate inline-block" style="max-width:15rem;">{{clip.title}}</div>
+              <div>{{clip.broadcaster_name}}</div>
+              <div class="text-caption d-flex align-center"><v-icon :color="vidIndex === index ? 'white' : ''" class="pr-1" x-small>mdi-eye</v-icon> {{viewerkFormatter(clip.view_count)}}</div>
+              <div class="text-caption">{{setDate(clip.created_at)}}</div>
+            </div>
+            <v-spacer></v-spacer>
+            <clipMenuVue :clip="{clipData:clip, listData:clipListData, dark:vidIndex === index}"></clipMenuVue>
+          </v-container>
+        </v-card-text>
+      </v-card>
+
+    </v-col>
+  </v-row>
+</v-container>
 </template>
 
 <script>
 import axios from 'axios';
-import ClipIframeDataTableDialog from '../dialog/ClipIframeDataTableDialog';
-import ClipIframeDataTableDialogMobile from '../dialog/ClipIframeDataTableDialogMobile';
+// import ClipIframeDataTableDialog from '../dialog/ClipIframeDataTableDialog';
+// import ClipIframeDataTableDialogMobile from '../dialog/ClipIframeDataTableDialogMobile';
 import clipMenuVue from './clipMenu.vue';
 import playAllClipsDialog from '../dialog/playAllClipsDialog';
 
@@ -108,11 +66,13 @@ export default {
   components: {
     playAllClipsDialog,
     clipMenuVue,
-    ClipIframeDataTableDialog,
-    ClipIframeDataTableDialogMobile,
+    // ClipIframeDataTableDialog,
+    // ClipIframeDataTableDialogMobile,
   },
   data() {
     return {
+      hovering: false,
+      vidIndex: 0,
       draggable: false,
       resultData: [],
       currentTooltipId: '',
@@ -128,6 +88,15 @@ export default {
     };
   },
   methods: {
+    prevVid(){
+      this.vidIndex -= 1;
+      this.scrollTarget.scrollTop = this.vidIndex * 113.33;
+    },
+    nextVid(){
+      this.vidIndex += 1;
+      this.scrollTarget.scrollTop = this.vidIndex * 113.33;
+
+    },
     saveOrder(){
       this.draggable = !this.draggable;
       if(!this.draggable){
@@ -191,7 +160,7 @@ export default {
     //   }
     // },
     setDate(el) {
-      return this.$moment(el).format('ll').substring(2);
+      return this.$moment(el).format('l');
     },
     swapIndexDown(el){
       let temp = this.currList[el]
@@ -208,6 +177,9 @@ export default {
     // },
   },
   computed: {
+    scrollTarget(){
+      return document.getElementsByClassName('overflow-y-auto')[0];
+    },
     theme() {
       return this.$vuetify.theme.dark ? 'dark-table' : 'light-table';
     },
@@ -320,5 +292,16 @@ table{
 }
 .dragHidden{
   display: hidden;
+}
+.v-card__title{
+  position: sticky;
+  right: 0;
+  top: 0;
+  z-index: 3;
+
+}
+.controller-panel{
+  position: absolute;
+  top: 50%;
 }
 </style>

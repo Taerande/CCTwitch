@@ -95,6 +95,7 @@ app.get('/signin/twitch/callback', async (req, res) => {
     await updateUser(userInfo, id);
     await authenticateUser(userInfo, id);
     const token = await getAuthToken(id);
+    // res.send({token: token, userInfo: userInfo})
     res.redirect(frontendUrl+'/?token='+token+'&twitchOAuthToken='+twitchOAuthToken);
   } catch (err) {
     console.error(err);

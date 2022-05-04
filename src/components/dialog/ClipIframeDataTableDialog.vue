@@ -10,19 +10,9 @@
     >
       <v-img
       class="mx-auto"
-      max-width="70"
+      max-width="100"
       lazy-src="@/assets/img/404.jpg"
       :src="clipData.thumbnail_url"></v-img>
-    </td>
-    <td
-    class="table-title"
-    style="text-align:start;"
-    @click="dialogId = clipData.id"
-    v-on="on"
-    >
-      <span style="width: 5rem;" class="canSort title-table text-truncate">
-        {{clipData.title}}
-      </span>
     </td>
   </template>
   <div class="black d-flex justify-end">

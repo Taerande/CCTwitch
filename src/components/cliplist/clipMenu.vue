@@ -1,11 +1,12 @@
 <template>
 <v-menu
-v-if="$store.state.userinfo.userInfo"
 :nudge-left="this.$vuetify.breakpoint.xs ? '140' : '0'"
+transition="slide-x-transition"
+left
 offset-x>
   <template v-slot:activator="{on, attrs}">
     <v-btn v-bind="attrs" v-on="on" icon>
-      <v-icon>mdi-dots-vertical</v-icon>
+      <v-icon :color="clip.dark ? 'white' : 'none'">mdi-dots-vertical</v-icon>
     </v-btn>
   </template>
   <v-list>
@@ -26,7 +27,6 @@ offset-x>
     </v-list-item>
   </v-list>
 </v-menu>
-<v-icon v-else>mdi-lock</v-icon>
 </template>
 <script>
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';

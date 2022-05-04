@@ -1,6 +1,6 @@
 <template>
 <v-container fluid fill-height>
-  <v-row>
+  <!-- <v-row>
     <v-col v-for="item in cliplist" :key="item.id">
       <v-card width="350px">
         <v-card-title class="d-flex align-center">
@@ -23,6 +23,48 @@
         </v-card-text>
       </v-card>
     </v-col>
+  </v-row> -->
+  <v-row>
+    <v-card>
+      <v-list class="d-flex">
+        <v-list-item v-for="item in $store.state.currentCliplist" :key="item.id">
+          {{item.title}}
+        </v-list-item>
+      </v-list>
+    </v-card>
+  </v-row>
+  <v-row>
+    <v-btn color="success" @click="show = !show">eddit</v-btn>
+  </v-row>
+  <v-row>
+    <v-col>
+      <v-list class="d-flex flex-column">
+        <v-list-item v-for="(clip, clipIndex) in currlist" :key="clip.id">
+          <v-list-item-icon>
+             <div v-if="show" class="d-flex flex-column">
+              <v-btn v-show="clipIndex > 0" @click="swapIndexUp(clipIndex)" color="error" icon>
+                <v-icon large>mdi-menu-up</v-icon>
+              </v-btn>
+              <v-btn  v-show="clipIndex < currlist.length - 1" color="success" @click="swapIndexDown(clipIndex)" icon>
+                <v-icon large>mdi-menu-down</v-icon>
+              </v-btn>
+            </div>
+          </v-list-item-icon>
+          <v-list-item-content class="d-flex">
+            <v-img
+              max-width="200" :src="clip.thumbnail_url"></v-img>
+              <div>
+                <span>{{clip.title}}</span>
+                <span>{{clip.display_name}}</span>
+                <span>{{clip.created_at}}</span>
+              </div>
+          </v-list-item-content>
+          <v-list-item-icon>
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-list-item-icon>
+        </v-list-item>
+      </v-list>
+    </v-col>
   </v-row>
   <v-row>
     <v-btn color="success" @click="show = !show">show</v-btn>
@@ -34,7 +76,7 @@
       <span>{{this.show === false ? 'A' : 'B'}}</span>
     </div>
   </v-row>
-  <v-row>
+  <!-- <v-row>
     <v-col>
       <v-card width="500">
         <video class="pa-0 ma-0" width="100%" :autoplay="!show"
@@ -49,7 +91,7 @@
         </div>
       </v-card>
     </v-col>
-  </v-row>
+  </v-row> -->
 </v-container>
 </template>
 <script>
@@ -63,9 +105,6 @@ export default {
       embdClips:[{"id":"FineEncouragingGoblinPhilosoraptor-ysVq-kbysJ6VRAcQ","url":"https://clips.twitch.tv/FineEncouragingGoblinPhilosoraptor-ysVq-kbysJ6VRAcQ","embed_url":"https://clips.twitch.tv/embed?clip=FineEncouragingGoblinPhilosoraptor-ysVq-kbysJ6VRAcQ","broadcaster_id":"49045679","broadcaster_name":"우왁굳","creator_id":"206440154","creator_name":"하쿠킹","video_id":"1468280289","game_id":"509658","language":"ko","title":"숨길 수 없는 하쿠 웃음","view_count":1393,"created_at":"2022-04-27T16:15:53Z","thumbnail_url":"https://clips-media-assets2.twitch.tv/AT-cm%7C2Bnec8rFavpG8rCelUQHEA-preview-480x272.jpg","duration":19.1,"videoOffsetSeconds":8584},
       {"id":"DelightfulAnimatedAniseTBCheesePull-kmk2vbWyKB2GQAA-","url":"https://clips.twitch.tv/DelightfulAnimatedAniseTBCheesePull-kmk2vbWyKB2GQAA-","embed_url":"https://clips.twitch.tv/embed?clip=DelightfulAnimatedAniseTBCheesePull-kmk2vbWyKB2GQAA-","broadcaster_id":"49045679","broadcaster_name":"우왁굳","creator_id":"525838829","creator_name":"천조","video_id":"1468280289","game_id":"499003","language":"ko","title":"반갈죽","view_count":769,"created_at":"2022-04-27T13:56:46Z","thumbnail_url":"https://clips-media-assets2.twitch.tv/AT-cm%7CMI47ppJpNr21sigdhkAAPg-preview-480x272.jpg","duration":37.4,"videoOffsetSeconds":8504},
       {"id":"CarefulOpenDolphinFrankerZ-Qo47ULsi_5RXRZmJ","url":"https://clips.twitch.tv/CarefulOpenDolphinFrankerZ-Qo47ULsi_5RXRZmJ","embed_url":"https://clips.twitch.tv/embed?clip=CarefulOpenDolphinFrankerZ-Qo47ULsi_5RXRZmJ","broadcaster_id":"203667951","broadcaster_name":"주르르","creator_id":"407011214","creator_name":"팡퐁__","video_id":"1468253054","game_id":"509658","language":"ko","title":"🎀 : 아! 주지라뇨! 이상한 별명 붙이지 마세요~","view_count":689,"created_at":"2022-04-27T11:09:43Z","thumbnail_url":"https://clips-media-assets2.twitch.tv/AT-cm%7C9x2lXUKOO1C7Iv-UV0WZiQ-preview-480x272.jpg","duration":16.7,"videoOffsetSeconds":2781},{'broadcaster_id':"169700336",'broadcaster_name':"릴파_",'created_at':"2022-01-15T13:18:34Z",'creator_id':"405666405",'creator_name':"후니111",'duration':50.5,'embed_url':"https://clips.twitch.tv/embed?clip=ComfortableTolerantHerringOSfrog-mpYbwVlYRhCwmk6U",'game_id':"509658",'id':"ComfortableTolerantHerringOSfrog-mpYbwVlYRhCwmk6U",'language':"ko",'thumbnail_url':"https://clips-media-assets2.twitch.tv/AT-cm%7CCERxZZqWG8FZWEYQsJpOlA-preview-480x272.jpg",'title':"염라",'url':"https://clips.twitch.tv/ComfortableTolerantHerringOSfrog-mpYbwVlYRhCwmk6U",'video_id':"",'view_count':759}],
-
-
-
       cliplist:[
         {
           id: '5dDoaCOoTUrhCy5MnK9s',
@@ -82,6 +121,16 @@ export default {
     }
   },
   methods: {
+    swapIndexDown(el){
+      let temp = this.currlist[el]
+      let replacetemp = this.currlist[el + 1]
+      this.currlist.splice(el, 2 , replacetemp, temp);
+    },
+    swapIndexUp(el){
+      let temp = this.currlist[el]
+      let replacetemp = this.currlist[el - 1]
+      this.currlist.splice(el-1, 2 , temp, replacetemp);
+    },
     authPlayA(){
       this.Aindex += 2;
       if( this.Aindex >= this.embdClips.length ){
@@ -109,7 +158,20 @@ export default {
       this.playing = false;
     },
   },
+  computed: {
+    currlist:{
+      get(){
+        return this.$store.state.currentCliplist;
+      },
+    }
+  },
+  watch:{
+    currlist(value){
+      this.$store.commit('SET_CurrentClipList', value);
+    },
+  },
   created() {
+    this.$store.commit('SET_CurrentClipList', this.embdClips);
   },
 }
 

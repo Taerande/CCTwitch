@@ -5,9 +5,7 @@
       <span class="text-h3 font-weight-bold pr-3">My Cliplists</span>
     </div>
     <v-spacer></v-spacer>
-    <div>
-      <AddNewCliplistDialog :type="{type:'add'}"></AddNewCliplistDialog>
-    </div>
+    <AddNewCliplistDialog :type="{type:'add'}"></AddNewCliplistDialog>
   </v-row>
   <v-row v-if="loading" class="absolute-center">
     <v-progress-circular indeterminate></v-progress-circular>
@@ -80,7 +78,7 @@ export default {
   },
   async created() {
     this.loading = true;
-    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    const userInfo = this.$store.state.userinfo.userInfo
       if(userInfo){
         this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',userInfo.uid).onSnapshot( async (sn) => {
           if(sn.empty){

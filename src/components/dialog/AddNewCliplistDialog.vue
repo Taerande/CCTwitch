@@ -36,7 +36,7 @@
     </v-btn>
   </template>
   <v-card class="justify-center">
-    <v-card-title class="text-h5" :style="{background:form.color}">
+    <v-card-title class="text-h5" :style="{background:form.color, color: textColor}">
       Cliplist Information
     </v-card-title>
     <v-card-text class="justify-center">
@@ -157,7 +157,7 @@ export default {
          ['#D7CCC8','#A1887F','#6D4C41','#4E342E'],
          ['#CFD8DC','#90A4AE','#546E7A','#37474F'],
          ['#F5F5F5','#E0E0E0','#757575','#424242'],
-       ]
+       ],
     };
   },
   methods: {
@@ -199,6 +199,11 @@ export default {
         this.form.title = this.$store.state.currentListData.title;
       }
       this.dialog = false;
+    }
+  },
+  computed:{
+    textColor(){
+      return this.$store.state.darkColorSet.includes(this.form.color.substr(0,7)) ? 'white' : 'black';
     }
   },
   mounted() {

@@ -16,7 +16,7 @@ firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     // store.commit('SET_FirebaseLoad', true)
     store.commit('SET_UserInfo',user)
-    localStorage.setItem('userInfo',JSON.stringify(user));
+    // localStorage.setItem('userInfo',JSON.stringify(user));
     // router.push('/')
   } else {
   }

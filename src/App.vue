@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <AppBar app></AppBar>
-    <bookmark app></bookmark>
+    <!-- <bookmark app></bookmark> -->
     <v-main class="app-container" app>
       <v-progress-circular v-if="this.$store.state.firebaseLoaded" class="absolute-center" color="twitch" size="60" width="6" indeterminate></v-progress-circular>
       <v-container class="absolute-center" v-else-if="!initData">
@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import bookmark from '@/components/layout/bookmark.vue'
+// import bookmark from '@/components/layout/bookmark.vue'
 import SnackBar from '@/components/layout/SnackBar.vue'
 import AppBar from '@/components/layout/AppBar.vue'
 import Footer from '@/components/layout/Footer.vue'
@@ -32,7 +32,7 @@ export default {
   components: {
     AppBar,
     Footer,
-    bookmark,
+    // bookmark,
     SnackBar,
   },
   data() {
@@ -46,48 +46,43 @@ export default {
     },
   },
  async created() {
-    // const likesInit = JSON.parse(localStorage.getItem('alllikes'))
-    // const cliplistInit = JSON.parse(localStorage.getItem('allCliplists'))
+    const likesInit = JSON.parse(localStorage.getItem('alllikes'))
     // const userInfo = localStorage.getItem('userInfo');
     // if(userInfo){
     //   this.$store.commit('SET_UserInfo',userInfo)
     // }
-    // if (likesInit === null) {
-    //   const likes = []
-    //   localStorage.setItem('alllikes', JSON.stringify(likes))
-    // }
-    // if (cliplistInit === null) {
-    //   const likes = []
-    //   localStorage.setItem('allCliplists', JSON.stringify(likes))
-    // }
-    // this.$store.commit('INIT_localStorage')
-    // this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'))
+    if (likesInit === null) {
+      const likes = []
+      localStorage.setItem('alllikes', JSON.stringify(likes))
+    }
+    this.$store.commit('INIT_localStorage')
+    this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'))
 
-    // // 백엔드에서 처리 해야댐.. twitch auth validation
-    // if(localStorage.getItem('twitchAppAccessToken')){
-    //   await axios.get('https://id.twitch.tv/oauth2/validate',{
-    //     headers:{
-    //       Authorization: `OAuth ${localStorage.getItem('twitchAppAccessToken').slice(1,-1)}`
-    //       }
-    //   }).then((res) => {
-    //     //정상
+    // 백엔드에서 처리 해야댐.. twitch auth validation
+    if(localStorage.getItem('twitchAppAccessToken')){
+      await axios.get('https://id.twitch.tv/oauth2/validate',{
+        headers:{
+          Authorization: `OAuth ${localStorage.getItem('twitchAppAccessToken').slice(1,-1)}`
+          }
+      }).then((res) => {
+        //정상
 
-    //   }).catch(async (error) => {
-    //     //비정상, 앱엑세스 토큰 재발급 Backend 처리
-    //     await axios.get(this.$store.state.appTokenURL).then((res) => {
-    //       console.log('비정상',res);
-    //       localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
-    //     });
-    //   })
-    // } else {
-    //   //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
-    //   await axios.get(this.$store.state.appTokenURL)
-    //   .then((res) => {
-    //     console.log('토큰없어',res);
-    //     //받아온 엑세스토큰 로컬스토리지에 저장
-    //     localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
-    //     });
-    // }
+      }).catch(async (error) => {
+        //비정상, 앱엑세스 토큰 재발급 Backend 처리
+        await axios.get(this.$store.state.appTokenURL).then((res) => {
+          console.log('비정상',res);
+          localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
+        });
+      })
+    } else {
+      //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
+      await axios.get(this.$store.state.appTokenURL)
+      .then((res) => {
+        console.log('토큰없어',res);
+        //받아온 엑세스토큰 로컬스토리지에 저장
+        localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
+        });
+    }
     this.initData = true;
   }
 }
@@ -96,6 +91,7 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&display=swap');
 :root {
   --twitch-color: rgb(119, 44, 232);
+  --hoverBack-color: rgba(255, 255, 255, 0.3);
 }
 .absolute-center{
   position: absolute;

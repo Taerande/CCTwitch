@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app flat>
+  <v-app-bar height="90" app flat>
     <v-container
     class="align-center justify-center">
       <v-row class="d-flex align-center">
@@ -26,7 +26,11 @@
                 <v-list>
                   <div class="text-caption pl-5">Search</div>
                   <v-divider class="my-3"></v-divider>
+                  <v-form
+                  @submit.prevent="searchChannel($store.state.searchString)">
                     <v-text-field
+                      v-model="$store.state.searchString"
+                      @click:prepend="searchChannel($store.state.searchString)"
                       @keydown.enter="$store.commit('SET_SnackBar',{type:'info', text:'Success', value:true})"
                       color="twitch"
                       outlined
@@ -36,6 +40,7 @@
                       placeholder="Find streamer"
                       solo
                     ></v-text-field>
+                  </v-form>
                   <div class="text-caption pl-5 pt-3">Menu</div>
                   <v-divider class="my-3"></v-divider>
                   <v-list-item to="/" @click="drawer = false">
@@ -109,6 +114,23 @@
             class="text-lg-h4 text-h5 font-weight-bold d-flex align-center pl-3">CCTwitch</div>
           </router-link>
         </div>
+        <div v-if="$vuetify.breakpoint.mdAndUp" class="d-flex">
+          <router-link to="/trending">
+            <div class="px-2 rounded-pill">
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">Trend</span>
+            </div>
+          </router-link>
+          <router-link to="/cliplist">
+            <div class="px-2 rounded-pill">
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">Cliplist</span>
+            </div>
+          </router-link>
+          <router-link class="ma-0 pa-0" to="/streamer">
+            <div class="px-2 rounded-pill">
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
+            </div>
+          </router-link>
+        </div>
         <v-spacer></v-spacer>
         <div class="d-flex justify-end" v-if="$vuetify.breakpoint.mdAndUp">
           <SearchBar v-show="$route.path !== '/'"></SearchBar>
@@ -144,33 +166,6 @@
       :src="$store.state.userinfo.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
     </v-avatar>
     <SignInDialog :type="{parent:'appbar'}" v-else></SignInDialog>
-    <template v-slot:extension v-if="$vuetify.breakpoint.mdAndUp">
-      <router-link to="/trending">
-      <div class="px-2 rounded-pill" :style="{background: $route.path === '/trending' ? 'rgb(119,44,232,0.4)' : ''}">
-         <v-icon color="green" class="pr-1">mdi-trending-up</v-icon>
-          <span class="text-subtitle-2 text-lg-body-1 pr-1">Trend</span>
-      </div>
-      </router-link>
-      <router-link to="/cliplist">
-      <div class="px-2 rounded-pill" :style="{background: $route.path.substr(1,8) === 'cliplist' ? 'rgb(119,44,232,0.4)' : ''}">
-        <v-icon color="blue" class="pr-1">mdi-playlist-check</v-icon>
-        <span class="text-subtitle-2 text-lg-body-1 pr-1">Cliplist</span>
-      </div>
-      </router-link>
-      <router-link class="ma-0 pa-0" to="/streamer">
-      <div class="px-2 rounded-pill"
-      :style="{
-        background: $route.path === '/streamer' ? 'rgb(119,44,232,0.4)' : '',
-        font: $route.path === '/streamer' ? '1rem' : '3rem'
-      }"
-      >
-        <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
-        <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
-      </div>
-      </router-link>
-    </template>
-    <template v-slot:extension v-else>
-    </template>
   </v-app-bar>
 </template>
 <script>

@@ -76,7 +76,6 @@ export default {
       const topPosition = (window.screen.height / 2) - ((900 / 2) + 50);
       const authWindow = window.open(
         uri,
-        "_blank",
         `toolbar=yes,scrollbars=yes,resizable=yes,width=500,height=900,top=${topPosition},left=${leftPosition}`
       );
       let url = '';
@@ -93,12 +92,11 @@ export default {
           authWindow.close();
           resolve(parsedCode);
         }
-      }, 100);
+      }, 10);
     });
     },
   },
   mounted() {
-    console.log();
 
   },
 }
