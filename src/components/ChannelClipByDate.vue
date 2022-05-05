@@ -20,29 +20,16 @@
       cols="12" lg="3" md="4" sm="6" xs="12"
       class="pa-3 clip-item"
       :class="item.broadcaster_id"
-
       >
-      <v-sheet
-       class="fill-height">
-        <v-lazy
-          v-model="item.id"
-          :options="{ threshold: 0.5}">
-          <v-card flat>
-            <v-card-text class="d-flex justify-center align-center pa-0">
-              <clipIframeDialog :clipData="item" :userProfileImg="userProfileImg"></clipIframeDialog>
-            </v-card-text>
-          </v-card>
-        </v-lazy>
-      </v-sheet>
+      <v-lazy
+        v-model="item.id"
+        :options="{ threshold: 0.5}">
+          <clipIframeDialog :clipData="item" :userProfileImg="userProfileImg"></clipIframeDialog>
+      </v-lazy>
     </v-col>
   </v-row>
   </v-row>
-  <v-row v-else class="justify-center align-center">
-    <v-col class="justify-center align-center">
-      <span class="text-h4">😫There is no Clips</span>
-    </v-col>
-  </v-row>
-    <infinite-loading @infinite="channelInfiniteHandler" spinner="spiral"></infinite-loading>
+  <infinite-loading @infinite="channelInfiniteHandler" spinner="spiral"></infinite-loading>
 </v-container>
 </template>
 <script>

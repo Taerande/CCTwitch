@@ -10,7 +10,8 @@
   <v-card class="pa-5">
     <v-card-title class="d-flex justify-center">
       <span class="px-3">로그인</span>
-      <v-btn class="absolute-right" color="error" icon @click="closeDialog"><v-icon>mdi-close</v-icon></v-btn>
+      <v-btn class="absolute-right" color="error" icon
+      @click="closeDialog"><v-icon>mdi-close</v-icon></v-btn>
     </v-card-title>
     <v-card-text>
       <v-row class="d-flex justify-center py-5">
@@ -43,7 +44,7 @@ export default {
       this.loginLoading = true;
       const state = crypto.randomBytes(16).toString("hex");
       const codeUri =
-      `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&force_verify	=true&redirect_uri=`+this.$store.state.redirectUri+`/signin/twitch/callback&scope=user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}&claims={"userinfo":{"preferred_username":null,"email":null,"email_verified":null,"picture":null}}`;
+      `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&force_verify=true&redirect_uri=`+this.$store.state.redirectUri+`/signin/twitch/callback&scope=user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}&claims={"userinfo":{"preferred_username":null,"email":null,"email_verified":null,"picture":null}}`;
       const code = await this.getCode(codeUri);
       const twitchOAuthToken = JSON.stringify(Buffer.from(code.twitchOAuthToken, 'base64').toString());
 
@@ -53,8 +54,7 @@ export default {
 
       localStorage.setItem('twitchOAuthToken', JSON.parse(twitchOAuthToken));
       if(this.type.parent === 'quickMenu'){
-        console.log('hi');
-        this.$emit('close-signin-dialog');
+        this.$store.commit('SET_Drawer')
       }
       this.loginLoading = false;
       this.dialog = false;
@@ -76,11 +76,12 @@ export default {
       const topPosition = (window.screen.height / 2) - ((900 / 2) + 50);
       const authWindow = window.open(
         uri,
+        "_blank",
         `toolbar=yes,scrollbars=yes,resizable=yes,width=500,height=900,top=${topPosition},left=${leftPosition}`
       );
       let url = '';
 
-      setInterval(async () => {
+      let tracking = setInterval(async () => {
         try {
           url = authWindow && authWindow.location && authWindow.location.search
         } catch (e) {}
@@ -90,9 +91,10 @@ export default {
             'twitchOAuthToken' : url.split('?token=')[1].split('&twitchOAuthToken=')[1],
           }
           authWindow.close();
+          clearInterval(tracking);
           resolve(parsedCode);
         }
-      }, 10);
+      }, 100);
     });
     },
   },

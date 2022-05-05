@@ -140,19 +140,21 @@
       :userInfo="userInfo"
       :clipSort="clipSort"
     ></SortButton>
-    <v-row
-      v-if="this.clipSort === 'vids'"
-      id="vidCarousel"
-      class="d-flex justify-center align-center pa-0"
-    >
-      <vids
-        @openVidsListDialog="openVidsListDialog"
-        class="justify-center"
-        :vids="this.vidLists"
-        :carsouelId="carsouelId"
-        @emitVidId="changeCarsouelId"
-      ></vids>
-      <v-row v-for="(item, listIndex) in this.vidLists" :key="listIndex">
+    <v-row class="d-block" v-if="this.clipSort === 'vids'">
+      <v-row
+        id="vidCarousel"
+        style="height:250px;"
+        class="d-flex justify-center align-center pa-0"
+      >
+        <vids
+          @openVidsListDialog="openVidsListDialog"
+          class="justify-center"
+          :vids="this.vidLists"
+          :carsouelId="carsouelId"
+          @emitVidId="changeCarsouelId"
+        ></vids>
+      </v-row>
+      <v-row  v-for="(item, listIndex) in this.vidLists" :key="listIndex">
         <v-row v-if="carsouelId == listIndex">
           <clips
             v-if="carsouelId == listIndex"
@@ -166,7 +168,7 @@
     </v-row>
     <v-row
       class="d-flex justify-center align-center pa-0"
-      v-if="this.clipSort === 'date'"
+      v-else-if="this.clipSort === 'date'"
     >
       <clipsByDate
         :userProfileImg="userInfo.data.profile_image_url"

@@ -6,10 +6,11 @@
   </v-row>
   <v-row class="d-flex">
     <v-col
+      class="pr-3"
       @mouseover="hovering = true"
       @mouseleave="hovering = false"
-      :cols="$vuetify.breakpoint.mdAndUp ? 8 : 12" style="position:relative;">
-      <v-sheet v-if="hovering" class="controller-panel px-10 d-flex justify-space-between align-center" width="100%" height="0">
+      :cols="$vuetify.breakpoint.mdAndUp ? 9 : 12" style="position:relative;">
+      <v-sheet v-if="hovering" class="controller-panel black px-10 d-flex justify-space-between align-center" width="100%" height="0">
         <v-btn text :style="vidIndex === 0 ? 'background:rgba(0,0,0,0)' : 'background:rgba(0,0,0,0.5)'" x-large>
           <v-icon v-if="vidIndex > 0" @click="prevVid()" size="80" color="white"> mdi-rotate-180 mdi-skip-next-outline</v-icon>
         </v-btn>
@@ -24,19 +25,18 @@
       :height="$vuetify.breakpoint.mdAndUp ? 720 : 500"
       width="100%"
       allowfullscreen="true"></iframe>
-
     </v-col>
-    <v-col :cols="$vuetify.breakpoint.mdAndUp ? 4 : 12" class="overflow-y-auto overflow-x-hidden" :style="{height : $vuetify.breakpoint.mdAndUp ? '720px' : '300px'}">
+    <v-col :cols="$vuetify.breakpoint.mdAndUp ? 3 : 12" class="overflow-y-auto overflow-x-hidden" :style="{height : $vuetify.breakpoint.mdAndUp ? '720px' : '300px'}">
       <v-card class="pa-0 ma-0" flat>
         <v-card-title class="d-flex align-center pb-10 rounded-0" :style="{background: clipListData.color, color:textColor}">
-          <span>asdf</span>
-          <v-spacer></v-spacer>
           <v-icon :color="textColor" class="pr-1">mdi-playlist-play</v-icon>
           <span>{{currList.length}}개</span>
+          <v-icon></v-icon>
+          <v-spacer></v-spacer>
         </v-card-title>
         <v-card-text v-for="(clip,index) in currList" :key="clip.id" class="pa-0 ma-0">
-          <v-container class="d-flex my-3 pa-2 px-3" flat @click="vidIndex = index" :class="vidIndex === index ? 'grey darken-3 white--text' : ''">
-            <v-img max-width="150" :src="clip.thumbnail_url" lazy-src="@/assets/img/404.jpg"></v-img>
+          <v-container class="d-flex align-center my-3 pa-2 px-3" flat @click="vidIndex = index" :class="vidIndex === index ? 'grey darken-3 white--text' : ''">
+            <v-img max-width="100" height="100%" :src="clip.thumbnail_url" lazy-src="@/assets/img/404.jpg"></v-img>
             <div class="pl-2">
               <div class="text-truncate inline-block" style="max-width:15rem;">{{clip.title}}</div>
               <div>{{clip.broadcaster_name}}</div>

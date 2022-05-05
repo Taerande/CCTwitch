@@ -1,15 +1,15 @@
 <template>
-  <v-app-bar height="90" app flat>
+  <v-app-bar height="90" app flat absolute>
     <v-container
     class="align-center justify-center">
       <v-row class="d-flex align-center">
         <div class="d-flex">
-          <v-btn icon @click="drawer = !drawer">
+          <v-btn icon @click="changeDrawer()">
             <v-icon>mdi-menu</v-icon>
           </v-btn>
           <v-dialog
             content-class="drawer"
-            v-model="drawer"
+            v-model="$store.state.drawer"
             no-click-animation
             fullscreen
             transition="dialog-bottom-transition"
@@ -18,7 +18,7 @@
               <v-card-title>
                 <span>Quick Menu</span>
                 <v-spacer></v-spacer>
-                <v-btn @click="drawer = false" icon>
+                <v-btn @click="changeDrawer()" icon>
                   <v-icon>mdi-chevron-double-down</v-icon>
                 </v-btn>
               </v-card-title>
@@ -43,19 +43,19 @@
                   </v-form>
                   <div class="text-caption pl-5 pt-3">Menu</div>
                   <v-divider class="my-3"></v-divider>
-                  <v-list-item to="/" @click="drawer = false">
+                  <v-list-item to="/" @click="changeDrawer()">
                     <v-icon color="twitch" class="pr-1">mdi-home</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Home</span>
                   </v-list-item>
-                  <v-list-item to="/trending" @click="drawer = false">
+                  <v-list-item to="/trending" @click="changeDrawer()">
                     <v-icon color="green" class="pr-1">mdi-trending-up</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Trend</span>
                   </v-list-item>
-                  <v-list-item to="/cliplist" @click="drawer = false">
+                  <v-list-item to="/cliplist" @click="changeDrawer()">
                     <v-icon color="blue" class="pr-1">mdi-playlist-check</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Cliplist</span>
                   </v-list-item>
-                  <v-list-item to="/streamer" @click="drawer = false">
+                  <v-list-item to="/streamer" @click="changeDrawer()">
                     <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
                   </v-list-item>
@@ -76,7 +76,7 @@
                   </v-card>
                   <v-card flat v-else>
                     <div class="d-flex justify-center px-10 pt-5">
-                     <SignInDialog @close-signin-dialog="closeDialog" :type="{parent:'quickMenu'}"></SignInDialog>
+                     <SignInDialog :type="{parent:'quickMenu'}"></SignInDialog>
                     </div>
                   </v-card>
                   <div class="text-caption pl-5 pt-8">Option</div>
@@ -146,7 +146,7 @@
           </template>
           <v-card>
             <v-card-text class="pt-5 mx-auto pt-10">
-             <SearchBar @close="closeDialog" class="mx-auto"></SearchBar>
+             <SearchBar @close="changeDrawer()" class="mx-auto"></SearchBar>
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -172,6 +172,8 @@
 
 import SearchBar from '@/components/SearchBar.vue';
 import SignInDialog from '@/components/dialog/SignInDialog.vue';
+import { mapState } from 'vuex'
+import { mapMutations } from 'vuex'
 
 export default {
   components: {
@@ -182,10 +184,12 @@ export default {
     return {
       dialog: false,
       logoutLoading: false,
-      drawer: false,
     };
   },
   methods: {
+    ...mapMutations({
+      changeDrawer: 'SET_Drawer',
+    }),
     toggleDarkTheme() {
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
       localStorage.setItem('dark', this.$vuetify.theme.dark);
@@ -205,10 +209,6 @@ export default {
       this.$store.commit('SET_SnackBar',{type: 'error', text:'로그아웃', value:true})
       }, 500);
     },
-    closeDialog(){
-      console.log('close');
-      this.drawer = false;
-    },
     searchChannel(el) {
       this.$store.state.searchQuery = el;
       this.$router.push({
@@ -220,8 +220,13 @@ export default {
           q: el,
         },
       });
-      this.drawer = false;
+      this.changeDrawer();
     },
+  },
+  computed: {
+    ...mapState({
+      drawer: 'drawer',
+    })
   },
   created() {
   },
@@ -239,7 +244,7 @@ export default {
   display: none;
 }
 #app-bar{
-  position: sticky;
+  position: absolute;
   top: 0;
   margin-left: 15%;
   margin-right: 15%;

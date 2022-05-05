@@ -17,7 +17,7 @@
       <Search class="pt-6"></Search>
     </v-row>
 
-    <v-row>
+    <v-row v-if="$store.state.userinfo.userInfo">
       <v-col>
         <v-card flat>
           <v-avatar

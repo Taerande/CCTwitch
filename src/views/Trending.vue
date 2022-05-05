@@ -1,12 +1,13 @@
 <template>
 <v-container>
-  <v-row class="pb-5">
+  <v-row class="py-5">
     <span class="text-h3 font-weight-bold pr-3">Trending</span>
   </v-row>
+  <v-divider></v-divider>
   <v-row v-if="loading" class="absolute-center">
     <v-progress-circular indeterminate></v-progress-circular>
   </v-row>
-  <v-row class="pt-15" v-else-if="cliplists.length > 0 && !loading">
+  <v-row class="pt-5" v-else-if="cliplists.length > 0 && !loading">
     <v-col cols="12" xl="2" lg="3" md="4" sm="6" xs="12" class="pa-3" v-for="item in cliplists" :key="item.id">
       <v-card dark height="150" class="d-flex flex-row" flat @click="$router.push({path:`clip/${item.id}`})" :img="item.thumbnail_url" style="background-size: cover;">
         <v-card-title class="pa-0 ma-0" style="{opacity: 1, width: 0px;}">

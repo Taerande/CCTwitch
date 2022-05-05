@@ -1,12 +1,11 @@
 <template>
 <v-container>
-  <v-row class="pt-5 justify-center align-baseline">
-    <div class="py-3">
-      <span class="text-h3 font-weight-bold pr-3">My Cliplists</span>
-    </div>
+  <v-row class="py-5 align-baseline">
+    <span class="text-h3 font-weight-bold pr-3">My Cliplists</span>
     <v-spacer></v-spacer>
     <AddNewCliplistDialog :type="{type:'add'}"></AddNewCliplistDialog>
   </v-row>
+  <v-divider></v-divider>
   <v-row v-if="loading" class="absolute-center">
     <v-progress-circular indeterminate></v-progress-circular>
   </v-row>

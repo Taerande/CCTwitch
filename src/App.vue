@@ -45,6 +45,7 @@ export default {
       this.$store.commit('TOGGLE_SearchBar')
     },
   },
+
  async created() {
     const likesInit = JSON.parse(localStorage.getItem('alllikes'))
     // const userInfo = localStorage.getItem('userInfo');
@@ -208,9 +209,16 @@ html.overflow-y-hidden{
   .table-views {
     display: none;
   }
+  .beforeVidImg,
+  .afterVidImg {
+    display: none;
+  }
 }
 
 .v-dialog.clipIframe {
   margin: 0 !important;
+}
+.hoverCursor{
+  cursor: pointer;
 }
 </style>

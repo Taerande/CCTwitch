@@ -349,15 +349,19 @@ export default {
       this.$store.commit('SET_SnackBar',{type: 'error', text:'로그인정보가 잘못되었습니다. 다시 로그인 해주세요', value:true})
     },
     async postProcess(){
-      const userInfo = this.$store.state.userinfo.userInfo;
-      const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
-      if(userInfo && twitchOAuthToken){
-        this.islogin = true;
-        this.getStreamFollowList(userInfo);
-        this.getFollowList(userInfo);
-      } else {
-        this.$store.commit('SET_SnackBar', {type:'error', text:'로그인 정보가 잘못되었습니다. 다시 로그인 해주세요', value:true});
-      }
+      // await this.$firebase.auth().onAuthStateChanged((user) => {
+        const user = this.$store.state.userinfo.userInfo;
+        console.log('asdf');
+        const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
+        console.log(user, twitchOAuthToken);
+        if(user && twitchOAuthToken){
+          this.islogin = true;
+          this.getStreamFollowList(user);
+          this.getFollowList(user);
+        } else {
+          this.$store.commit('SET_SnackBar', {type:'error', text:'로그인 정보가 잘못되었습니다. 다시 로그인 해주세요', value:true});
+        }
+      // });
     },
         // Authoriation: `Bearer ${this.$store.state.twitchAuthToken}`
   },
@@ -369,7 +373,6 @@ export default {
   async mounted() {
     await this.postProcess();
   }
-
 };
 </script>
 <style lang="scss">

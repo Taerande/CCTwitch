@@ -11,7 +11,7 @@ firebase.initializeApp(firebaseConfig);
 Vue.prototype.$firebase = firebase;
 Vue.prototype.$firestore = firebase.firestore();
 
-firebase.auth().onAuthStateChanged((user) => {
+firebase.auth().onAuthStateChanged(async (user) => {
   // store.commit('SET_FirebaseLoad', true)
   if (user) {
     // store.commit('SET_FirebaseLoad', true)
@@ -20,4 +20,5 @@ firebase.auth().onAuthStateChanged((user) => {
     // router.push('/')
   } else {
   }
-  });
+});
+

@@ -6,8 +6,9 @@
   max-width="1280">
   <template v-slot:activator="{ on, attrs }">
     <v-img
+    class="mx-auto"
+    max-width="440"
     :aspect-ratio="16/9"
-    max-width="300"
     id="clip-thumbnail"
     @click="dialog = true"
     v-bind="attrs"
