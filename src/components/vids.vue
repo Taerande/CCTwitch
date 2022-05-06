@@ -7,18 +7,20 @@
     v-if="vidlist.length > 0"
   >
     <v-carousel-item
+      full-width
       v-ripple="false"
       v-for="(item, index) in vidlist"
       :key="index"
-      :aspect-ratio="16/9"
+      transition="none"
     >
+      <!-- :aspect-ratio="16/9" -->
     <v-sheet
     class="d-flex justify-center align-center pa-2 rounded-lg"
-    color="rgba(0,0,0,0.05)">
+    :color="$vuetify.theme.dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'">
      <v-img
-      @click.stop.prevent="model = index - 1"
+      @click.stop.prevent="index===0 ? model = vidlist.length-1 : model = index - 1"
       class="beforeVidImg rounded-lg rounded-r-0 hoverCursor"
-      max-width="400"
+      :max-width="imgWidth * 0.9"
       height="80%"
       :src="setThumbnailSize(item.data.thumbnail_url, index- 1) || '@/assets/img/404.jpg'"
       lazy-src="@/assets/img/404.jpg"
@@ -31,7 +33,7 @@
       <div class="white--text elevation-12" style="position: relative;">
         <v-img
         class="hoverCursor"
-        max-width="440"
+        :max-width="imgWidth"
         height="100%"
         @click="openVidsListDialog"
         :src="setThumbnailSize(item.data.thumbnail_url, index*1) || '@/assets/img/404.jpg'"
@@ -64,7 +66,7 @@
        <v-img
         @click.stop.prevent="model = index + 1"
         class="afterVidImg rounded-lg rounded-l-0 hoverCursor"
-        max-width="400"
+        :max-width="imgWidth * 0.9"
         height="80%"
         :src="setThumbnailSize(item.data.thumbnail_url, index + 1) || '@/assets/img/404.jpg'"
         lazy-src="@/assets/img/404.jpg"
@@ -77,7 +79,6 @@
     </v-sheet>
     </v-carousel-item>
   </v-carousel>
-
   <div v-else class="d-flex align-center text-h4" style="height: 30vh;">
     😅There is no Vids
   </div>
@@ -168,6 +169,13 @@ export default {
         this.$emit('emitVidId',newValue);
       }
     },
+    imgWidth(){
+      if(this.$vuetify.breakpoint.mobile){
+        return '285';
+      } else {
+        return '400';
+      }
+    }
   },
   mounted() {
     this.vidlist = this.vids;
@@ -190,13 +198,11 @@ export default {
 }
 .beforeVidImg{
   z-index: 2;
-  /* opacity: 0.8; */
   left: -1%;
   transform: scale(0.8);
 }
 .afterVidImg{
   z-index: 2;
-  /* opacity: 0.8; */
   left: 1%;
   transform: scale(0.8);
 

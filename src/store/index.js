@@ -25,7 +25,7 @@ export default new Vuex.Store({
     searchList: [],
     twitchOAuthToken: '',
     headerConfig: {
-      Authorization: 'Bearer e3mq4qudwfzqkcz1uc5nb84menag54',
+      Authorization: '',
       'Client-id': process.env.VUE_APP_TWITCH_CLIENT_ID,
       Accept: process.env.VUE_APP_TWITCH_HEADER_ACCEPT,
     },

@@ -87,6 +87,12 @@
                 >{{ userInfo.data.display_name }}님의 Video List</span
               >
             </v-card-title>
+            <div class="d-flex justify-center align-center pa-3" v-if="vidLists.length > 0">
+              <span>
+                {{setDate(vidLists[vidLists.length-1].data.created_at)}} ~
+                {{setDate(vidLists[0].data.created_at)}}
+              </span>
+            </div>
             <v-container class="pa-3 mx-auto">
               <v-row class="d-flex align-center">
                 <v-col
@@ -98,11 +104,11 @@
                   md="4"
                   sm="6"
                   xs="12"
-                  v-for="(item, index) in this.vidLists"
+                  v-for="(item, index) in vidLists"
                   :key="index"
                 >
                   <v-img
-                    max-width="150"
+                    :max-width="imgWidth"
                     :src="
                       setThumbnailSize(item.data.thumbnail_url) ||
                       '@/assets/img/404.jpg'
@@ -143,18 +149,17 @@
     <v-row class="d-block" v-if="this.clipSort === 'vids'">
       <v-row
         id="vidCarousel"
-        style="height:250px;"
-        class="d-flex justify-center align-center pa-0"
+        justify="center"
+        align="center"
       >
         <vids
           @openVidsListDialog="openVidsListDialog"
-          class="justify-center"
-          :vids="this.vidLists"
+          :vids="vidLists"
           :carsouelId="carsouelId"
           @emitVidId="changeCarsouelId"
         ></vids>
       </v-row>
-      <v-row  v-for="(item, listIndex) in this.vidLists" :key="listIndex">
+      <v-row  v-for="(item, listIndex) in vidLists" :key="listIndex">
         <v-row v-if="carsouelId == listIndex">
           <clips
             v-if="carsouelId == listIndex"
@@ -341,6 +346,15 @@ export default {
       await this.getVid(this.userInfo.data.id)
       this.dataLoading = true
     },
+  },
+  computed:{
+    imgWidth(){
+      if(this.$vuetify.breakpoint.mobile){
+        return '100px';
+      } else {
+        return '150px';
+      }
+    }
   },
   created() {
     this.process()

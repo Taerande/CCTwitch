@@ -349,11 +349,9 @@ export default {
       this.$store.commit('SET_SnackBar',{type: 'error', text:'로그인정보가 잘못되었습니다. 다시 로그인 해주세요', value:true})
     },
     async postProcess(){
-      // await this.$firebase.auth().onAuthStateChanged((user) => {
-        const user = this.$store.state.userinfo.userInfo;
-        console.log('asdf');
+      await this.$firebase.auth().onAuthStateChanged((user) => {
+        // const user = this.$store.state.userinfo.userInfo;
         const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
-        console.log(user, twitchOAuthToken);
         if(user && twitchOAuthToken){
           this.islogin = true;
           this.getStreamFollowList(user);
@@ -361,9 +359,8 @@ export default {
         } else {
           this.$store.commit('SET_SnackBar', {type:'error', text:'로그인 정보가 잘못되었습니다. 다시 로그인 해주세요', value:true});
         }
-      // });
+      });
     },
-        // Authoriation: `Bearer ${this.$store.state.twitchAuthToken}`
   },
   computed: {
     getTodayDate() {

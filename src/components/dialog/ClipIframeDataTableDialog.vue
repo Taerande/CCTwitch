@@ -3,17 +3,19 @@
   content-class="clipIframe"
   max-width="1280"
   v-model="dialog">
-  <template v-slot:activator="{ on }">
-    <td
-    class="ma-2 canSort table-thumbnail"
+  <template v-slot:activator="{ on }" class="d-flex">
+    <v-img
+    class="pa-0"
     v-on="on"
-    >
-      <v-img
-      class="mx-auto"
-      max-width="100"
-      lazy-src="@/assets/img/404.jpg"
-      :src="clipData.thumbnail_url"></v-img>
-    </td>
+    height="100%"
+    :max-width="imgWidth"
+    lazy-src="@/assets/img/404.jpg"
+    :src="clipData.thumbnail_url"></v-img>
+    <div v-on="on" class="pl-1">
+      <span>{{clipData.title}}</span>
+      <span>{{clipData.created_at}}</span>
+      <span>{{clipData.view_count}}</span>
+    </div>
   </template>
   <div class="black d-flex justify-end">
      <v-btn dark :disabled="clipData.video_id.length === 0" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
@@ -22,10 +24,10 @@
   <iframe
     class="black d-flex align-center"
     v-if="dialog"
-    :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=false`"
+    :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=true`"
     preload="auto"
     frameborder="0"
-    height="720"
+    :height="$vuetify.breakpoint.smAndUp ? 720 : 400"
     width="1280"
     allowfullscreen="true"></iframe>
 </v-dialog>
@@ -74,12 +76,28 @@ export default {
       }).then((res) => {
           element.videoOffsetSeconds = res.data.data.clip.videoOffsetSeconds;
       })
-      }
+    },
   },
+  computed:{
+    imgWidth(){
+      if(this.$vuetify.breakpoint.lgAndUp){
+        return '250';
+      } else if(this.$vuetify.breakpoint.smAndUp) {
+        return '200';
+      } else if (this.$vuetify.breakpoint.mobile) {
+        return '100';
+      } else {
+        return '250';
+      }
+    }
+  },
+
   mounted(){
     if(this.clipData.video_id){
       this.getVidOffset(this.clipData);
-    }
+    };
+    console.log(this.$vuetify.breakpoint);
+
   }
 }
 </script>

@@ -132,4 +132,8 @@ div[role=listitem]:hover{
   cursor: pointer;
   background-color: rgb(0, 0, 0, 0.2) !important;
 }
+i.v-icon.v-icon {
+  border-radius: 100%;
+  background: rgb(0, 0, 0, 0.3);
+}
 </style>

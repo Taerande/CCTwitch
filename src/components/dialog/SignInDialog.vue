@@ -1,7 +1,9 @@
 <template>
 <v-dialog persistent no-click-animation v-model="dialog" max-width="900" @keydown.esc="dialog = false">
   <template v-slot:activator="{on}">
-    <v-icon v-if="type.parent == 'pinclip'" v-on="on" small color="error">mdi-pin-outline</v-icon>
+    <v-btn v-if="type.parent == 'pinclip'" icon>
+      <v-icon class="pinClip" v-on="on" size="20" color="red">mdi-pin</v-icon>
+    </v-btn>
     <v-btn v-on="on" :loading="loginLoading" v-else-if="type.parent == 'quickMenu'" width="100%" dark color="twitch">Login</v-btn>
     <v-btn v-else v-on="on" class="twitch" :loading="loginLoading">
       <span>로그인</span>
@@ -58,6 +60,7 @@ export default {
       }
       this.loginLoading = false;
       this.dialog = false;
+      this.$router.push('/');
       this.$store.commit('SET_SnackBar',{type: 'info', text:'로그인 성공', value:true})
 
     },
@@ -107,6 +110,10 @@ export default {
 .absolute-right{
   position: absolute !important;
   right: 1rem !important;
+}
+.pinClip{
+  border-radius: 100%;
+  background: rgb(0, 0, 0, 0.3);
 }
 
 </style>

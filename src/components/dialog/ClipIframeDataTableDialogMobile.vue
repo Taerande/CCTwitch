@@ -9,7 +9,6 @@
         <v-img
           v-on="on"
           class="clip-thumbnail"
-          max-width="160"
           :src="clipData.thumbnail_url || '@/assets/img/404.jpg'"
           lazy-src="@/assets/img/404.jpg">
           <span class="duration grey darken-4 pa-1 text-caption text-weight-bold align-center">{{clipData.duration}}</span>

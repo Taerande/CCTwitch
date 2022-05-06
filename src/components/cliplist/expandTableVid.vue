@@ -19,7 +19,7 @@
         </v-btn>
       </v-sheet>
       <iframe
-      :src="`https://clips.twitch.tv/embed?clip=${currList[vidIndex].id}&parent=${$store.state.embedUrl}&autoplay=true&muted=false&preload=auto`"
+      :src="`https://clips.twitch.tv/embed?clip=${this.currList[vidIndex].id}&parent=${$store.state.embedUrl}&autoplay=true&muted=false&preload=auto`"
       preload="auto"
       frameborder="0"
       :height="$vuetify.breakpoint.mdAndUp ? 720 : 500"
@@ -34,7 +34,7 @@
           <v-icon></v-icon>
           <v-spacer></v-spacer>
         </v-card-title>
-        <v-card-text v-for="(clip,index) in currList" :key="clip.id" class="pa-0 ma-0">
+        <v-card-text v-for="(clip,index) in currList" :key="index" class="pa-0 ma-0">
           <v-container class="d-flex align-center my-3 pa-2 px-3" flat @click="vidIndex = index" :class="vidIndex === index ? 'grey darken-3 white--text' : ''">
             <v-img max-width="100" height="100%" :src="clip.thumbnail_url" lazy-src="@/assets/img/404.jpg"></v-img>
             <div class="pl-2">
@@ -183,18 +183,22 @@ export default {
     theme() {
       return this.$vuetify.theme.dark ? 'dark-table' : 'light-table';
     },
-    currList(){
-      return this.$store.state.currentCliplist;
+    currList:{
+      get(){
+        return this.$store.state.currentCliplist;
+      },
+      set(value) {
+        this.$store.commit('SET_CurrentClipList', value);
+      }
     },
     textColor(){
       return this.$store.state.darkColorSet.includes(this.clipListData.color.substr(0,7)) ? 'white' : 'black';
     }
   },
-  watch:{
-    currList(value){
-      this.$store.commit('SET_CurrentClipList', value);
-    }
-  },
+  // watch:{
+  //   currList(value){
+  //   }
+  // },
   async created() {
     await axios.get('https://api.twitch.tv/helix/clips', {
       headers: this.$store.state.headerConfig,
@@ -215,7 +219,6 @@ export default {
       if(res.data.data.length !== this.clipListData.cliplist.length)
       {
         for( let i = 0; i < diff.length; i++){
-          console.log({id:'asdfsdf', title:'클립정보를 찾을 수 없습니다.'});
           this.$store.commit('ADD_ClipInCurrentCliplist',
           {
             id:diff[i],

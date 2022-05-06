@@ -52,6 +52,8 @@ export default {
     // if(userInfo){
     //   this.$store.commit('SET_UserInfo',userInfo)
     // }
+    const appAccessToken = JSON.parse(localStorage.getItem('twitchAppAccessToken'));
+    this.$store.commit('SET_TwitchAppAccessToken', appAccessToken);
     if (likesInit === null) {
       const likes = []
       localStorage.setItem('alllikes', JSON.stringify(likes))
@@ -63,7 +65,7 @@ export default {
     if(localStorage.getItem('twitchAppAccessToken')){
       await axios.get('https://id.twitch.tv/oauth2/validate',{
         headers:{
-          Authorization: `OAuth ${localStorage.getItem('twitchAppAccessToken').slice(1,-1)}`
+          Authorization: `OAuth ${JSON.parse(localStorage.getItem('twitchAppAccessToken'))}`
           }
       }).then((res) => {
         //정상
@@ -71,7 +73,7 @@ export default {
       }).catch(async (error) => {
         //비정상, 앱엑세스 토큰 재발급 Backend 처리
         await axios.get(this.$store.state.appTokenURL).then((res) => {
-          console.log('비정상',res);
+          this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
           localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
         });
       })
@@ -202,6 +204,14 @@ html.overflow-y-hidden{
 @media screen and (max-width: 600px) {
   html {
     font-size: 80%;
+  }
+  header {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+  main {
+    margin-right: 3px;
+    margin-left: 3px;
   }
   .table-duration,
   .table-date,

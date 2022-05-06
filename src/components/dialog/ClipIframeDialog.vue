@@ -6,21 +6,19 @@
   max-width="1280">
   <template v-slot:activator="{ on, attrs }">
     <v-img
-    class="mx-auto"
-    max-width="440"
+    class="mx-auto rounded-lg"
+    height="100%"
+    :max-width="imgWidth"
     :aspect-ratio="16/9"
     id="clip-thumbnail"
-    @click="dialog = true"
+    @click="getVidOffset(clipData)"
     v-bind="attrs"
     v-on="on"
     lazy-src="@/assets/img/404.jpg"
     :src="clipData.thumbnail_url">
       <v-container fluid fill-height class="d-flex align-content-space-between">
-        <v-row class="d-flex justify-space-between align-center pl-1" style="background-color: rgba( 0, 0, 0, 0.5 )">
-          <v-avatar size="25">
-            <v-img :src="$attrs.userProfileImg" lazy-src="@/assets/img/404.jpg" alt="profile_img"></v-img>
-          </v-avatar>
-          <span style="max-width: 150px;" class="white--text text-body-2 text-truncate">{{clipData.title}}</span>
+        <v-row class="d-flex justify-space-between align-center pl-1">
+          <v-spacer></v-spacer>
           <pinClip name="channelClipPin" :clipData="{data:clipData}"></pinClip>
         </v-row>
         <v-row class="d-flex justify-space-between">
@@ -29,6 +27,7 @@
         </v-row>
       </v-container>
     </v-img>
+    <div class="text-title text-truncate pt-2">{{clipData.title}}</div>
   </template>
     <div class="black d-flex justify-end align-center" v-if="dialog">
       <span class="white--text pl-5">{{this.$moment(clipData.created_at).format('ll')}}</span>
@@ -45,7 +44,7 @@
       :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=false&muted=false&preload=auto`"
       preload="auto"
       frameborder="0"
-      :height="$vuetify.breakpoint.smAndUp ? 720 : 300"
+      :height="$vuetify.breakpoint.smAndUp ? 720 : 400"
       width="100%"
       allowfullscreen="true"></iframe>
 </v-dialog>
@@ -101,6 +100,9 @@ export default {
       return Math.abs(num);
     },
     async getVidOffset(element){
+      if(!element.video_id){
+        return this.dialog = true;
+      }
       const json = JSON.stringify(
         {
           operationName: "ClipsFullVideoButton",
@@ -114,20 +116,27 @@ export default {
               }
           }
         })
-     await axios.post('https://gql.twitch.tv/gql',json, {
+      await axios.post('https://gql.twitch.tv/gql',json, {
         headers: {
           'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
         },
 
       }).then((res) => {
           element.videoOffsetSeconds = res.data.data.clip.videoOffsetSeconds;
+          this.dialog = true;
       })
       }
   },
-  mounted(){
-    if(this.clipData.video_id){
-      this.getVidOffset(this.clipData);
+  computed:{
+    imgWidth(){
+      if(this.$vuetify.breakpoint.mobile){
+        return '285';
+      } else {
+        return '400';
+      }
     }
+  },
+  mounted(){
   }
 }
 </script>

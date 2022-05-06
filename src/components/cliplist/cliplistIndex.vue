@@ -1,61 +1,69 @@
 <template>
-<v-container fluid fill-height>
-  <v-row class="d-flex justify-space-between align-baseline">
-    <div class="pt-10 pb-3">
+<v-container fluid>
+  <v-row class="d-block">
+    <div class="d-flex pt-10 align-baseline">
       <span class="text-h3 font-weight-bold pr-3">{{cliplist.title}}</span>
       <span class="text-subtitle-1">
         <v-icon>mdi-</v-icon>
         (총 {{ cliplist.cliplist.length }} / 100 개)</span>
     </div>
-    <v-spacer></v-spacer>
-    <ImportNewClipDialogVue :parent="cliplist"></ImportNewClipDialogVue>
-    <DeleteDialog
-    @DeleteCliplist="deleteCliplist"
-    :delete="{
-      type:'cliplist',
-      data:{
-        target: cliplist,
-        }
-      }">
-    </DeleteDialog>
-    <v-btn @click="copyCliplist(cliplist)" icon>
-      <v-icon>mdi-share-variant-outline</v-icon>
-    </v-btn>
-    <AddNewCliplistDialog
-    v-if="$store.state.currentListData"
-    :type="{
-      type:'edit',
-      data: cliplist,
-      }">
-    </AddNewCliplistDialog>
+    <div class="d-flex align-baseline pb-1">
+      <span></span>
+      <span class="text-body-2 grey--text pr-3">조회수 {{cliplist.viewCount}}</span>
+      <span class="text-body-2 grey--text pr-3">
+        <v-icon small>mdi-thumb-up-outline</v-icon>
+        <span class="text-body-2 grey--text pr-3">{{cliplist.likeCount}}</span>
+      </span>
+      <span class="text-caption">{{setDate(cliplist.createdAt.toString())}}</span>
+      <v-spacer></v-spacer>
+      <ImportNewClipDialogVue :parent="cliplist"></ImportNewClipDialogVue>
+      <DeleteDialog
+      @DeleteCliplist="deleteCliplist"
+      :delete="{
+        type:'cliplist',
+        data:{
+          target: cliplist,
+          }
+        }">
+      </DeleteDialog>
+      <v-btn @click="copyCliplist(cliplist)" icon>
+        <v-icon>mdi-share-variant-outline</v-icon>
+      </v-btn>
+      <AddNewCliplistDialog
+      v-if="$store.state.currentListData"
+      :type="{
+        type:'edit',
+        data: cliplist,
+        }">
+      </AddNewCliplistDialog>
+    </div>
+    <v-divider></v-divider>
   </v-row>
   <v-row class="d-block">
-  <v-divider></v-divider>
-    <div class="pl-1">
+    <div class="d-flex align-center pt-3">
+      <v-avatar
+        size="36">
+        <img :src="userInfo.profile_image_url" alt="alt">
+      </v-avatar>
+      <div class="pl-1">
+        <div>{{userInfo.display_name}}</div>
+      </div>
+    </div>
+    <v-spacer></v-spacer>
+    <div class="pt-3">
       {{cliplist.description}}
     </div>
-    <div class="d-flex pa-3">
-      <div class="d-flex align-center">
-        <v-avatar
-          size="36">
-          <img :src="userInfo.profile_image_url" alt="alt">
-        </v-avatar>
-        <div class="pl-3">
-          <div>{{userInfo.display_name}}</div>
-        </div>
-      </div>
-      <v-spacer></v-spacer>
-
-    </div>
-  <v-divider></v-divider>
   </v-row>
   <expandTableVue
-  v-if="cliplist.cliplist.length > 0"
-  :clipListData="cliplist">
+    v-if="cliplist.cliplist.length > 0"
+    :clipListData="cliplist.cliplist">
   </expandTableVue>
-  <v-container v-else style="height:60vh;" class="d-flex justify-center align-center">
+  <v-row v-else style="height:60vh;" class="d-flex justify-center align-center">
     <v-alert rounded="pill" class="d-inline-block" type="error">🤐 저장 혹은 공유된 클립 모음이 없습니다.</v-alert>
-  </v-container>
+  </v-row>
+  <v-row class="pb-16 pt-5">
+    <v-btn block color="success">More</v-btn>
+  </v-row>
 </v-container>
 </template>
 
@@ -64,7 +72,7 @@
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import axios from 'axios';
-import expandTableVue from './expandTableVid';
+import expandTableVue from './expandTable';
 import ImportNewClipDialogVue from '../dialog/ImportNewClipDialog.vue';
 export default {
   components: {
@@ -150,10 +158,7 @@ export default {
       }
     },
     setDate(el) {
-      const time = new Date(el).getTime();
-      const krTime = time + 9 * 60 * 60 * 1000;
-      const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
-      return dateFormatted;
+      return this.$moment(el).format('ll');
     },
     async getClip(id, description) {
       await axios.get('https://api.twitch.tv/helix/clips', {
@@ -180,6 +185,7 @@ export default {
     },
   },
   async mounted() {
+    let tempArr = [];
     this.unsubscribe = await this.$firestore.collection('cliplist').doc(this.$route.params.id).onSnapshot((sn) => {
       const item = sn.data();
       this.getUserInfo(item.authorId);
@@ -190,21 +196,33 @@ export default {
       this.$store.commit('SET_CurrentListData', {
         id: sn.id,
         title: item.title,
+        viewCount: item.viewCount,
+        createdAt: item.createdAt.toDate(),
         description: item.description,
         color: item.color,
         isPublic: item.isPublic,
         authorId: item.authorId,
         authorName: item.authorName,
+        likeCount: item.likeCount,
+      });
+      item.cliplist.map(async (el) => {
+        const result = await axios.get('https://api.twitch.tv/helix/clips', {
+          headers: this.$store.state.headerConfig,
+          params:{ id: el}
+        });
+        tempArr.push(result.data.data[0]);
       });
       this.cliplist = {
         id: sn.id,
         title: item.title,
         description: item.description,
         color: item.color,
-        createdAt: item.createdAt,
+        viewCount: item.viewCount,
+        likeCount: item.likeCount,
+        createdAt: item.createdAt.toDate(),
         authorId: item.authorId,
         authorName: item.authorName,
-        cliplist: item.cliplist,
+        cliplist: tempArr,
       }
     })
     this.loading = true;

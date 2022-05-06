@@ -6,7 +6,6 @@
     <v-row class="col-12 pa-1 d-flex justify-space-between align-baseline">
       <div class="d-flex align-baseline">
       <h1>Clips</h1>
-      <span class="pl-2 text-caption">(동영상별 최대 {{$store.state.clipCount}}개의 클립을 가져옵니다.)</span>
       </div>
       <div>
         <v-icon @click="refresh">mdi-refresh</v-icon>
@@ -122,18 +121,18 @@ export default {
         },
       }).then((res) => {
         this.paginationCursor = res.data.pagination.cursor;
-        if (this.cliplist.length >= this.$store.state.clipCount || res.data.data.length === 0) {
+        if (res.data.data.length === 0) {
           $state.complete();
         } else if (res.data.pagination.cursor === undefined && res.data.data.length > 0) {
           res.data.data.forEach((el) => {
-            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < this.$store.state.clipCount) {
+            if (el.video_id === this.infiniteData.data.video_id) {
               this.cliplist.push(el);
             }
           });
           $state.complete();
         } else {
           res.data.data.forEach((el) => {
-            if (el.video_id === this.infiniteData.data.video_id && this.cliplist.length < this.$store.state.clipCount) {
+            if (el.video_id === this.infiniteData.data.video_id) {
               this.cliplist.push(el);
             }
           });
