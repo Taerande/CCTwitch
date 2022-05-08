@@ -73,16 +73,16 @@ export default {
       }).catch(async (error) => {
         //비정상, 앱엑세스 토큰 재발급 Backend 처리
         await axios.get(this.$store.state.appTokenURL).then((res) => {
-          this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
           localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
-        });
+          this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
+        })
       })
     } else {
       //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
       await axios.get(this.$store.state.appTokenURL)
       .then((res) => {
-        console.log('토큰없어',res);
         //받아온 엑세스토큰 로컬스토리지에 저장
+        this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
         localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
         });
     }

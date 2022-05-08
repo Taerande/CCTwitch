@@ -8,17 +8,15 @@ export default new Vuetify({
     themes: {
       light: {
         twitch: '#772ce8',
+        overlayColor: '#F4F6F6',
       },
       dark: {
         twitch: '#772ce8',
+        overlayColor: '#F4F6F6',
       },
     },
   },
   breakpoint: {
-    thresholds: {
-      pc: 1280,
-      tb: 768,
-      mb: 480,
-    },
+    mobileBreakpoint: 480,
   }
 });

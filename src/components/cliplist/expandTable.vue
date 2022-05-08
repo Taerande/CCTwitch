@@ -1,39 +1,37 @@
 <template>
 <v-row justify="center">
-  <v-col cols="12" class="py-1" v-for="(clip, index) in clipListData" :key="clip.id">
-    <v-card class="d-flex felx-column rounded-lg tile">
-      <v-card-title class="justify-center" style="width:5%;">
-        <v-icon v-if="index === vidIndex">mdi-drag-horizontal-variant</v-icon>
-        <span v-else>{{index}}</span>
+  <v-col cols="12" class="py-1" v-for="(clip, index) in $store.state.currentCliplist" :key="clip.id">
+    <v-card max-height="100" class="d-flex felx-column rounded-lg" elevation="3">
+      <v-card-title class="justify-center ma-0 pa-0 pl-1" style="width:3rem;">
+        <v-icon small v-if="index === vidIndex">mdi-drag-horizontal-variant</v-icon>
+        <span class="text-caption font-weight-bold" v-else>{{index + 1}}</span>
       </v-card-title>
-      <v-card-text class="d-flex align-center ma-0 py-3">
-        <ClipIframeDataTableDialog :clipData="clip"></ClipIframeDataTableDialog>
+      <v-card-text class="d-flex align-center ma-0 pa-0">
+        <ClipIframeDataTableDialog :clipData="clip.clipData"></ClipIframeDataTableDialog>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-icon>mdi-dots-vertical</v-icon>
+        <clipMenuVue :clip="{clipData:clip.clipData, listData:clipListData}" :listData="AllCliplists"></clipMenuVue>
       </v-card-actions>
-        <!-- <clipMenuVue :clip="clip"></clipMenuVue> -->
-          <!-- <ClipIframeDataTableDialogMobile :clipData="clip"></ClipIframeDataTableDialogMobile> -->
     </v-card>
   </v-col>
 </v-row>
+<!-- <ClipIframeDataTableDialogMobile :clipData="clip"></ClipIframeDataTableDialogMobile> -->
 </template>
 
 <script>
 import axios from 'axios';
 import ClipIframeDataTableDialog from '../dialog/ClipIframeDataTableDialog';
-import ClipIframeDataTableDialogMobile from '../dialog/ClipIframeDataTableDialogMobile';
 import clipMenuVue from './clipMenu.vue';
 
 export default {
   props:['clipListData'],
   components: {
-    // clipMenuVue,
+    clipMenuVue,
     ClipIframeDataTableDialog,
-    // ClipIframeDataTableDialogMobile,
   },
   data() {
     return {
+      AllCliplists:[],
       vidIndex: 0,
       currentTooltipId: '',
       tableloading: false,
@@ -77,58 +75,6 @@ export default {
       const result = a.length === b.length && a.every((value) => b.includes(value));
       return result;
     },
-    // async copyCliplist(element) {
-    //   let clipString = '';
-    //   this.tableloading = true;
-    //   setTimeout(async () => {
-    //     if (element.pinnedClips.length > 0) {
-    //       await this.$firestore.collection('cliplist').where('id', '==', element.id)
-    //         .get()
-    //         .then(async (res) => {
-    //           const templist = [];
-    //           element.pinnedClips.forEach((el) => templist.push(el.id));
-    //           if (res.empty) {
-    //             await this.$firestore.collection('cliplist').add({
-    //               id: element.id,
-    //               title: element.title,
-    //               color: element.color,
-    //               pinnedClips: templist,
-    //             }).then((resp) => {
-    //               clipString = resp.id;
-    //             });
-    //           } else if (this.compareArray(res.docs[0].data().pinnedClips, templist)) {
-    //             clipString = res.docs[0].id;
-    //           } else {
-    //             const uid = String.fromCharCode(Math.floor(Math.random() * 26) + 97)
-    //              + Math.random().toString(16).slice(2)
-    //              + Date.now().toString(16).slice(4);
-    //             await this.$firestore.collection('cliplist').add({
-    //               id: uid,
-    //               title: element.title,
-    //               color: element.color,
-    //               pinnedClips: templist,
-    //             }).then(async (resp) => {
-    //               await this.$store.commit('INIT_currCliplist');
-    //               await this.$store.commit('UPDATE_clipList', { id: element.id, updateId: uid });
-    //               clipString = resp.id;
-    //             });
-    //           }
-    //         });
-    //       const tempArea = document.createElement('textarea');
-    //       document.body.appendChild(tempArea);
-    //       tempArea.value = clipString;
-    //       tempArea.select();
-    //       document.execCommand('copy');
-    //       document.body.removeChild(tempArea);
-    //       this.tableloading = false;
-    //       this.$store.commit('SET_SnackBar', { type: 'success', text: `Cliplist : ${clipString} 가 복사되었습니다.`, value: true });
-    //     } else {
-    //       this.tableloading = false;
-    //       this.$store.commit('SET_SnackBar', { type: 'error', text: 'Cliplist : 리스트에 클립이 없습니다.', value: true });
-    //     }
-    //   }, 1000);
-    // },
-
     sortByViews() {
       this.page = 1;
       if (this.viewSort === 'asc') {
@@ -159,9 +105,6 @@ export default {
         this.$store.commit('SORT_cliplist', { data: this.$store.state.currentCliplist.pinnedClips, type: 'name', order: 'asc' });
       }
     },
-    setDate(el) {
-      return this.$moment(el).format('l');
-    },
     resetData() {
       this.$store.commit('SET_currCliplist', { data: '' });
     },
@@ -171,6 +114,35 @@ export default {
       return this.$vuetify.theme.dark ? 'dark-table' : 'light-table';
     },
   },
+  async mounted() {
+    if(this.$store.state.userinfo.userInfo){
+      this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userinfo.userInfo.uid).onSnapshot((sn) => {
+        if(sn.empty){
+          this.AllCliplists = [];
+          // this.$store.commit('SET_Cliplist', this.cliplist);
+          return
+        }
+        this.AllCliplists = sn.docs.map( v => {
+          const item = v.data()
+          return {
+            id: v.id,
+            title: item.title,
+            description: item.description,
+            createdAt: item.createdAt,
+            color: item.color,
+            clipCount: item.clipCount,
+            clipIds: item.clipIds,
+          }
+        })
+        this.$store.commit('SET_Cliplist', this.cliplist);
+      });
+    }
+  },
+  destroyed() {
+    if(this.unsubscribe) this.unsubscribe()
+  },
+
+
 
 };
 </script>

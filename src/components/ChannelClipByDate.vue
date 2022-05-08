@@ -12,7 +12,8 @@
         <v-icon @click="shuffle">mdi-shuffle</v-icon>
       </div>
     </v-row>
-  <v-row class="d-flex justify-center">
+    <v-divider></v-divider>
+  <v-row class="d-flex">
     <v-col
       v-for="(item, index) in this.cliplist"
       :key="index"
@@ -23,8 +24,9 @@
       <v-lazy
         v-model="item.id"
         :options="{ threshold: 0.5}">
-          <clipIframeDialog :clipData="item" :userProfileImg="userProfileImg"></clipIframeDialog>
+          <clipIframeDialog :clipData="item" :listData="listData"></clipIframeDialog>
       </v-lazy>
+      <div class="d-flex justify-center">{{item.title}}</div>
     </v-col>
   </v-row>
   </v-row>
@@ -38,7 +40,7 @@ import clipIframeDialog from '@/components/dialog/ClipIframeDialog';
 
 export default {
 
-  props: ['clips','userProfileImg'],
+  props: ['clips','listData'],
   components: {
     infiniteLoading,
     clipIframeDialog,

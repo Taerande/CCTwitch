@@ -1,6 +1,6 @@
 <template>
 <v-menu
-:nudge-left="this.$vuetify.breakpoint.xs ? '140' : '0'"
+nudge-left="5"
 transition="slide-x-transition"
 left
 offset-x>
@@ -16,9 +16,9 @@ offset-x>
     </v-list-item>
     <pinClipVue
       v-if="$store.state.userinfo.userInfo"
-      :clipData="{data:clip.clipData, type:'menu'}"></pinClipVue>
+      :clipData="{data:clip.clipData, type:'menu'}" :listData="listData"></pinClipVue>
     <DeleteDialog
-      v-if="clip.listData.authorId === $store.state.userinfo.userInfo.uid"
+      v-if="$store.state.userinfo.userInfo && clip.listData.authorId === $store.state.userinfo.userInfo.uid"
       :delete="{type:'clip', data:{target: clip.clipData, belongsTo: clip.listData.id}}">
     </DeleteDialog>
     <v-list-item @click="downloadClip(clip.clipData)">
@@ -31,9 +31,8 @@ offset-x>
 <script>
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import pinClipVue from '../pinClip.vue';
-
 export default {
-  props: ['clip'],
+  props: ['clip','listData'],
   components: {
     DeleteDialog,
     pinClipVue,

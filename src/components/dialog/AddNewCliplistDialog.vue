@@ -21,7 +21,7 @@
     >
       <div
       class="twitch cliplist-canvas d-flex justify-center align-center">
-        <v-icon large>mdi-plus</v-icon>
+        <v-icon color="white" large>mdi-plus</v-icon>
       </div>
       <span class="pl-3">
         새 플레이 리스트 추가
@@ -35,7 +35,7 @@
     <v-icon>mdi-pencil-outline</v-icon>
     </v-btn>
   </template>
-  <v-card class="justify-center">
+  <v-card class="justify-center" :loading="loading" :disabled="loading">
     <v-card-title class="text-h5" :style="{background:form.color, color: textColor}">
       Cliplist Information
     </v-card-title>
@@ -98,6 +98,7 @@
       v-if="type.type === 'add' || type.type==='pin'"
         color="green darken-1"
         text
+        :loading="loading"
         :disabled="form.title === ''"
         @click="saveCliplist(), dialog = false"
       >
@@ -107,6 +108,7 @@
       v-if="type.type === 'edit'"
         color="green darken-1"
         text
+        :loading="loading"
         :disabled="form.title === ''"
         @click="updateClipListData(), dialog = false"
       >
@@ -121,9 +123,9 @@ export default {
   props: ['type'],
   data() {
     return {
+      loading:false,
       dialog:false,
       form:{
-        cliplist:[],
         isPublic:false,
         description: '',
         color: '',
@@ -168,16 +170,23 @@ export default {
       this.form.isPublic = false;
     },
     async saveCliplist(){
-      this.form.cliplist = [];
+      this.loading = true;
+      this.form.likeCount = 0;
+      this.form.viewCount = 0;
+      this.form.clipCount = 0;
+      this.form.clipIds = [];
       this.form.createdAt = new Date();
       this.form.authorName = this.$store.state.userinfo.userInfo.displayName || '';
       this.form.authorId = this.$store.state.userinfo.userInfo.uid || '';
-      await this.$firestore.collection('cliplist').add(this.form);
-      await this.$store.commit('SET_SnackBar',{type:'info', text:`${this.form.title}이 생성 되었습니다.`, value:true});
-      this.initInput();
+      await this.$firestore.collection('cliplist').add(this.form).then( async () => {
+        await this.$store.commit('SET_SnackBar',{type:'info', text:`${this.form.title}이 생성 되었습니다.`, value:true});
+        this.loading = false;
+        this.initInput();
+      });
     },
     async updateClipListData(){
-      let target = this.$firestore.collection('cliplist').doc(this.$store.state.currentListData.id);
+      this.loading = true;
+      let target = this.$firestore.collection('cliplist').doc(this.type.data.id);
       target.update({
         updatedAt : new Date(),
         title : this.form.title,
@@ -185,25 +194,25 @@ export default {
         description : this.form.description,
         isPublic : this.form.isPublic,
       }).then(() => {
-        this.$store.commit('SET_SnackBar',{type:'info', text:`${this.$store.state.currentListData.title}을 수정했습니다.`, value:true});
-        this.dialog = false;
+        this.loading = false;
+        this.$store.commit('SET_SnackBar',{type:'info', text:`${this.type.data.title}을 수정했습니다.`, value:true});
       })
 
 
     },
     setDefaultValue(){
       if (this.type.type === 'edit') {
-        this.form.isPublic = this.$store.state.currentListData.isPublic;
-        this.form.description = this.$store.state.currentListData.description;
-        this.form.color = this.$store.state.currentListData.color;
-        this.form.title = this.$store.state.currentListData.title;
+        this.form.isPublic = this.type.data.isPublic;
+        this.form.description = this.type.data.description;
+        this.form.color = this.type.data.color;
+        this.form.title = this.type.data.title;
       }
       this.dialog = false;
     }
   },
   computed:{
     textColor(){
-      return this.$store.state.darkColorSet.includes(this.form.color.substr(0,7)) ? 'white' : 'black';
+      return this.$store.state.darkColorSet.includes(this.form.color) ? 'white' : 'black';
     }
   },
   mounted() {

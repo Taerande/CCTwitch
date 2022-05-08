@@ -1,8 +1,9 @@
 <template>
 <v-container fluid >
-  <v-row class="align-center pt-10 pl-3 pb-3">
-    <span class="text-h5 font-weight-bold">Search : {{this.$route.query.q}} </span>
+  <v-row class="py-5">
+    <span class="text-h3 font-weight-bold pr-3">Search : {{this.$route.query.q}}</span>
   </v-row>
+  <v-divider></v-divider>
   <v-divider></v-divider>
   <v-row
   v-if="$store.state.searchList.length > 0 && !dataLoading"

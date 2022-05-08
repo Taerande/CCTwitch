@@ -10,6 +10,7 @@ firebase.initializeApp(firebaseConfig);
 
 Vue.prototype.$firebase = firebase;
 Vue.prototype.$firestore = firebase.firestore();
+Vue.prototype.$isFirebaseAuth = false;
 
 firebase.auth().onAuthStateChanged(async (user) => {
   // store.commit('SET_FirebaseLoad', true)

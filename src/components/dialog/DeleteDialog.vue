@@ -28,7 +28,7 @@
         <span class="text-uppercase">
           {{this.delete.type}}
         </span>: {{this.delete.data.target.title.length > 25 ? `${this.delete.data.target.title.substr(0, 24)}...` : this.delete.data.target.title}}</span>
-        <span v-if="this.delete.type === 'cliplist'">[<span class="red--text">{{this.delete.data.target.cliplist.length}}</span>]개 을 삭제합니다.</span>
+        <span v-if="this.delete.type === 'cliplist'">[<span class="red--text">{{this.delete.data.target.clipCount}}</span>]개 을 삭제합니다.</span>
       <!-- <div>{{this.delete.data.target}}</div>
       <div>{{this.$router.params}}</div> -->
     </v-card-text>
@@ -54,10 +54,20 @@ export default {
   methods: {
     async DeleteData(type, data) {
       if (type === 'clip') {
+        const index = this.$store.state.currentCliplist.findIndex( (element) => element.clipData.id === data.target.id);
+        let batch = await this.$firestore.batch();
         let target = await this.$firestore.collection('cliplist').doc(data.belongsTo);
-        await target.update({
-          cliplist: this.$firebase.firestore.FieldValue.arrayRemove(data.target.id)
-        }).then(async () => {
+        batch.delete(target.collection('clips').doc(data.target.id))
+        batch.update(target, index === 0 ?
+          {
+            clipIds: this.$firebase.firestore.FieldValue.arrayRemove(data.target.id),
+            clipCount: this.$firebase.firestore.FieldValue.increment(-1),
+            thumbnail_url: this.$store.state.currentCliplist[1].fireData.thumbnail_url} :
+          {
+            clipIds: this.$firebase.firestore.FieldValue.arrayRemove(data.target.id),
+            clipCount: this.$firebase.firestore.FieldValue.increment(-1)
+          })
+        await batch.commit().then(async () => {
           console.log('cliplist',this.$store.state.currentCliplist);
           console.log('target clip',data.target);
           await this.$store.commit('DELETE_Clip',data.target.id);
@@ -65,13 +75,14 @@ export default {
           this.dialog = false;
           this.$store.commit('SET_SnackBar', {type:'error', text:`클립 : ${data.target.title}을 삭제하였습니다.`, value:true});
         }).catch((e) => console.error(e.message));
+
       } else if (type === 'cliplist') {
         // await this.$firestore.collection('')
         this.$emit('DeleteCliplist');
         // await this.$store.commit('DELETE_cliplist', data);
         this.btnLoading = false;
         this.dialog = false;
-        this.$router.push({ path: '/cliplist' });
+        this.$router.push({ path: '/mycliplist' });
       } else if (type === 'importedClip') {
         this.$emit('delImportedClip', { index: this.delete.data.index, title: this.delete.data.target.title });
       }

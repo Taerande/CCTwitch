@@ -9,7 +9,7 @@
       v-on="on"
       v-bind="attrs"
       v-if="clipType === 'menu'">
-        <v-icon>mdi-pin-outline</v-icon>
+        <v-icon>mdi-plus-box-multiple-outline</v-icon>
         <span class="text-caption pl-1">클립 추가</span>
       </v-list-item>
       <v-btn
@@ -17,10 +17,10 @@
         v-on="on"
         v-bind="attrs"
         icon>
-        <v-icon size="20" color="red">mdi-pin</v-icon>
+        <v-icon class="pinClip" color="red">mdi-plus-box-multiple</v-icon>
       </v-btn>
     </template>
-    <v-card width="400px" height="600px">
+    <v-card width="400px" height="600px" :loading="loading" :disabled="loading">
       <v-card-title class="d-flex justify-center">
         <span>내 플레이리스트에 추가</span>
       </v-card-title>
@@ -31,18 +31,18 @@
       <v-card-text>
         <v-list class="pt-5">
             <AddNewCliplistDialog :type="{type:'pin',data:{text: 'Add New List'}}"></AddNewCliplistDialog>
-          <v-list-item :disabled="item.cliplist.length >= 100" @click="addNewClip(item, index)" class="pa-1" v-for="(item,index) in cliplist" :key="index">
+          <v-list-item :disabled="item.clipCount >= 100 || item.clipIds.some(e => e === clipData.data.id)" @click="addNewClip(item, index)" class="pa-1" v-for="(item,index) in listData" :key="index">
               <div class="cliplist-canvas" :style="{background: item.color}"></div>
               <v-list-item-content>
                 <v-list-item-title class="text-title">{{item.title}}</v-list-item-title>
-                <v-list-item-subtitle class="text-caption">{{item.cliplist.length}}개</v-list-item-subtitle>
+                <v-list-item-subtitle class="text-caption">{{item.clipCount || 0}}개</v-list-item-subtitle>
               </v-list-item-content>
           </v-list-item>
         </v-list>
       </v-card-text>
       <v-card-actions class="d-flex justify-end pa-3">
         <v-spacer></v-spacer>
-        <v-btn depressed @click="dialog = false">
+        <v-btn text @click="dialog = false">
           <span class="error--text text-break">Close</span>
         </v-btn>
       </v-card-actions>
@@ -55,7 +55,7 @@ import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
 import SignInDialogVue from './dialog/SignInDialog.vue';
 
 export default {
-  props:['clipData'],
+  props:['clipData','listData'],
   components: {
     AddNewCliplistDialog,
     SignInDialogVue,
@@ -63,57 +63,55 @@ export default {
   data() {
     return {
       cliplist:[],
-      unsubscribe: null,
       dialog: false,
+      loading: false
     };
   },
   methods: {
     async addNewClip(el, index){
-      //중복체크
-      const isInvolved =  this.cliplist[index].cliplist.find((element) => this.clipData.data.id === element);
-      if(isInvolved){
-         this.$store.commit('SET_SnackBar',{type:'error', text:`${this.clipData.data.title}은 이미 있습니다.`, value:true})
-      } else {
-        let target = this.$firestore.collection('cliplist').doc(el.id);
-        target.update({
-          cliplist: this.$firebase.firestore.FieldValue.arrayUnion(this.clipData.data.id)
-        }).then(() => {
-          this.$store.commit('SET_SnackBar',{type:'success', text:`${this.clipData.data.title}을 추가했습니다.`, value:true})
-        })
+      this.loading = true
+      let batch = await this.$firestore.batch();
+      let target = await this.$firestore.collection('cliplist').doc(el.id);
+      const inputData = {
+        clipId: this.clipData.data.id,
+        thumbnail_url: this.clipData.data.thumbnail_url,
+        createdAt: new Date()
       }
+      //중복체크
+      const isIn = this.listData[index].clipIds.some( e => e === this.clipData.data.id);
+      const clipCount = this.listData[index].clipCount;
+      //batch write
+
+      if(!isIn){
+          batch.set(target.collection('clips').doc(this.clipData.data.id),inputData)
+          batch.update(target, clipCount === 0 ? {
+            thumbnail_url: inputData.thumbnail_url,
+            clipCount: this.$firebase.firestore.FieldValue.increment(1),
+            clipIds: this.$firebase.firestore.FieldValue.arrayUnion(this.clipData.data.id)
+          } : {
+            clipCount: this.$firebase.firestore.FieldValue.increment(1),
+            clipIds: this.$firebase.firestore.FieldValue.arrayUnion(this.clipData.data.id)
+          });
+          await batch.commit().then(() => {
+            this.$store.commit('SET_SnackBar',{type:'success', text:`${this.clipData.data.title}을 추가했습니다.`, value:true})
+          }).catch(() => {
+            this.$store.commit('SET_SnackBar',{type:'error', text:`입력 데이터가 잘못 되었습니다.`, value:true})
+          });
+        } else {
+          this.$store.commit('SET_SnackBar',{type:'error', text:`${this.clipData.data.title}은 이미 있습니다.`, value:true})
+        }
+      this.loading = false;
     }
 
   },
   async created() {
-    if(this.$store.state.userinfo.userInfo){
-      this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userinfo.userInfo.uid).onSnapshot((sn) => {
-        if(sn.empty){
-          this.cliplist = []
-          return
-        }
-        this.cliplist = sn.docs.map( v => {
-          const item = v.data()
-          return {
-            id: v.id,
-            title: item.title,
-            description: item.description,
-            createdAt: item.createdAt,
-            color: item.color,
-            cliplist: item.cliplist,
-          }
-        })
-      });
-    }
+
   },
   computed:{
     clipType(){
       return this.clipData.type;
     }
   },
-  destroyed() {
-    if(this.unsubscribe) this.unsubscribe()
-  },
-
 };
 </script>
 <style lang="scss" scoped>
@@ -128,12 +126,13 @@ export default {
 .v-list-item__content{
   padding-left: 10px !important;
 }
-div[role=listitem]:hover{
+div[role=menuitem]:hover{
   cursor: pointer;
-  background-color: rgb(0, 0, 0, 0.2) !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
 }
-i.v-icon.v-icon {
-  border-radius: 100%;
-  background: rgb(0, 0, 0, 0.3);
-}
+// .pinClip {
+//   transform: scale();
+//   border-radius: 100%;
+//   background: rgb(0, 0, 0, 0.3);
+// }
 </style>

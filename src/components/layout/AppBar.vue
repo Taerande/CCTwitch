@@ -49,11 +49,11 @@
                   </v-list-item>
                   <v-list-item to="/trending" @click="changeDrawer()">
                     <v-icon color="green" class="pr-1">mdi-trending-up</v-icon>
-                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Trend</span>
+                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
                   </v-list-item>
-                  <v-list-item to="/cliplist" @click="changeDrawer()">
+                  <v-list-item to="/mycliplist" @click="changeDrawer()">
                     <v-icon color="blue" class="pr-1">mdi-playlist-check</v-icon>
-                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Cliplist</span>
+                    <span class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
                   </v-list-item>
                   <v-list-item to="/streamer" @click="changeDrawer()">
                     <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
@@ -117,12 +117,12 @@
         <div v-if="$vuetify.breakpoint.mdAndUp" class="d-flex">
           <router-link to="/trending">
             <div class="px-2 rounded-pill">
-              <span class="text-subtitle-2 text-lg-body-1 pr-1">Trend</span>
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
             </div>
           </router-link>
-          <router-link to="/cliplist">
+          <router-link to="/mycliplist">
             <div class="px-2 rounded-pill">
-              <span class="text-subtitle-2 text-lg-body-1 pr-1">Cliplist</span>
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
             </div>
           </router-link>
           <router-link class="ma-0 pa-0" to="/streamer">
@@ -205,7 +205,7 @@ export default {
           this.$router.push({path:'/'})
         }
       });
-      this.closeDialog();
+      this.$store.commit('SET_Drawer');
       this.$store.commit('SET_SnackBar',{type: 'error', text:'로그아웃', value:true})
       }, 500);
     },

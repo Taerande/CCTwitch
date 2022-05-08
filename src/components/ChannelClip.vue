@@ -24,8 +24,9 @@
       <v-lazy
         v-model="item.id"
         :options="{ threshold: 0.5}">
-          <clipIframeDialog :clipData="item" :userProfileImg="userProfileImg"></clipIframeDialog>
+        <clipIframeDialog :clipData="item" :listData="listData"></clipIframeDialog>
       </v-lazy>
+      <div class="d-flex justify-center">{{item.title}}</div>
     </v-col>
   </v-row>
   </v-row>
@@ -38,7 +39,7 @@ import infiniteLoading from 'vue-infinite-loading';
 import clipIframeDialog from '@/components/dialog/ClipIframeDialog';
 
 export default {
-  props: ['clips','userProfileImg'],
+  props: ['clips','listData'],
   components: {
     clipIframeDialog,
     infiniteLoading,
@@ -142,7 +143,7 @@ export default {
     },
 
   },
-  created() {
+  mounted() {
     this.infiniteData.data = {
       broadcaster_id: this.clips.data.user_id,
       started_at: this.clips.data.created_at,

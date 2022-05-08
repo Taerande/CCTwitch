@@ -1,6 +1,11 @@
 <template>
   <v-container>
-    <v-row class="pt-10 align-center">
+    <v-row class="py-5">
+      <span class="text-h3 font-weight-bold pr-3">Channel : {{userInfo.data.display_name}}</span>
+      <span>{{$vuetify.breakpoint.mobile}}</span>
+    </v-row>
+    <v-divider></v-divider>
+    <v-row class="pt-5 align-center">
       <v-row v-if="userInfo">
         <v-badge
           v-if="userInfo.data.broadcaster_type == 'partner'"
@@ -159,11 +164,14 @@
           @emitVidId="changeCarsouelId"
         ></vids>
       </v-row>
+      <v-row class="pt-10">
+        <v-divider></v-divider>
+      </v-row>
       <v-row  v-for="(item, listIndex) in vidLists" :key="listIndex">
         <v-row v-if="carsouelId == listIndex">
           <clips
             v-if="carsouelId == listIndex"
-            :userProfileImg="userInfo.data.profile_image_url"
+            :listData="cliplist"
             :clips="{
               data: item.data,
             }"
@@ -176,7 +184,7 @@
       v-else-if="this.clipSort === 'date'"
     >
       <clipsByDate
-        :userProfileImg="userInfo.data.profile_image_url"
+        :listDat="cliplist"
         :clips="{ user_id: userInfo.data.id }"
       ></clipsByDate>
     </v-row>
@@ -198,8 +206,10 @@ export default {
   },
   data() {
     return {
+      unsubscribe: null,
       dialog: false,
       dataLoading: false,
+      cliplist:[],
       vidLists: [],
       carsouelId: 0,
       userInfo: {
@@ -345,7 +355,7 @@ export default {
       await this.getUserInfo(this.$route.query.q)
       await this.getVid(this.userInfo.data.id)
       this.dataLoading = true
-    },
+    }
   },
   computed:{
     imgWidth(){
@@ -357,12 +367,49 @@ export default {
     }
   },
   created() {
-    this.process()
+
+  },
+  async created() {
+    await this.process();
     this.$store.commit('SET_DateSort', {
       text: null,
       start: null,
       end: null,
     })
+    let tempuserInfo = this.$store.state.userinfo.userInfo;
+    if(!this.$store.state.userinfo.userInfo) {
+      console.log('hi');
+      console.log('hi');
+      await this.$firebase.auth().onAuthStateChanged(async (user) => {
+        if(user){
+          tempuserInfo = user;
+          this.$store.commit('SET_UserInfo',user);
+        }
+      })
+      }
+      if(tempuserInfo){
+        this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',tempuserInfo.uid).onSnapshot((sn) => {
+          if(sn.empty){
+            this.cliplist = [];
+            return
+            }
+            this.cliplist = sn.docs.map( v => {
+              const item = v.data()
+              return {
+                id: v.id,
+                title: item.title,
+                description: item.description,
+                createdAt: item.createdAt,
+                color: item.color,
+                clipCount: item.clipCount,
+                clipIds: item.clipIds,
+              }
+            })
+          })
+      }
+  },
+  destroyed() {
+    if(this.unsubscribe) this.unsubscribe()
   },
 }
 </script>

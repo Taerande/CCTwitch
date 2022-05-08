@@ -5,16 +5,17 @@
   v-model="dialog">
   <template v-slot:activator="{ on }" class="d-flex">
     <v-img
-    class="pa-0"
+    class="pa-0 thumbnailImg ma-0"
     v-on="on"
+    @click="getVidOffset(clipData)"
     height="100%"
     :max-width="imgWidth"
     lazy-src="@/assets/img/404.jpg"
     :src="clipData.thumbnail_url"></v-img>
-    <div v-on="on" class="pl-1">
-      <span>{{clipData.title}}</span>
-      <span>{{clipData.created_at}}</span>
-      <span>{{clipData.view_count}}</span>
+    <div class="pl-1">
+      <div>{{clipData.title}}</div>
+      <div>{{$moment(clipData.created_at).format('ll')}}</div>
+      <div class="d-flex align-center"><v-icon small class="pr-1">mdi-eye</v-icon>{{clipData.view_count}}</div>
     </div>
   </template>
   <div class="black d-flex justify-end">
@@ -81,28 +82,26 @@ export default {
   computed:{
     imgWidth(){
       if(this.$vuetify.breakpoint.lgAndUp){
-        return '250';
-      } else if(this.$vuetify.breakpoint.smAndUp) {
         return '200';
-      } else if (this.$vuetify.breakpoint.mobile) {
-        return '100';
+      } else if(this.$vuetify.breakpoint.md) {
+        return '175';
+      } else if(this.$vuetify.breakpoint.sm) {
+        return '150';
+      } else if (this.$vuetify.breakpoint.xs) {
+        return '125';
       } else {
-        return '250';
+        return '100';
       }
     }
   },
 
   mounted(){
-    if(this.clipData.video_id){
-      this.getVidOffset(this.clipData);
-    };
-    console.log(this.$vuetify.breakpoint);
-
   }
 }
 </script>
 <style lang="scss" scoped>
-#clip-thumbnail{
+.thumbnailImg{
   cursor: pointer;
+  transform: scale(0.9);
 }
 </style>

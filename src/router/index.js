@@ -50,7 +50,7 @@ const routes = [
     component: Trending,
   },
   {
-    path: '/clip',
+    path: '/cliplist',
     name: 'Cliplist',
     component: Cliplist,
     children: [
@@ -63,7 +63,7 @@ const routes = [
 
   },
   {
-    path: '/cliplist',
+    path: '/mycliplist',
     name: 'cliplistList',
     component: cliplistList,
   },
@@ -100,12 +100,7 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   store.commit('INIT_SnackBar')
   next()
-  // store.commit('SET_FirebaseLoad', true)
-  // if(store.state.firbaseLoaded) {
-  //   setTimeout( () => {
-  //     next()
-  //   }, 500)
-  // }
+
 })
 router.afterEach((to, from) => {
   // store.commit('SET_FirebaseLoad', false)
