@@ -2,19 +2,16 @@
 <v-container fluid>
   <v-row class="d-block">
     <div class="d-flex pt-10 align-baseline">
-      <span class="text-h3 font-weight-bold pr-3">{{cliplist.title}}</span>
-      <span class="text-subtitle-1">
-        <v-icon>mdi-</v-icon>
-        (총 {{ cliplist.clipCount }} / 100 개)</span>
+      <span class="text-h4 font-weight-bold pr-3">{{cliplist.title}}</span>
     </div>
+    <SignInDialog v-if="SignInDialog"></SignInDialog>
     <div class="d-flex align-baseline pb-1">
-      <span></span>
-      <span class="text-body-2 grey--text pr-3">조회수 {{cliplist.viewCount}}</span>
-      <span class="text-body-2 grey--text pr-3">
-        <v-icon small>mdi-thumb-up-outline</v-icon>
-        <span class="text-body-2 grey--text pr-3">{{cliplist.likeCount}}</span>
-      </span>
-      <span class="text-caption">{{$moment(cliplist.createdAt).format('ll')}}</span>
+        <span class="text-title-1">
+        <v-icon>mdi-playlist-play</v-icon>
+        {{ cliplist.clipCount }}</span>
+        <v-icon @click="likeCliplist()">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon>
+        <span class="text-title pl-1">{{cliplist.likeCount}}</span>
+      <span class="text-caption px-2">{{$moment(cliplist.createdAt).format('ll')}}</span>
       <v-spacer></v-spacer>
       <div class="d-flex" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === cliplist.authorId">
         <ImportNewClipDialogVue :parent="cliplist"></ImportNewClipDialogVue>
@@ -35,10 +32,10 @@
         </AddNewCliplistDialog>
       </div>
     </div>
-    <v-divider></v-divider>
+    <v-progress-linear value="100"  class="pb-3" :color="cliplist.color"></v-progress-linear>
   </v-row>
-  <v-row class="d-block py-3">
-    <div class="d-flex align-center pt-3">
+  <v-row class="d-block py-2">
+    <div class="d-flex align-center">
       <v-avatar
         size="36">
         <img :src="userInfo.profile_image_url" alt="alt">
@@ -48,19 +45,21 @@
       </div>
     </div>
     <v-spacer></v-spacer>
-    <div class="py-3 text-body-1 pl-10">
+    <div class="text-body-1 pl-10">
       {{cliplist.description}}
     </div>
   </v-row>
   <expandTableVue
-    class="pb-10"
     v-if="$store.state.currentCliplist.length > 0"
     :clipListData="cliplist">
   </expandTableVue>
   <v-row v-else style="height:60vh;" class="d-flex justify-center align-center">
     <v-alert rounded="pill" class="d-inline-block" type="error">🤐 저장 혹은 공유된 클립 모음이 없습니다.</v-alert>
   </v-row>
-  <v-row v-if="cliplist.clipCount > $store.state.currentCliplist.length" class="d-block pb-16" v-intersect="onIntersect">
+  <v-row class="d-flex justify-center" v-if="cliplist.clipCount > $store.state.currentCliplist.length && loading">
+    <v-icon large>mdi-dots-horizontal</v-icon>
+  </v-row>
+  <v-row v-if="cliplist.clipCount > $store.state.currentCliplist.length" class="d-block pb-16 pt-10" v-intersect="onIntersect">
     <div class="d-flex justify-center">
       <v-progress-circular indeterminate></v-progress-circular>
     </div>
@@ -76,15 +75,20 @@ import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import axios from 'axios';
 import expandTableVue from './expandTable';
 import ImportNewClipDialogVue from '../dialog/ImportNewClipDialog.vue';
+import SignInDialog from '../dialog/SignInDialog.vue';
+
+
 export default {
   components: {
     DeleteDialog,
     AddNewCliplistDialog,
     expandTableVue,
     ImportNewClipDialogVue,
-  },
+    SignInDialog
+},
   data() {
     return {
+      SignInDialog: false,
       lastVisible: null,
       cliplist: {
         id:'',
@@ -96,6 +100,7 @@ export default {
         authorName:'',
       },
       userInfo:'',
+      gotDataStatus:false,
       currentTooltipId: '',
       loading: false,
       dialogId: '',
@@ -116,10 +121,29 @@ export default {
     onIntersect(entries , observer, isIntersecting)
     {
       setTimeout(() => {
-        if(isIntersecting){
+        if(isIntersecting && this.gotDataStatus && this.lastVisible){
           this.getMoreClips()
         }
-      }, 3000);
+      }, 500);
+    },
+    async likeCliplist(){
+      if(this.$store.state.userinfo.userInfo){
+        let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
+        if(this.liked){
+          docRef.update({
+            likeCount: this.$firebase.firestore.FieldValue.increment(-1),
+            likeUids: this.$firebase.firestore.FieldValue.arrayRemove(this.$store.state.userinfo.userInfo.uid)
+          })
+        } else {
+          docRef.update({
+            likeCount: this.$firebase.firestore.FieldValue.increment(1),
+            likeUids: this.$firebase.firestore.FieldValue.arrayUnion(this.$store.state.userinfo.userInfo.uid)
+          })
+        }
+      } else {
+        this.SignInDialog = true;
+      }
+
     },
     async getUserInfo(userId){
       await axios.get('https://api.twitch.tv/helix/users',{
@@ -161,6 +185,7 @@ export default {
       })
     },
     async getMoreClips(){
+      this.gotDataStatus = false;
       let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
       docRef.collection('clips').orderBy('createdAt','asc').startAfter(this.lastVisible).limit(10).get().then((collection) =>{
         this.lastVisible = last(collection.docs);
@@ -174,12 +199,19 @@ export default {
             })
         })
         }
+      }).then(() => {
+        this.gotDataStatus = true
       })
     }
   },
   computed: {
     theme() {
       return this.$vuetify.theme.dark ? 'dark-table' : 'light-table';
+    },
+    liked(){
+      if(!this.$store.state.userinfo.userInfo) return false;
+      if(this.cliplist.likeUids === undefined) return false;
+      return this.cliplist.likeUids.includes(this.$store.state.userinfo.userInfo.uid);
     },
   },
   async created(){
@@ -192,7 +224,7 @@ export default {
   },
   async mounted() {
     let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
-    this.unsubscribe = docRef.onSnapshot((doc) => {
+    this.unsubscribe = await docRef.onSnapshot((doc) => {
       const item = doc.data();
       this.getUserInfo(item.authorId)
         if(doc.exists){
@@ -201,9 +233,11 @@ export default {
             title: item.title,
             description: item.description,
             color: item.color,
-            viewCount: item.viewCount,
             clipCount: item.clipCount,
             likeCount: item.likeCount,
+            likeUids : item.likeUids,
+            isPublic: item.isPublic,
+            clipIds : item.clipIds,
             createdAt: item.createdAt.toDate(),
             authorId: item.authorId,
             authorName: item.authorName,
@@ -211,17 +245,19 @@ export default {
         }
     });
 
-    docRef.collection('clips').orderBy('createdAt','asc').limit(10).get().then(async (collection) =>{
-      console.log(collection.docs);
+    await docRef.collection('clips').orderBy('createdAt','asc').limit(10).get().then(async (collection) =>{
       this.lastVisible = await last(collection.docs);
       if(collection.docs.length > 0){
-        await collection.forEach( async (el) => {
+        await collection.docs.forEach( async (el, index) => {
           let fireClip = await el.data();
           let twitchClip = await this.getTwitchClipData(fireClip.clipId);
           this.$store.commit('ADD_ClipInCurrentCliplist',{
               clipData: twitchClip.data.data[0],
               fireData: fireClip,
-            })
+            });
+            if(index + 1 === collection.docs.length){
+              this.gotDataStatus = true;
+            }
         });
     }})
     this.loading = true;

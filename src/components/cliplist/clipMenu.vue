@@ -1,12 +1,13 @@
 <template>
 <v-menu
+v-model="dialog"
 nudge-left="5"
 transition="slide-x-transition"
 left
 offset-x>
   <template v-slot:activator="{on, attrs}">
-    <v-btn v-bind="attrs" v-on="on" icon>
-      <v-icon :color="clip.dark ? 'white' : 'none'">mdi-dots-vertical</v-icon>
+    <v-btn @click="dialog = !dialog" v-bind="attrs" v-on="on" icon>
+      <v-icon small>mdi-dots-vertical</v-icon>
     </v-btn>
   </template>
   <v-list>
@@ -18,6 +19,7 @@ offset-x>
       v-if="$store.state.userinfo.userInfo"
       :clipData="{data:clip.clipData, type:'menu'}" :listData="listData"></pinClipVue>
     <DeleteDialog
+      @closeMenu="closeMenu()"
       v-if="$store.state.userinfo.userInfo && clip.listData.authorId === $store.state.userinfo.userInfo.uid"
       :delete="{type:'clip', data:{target: clip.clipData, belongsTo: clip.listData.id}}">
     </DeleteDialog>
@@ -37,7 +39,15 @@ export default {
     DeleteDialog,
     pinClipVue,
   },
+  data() {
+    return {
+      dialog: false,
+    }
+  },
   methods: {
+    closeMenu(){
+      this.dialog = false
+    },
     copyClip(el) {
       const tempArea = document.createElement('textarea');
       document.body.appendChild(tempArea);

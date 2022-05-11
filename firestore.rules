@@ -1,9 +1,36 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    	match /cliplist/{document=**}{
-        allow read : if true;
-        allow write: if request.auth != null;
+    	match /cliplist/{cliplistId}{
+
+        
+        function incrementCliplistCount(before, after){
+        	return before.authorId == after.authorId &&
+          before.authorName == after.authorName &&
+          before.color == after.color &&
+          before.createdAt == after.createdAt &&
+          before.description == after.description &&
+          before.isPublic == after.isPublic &&
+          before.thumbnail_url == after.thumbnail_url &&
+          before.title == after.title &&
+          before.updatedAt == after.updatedAt &&
+          (before.likeCount != after.likeCount || before.likeUids != after.likeUids )
+        
+        }
+
+        allow read : if resource.data.isPublic==true || request.auth.uid == resource.data.authorId;
+        allow create: if request.auth != null;
+        allow update: if request.auth != null || incrementCliplistCount(resource.data, request.resource.data);
+        allow delete: if request.auth != null;
+        
+        function cliplistData() {
+        	return get(/databases/$(database)/documents/cliplist/$(cliplistId)).data
+        }
+        
+        match /clips/{clipId}{
+        	allow read : if cliplistData().isPublic == true || request.auth != null;
+          allow write: if request.auth != null;
+        }
       }
   }
 }

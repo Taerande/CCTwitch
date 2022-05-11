@@ -40,8 +40,7 @@
       Cliplist Information
     </v-card-title>
     <v-card-text class="justify-center">
-      <div class="pa-5">
-        <div class="d-flex justify-center pa-3">
+      <div class="d-flex justify-center pa-3">
           <v-color-picker
           hide-canvas
           hide-sliders
@@ -49,47 +48,58 @@
           show-swatches
           :swatches="swatches"
           v-model="form.color"></v-color-picker>
-          <v-spacer></v-spacer>
-          <div class="d-flex align-center">
-            <v-switch
-            v-model="form.isPublic">
-            <template v-slot:label>
-              <div class="pa-3">
-                <v-icon :color="form.isPublic ? 'info' : 'error'">{{form.isPublic ? 'mdi-earth' : 'mdi-lock'}}</v-icon>
-                <span :class="form.isPublic ? 'info--text' : 'error--text'">{{form.isPublic ? '공개' : '비공개'}}</span>
-              </div>
-            </template>
-            </v-switch>
-          </div>
-        </div>
-          <v-text-field
-            v-model="form.title"
-            outlined
-            size="50"
-            full-width
-            class="pt-5"
-            counter
-            maxlength="150"
-            filled
-            flat
-            :rules="[rules.required, rules.counter]"
-            color="white"
-            multi-line
-            placeholder="Title (최대 20자)"
-          ></v-text-field>
       </div>
-        <v-textarea
+      <v-text-field
+        clearable
+        clear-icon="mdi-close-circle"
+        v-model="form.title"
+        outlined
+        class="pt-5 d-block"
+        counter
+        maxlength="25"
+        flat
+        :rules="[titleRules.required, titleRules.counter]"
+        color="twitch"
+        placeholder="제목은 (최대 25자)까지 입력가능합니다."
+        label="Title"
+      ></v-text-field>
+      <v-textarea
+        clearable
+        clear-icon="mdi-close-circle"
+        class="pt-5"
         v-model="form.description"
-        filled
+        outlined
         no-resize
         counter
-        maxlength="500"
-        :rules="[rules.descCounter]"
-        size="0"
+        color="twitch"
+        maxlength="100"
+        :rules="descRules"
         name="input-7-4"
-        :placeholder="form.description"
-        label="Write down description."
+        label="Description."
       ></v-textarea>
+      <v-select
+        color="twitch"
+        outlined
+        item-color=""
+        v-model="form.isPublic"
+        :value="form.isPublic ? form.isPublic : 2"
+        :items="selectItem"
+        label="Public"
+      >
+      <template v-slot:selection="{item}">
+      <div class="pa-2">
+        <v-icon class="pr-3" small>{{item.icon}}</v-icon>
+        <span class="text-caption">{{item.name}}</span>
+      </div>
+      </template>
+      <template v-slot:item="{item}">
+      <div class="pa-2">
+        <v-icon class="pr-3" small>{{item.icon}}</v-icon>
+        <span class="text-caption">{{item.name}}</span>
+      </div>
+      </template>
+      </v-select>
+
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -123,22 +133,27 @@ export default {
   props: ['type'],
   data() {
     return {
+      selectItem:[
+        {name: '공개', icon:'mdi-earth', value: 2},
+        {name: '일부공개', icon:'mdi-eye', value: 1},
+        {name: '비공개', icon:'mdi-eye-off', value: 0},
+      ],
       loading:false,
       dialog:false,
       form:{
-        isPublic:false,
+        isPublic:2,
         description: '',
-        color: '',
+        color: '#00897BFF',
         title: '',
         createdAt:'',
         authorName:'',
         authorId:'',
       },
-      rules: {
+      titleRules:{
         required: (value) => !!value || 'Required.',
-        counter: (value) => value.length <= 150 || 'Max 150 characters',
-        descCounter: (value) => value.length <= 500 || 'Max 500 characters',
+        counter: (value) => value.length <= 25 || 'Max 25 characters',
       },
+      descRules:[(value) => value.length <= 100 || 'Max 100 characters'],
       swatches:[
          ['#FFCDD2','#E57373','#E53935','#C62828'],
          ['#F8BBD0','#F06292','#D81B60','#AD1457'],
@@ -212,7 +227,7 @@ export default {
   },
   computed:{
     textColor(){
-      return this.$store.state.darkColorSet.includes(this.form.color) ? 'white' : 'black';
+      return this.$store.state.darkColorSet.includes(this.form.color.substr(0,7)) ? 'white' : 'black';
     }
   },
   mounted() {

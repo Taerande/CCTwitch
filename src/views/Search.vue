@@ -4,7 +4,6 @@
     <span class="text-h3 font-weight-bold pr-3">Search : {{this.$route.query.q}}</span>
   </v-row>
   <v-divider></v-divider>
-  <v-divider></v-divider>
   <v-row
   v-if="$store.state.searchList.length > 0 && !dataLoading"
   class="pa-0 pt-3 d-flex">
@@ -95,6 +94,7 @@ export default {
         },
         headers: this.$store.state.headerConfig,
       }).then((res) => {
+        console.log(res);
         res.data.data.forEach((element) => {
           const data = element;
           if (element.title.length > 0 && element.game_id > 0) {

@@ -1,33 +1,30 @@
 <template>
-<v-row justify="center">
-  <v-col cols="12" class="py-1" v-for="(clip, index) in $store.state.currentCliplist" :key="clip.id">
-    <v-card max-height="100" class="d-flex felx-column rounded-lg" elevation="3">
-      <v-card-title class="justify-center ma-0 pa-0 pl-1" style="width:3rem;">
-        <v-icon small v-if="index === vidIndex">mdi-drag-horizontal-variant</v-icon>
-        <span class="text-caption font-weight-bold" v-else>{{index + 1}}</span>
-      </v-card-title>
-      <v-card-text class="d-flex align-center ma-0 pa-0">
-        <ClipIframeDataTableDialog :clipData="clip.clipData"></ClipIframeDataTableDialog>
-      </v-card-text>
-      <v-card-actions class="justify-center">
-        <clipMenuVue :clip="{clipData:clip.clipData, listData:clipListData}" :listData="AllCliplists"></clipMenuVue>
-      </v-card-actions>
-    </v-card>
-  </v-col>
+<v-row class="d-block py-3">
+  <v-divider class="my-3"></v-divider>
+  <draggable
+  v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId" v-model="currentCliplist"
+  handle=".handle" ghost-class="ghost" @change="changeIndex" chosen-class="chosen" drag-class="drag">
+    <v-col cols="12" v-for="(clip, index) in currentCliplist" :key="index">
+      <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+      <v-divider class="my-3"></v-divider>
+    </v-col>
+  </draggable>
+    <v-col v-else cols="12" class="ma-2" v-for="(clip, index) in currentCliplist" :key="index">
+        <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+      <v-divider class="my-3"></v-divider>
+    </v-col>
 </v-row>
-<!-- <ClipIframeDataTableDialogMobile :clipData="clip"></ClipIframeDataTableDialogMobile> -->
 </template>
 
 <script>
 import axios from 'axios';
 import ClipIframeDataTableDialog from '../dialog/ClipIframeDataTableDialog';
-import clipMenuVue from './clipMenu.vue';
-
+import draggable from 'vuedraggable'
 export default {
   props:['clipListData'],
   components: {
-    clipMenuVue,
     ClipIframeDataTableDialog,
+    draggable,
   },
   data() {
     return {
@@ -40,9 +37,54 @@ export default {
       viewSort: '',
       createdSort: '',
       page: 1,
+      tempDate:0,
     };
   },
   methods: {
+    async changeIndex(e){
+      let batch = this.$firestore.batch();
+      let tempDate = 0;
+      const data = await e.moved
+      const isLast = this.currentCliplist[data.newIndex + 1] === undefined;
+      let target = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
+
+      if(data.newIndex === 0){
+        tempDate = await this.currentCliplist[1].fireData.createdAt - 10;
+        console.log('to 0');
+        console.log(this.currentCliplist[1].fireData.clipId);
+      } else if (isLast) {
+        tempDate = await this.currentCliplist[data.newIndex - 1].fireData.createdAt + 10;
+        console.log('to last');
+        console.log(this.currentCliplist[data.newIndex - 1].fireData.clipId);
+      } else {
+        console.log('to every');
+        console.log(this.currentCliplist[data.newIndex - 1].fireData.clipId,this.currentCliplist[data.newIndex + 1].fireData.clipId) ;
+       tempDate = await (this.currentCliplist[data.newIndex - 1].fireData.createdAt + this.currentCliplist[data.newIndex + 1].fireData.createdAt)/2;
+      }
+
+      if(data.newIndex ===0 ){
+        batch.update(target.collection('clips').doc(data.element.fireData.clipId),{
+          createdAt: tempDate
+        });
+        batch.update(target,{
+          thumbnail_url: data.element.clipData.thumbnail_url
+        });
+        await batch.commit().then(() => {
+        this.$store.commit('UPDATE_Firedata',{index:data.newIndex, createdAt:tempDate})
+      }).catch((err)=> {
+        this.$store.commit('SET_SnackBar',{type:'error', text:`${err.message}`, value:true})
+      });
+      } else {
+        batch.update(target.collection('clips').doc(data.element.fireData.clipId),{
+          createdAt: tempDate
+        });
+        await batch.commit().then(() => {
+        this.$store.commit('UPDATE_Firedata',{index:data.newIndex, createdAt:tempDate})
+      }).catch((err)=> {
+        this.$store.commit('SET_SnackBar',{type:'error', text:`${err.message}`, value:true})
+      });
+      }
+    },
     viewerkFormatter(el) {
       const num = el.toString();
       if (num > 999999999) {
@@ -110,16 +152,26 @@ export default {
     },
   },
   computed: {
+    currentCliplist:{
+      get(){
+        return this.$store.state.currentCliplist
+      },
+      set(value){
+        this.$store.commit('SET_CurrentClipList', value);
+      }
+    },
     theme() {
       return this.$vuetify.theme.dark ? 'dark-table' : 'light-table';
     },
+    listColor(){
+      return this.clipListData.color;
+    }
   },
   async mounted() {
     if(this.$store.state.userinfo.userInfo){
       this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userinfo.userInfo.uid).onSnapshot((sn) => {
         if(sn.empty){
           this.AllCliplists = [];
-          // this.$store.commit('SET_Cliplist', this.cliplist);
           return
         }
         this.AllCliplists = sn.docs.map( v => {
@@ -134,63 +186,17 @@ export default {
             clipIds: item.clipIds,
           }
         })
-        this.$store.commit('SET_Cliplist', this.cliplist);
       });
     }
   },
   destroyed() {
     if(this.unsubscribe) this.unsubscribe()
   },
-
-
-
 };
 </script>
 <style lang="scss" scoped>
-tr{
-  height: 56px;
-}
-th{
-  height: 56px;
-}
-table{
-  width: -webkit-fill-available;
-}
-tbody tr:nth-child(2n) {
-  background-color: rgb(0,0,0,0.05);
-}
-tbody tr:nth-child(2n+1) {
-  background-color: rgb(255,255,255,0.05)
-}
-.dark-table tr:hover{
-  background-color: rgb(255,255,255,0.2)
-}
-.light-table tr:hover{
-  background-color: rgb(0,0,0,0.2)
-}
-td{
-  text-align: center;
-  text-justify: center;
-}
-.canSort{
-  cursor: pointer;
-}
-.expand-enter-active {
-  transition: all 2s ease;
-}
-.ghost{
-  background: red !important;
-
-}
-.select{
+.ghost {
   opacity: 0 !important;
 }
-table{
-  position: relative;
-  width: 100%;
-}
-.table-thumbnail, .table-title, .table-channel, .table-date, .table-duration, .table-views, .table-description{
-  max-width: 20rem;
 
-}
 </style>

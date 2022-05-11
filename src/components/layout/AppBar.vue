@@ -59,6 +59,10 @@
                     <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
                   </v-list-item>
+                  <v-list-item to="/streamer" @click="changeDrawer()">
+                    <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-help</v-icon>
+                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Random</span>
+                  </v-list-item>
                   <div class="text-caption pl-5 pt-8">User</div>
                   <v-divider class="my-3"></v-divider>
                   <v-card flat v-if="$store.state.userinfo.userInfo">
@@ -132,29 +136,8 @@
           </router-link>
         </div>
         <v-spacer></v-spacer>
-        <div class="d-flex justify-end" v-if="$vuetify.breakpoint.mdAndUp">
-          <SearchBar v-show="$route.path !== '/'"></SearchBar>
-        </div>
-        <div class="d-flex justify-end" v-else>
-          <v-dialog
-            v-model="dialog"
-            max-width="500px"
-            transition="dialog-transition"
-          >
-          <template v-slot:activator="{on, attrs}">
-            <v-icon v-bind="attrs" v-on="on">mdi-magnify</v-icon>
-          </template>
-          <v-card>
-            <v-card-text class="pt-5 mx-auto pt-10">
-             <SearchBar @close="changeDrawer()" class="mx-auto"></SearchBar>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn small color="error" text @click="dialog = false">close</v-btn>
-              <v-btn small color="success" text @click="searchChannel($store.state.searchString)">Search</v-btn>
-            </v-card-actions>
-          </v-card>
-          </v-dialog>
+        <div class="px-3">
+          <SearchBar></SearchBar>
         </div>
       </v-row>
     </v-container>
@@ -165,7 +148,7 @@
       <img
       :src="$store.state.userinfo.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
     </v-avatar>
-    <SignInDialog :type="{parent:'appbar'}" v-else></SignInDialog>
+    <SignInDialog v-else :type="{parent:'appbar'}"></SignInDialog>
   </v-app-bar>
 </template>
 <script>
@@ -234,8 +217,7 @@ export default {
 </script>
 <style lang="scss">
 .v-toolbar__content{
-  padding-top: 20px !important;
-  padding-bottom: 0px !important;
+  padding: 0px !important;
 }
 .v-toolbar__extension{
   padding-top: 0px !important;

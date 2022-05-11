@@ -10,26 +10,31 @@
     <v-progress-circular indeterminate></v-progress-circular>
   </v-row>
   <v-row class="d-flex pt-10" v-else-if="cliplist.length > 0 && !loading">
-    <v-col cols="12" xl="2" lg="3" md="4" sm="6" xs="12" class="pa-3" v-for="item in cliplist" :key="item.id">
+    <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-3" v-for="item in cliplist" :key="item.id">
       <v-card dark :height="imgHeight" class="d-flex flex-row" flat @click="$router.push({path:`cliplist/${item.id}`})" :img="item.thumbnail_url" style="background-size: cover;">
         <v-card-title class="pa-0 ma-0" style="{opacity: 1, width: 0px;}">
-          <div class="mx-auto"><v-icon :color="item.isPublic ? 'info' : 'error'">{{item.isPublic ? 'mdi-earth' : 'mdi-lock'}}</v-icon></div>
         </v-card-title>
         <v-card-text class="d-flex justify-center align-center pa-0" :style="{background:item.color.substr(0,7)+'66', color: 'white'}">
           <div class="d-flex flex-column align-center">
             <v-icon color="white">mdi-playlist-play</v-icon>
-            <span>{{item.clipCount}}</span>
+            <span class="py-1">{{item.clipCount}}</span>
+            <v-icon>{{publicIcon(item.isPublic)}}</v-icon>
           </div>
         </v-card-text>
       </v-card>
-      <div class="d-flex">
-        <span class="text-caption">{{item.display_name}}</span>
-        <v-spacer></v-spacer>
-        <span class="text-caption">{{setDate(item.createdAt)}}</span>
-      </div>
-      <div>
+      <div class="py-1">
         <span>{{item.title}}</span>
       </div>
+      <div class="d-flex">
+        <span class="text-subtitle">{{item.display_name}}</span>
+        <v-spacer></v-spacer>
+        <div class="d-flex align-center pr-3">
+          <v-icon class="pr-1" small>mdi-thumb-up-outline</v-icon>
+          <span class="text-subtitle">{{item.likeCount}}</span>
+        </div>
+        <span class="text-subtitle">{{setDate(item.createdAt)}}</span>
+      </div>
+      <v-divider></v-divider>
     </v-col>
   </v-row>
   <v-row v-else-if="cliplist.length === 0 && !loading" class="absolute-center">
@@ -55,6 +60,17 @@ export default {
     };
   },
   methods: {
+    publicIcon(el){
+      if(el === 0){
+        return 'mdi-eye-off'
+      } else if(el === 1){
+        return 'mdi-eye'
+      } else {
+        return 'mdi-earth'
+      }
+
+
+    },
     setDate(el){
       return this.$moment(el).format('l');
     },
@@ -75,15 +91,14 @@ export default {
   computed:{
     imgHeight(){
       if(this.$vuetify.breakpoint.mobile){
-        return '250';
+        return '200';
       } else if(this.$vuetify.breakpoint.smAndDown){
         return '225'
       } else if (this.$vuetify.breakpoint.md){
         return '175'
       } else {
-        return '150'
+        return '200'
       }
-
     }
   },
   async created() {

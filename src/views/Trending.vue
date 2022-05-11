@@ -8,8 +8,8 @@
     <v-progress-circular indeterminate></v-progress-circular>
   </v-row>
   <v-row class="pt-5" v-else-if="cliplists.length > 0 && !loading">
-    <v-col cols="12" xl="2" lg="3" md="4" sm="6" xs="12" class="pa-3" v-for="item in cliplists" :key="item.id">
-      <v-card dark :height="imgHeight" class="d-flex flex-row" flat @click="$router.push({path:`cliplist/${item.id}`})" :img="item.thumbnail_url" style="background-size: cover;">
+    <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-3" v-for="item in cliplists" :key="item.id">
+      <v-card dark :height="imgHeight" max-width="440" class="d-flex flex-row mx-auto" flat @click="$router.push({path:`cliplist/${item.id}`})" :img="item.thumbnail_url" style="background-size: cover;">
         <v-card-title class="pa-0 ma-0" style="{opacity: 1, width: 0px;}">
           <div style="display:none;">{{item.title}}</div>
         </v-card-title>
@@ -56,7 +56,7 @@ export default {
     },
     async loadData(){
       this.loading = true;
-      const sn = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('isPublic','==',true).get();
+      const sn = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('isPublic','==',2).get();
       this.cliplists = sn.docs.map( (v) => {
         const item = v.data();
         return {
@@ -103,13 +103,13 @@ export default {
   computed: {
     imgHeight(){
       if(this.$vuetify.breakpoint.mobile){
-        return '250';
+        return '200';
       } else if(this.$vuetify.breakpoint.smAndDown){
         return '225'
       } else if (this.$vuetify.breakpoint.md){
-        return '175'
-      } else {
         return '150'
+      } else {
+        return '200'
       }
     }
   },

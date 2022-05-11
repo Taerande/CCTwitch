@@ -69,7 +69,6 @@ export default {
           }
       }).then((res) => {
         //정상
-
       }).catch(async (error) => {
         //비정상, 앱엑세스 토큰 재발급 Backend 처리
         await axios.get(this.$store.state.appTokenURL).then((res) => {

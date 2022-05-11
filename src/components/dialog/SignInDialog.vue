@@ -2,7 +2,7 @@
 <v-dialog persistent no-click-animation v-model="dialog" max-width="900" @keydown.esc="dialog = false">
   <template v-slot:activator="{on}">
     <v-btn v-if="type.parent == 'pinclip'" icon>
-      <v-icon class="pinClip" v-on="on" size="20" color="red">mdi-pin</v-icon>
+      <v-icon v-on="on" size="20" color="red">mdi-plus-box-multiple</v-icon>
     </v-btn>
     <v-btn v-on="on" :loading="loginLoading" v-else-if="type.parent == 'quickMenu'" width="100%" dark color="twitch">Login</v-btn>
     <v-btn v-else v-on="on" class="twitch" :loading="loginLoading">

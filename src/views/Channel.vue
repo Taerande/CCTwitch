@@ -2,7 +2,6 @@
   <v-container>
     <v-row class="py-5">
       <span class="text-h3 font-weight-bold pr-3">Channel : {{userInfo.data.display_name}}</span>
-      <span>{{$vuetify.breakpoint.mobile}}</span>
     </v-row>
     <v-divider></v-divider>
     <v-row class="pt-5 align-center">
@@ -184,7 +183,7 @@
       v-else-if="this.clipSort === 'date'"
     >
       <clipsByDate
-        :listDat="cliplist"
+        :listData="cliplist"
         :clips="{ user_id: userInfo.data.id }"
       ></clipsByDate>
     </v-row>
@@ -298,7 +297,8 @@ export default {
       await axios
         .get('https://api.twitch.tv/helix/users', {
           params: {
-            login: element,
+            login: element.q,
+            id: element.id,
           },
           headers: this.$store.state.headerConfig,
         })
@@ -352,7 +352,7 @@ export default {
       return Math.abs(el)
     },
     async process() {
-      await this.getUserInfo(this.$route.query.q)
+      await this.getUserInfo(this.$route.query)
       await this.getVid(this.userInfo.data.id)
       this.dataLoading = true
     }
@@ -378,8 +378,6 @@ export default {
     })
     let tempuserInfo = this.$store.state.userinfo.userInfo;
     if(!this.$store.state.userinfo.userInfo) {
-      console.log('hi');
-      console.log('hi');
       await this.$firebase.auth().onAuthStateChanged(async (user) => {
         if(user){
           tempuserInfo = user;

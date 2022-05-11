@@ -55,8 +55,8 @@ export default {
     async DeleteData(type, data) {
       if (type === 'clip') {
         const index = this.$store.state.currentCliplist.findIndex( (element) => element.clipData.id === data.target.id);
-        let batch = await this.$firestore.batch();
-        let target = await this.$firestore.collection('cliplist').doc(data.belongsTo);
+        let batch = this.$firestore.batch();
+        let target = this.$firestore.collection('cliplist').doc(data.belongsTo);
         batch.delete(target.collection('clips').doc(data.target.id))
         batch.update(target, index === 0 ?
           {
@@ -67,12 +67,11 @@ export default {
             clipIds: this.$firebase.firestore.FieldValue.arrayRemove(data.target.id),
             clipCount: this.$firebase.firestore.FieldValue.increment(-1)
           })
-        await batch.commit().then(async () => {
-          console.log('cliplist',this.$store.state.currentCliplist);
-          console.log('target clip',data.target);
-          await this.$store.commit('DELETE_Clip',data.target.id);
+        await batch.commit().then( () => {
+          this.$store.commit('DELETE_Clip',data.target.id);
           this.btnLoading = false;
           this.dialog = false;
+          this.$emit('closeMenu');
           this.$store.commit('SET_SnackBar', {type:'error', text:`클립 : ${data.target.title}을 삭제하였습니다.`, value:true});
         }).catch((e) => console.error(e.message));
 

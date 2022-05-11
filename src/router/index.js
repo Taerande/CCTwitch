@@ -14,9 +14,12 @@ Vue.use(VueRouter);
 // const About = () => import(/* webpackChunkName: "about" */ '@/views/About.vue');
 const Search = () => import(/* webpackChunkName: "search" */ '@/views/Search.vue');
 const Channel = () => import(/* webpackChunkName: "channel" */ '@/views/Channel.vue');
+const User = () => import(/* webpackChunkName: "user" */ '@/views/User.vue');
+const UserInfo = () => import(/* webpackChunkName: "UserInfo" */ '@/components/User/index.vue');
 const Trending = () => import(/* webpackChunkName: "trending" */ '@/views/Trending.vue');
 const Cliplist = () => import(/* webpackChunkName: "cliplist" */ '@/views/Cliplist.vue');
 const cliplistList = () => import(/* webpackChunkName: "cliplistList" */ '@/components/cliplist/cliplistList.vue');
+const test = () => import(/* webpackChunkName: "test" */ '@/views/test.vue');
 const cliplistIndex = () => import(/* webpackChunkName: "cliplistIndex" */ '@/components/cliplist/cliplistIndex.vue');
 const streamer = () => import(/* webpackChunkName: "streamer" */ '@/views/Streamer.vue');
 // const Analysis = () => import(/* webpackChunkName: "Analysis" */ '@/views/Analysis.vue');
@@ -38,6 +41,18 @@ const routes = [
     path: '/channel',
     name: 'Channel',
     component: Channel,
+  },
+  {
+    path: '/user',
+    name: 'User',
+    component: User,
+    children:[
+      {
+        path:':id',
+        name:'userinfo',
+        component: UserInfo,
+      }
+    ]
   },
   {
     path: '/search',
@@ -71,6 +86,11 @@ const routes = [
     path: '/streamer',
     name: 'streamer',
     component: streamer,
+  },
+  {
+    path: '/test',
+    name: 'test',
+    component: test,
   },
   // {
   //   path: '/analysis',

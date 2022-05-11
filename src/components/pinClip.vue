@@ -75,7 +75,7 @@ export default {
       const inputData = {
         clipId: this.clipData.data.id,
         thumbnail_url: this.clipData.data.thumbnail_url,
-        createdAt: new Date()
+        createdAt: parseInt(new Date().getTime())
       }
       //중복체크
       const isIn = this.listData[index].clipIds.some( e => e === this.clipData.data.id);
