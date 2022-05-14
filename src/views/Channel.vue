@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="userInfo">
     <v-row class="py-5">
       <span class="text-h3 font-weight-bold pr-3">Channel : {{userInfo.data.display_name}}</span>
     </v-row>
@@ -69,14 +69,14 @@
             </v-btn>
           </div>
           <div v-if="this.userInfo.is_live">
-            <v-icon color="red">mdi-broadcast</v-icon>
+            <v-icon color="red" small>mdi-circle</v-icon>
             <span class="red--text text-body-2 pa-1">LIVE</span>
             <span class="red--text text-caption">
               {{ viewerkFormatter(this.userInfo.viewer_count) }}
             </span>
           </div>
           <div v-else>
-            <v-icon color="blue">mdi-broadcast-off</v-icon>
+            <v-icon color="blue" small>mdi-circle-off-outline</v-icon>
             <span class="blue--text text-body-2 pa-1">OFF</span>
           </div>
         </div>
@@ -294,46 +294,48 @@ export default {
         .catch((error) => console.log(error))
     },
     async getUserInfo(element) {
-      await axios
-        .get('https://api.twitch.tv/helix/users', {
+      try{
+        await axios
+          .get('https://api.twitch.tv/helix/users', {
+            params: {
+              login: element.q,
+              id: element.id,
+            },
+            headers: this.$store.state.headerConfig,
+          })
+          .then((res) => {
+            this.userInfo.data = res.data.data['0']
+          })
+      }
+      catch{(err) => {
+        console.log(err);
+        }
+      }
+    },
+    async getFollower() {
+      axios
+        .get('https://api.twitch.tv/helix/users/follows', {
           params: {
-            login: element.q,
-            id: element.id,
+            to_id: this.userInfo.data.id,
           },
           headers: this.$store.state.headerConfig,
         })
         .then((res) => {
-          this.userInfo.data = res.data.data['0']
+          this.userInfo.follower_count = res.data.total
         })
-        .then(() => {
-          axios
-            .get('https://api.twitch.tv/helix/users/follows', {
-              params: {
-                to_id: this.userInfo.data.id,
-              },
-              headers: this.$store.state.headerConfig,
-            })
-            .then((resp) => {
-              this.userInfo.follower_count = resp.data.total
-            })
-            .then(() => {
-              axios
-                .get('https://api.twitch.tv/helix/streams', {
-                  params: {
-                    user_login: element,
-                  },
-                  headers: this.$store.state.headerConfig,
-                })
-                .then((respp) => {
-                  if (respp.data.data.length === 0) {
-                    this.userInfo.is_live = ''
-                  } else {
-                    this.userInfo.is_live = respp.data.data['0'].type
-                    this.userInfo.viewer_count =
-                      respp.data.data['0'].viewer_count
-                  }
-                })
-            })
+    },
+    async getStreamData(element){
+      axios
+        .get('https://api.twitch.tv/helix/streams', {
+          params: {
+            user_login: element,
+          },
+          headers: this.$store.state.headerConfig,
+        })
+        .then((res) => {
+            this.userInfo.is_live = res.data.data[0].type
+            this.userInfo.viewer_count =
+              res.data.data['0'].viewer_count
         })
     },
     like(el) {
@@ -353,6 +355,8 @@ export default {
     },
     async process() {
       await this.getUserInfo(this.$route.query)
+      await this.getFollower()
+      await this.getStreamData( this.userInfo.data.login)
       await this.getVid(this.userInfo.data.id)
       this.dataLoading = true
     }

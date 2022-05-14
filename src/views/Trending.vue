@@ -35,44 +35,93 @@
       Data Not Found
     </v-alert>
   </v-row>
+  <v-row v-if="lastVisible" class="d-felx justify-center">
+    <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
+  </v-row>
 </v-container>
 
 </template>
 
 <script>
+import { last } from 'lodash';
 import axios from 'axios';
 export default {
   components:{
   },
   data() {
     return {
+      lastVisible: null,
       loading:false,
       cliplists:[],
+      dataLoading: false,
     };
   },
   methods: {
+    async getMoreData(){
+      this.dataLoading = true;
+      try{
+        await this.$firestore.collection('cliplist').orderBy('createdAt','asc').where('isPublic','==',2).startAfter(this.lastVisible).limit(12).get().then((sn) => {
+          this.lastVisible = last(sn.docs);
+          if(sn.docs.length > 0){
+            sn.docs.forEach(async (el) => {
+              const item = el.data();
+              this.cliplists.push({
+              id: el.id,
+              title: item.title,
+              description: item.description,
+              createdAt: item.createdAt.toDate(),
+              display_name: item.authorName,
+              clipIds: item.clipIds,
+              color: item.color,
+              thumbnail_url: item.thumbnail_url,
+              clipCount: item.clipCount,
+              viewCount: item.viewCount,
+              likeCount: item.likeCount,})
+            })
+          }else {
+            this.$store.commit('SET_SnackBar',{type:'error', text:`No More Data`, value:true});
+          }
+        }).then(() => {
+          this.dataLoading = false;
+        })
+      } catch(err){
+        this.$store.commit('SET_SnackBar',{type:'error', text:`No More Data`, value:true});
+        this.dataLoading = false;
+      }
+
+    },
     setDate(el){
       return this.$moment(el).format('l');
     },
     async loadData(){
       this.loading = true;
-      const sn = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('isPublic','==',2).get();
-      this.cliplists = sn.docs.map( (v) => {
-        const item = v.data();
-        return {
-          id: v.id,
-          title: item.title,
-          description: item.description,
-          createdAt: item.createdAt.toDate(),
-          display_name: item.authorName,
-          clipIds: item.clipIds,
-          color: item.color,
-          thumbnail_url: item.thumbnail_url,
-          clipCount: item.clipCount,
-          viewCount: item.viewCount,
-          likeCount: item.likeCount,
-        }
-      })
+      try{
+        const sn = await this.$firestore.collection('cliplist').orderBy("createdAt","asc").where('isPublic','==',2).limit(12).get();
+
+        this.lastVisible = last(sn.docs);
+
+        this.cliplists = sn.docs.map( (v) => {
+          const item = v.data();
+          return {
+            id: v.id,
+            title: item.title,
+            description: item.description,
+            createdAt: item.createdAt.toDate(),
+            display_name: item.authorName,
+            clipIds: item.clipIds,
+            color: item.color,
+            thumbnail_url: item.thumbnail_url,
+            clipCount: item.clipCount,
+            viewCount: item.viewCount,
+            likeCount: item.likeCount,
+          }
+        })
+      }
+      catch(err){
+        console.log(err);
+        this.$store.commit('SET_SnackBar',{type:'error', text:`${err.message}`, value:true});
+      }
+
     },
     // async getUserInfo(item){
     //   await axios.get('https://api.twitch.tv/helix/users',{

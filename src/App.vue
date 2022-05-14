@@ -103,8 +103,8 @@ export default {
 }
 header {
   height: fit-content;
-  padding-left: 15%;
-  padding-right: 15%;
+  padding-left: 3%;
+  padding-right: 3%;
 }
 .col,
 .row,

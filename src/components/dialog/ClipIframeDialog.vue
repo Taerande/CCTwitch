@@ -19,7 +19,8 @@
       <v-container fluid fill-height class="d-flex align-content-space-between">
         <v-row class="d-flex justify-space-between align-center pl-1">
           <v-spacer></v-spacer>
-          <pinClip name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
+          <pinClip v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
+          <v-btn v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon></v-btn>
         </v-row>
         <v-row class="d-flex justify-space-between">
           <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">{{setDate(clipData.created_at)}}</span>
@@ -32,7 +33,8 @@
       <span class="white--text pl-5">{{this.$moment(clipData.created_at).format('ll')}}</span>
       <v-spacer></v-spacer>
       <v-btn :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
-      <pinClip name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
+      <pinClip v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
+      <v-btn v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon></v-btn>
       <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
     </div>
       <iframe

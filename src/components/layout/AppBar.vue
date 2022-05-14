@@ -1,11 +1,11 @@
 <template>
-  <v-app-bar height="90" app flat absolute>
+  <v-app-bar class="white--text" height="90" app flat absolute dark>
     <v-container
     class="align-center justify-center">
       <v-row class="d-flex align-center">
         <div class="d-flex">
-          <v-btn icon @click="changeDrawer()">
-            <v-icon>mdi-menu</v-icon>
+          <v-btn icon @click="changeDrawer(!drawer)">
+            <v-icon color="white">mdi-menu</v-icon>
           </v-btn>
           <v-dialog
             content-class="drawer"
@@ -18,7 +18,7 @@
               <v-card-title>
                 <span>Quick Menu</span>
                 <v-spacer></v-spacer>
-                <v-btn @click="changeDrawer()" icon>
+                <v-btn @click="changeDrawer(false)" icon>
                   <v-icon>mdi-chevron-double-down</v-icon>
                 </v-btn>
               </v-card-title>
@@ -43,23 +43,23 @@
                   </v-form>
                   <div class="text-caption pl-5 pt-3">Menu</div>
                   <v-divider class="my-3"></v-divider>
-                  <v-list-item to="/" @click="changeDrawer()">
+                  <v-list-item to="/" @click="changeDrawer(false)">
                     <v-icon color="twitch" class="pr-1">mdi-home</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Home</span>
                   </v-list-item>
-                  <v-list-item to="/trending" @click="changeDrawer()">
+                  <v-list-item to="/trending" @click="changeDrawer(false)">
                     <v-icon color="green" class="pr-1">mdi-trending-up</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
                   </v-list-item>
-                  <v-list-item to="/mycliplist" @click="changeDrawer()">
+                  <v-list-item to="/mycliplist" @click="changeDrawer(false)">
                     <v-icon color="blue" class="pr-1">mdi-playlist-check</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
                   </v-list-item>
-                  <v-list-item to="/streamer" @click="changeDrawer()">
+                  <v-list-item to="/streamer" @click="changeDrawer(false)">
                     <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
                   </v-list-item>
-                  <v-list-item to="/streamer" @click="changeDrawer()">
+                  <v-list-item to="/streamer" @click="changeDrawer(false)">
                     <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-help</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Random</span>
                   </v-list-item>
@@ -74,7 +74,7 @@
                       </v-avatar>
                     <span class="text-subtitle px-1">{{$store.state.userinfo.userInfo.displayName}}</span>
                     <div class="d-flex justify-center px-10 pt-5">
-                      <v-btn width="100%" @click="logOut" :loading="logoutLoading" color="error">Logout</v-btn>
+                      <v-btn width="100%" @click="logOut()" :loading="logoutLoading" color="error">Logout</v-btn>
                     </div>
                     </v-card-text>
                   </v-card>
@@ -179,16 +179,14 @@ export default {
     },
     async logOut(){
       this.logoutLoading = true;
-      await setTimeout( async () => {
-        await this.$firebase.auth().signOut().then(() =>{
-        this.logoutLoading = false;
+      await this.$firebase.auth().signOut().then(() =>{
         this.$store.commit('SET_UserInfo', null);
-        localStorage.removeItem('userInfo');
-        if(this.$route.path !== '/'){
-          this.$router.push({path:'/'})
-        }
-      });
-      this.$store.commit('SET_Drawer');
+      localStorage.removeItem('userInfo');
+      if(this.$route.path !== '/'){
+        this.$router.push({path:'/'}).catch(()=>{});
+      }
+      this.logoutLoading = false;
+      this.$store.commit('SET_Drawer', false);
       this.$store.commit('SET_SnackBar',{type: 'error', text:'로그아웃', value:true})
       }, 500);
     },
@@ -203,7 +201,7 @@ export default {
           q: el,
         },
       });
-      this.changeDrawer();
+      this.changeDrawer(false);
     },
   },
   computed: {

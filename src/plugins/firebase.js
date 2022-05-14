@@ -3,12 +3,14 @@ import Vue from 'vue';
 import firebase from 'firebase/compat/app';
 import firebaseConfig from '../../firebaseConfig';
 import 'firebase/compat/firestore';
+import 'firebase/compat/database';
 import 'firebase/compat/auth';
 import store from '../store'
 
 firebase.initializeApp(firebaseConfig);
 
 Vue.prototype.$firebase = firebase;
+Vue.prototype.$firertdb = firebase.database();
 Vue.prototype.$firestore = firebase.firestore();
 Vue.prototype.$isFirebaseAuth = false;
 

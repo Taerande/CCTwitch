@@ -109,7 +109,7 @@
         color="green darken-1"
         text
         :loading="loading"
-        :disabled="form.title === ''"
+        :disabled="form.title === '' || form.title === null"
         @click="saveCliplist(), dialog = false"
       >
         ADD
@@ -119,11 +119,12 @@
         color="green darken-1"
         text
         :loading="loading"
-        :disabled="form.title === ''"
+        :disabled="form.title === '' || form.title === null"
         @click="updateClipListData(), dialog = false"
       >
       Edit
       </v-btn>
+      {{form}}
     </v-card-actions>
   </v-card>
 </v-dialog>
@@ -189,6 +190,7 @@ export default {
       this.form.likeCount = 0;
       this.form.viewCount = 0;
       this.form.clipCount = 0;
+      this.form.thumbnail_url = null;
       this.form.clipIds = [];
       this.form.createdAt = new Date();
       this.form.authorName = this.$store.state.userinfo.userInfo.displayName || '';

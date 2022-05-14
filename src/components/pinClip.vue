@@ -1,6 +1,5 @@
 <template>
   <v-dialog
-  v-if="$store.state.userinfo.userInfo"
   v-model="dialog"
   scrollable
   width="400px">
@@ -48,17 +47,14 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <SignInDialogVue v-else :type="{parent:'pinclip'}"></SignInDialogVue>
 </template>
 <script>
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
-import SignInDialogVue from './dialog/SignInDialog.vue';
 
 export default {
   props:['clipData','listData'],
   components: {
     AddNewCliplistDialog,
-    SignInDialogVue,
   },
   data() {
     return {
@@ -94,15 +90,14 @@ export default {
           });
           await batch.commit().then(() => {
             this.$store.commit('SET_SnackBar',{type:'success', text:`${this.clipData.data.title}을 추가했습니다.`, value:true})
-          }).catch(() => {
-            this.$store.commit('SET_SnackBar',{type:'error', text:`입력 데이터가 잘못 되었습니다.`, value:true})
+          }).catch((err) => {
+            this.$store.commit('SET_SnackBar',{type:'error', text:`${err.message}입력 데이터가 잘못 되었습니다.`, value:true})
           });
         } else {
           this.$store.commit('SET_SnackBar',{type:'error', text:`${this.clipData.data.title}은 이미 있습니다.`, value:true})
         }
       this.loading = false;
-    }
-
+    },
   },
   async created() {
 

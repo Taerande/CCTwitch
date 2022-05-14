@@ -13,7 +13,7 @@
       <v-icon>mdi-clipboard-plus-outline</v-icon>
       </v-btn>
     </template>
-    <v-card class="justify-center overflow-auto">
+    <v-card :disabled="loading" class="justify-center overflow-auto">
       <v-card-title class="twitch text-h5 font-weight-bold">
         <div>Twitch 클립 가져오기</div>
       </v-card-title>
@@ -90,6 +90,7 @@
         </v-btn>
         <v-btn
         text
+        :loading="loading"
         color="success"
         @click="addToFireStoreCliplist()"
         :disabled="this.pinnedClipslist.length === 0"
@@ -116,6 +117,7 @@ export default {
       currentId: '',
       dialog: false,
       color: '',
+      loading:false,
       clipUrl: '',
       result:'',
       clipResult:[],
@@ -153,35 +155,63 @@ export default {
        this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : ${item.title}을 목록에서 삭제합니다.`, value: true });
     },
     addToCliplist(el){
-      this.pinnedClipslist.push(el);
-      this.$store.commit('SET_SnackBar', { type: 'success', text: `Import : ${el.title}을 추가합니다.`, value: true });
-      this.clipDialog = false;
-      this.clipUrl = '';
+      if(this.pinnedClipslist.length + this.parent.clipCount > 100){
+        this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : 클립은 최대 100까지 저장 가능합니다.`, value: true });
+        this.clipDialog = false;
+        this.clipUrl = '';
+      } else {
+        this.pinnedClipslist.push(el);
+        this.$store.commit('SET_SnackBar', { type: 'success', text: `Import : ${el.title}을 추가합니다.`, value: true });
+        this.clipDialog = false;
+        this.clipUrl = '';
+      }
     },
     async addToFireStoreCliplist(){
+      this.loading = true;
+      if(this.pinnedClipslist.length + this.parent.clipCount > 100) return
+      let batch = this.$firestore.batch();
       let objectData = this.pinnedClipslist.map( (v) => {
         return v.id;
       })
-      let intersection = this.pinnedClipslist.filter( x => this.$store.state.currentCliplist.includes(x));
+      let target = this.$firestore.collection('cliplist').doc(this.parent.id);
+      let intersection = this.pinnedClipslist.filter( x => this.parent.clipIds.includes(x.id));
+      let stateData = [];
 
       if(intersection.length === 0){
-        let target = this.$firestore.collection('cliplist').doc(this.parent.id);
-        target.update({
-          cliplist: this.$firebase.firestore.FieldValue.arrayUnion(...objectData)
-        }).then( () => {
-          this.$store.commit('ADD_CurrentCliplist', this.pinnedClipslist)
+        this.pinnedClipslist.forEach((el) => {
+          batch.set(target.collection('clips').doc(el.id),{
+            clipId: el.id,
+            createdAt: parseInt(new Date().getTime()),
+            thumbnail_url: el.thumbnail_url,
+          });
+          stateData.push({
+            fireData:{
+              clipId: el.id,
+              createdAt: parseInt(new Date().getTime()),
+              thumbnail_url: el.thumbnail_url,
+            },
+            clipData: el,
+          })
+        })
+        batch.update(target,{
+          clipIds: this.$firebase.firestore.FieldValue.arrayUnion(...objectData),
+          clipCount:  this.$firebase.firestore.FieldValue.increment(this.pinnedClipslist.length),
+        })
+
+        await batch.commit().then( () => {
+          this.$store.commit('ADD_CurrentCliplist', stateData)
           this.$store.commit('SET_SnackBar',{type:'success', text: this.pinnedClipslist.length > 1 ? `${this.pinnedClipslist[0].title}외 ${this.pinnedClipslist.length - 1}개의 클립을 추가했습니다.` : `${this.pinnedClipslist[0].title}을 추가했습니다.`, value:true})
           this.pinnedClipslist = [];
+          this.loading = false;
           this.dialog = false;
         })
         .catch( () => {
           this.$store.commit('SET_SnackBar',{type:'error', text:`Something wrong`, value:true})
         })
       }else {
+        this.loading = false;
         this.$store.commit('SET_SnackBar',{type:'error', text:`중복된 클립이 존재합니다.`, value:true})
       }
-
-
       },
     async getClip(el) {
       this.inQue = false;
@@ -194,7 +224,7 @@ export default {
         resultId = preClipId.split('?')[0];
       }
       let isInvolved = this.pinnedClipslist.find(element => element.id === resultId);
-      let isIn = this.parent.cliplist.find(element => element === resultId);
+      let isIn = this.parent.clipIds.find(element => element === resultId);
       if(isInvolved || isIn){
         this.inQue = true;
         this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : 이미 추가된 클립입니다.`, value: true });

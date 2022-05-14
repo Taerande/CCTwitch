@@ -46,7 +46,7 @@
           </div>
           <div class="d-flex align-baseline pt-1 text-caption">
             <span>({{setDate(item.data.created_at)}})  [{{getDurationTime(item.data.duration)}}]</span>
-            <span v-if="item.data.is_live" class="pl-1 red--text text-caption">OnAir</span>
+            <span v-if="item.data.is_live" class="pl-1 red--text text-caption"><v-icon  color="error" small class="px-1">mdi-circle</v-icon>{{item.data.viewer_count}}</span>
             <v-spacer></v-spacer>
             <v-btn v-if="item.data.is_live"
             small
@@ -142,6 +142,7 @@ export default {
         const convert = res.data.data[0].thumbnail_url.replace(width2, '480').replace(height2, '272');
         this.vidlist[index].data.thumbnail_url = convert;
         this.vidlist[index].data.is_live = res.data.data[0].type;
+        this.vidlist[index].data.viewer_count = res.data.data[0].viewer_count;
       });
     },
     getDurationTime(el) {

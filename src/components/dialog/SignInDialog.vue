@@ -1,5 +1,5 @@
 <template>
-<v-dialog persistent no-click-animation v-model="dialog" max-width="900" @keydown.esc="dialog = false">
+<v-dialog persistent no-click-animation v-model="$store.state.signInDialog" max-width="900">
   <template v-slot:activator="{on}">
     <v-btn v-if="type.parent == 'pinclip'" icon>
       <v-icon v-on="on" size="20" color="red">mdi-plus-box-multiple</v-icon>
@@ -13,11 +13,11 @@
     <v-card-title class="d-flex justify-center">
       <span class="px-3">로그인</span>
       <v-btn class="absolute-right" color="error" icon
-      @click="closeDialog"><v-icon>mdi-close</v-icon></v-btn>
+      @click="closeDialog()"><v-icon>mdi-close</v-icon></v-btn>
     </v-card-title>
     <v-card-text>
       <v-row class="d-flex justify-center py-5">
-        <v-btn x-large dark color="twitch" depressed rounded class="mx-3" @click="AuthenticateWithTwitch" :loading="loginLoading">
+        <v-btn x-large dark color="twitch" depressed rounded class="mx-3" @click="AuthenticateWithTwitch()" :loading="loginLoading">
           <v-icon large>mdi-twitch</v-icon>
           <span>트위치로 로그인하기</span>
         </v-btn>
@@ -40,7 +40,7 @@ export default {
   methods: {
     closeDialog(){
       this.loginLoading = false;
-      this.dialog = false;
+      this.$store.commit('SET_SignInDialog', false);
     },
     async AuthenticateWithTwitch(){
       this.loginLoading = true;
@@ -56,11 +56,13 @@ export default {
 
       localStorage.setItem('twitchOAuthToken', JSON.parse(twitchOAuthToken));
       if(this.type.parent === 'quickMenu'){
-        this.$store.commit('SET_Drawer')
+        this.$store.commit('SET_Drawer', false);
       }
       this.loginLoading = false;
-      this.dialog = false;
-      this.$router.push('/');
+      this.$store.commit('SET_SignInDialog', false);
+      if(this.$route.path !== '/'){
+        this.$router.push({path:'/'}).catch(()=>{});
+      }
       this.$store.commit('SET_SnackBar',{type: 'info', text:'로그인 성공', value:true})
 
     },

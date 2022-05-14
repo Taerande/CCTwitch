@@ -2,8 +2,8 @@
  <v-dialog
   content-class="clipIframe"
   v-model="dialog"
-  height="720"
-  max-width="1280">
+  max-height="400"
+  max-width="600">
   <template v-slot:activator="{ on, attrs }">
     <v-container fluid fill-height class="d-flex align-center" v-on="on">
       <v-img
@@ -24,8 +24,6 @@
     </v-container>
   </template>
     <div class="black d-flex justify-end">
-      <v-btn :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
-      <pinClip name="channelClipPin" :clipData="{data:clipData}"></pinClip>
       <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
     </div>
       <iframe
@@ -36,17 +34,14 @@
       :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=false&muted=false&preload=auto`"
       preload="auto"
       frameborder="0"
-      :height="$vuetify.breakpoint.smAndUp ? 720 : 300"
+      :height="$vuetify.breakpoint.smAndUp ? 400 : 300"
       width="100%"
       allowfullscreen="true"></iframe>
 </v-dialog>
 </template>
 <script>
-import pinClip from '@/components/pinClip.vue';
-import axios from 'axios';
 export default {
   components:{
-    pinClip,
   },
   props:['clipData'],
   data() {
@@ -70,8 +65,7 @@ export default {
       }
     },
     setDate(el) {
-      const c = this.$moment(el).fromNow();
-      return c;
+      return this.$moment(el).fromNow();
     },
      viewerkFormatter(el) {
       const num = el.toString();
@@ -86,34 +80,8 @@ export default {
       }
       return Math.abs(num);
     },
-    async getVidOffset(element){
-      const json = JSON.stringify(
-        {
-          operationName: "ClipsFullVideoButton",
-          variables: {
-            slug: element.id
-          },
-          extensions: {
-            persistedQuery: {
-              version: 1,
-              sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
-              }
-          }
-        })
-     await axios.post('https://gql.twitch.tv/gql',json, {
-        headers: {
-          'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
-        },
-
-      }).then((res) => {
-          element.videoOffsetSeconds = res.data.data.clip.videoOffsetSeconds;
-      })
-      }
   },
   mounted(){
-    if(this.clipData.video_id){
-      this.getVidOffset(this.clipData);
-    }
   }
 }
 </script>

@@ -6,7 +6,7 @@
   <template v-slot:activator="{ on }" class="d-flex">
     <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" max-height="100" class="d-flex" flat>
       <v-card-title class="justify-center ma-0 pa-0 mx-auto" style="width:3rem;">
-        <span v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId" class="handle"> <v-icon>mdi-drag-horizontal-variant</v-icon></span>
+        <span class="handle" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId"> <v-icon>mdi-drag-horizontal-variant</v-icon></span>
         <span v-else class="text-caption font-weight-bold">{{index+1}}</span>
       </v-card-title>
       <v-card-text class="d-flex align-center ma-0 pa-0">
@@ -24,9 +24,9 @@
         </v-img>
         <div class="pl-4 d-flex">
           <div class="d-flex flex-column">
-            <div class="text-truncate" style="width:10rem;">{{clipData.title}}</div>
+            <div class="text-truncate">{{clipData.title}}</div>
             <div class="d-flex">
-              <span>{{$moment(clipData.created_at).format('ll')}}</span>
+              <span>{{$moment(clipData.created_at).format('l')}}</span>
               <span class="d-flex px-3 align-center"><v-icon small class="pr-1">mdi-eye</v-icon>{{clipData.view_count}}</span>
             </div>
             <div class="pa-3 twitch--text">
@@ -37,10 +37,9 @@
             </div>
           </div>
         </div>
-      </v-card-text>
-      <v-card-actions>
+        <v-spacer></v-spacer>
         <clipMenuVue :clip="{clipData:clipData, listData:clipListData}" :listData="listData"></clipMenuVue>
-      </v-card-actions>
+      </v-card-text>
     </v-card>
   </template>
   <div class="black d-flex justify-end">
@@ -56,7 +55,7 @@
     :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=true`"
     preload="auto"
     frameborder="0"
-    :height="$vuetify.breakpoint.smAndUp ? 720 : 400"
+    :height="$vuetify.breakpoint.mdAndUp ? 720 : 400"
     width="1280"
     allowfullscreen="true"></iframe>
 </v-dialog>
@@ -123,7 +122,7 @@ export default {
       } else if(this.$vuetify.breakpoint.sm) {
         return '150';
       } else if (this.$vuetify.breakpoint.xs) {
-        return '125';
+        return '100';
       } else {
         return '100';
       }

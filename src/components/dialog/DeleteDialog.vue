@@ -25,9 +25,9 @@
     </v-card-title>
     <v-card-text class="d-flex align-center justify-center pt-5">
       <span class="twitch--text pl-1 text-title text-truncate">
-        <span class="text-uppercase">
+        <span class="text-uppercase" style="width:25rem;">
           {{this.delete.type}}
-        </span>: {{this.delete.data.target.title.length > 25 ? `${this.delete.data.target.title.substr(0, 24)}...` : this.delete.data.target.title}}</span>
+        </span>: {{this.delete.data.target.title}}</span>
         <span v-if="this.delete.type === 'cliplist'">[<span class="red--text">{{this.delete.data.target.clipCount}}</span>]개 을 삭제합니다.</span>
       <!-- <div>{{this.delete.data.target}}</div>
       <div>{{this.$router.params}}</div> -->

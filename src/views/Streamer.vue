@@ -346,20 +346,26 @@ export default {
           this.$router.push({path:'/'})
         }
       });
-      this.$store.commit('SET_SnackBar',{type: 'error', text:'로그인정보가 잘못되었습니다. 다시 로그인 해주세요', value:true})
     },
     async postProcess(){
-      await this.$firebase.auth().onAuthStateChanged((user) => {
-        // const user = this.$store.state.userinfo.userInfo;
-        const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
-        if(user && twitchOAuthToken){
-          this.islogin = true;
-          this.getStreamFollowList(user);
-          this.getFollowList(user);
-        } else {
-          this.$store.commit('SET_SnackBar', {type:'error', text:'로그인 정보가 잘못되었습니다. 다시 로그인 해주세요', value:true});
+      try{
+        await this.$firebase.auth().onAuthStateChanged((user) => {
+          // const user = this.$store.state.userinfo.userInfo;
+          const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
+          if(user && twitchOAuthToken){
+            this.islogin = true;
+            this.getStreamFollowList(user);
+            this.getFollowList(user);
+          } else {
+            this.$store.commit('SET_SnackBar', {type:'error', text:'로그인 정보가 잘못되었습니다. 다시 로그인 해주세요', value:true});
+          }
+        });
+      } catch {
+        (err) => {
+          console.log(err.message);
         }
-      });
+
+      }
     },
   },
   computed: {
@@ -368,6 +374,7 @@ export default {
     },
   },
   async mounted() {
+    console.log('hi');
     await this.postProcess();
   }
 };

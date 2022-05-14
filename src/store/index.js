@@ -6,6 +6,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    signInDialog: false,
     drawer: false,
     backendUrl: process.env.VUE_APP_BACKEND_URL_DEV,
     globalLan:'ko',
@@ -46,14 +47,17 @@ export default new Vuex.Store({
     darkColorSet:['#E53935','#C62828','#D81B60','#AD1457','#8E24AA','#6A1B9A','#5E35B1','#4527A0','#3949AB','#283593','#1E88E5','#1565C0','#039BE5','#0277BD','#00ACC1','#00838F','#00897B','#00695C','#43A047','#2E7D32','#7CB342','#558B2F','#C0CA33','#9E9D24','#F9A825','#FFB300','#FF8F00','#FB8C00','#EF6C00','#F4511E','#D84315','#6D4C41','#4E342E','#546E7A','#37474F','#757575','#424242'],
   },
   mutations: {
+    SET_SignInDialog(state, payload) {
+      state.signInDialog = payload
+    },
     UPDATE_Firedata(state, payload){
       state.currentCliplist[payload.index].fireData.createdAt = payload.createdAt;
     },
     SET_Cliplist(state, payload){
       state.cliplist = payload;
     },
-    SET_Drawer(state){
-      state.drawer = !state.drawer;
+    SET_Drawer(state, payload){
+      state.drawer = payload;
     },
     SET_TwitchOAuthToken(state, payload){
       state.twitchOAuthToken = `Bearer ${payload}`;
@@ -126,7 +130,6 @@ export default new Vuex.Store({
     },
     ADD_CurrentCliplist(state, payload){
       state.currentCliplist = [...state.currentCliplist, ...payload];
-      console.log(state.currentCliplist , payload)
     },
     DELETE_LikedStreamer(state, response) {
       const temp = JSON.parse(localStorage.getItem('alllikes'));

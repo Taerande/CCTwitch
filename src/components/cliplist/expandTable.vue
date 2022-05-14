@@ -1,16 +1,17 @@
 <template>
-<v-row class="d-block py-3">
+<v-row class="py-3 red">
   <v-divider class="my-3"></v-divider>
   <draggable
   v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId" v-model="currentCliplist"
   handle=".handle" ghost-class="ghost" @change="changeIndex" chosen-class="chosen" drag-class="drag">
     <v-col cols="12" v-for="(clip, index) in currentCliplist" :key="index">
-      <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+    <div>{{clip}}</div>
+      <!-- <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog> -->
       <v-divider class="my-3"></v-divider>
     </v-col>
   </draggable>
     <v-col v-else cols="12" class="ma-2" v-for="(clip, index) in currentCliplist" :key="index">
-        <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+        <!-- <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog> -->
       <v-divider class="my-3"></v-divider>
     </v-col>
 </v-row>
@@ -23,7 +24,7 @@ import draggable from 'vuedraggable'
 export default {
   props:['clipListData'],
   components: {
-    ClipIframeDataTableDialog,
+    // ClipIframeDataTableDialog,
     draggable,
   },
   data() {
@@ -50,15 +51,9 @@ export default {
 
       if(data.newIndex === 0){
         tempDate = await this.currentCliplist[1].fireData.createdAt - 10;
-        console.log('to 0');
-        console.log(this.currentCliplist[1].fireData.clipId);
       } else if (isLast) {
         tempDate = await this.currentCliplist[data.newIndex - 1].fireData.createdAt + 10;
-        console.log('to last');
-        console.log(this.currentCliplist[data.newIndex - 1].fireData.clipId);
       } else {
-        console.log('to every');
-        console.log(this.currentCliplist[data.newIndex - 1].fireData.clipId,this.currentCliplist[data.newIndex + 1].fireData.clipId) ;
        tempDate = await (this.currentCliplist[data.newIndex - 1].fireData.createdAt + this.currentCliplist[data.newIndex + 1].fireData.createdAt)/2;
       }
 

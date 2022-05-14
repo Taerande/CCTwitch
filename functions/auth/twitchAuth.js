@@ -89,6 +89,12 @@ app.get('/signin/twitch/callback', async (req, res) => {
 
     const userData = await getUserInfo(data);
     const userInfo = userData.data[0];
+    userInfo['publicData'] ={
+      id:userData.data[0].id,
+      login: userData.data[0].login,
+      display_name: userData.data[0].display_name,
+      profile_image_url: userData.data[0].profile_image_url
+    }
     const id = `twitch:${userInfo.id}`;
     const twitchOAuthToken = Buffer.from(JSON.stringify(data)).toString('base64');
 

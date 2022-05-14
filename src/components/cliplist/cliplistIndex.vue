@@ -5,13 +5,12 @@
       <span class="text-h4 font-weight-bold pr-3">{{cliplist.title}}</span>
     </div>
     <SignInDialog v-if="SignInDialog"></SignInDialog>
-    <div class="d-flex align-baseline pb-1">
+    <div class="d-flex align-center pb-1">
+        <span class="text-title-1 pr-3">
+        <v-icon >mdi-playlist-play</v-icon>CLIPS: {{ cliplist.clipCount }}</span>
         <span class="text-title-1">
-        <v-icon>mdi-playlist-play</v-icon>
-        {{ cliplist.clipCount }}</span>
-        <v-icon @click="likeCliplist()">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon>
-        <span class="text-title pl-1">{{cliplist.likeCount}}</span>
-      <span class="text-caption px-2">{{$moment(cliplist.createdAt).format('ll')}}</span>
+        <v-icon class="pb-1" @click="likeCliplist()">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon><span class="pl-3">LIKE :{{cliplist.likeCount}}</span></span>
+      <span class="text-caption px-2">{{$moment(cliplist.createdAt).format('l')}}</span>
       <v-spacer></v-spacer>
       <div class="d-flex" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === cliplist.authorId">
         <ImportNewClipDialogVue :parent="cliplist"></ImportNewClipDialogVue>
@@ -129,19 +128,29 @@ export default {
     async likeCliplist(){
       if(this.$store.state.userinfo.userInfo){
         let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
+        let userDocs = await this.$firebase.database().ref().child('/users/' +this.$store.state.userinfo.userInfo.uid);
+        let updates = {};
         if(this.liked){
+          updates['/likelist/'+this.$route.params.id] = null;
+          userDocs.update(updates);
           docRef.update({
             likeCount: this.$firebase.firestore.FieldValue.increment(-1),
             likeUids: this.$firebase.firestore.FieldValue.arrayRemove(this.$store.state.userinfo.userInfo.uid)
+          }).then(() => {
+            this.$store.commit('SET_SnackBar',{type:'error', text:`"${this.cliplist.title}"을 좋아요 목록에서 제거합니다.`, value:true})
           })
         } else {
+          updates['/likelist/'+this.$route.params.id] = parseInt(new Date().getTime()) ;
+          userDocs.update(updates);
           docRef.update({
             likeCount: this.$firebase.firestore.FieldValue.increment(1),
             likeUids: this.$firebase.firestore.FieldValue.arrayUnion(this.$store.state.userinfo.userInfo.uid)
+          }).then(() => {
+            this.$store.commit('SET_SnackBar',{type:'info', text:`"${this.cliplist.title}"을 좋아요 목록에 추가합니다.`, value:true})
           })
         }
       } else {
-        this.SignInDialog = true;
+        this.$store.commit('SET_SignInDialog', true);
       }
 
     },
