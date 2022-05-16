@@ -15,14 +15,14 @@
             transition="dialog-bottom-transition"
           >
             <v-card>
-              <v-card-title>
-                <span>Quick Menu</span>
+              <v-card-title class="twitch">
+                <div class="white--text">Quick Menu</div>
                 <v-spacer></v-spacer>
-                <v-btn @click="changeDrawer(false)" icon>
+                <v-btn color="white" @click="changeDrawer(false)" icon>
                   <v-icon>mdi-chevron-double-down</v-icon>
                 </v-btn>
               </v-card-title>
-              <v-card-text>
+              <v-card-text class="pt-16">
                 <v-list>
                   <div class="text-caption pl-5">Search</div>
                   <v-divider class="my-3"></v-divider>
@@ -73,7 +73,7 @@
                           :src="$store.state.userinfo.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
                       </v-avatar>
                     <span class="text-subtitle px-1">{{$store.state.userinfo.userInfo.displayName}}</span>
-                    <div class="d-flex justify-center px-10 pt-5">
+                    <div class="d-flex justify-center py-3">
                       <v-btn width="100%" @click="logOut()" :loading="logoutLoading" color="error">Logout</v-btn>
                     </div>
                     </v-card-text>
@@ -88,8 +88,8 @@
                   <div>
                     <v-btn
                     depressed
-                    outlined
                     v-if="!$vuetify.theme.dark"
+                    class="text-capitalize text-caption"
                     @click="toggleDarkTheme()">
                       <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
                       <span>Dark Mode</span>
@@ -148,7 +148,9 @@
       <img
       :src="$store.state.userinfo.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
     </v-avatar>
-    <SignInDialog v-else :type="{parent:'appbar'}"></SignInDialog>
+    <v-btn v-else dark @click="$store.commit('SET_SignInDialog', true)" class="twitch">
+        <span>로그인</span>
+      </v-btn>
   </v-app-bar>
 </template>
 <script>
@@ -191,6 +193,7 @@ export default {
       }, 500);
     },
     searchChannel(el) {
+      if(el === '' || null){ return }
       this.$store.state.searchQuery = el;
       this.$router.push({
         path: '/search',
@@ -260,6 +263,5 @@ export default {
   left: 0;
   width: 100%;
 }
-
 }
 </style>

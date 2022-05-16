@@ -7,10 +7,10 @@
       <div class="d-flex align-baseline">
       <h1>Clips</h1>
       </div>
-      <div>
+      <!-- <div>
         <v-icon @click="refresh">mdi-refresh</v-icon>
         <v-icon @click="shuffle">mdi-shuffle</v-icon>
-      </div>
+      </div> -->
     </v-row>
   <v-row class="d-flex">
     <v-col
@@ -71,25 +71,25 @@ export default {
       }
       return Math.abs(num);
     },
-    shuffle() {
-      const playlist = [...this.cliplist];
-      let listLength = playlist.length;
-      let t;
-      let i;
-      while (listLength) {
-        i = Math.floor(Math.random() * listLength);
-        listLength -= 1;
-        t = playlist[listLength];
-        playlist[listLength] = playlist[i];
-        playlist[i] = t;
-        this.cliplist = playlist;
-      }
-      this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 랜덤으로 정렬합니다.', value: true });
-    },
-    refresh() {
-      this.cliplist.sort((a, b) => b.view_count - a.view_count);
-      this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 조회수순으로 정렬합니다.', value: true });
-    },
+    // shuffle() {
+    //   const playlist = [...this.cliplist];
+    //   let listLength = playlist.length;
+    //   let t;
+    //   let i;
+    //   while (listLength) {
+    //     i = Math.floor(Math.random() * listLength);
+    //     listLength -= 1;
+    //     t = playlist[listLength];
+    //     playlist[listLength] = playlist[i];
+    //     playlist[i] = t;
+    //     this.cliplist = playlist;
+    //   }
+    //   this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 랜덤으로 정렬합니다.', value: true });
+    // },
+    // refresh() {
+    //   this.cliplist.sort((a, b) => b.view_count - a.view_count);
+    //   this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 조회수순으로 정렬합니다.', value: true });
+    // },
     changeId(el) {
       this.currentId = el;
     },
@@ -125,14 +125,14 @@ export default {
         if (res.data.data.length === 0) {
           $state.complete();
         } else if (res.data.pagination.cursor === undefined && res.data.data.length > 0) {
-          res.data.data.forEach((el) => {
+          res.data.data.map((el) => {
             if (el.video_id === this.infiniteData.data.video_id) {
               this.cliplist.push(el);
             }
           });
           $state.complete();
         } else {
-          res.data.data.forEach((el) => {
+          res.data.data.map((el) => {
             if (el.video_id === this.infiniteData.data.video_id) {
               this.cliplist.push(el);
             }

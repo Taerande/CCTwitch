@@ -22,7 +22,7 @@
           auto-grow
           counter
           maxlength="100"
-          :rules="[rules.counter]"
+          :rules="[rules.counter]"e
           color="twitch"
           name="input-7-4"
           :placeholder="this.edit.data.description"

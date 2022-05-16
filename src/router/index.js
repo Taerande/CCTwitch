@@ -81,6 +81,18 @@ const routes = [
     path: '/mycliplist',
     name: 'cliplistList',
     component: cliplistList,
+    beforeEnter: (to, from, next) => {
+      if(!store.state.userinfo.userInfo){
+        router.push({name:'Home'});
+        store.commit('SET_SignInDialog',true)
+        store.commit('SET_SnackBar',{
+          type:'error',
+          text:'로그인이 필요합니다.',
+          value:true,
+        })
+      }
+      next()
+    }
   },
   {
     path: '/streamer',

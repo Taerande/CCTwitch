@@ -1,17 +1,16 @@
 <template>
-<v-row class="py-3 red">
+<v-row class="d-block py-3">
   <v-divider class="my-3"></v-divider>
   <draggable
   v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId" v-model="currentCliplist"
   handle=".handle" ghost-class="ghost" @change="changeIndex" chosen-class="chosen" drag-class="drag">
     <v-col cols="12" v-for="(clip, index) in currentCliplist" :key="index">
-    <div>{{clip}}</div>
-      <!-- <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog> -->
+      <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
       <v-divider class="my-3"></v-divider>
     </v-col>
   </draggable>
-    <v-col v-else cols="12" class="ma-2" v-for="(clip, index) in currentCliplist" :key="index">
-        <!-- <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog> -->
+    <v-col v-else cols="12" v-for="(clip, index) in currentCliplist" :key="index">
+        <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
       <v-divider class="my-3"></v-divider>
     </v-col>
 </v-row>
@@ -24,7 +23,7 @@ import draggable from 'vuedraggable'
 export default {
   props:['clipListData'],
   components: {
-    // ClipIframeDataTableDialog,
+    ClipIframeDataTableDialog,
     draggable,
   },
   data() {
@@ -79,19 +78,6 @@ export default {
         this.$store.commit('SET_SnackBar',{type:'error', text:`${err.message}`, value:true})
       });
       }
-    },
-    viewerkFormatter(el) {
-      const num = el.toString();
-      if (num > 999999999) {
-        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999999) {
-        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999) {
-        return `${num.slice(0, -3)},${num.slice(-3)}`;
-      }
-      return Math.abs(num);
     },
     updateData(el) {
       const idList = [];

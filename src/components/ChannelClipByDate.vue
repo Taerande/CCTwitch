@@ -119,12 +119,12 @@ export default {
         if (res.data.data.length === 0) {
           $state.complete();
         } else if (res.data.pagination.cursor === undefined && res.data.data.length > 0) {
-          res.data.data.forEach((el) => {
+          res.data.data.map((el) => {
             this.cliplist.push(el);
           });
           $state.complete();
         } else {
-          res.data.data.forEach((el) => {
+          res.data.data.map((el) => {
             this.cliplist.push(el);
           });
           $state.loaded();

@@ -3,14 +3,13 @@
   <v-row class="d-block">
     <div class="d-flex pt-10 align-baseline">
       <span class="text-h4 font-weight-bold pr-3">{{cliplist.title}}</span>
+      <v-icon>{{likeIcon(cliplist.isPublic)}}</v-icon>
     </div>
-    <SignInDialog v-if="SignInDialog"></SignInDialog>
     <div class="d-flex align-center pb-1">
         <span class="text-title-1 pr-3">
-        <v-icon >mdi-playlist-play</v-icon>CLIPS: {{ cliplist.clipCount }}</span>
+        <v-icon >mdi-playlist-play</v-icon>{{ cliplist.clipCount }}</span>
         <span class="text-title-1">
-        <v-icon class="pb-1" @click="likeCliplist()">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon><span class="pl-3">LIKE :{{cliplist.likeCount}}</span></span>
-      <span class="text-caption px-2">{{$moment(cliplist.createdAt).format('l')}}</span>
+        <v-icon class="pb-1" @click="likeCliplist()">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon><span class="pl-1">{{cliplist.likeCount}}</span></span>
       <v-spacer></v-spacer>
       <div class="d-flex" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === cliplist.authorId">
         <ImportNewClipDialogVue :parent="cliplist"></ImportNewClipDialogVue>
@@ -42,6 +41,7 @@
       <div class="pl-1">
         <div>{{userInfo.display_name}}</div>
       </div>
+      <span class="px-2">{{$moment(cliplist.createdAt).format('l')}}</span>
     </div>
     <v-spacer></v-spacer>
     <div class="text-body-1 pl-10">
@@ -74,7 +74,6 @@ import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import axios from 'axios';
 import expandTableVue from './expandTable';
 import ImportNewClipDialogVue from '../dialog/ImportNewClipDialog.vue';
-import SignInDialog from '../dialog/SignInDialog.vue';
 
 
 export default {
@@ -83,11 +82,9 @@ export default {
     AddNewCliplistDialog,
     expandTableVue,
     ImportNewClipDialogVue,
-    SignInDialog
 },
   data() {
     return {
-      SignInDialog: false,
       lastVisible: null,
       cliplist: {
         id:'',
@@ -117,6 +114,15 @@ export default {
     };
   },
   methods: {
+    likeIcon(el){
+      if(el === 0){
+        return 'mdi-eye-off'
+      }else if(el === 0){
+        return 'mdi-eye-off'
+      }else{
+        return 'mdi-earth'
+      }
+    },
     onIntersect(entries , observer, isIntersecting)
     {
       setTimeout(() => {
@@ -137,7 +143,7 @@ export default {
             likeCount: this.$firebase.firestore.FieldValue.increment(-1),
             likeUids: this.$firebase.firestore.FieldValue.arrayRemove(this.$store.state.userinfo.userInfo.uid)
           }).then(() => {
-            this.$store.commit('SET_SnackBar',{type:'error', text:`"${this.cliplist.title}"을 좋아요 목록에서 제거합니다.`, value:true})
+            this.$store.commit('SET_SnackBar',{type:'error', text:`Cliplist : "${this.cliplist.title}"을 좋아요 목록에서 제거합니다.`, value:true})
           })
         } else {
           updates['/likelist/'+this.$route.params.id] = parseInt(new Date().getTime()) ;
@@ -146,7 +152,7 @@ export default {
             likeCount: this.$firebase.firestore.FieldValue.increment(1),
             likeUids: this.$firebase.firestore.FieldValue.arrayUnion(this.$store.state.userinfo.userInfo.uid)
           }).then(() => {
-            this.$store.commit('SET_SnackBar',{type:'info', text:`"${this.cliplist.title}"을 좋아요 목록에 추가합니다.`, value:true})
+            this.$store.commit('SET_SnackBar',{type:'success', text:`Cliplist : "${this.cliplist.title}"을 좋아요 목록에 추가합니다.`, value:true})
           })
         }
       } else {
@@ -167,7 +173,7 @@ export default {
     async deleteCliplist(){
       await this.$firestore.collection('cliplist').doc(this.$route.params.id).delete();
       this.$router.push({path:'/mycliplist'});
-      this.$store.commit('SET_SnackBar',{type:'error', text:`${this.cliplist.title}클립 모음집이 삭제되었습니다.`, value:true});
+      this.$store.commit('SET_SnackBar',{type:'error', text:`Cliplist : ${this.cliplist.title}클립 모음집이 삭제되었습니다.`, value:true});
     },
     async getClip(id, description) {
       await axios.get('https://api.twitch.tv/helix/clips', {
@@ -232,6 +238,7 @@ export default {
     })
   },
   async mounted() {
+    console.log(this.$vuetify.breakpoint);
     let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
     this.unsubscribe = await docRef.onSnapshot((doc) => {
       const item = doc.data();

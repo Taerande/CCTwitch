@@ -1,42 +1,28 @@
 <template>
  <v-footer
     padless>
-    <v-divider></v-divider>
     <v-card
       class="py-2 app-container"
       flat
       tile>
-      <v-card-text class="d-flex pa-0 py-2 white--text align-center justify-center">
-        <v-btn
-          v-for="(icon,index) in icons"
-          :key="index"
-          class="mx-4"
-          icon
-        >
-          <v-icon>
-            {{ icon.icon }}
-          </v-icon>
-        </v-btn>
+      <v-card-text class="pa-0 py-2 align-center justify-center">
         <div>
           <v-btn
-          icon
-          v-if="!$vuetify.theme.dark"
-          @click="toggleDarkTheme()">
-            <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
-
+            v-for="(icon,index) in icons"
+            :key="index"
+            class="mx-4"
+            icon
+          >
+            <v-icon>
+              {{ icon.icon }}
+            </v-icon>
           </v-btn>
-          <v-btn v-else
-          icon
-          @click="toggleDarkTheme()">
-            <v-icon color="red">mdi-weather-sunny</v-icon></v-btn>
+        </div>
+        <div class="px-2">
+          {{ new Date().getFullYear() }} — <strong>Clip Collector for TWITCH</strong>
         </div>
       </v-card-text>
-
       <v-divider></v-divider>
-
-      <v-card-text>
-        {{ new Date().getFullYear() }} — <strong>Twitch Hot Clip Tracker</strong>
-      </v-card-text>
     </v-card>
   </v-footer>
 </template>
@@ -47,8 +33,6 @@ export default {
       icons: [
         { icon: 'mdi-home' },
         { icon: 'mdi-email' },
-        { icon: 'mdi-twitch' },
-        { icon: 'mdi-play' },
       ],
     };
   },

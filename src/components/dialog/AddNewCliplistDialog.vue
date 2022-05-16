@@ -120,11 +120,10 @@
         text
         :loading="loading"
         :disabled="form.title === '' || form.title === null"
-        @click="updateClipListData(), dialog = false"
+        @click="updateClipListData()"
       >
       Edit
       </v-btn>
-      {{form}}
     </v-card-actions>
   </v-card>
 </v-dialog>
@@ -212,6 +211,7 @@ export default {
         isPublic : this.form.isPublic,
       }).then(() => {
         this.loading = false;
+        this.dialog = false;
         this.$store.commit('SET_SnackBar',{type:'info', text:`${this.type.data.title}을 수정했습니다.`, value:true});
       })
 

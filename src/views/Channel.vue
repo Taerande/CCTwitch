@@ -76,7 +76,7 @@
             </span>
           </div>
           <div v-else>
-            <v-icon color="blue" small>mdi-circle-off-outline</v-icon>
+            <v-icon color="blue" small>mdi-circle</v-icon>
             <span class="blue--text text-body-2 pa-1">OFF</span>
           </div>
         </div>
@@ -333,7 +333,7 @@ export default {
           headers: this.$store.state.headerConfig,
         })
         .then((res) => {
-            this.userInfo.is_live = res.data.data[0].type
+            this.userInfo.is_live = res.data.data['0'].type
             this.userInfo.viewer_count =
               res.data.data['0'].viewer_count
         })

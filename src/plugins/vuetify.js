@@ -17,6 +17,9 @@ export default new Vuetify({
     },
   },
   breakpoint: {
-    mobileBreakpoint: 480,
+    thresholds:{
+      xs: 450,
+      sm: 600,
+    }
   }
 });

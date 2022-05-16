@@ -6,7 +6,7 @@
     <AddNewCliplistDialog v-if="$store.state.userinfo.userInfo" :type="{type:'add'}"></AddNewCliplistDialog>
   </v-row>
   <v-divider></v-divider>
-  <v-subheader>Created</v-subheader>
+
   <v-row v-if="loading" class="absolute-center">
     <v-progress-circular indeterminate></v-progress-circular>
   </v-row>
@@ -191,10 +191,7 @@ export default {
   mounted() {
   },
   destroyed() {
-    console.log('hi');
-    console.log(this.cliplist);
     if(this.unsubscribe) this.unsubscribe()
-    console.log(this.cliplist);
   },
 };
 </script>

@@ -72,7 +72,7 @@ export default {
           this.btnLoading = false;
           this.dialog = false;
           this.$emit('closeMenu');
-          this.$store.commit('SET_SnackBar', {type:'error', text:`클립 : ${data.target.title}을 삭제하였습니다.`, value:true});
+          this.$store.commit('SET_SnackBar', {type:'error', text:`Clip : ${data.target.title}을 삭제하였습니다.`, value:true});
         }).catch((e) => console.error(e.message));
 
       } else if (type === 'cliplist') {

@@ -4,8 +4,8 @@
   max-width="1280"
   v-model="dialog">
   <template v-slot:activator="{ on }" class="d-flex">
-    <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" max-height="100" class="d-flex" flat>
-      <v-card-title class="justify-center ma-0 pa-0 mx-auto" style="width:3rem;">
+    <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" max-height="100" class="d-flex ma-0 pa-0" flat>
+      <v-card-title class="justify-center ma-0 pa-0 mx-auto" style="width:4rem;">
         <span class="handle" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId"> <v-icon>mdi-drag-horizontal-variant</v-icon></span>
         <span v-else class="text-caption font-weight-bold">{{index+1}}</span>
       </v-card-title>
@@ -22,14 +22,14 @@
           <v-icon size="50" color="white">mdi-play</v-icon>
         </div>
         </v-img>
-        <div class="pl-4 d-flex">
-          <div class="d-flex flex-column">
+        <div class="pl-2 d-flex">
+          <div class="d-flex flex-column" :style="{width:titleWidth}">
             <div class="text-truncate">{{clipData.title}}</div>
-            <div class="d-flex">
+            <div class="d-flex algin-center">
               <span>{{$moment(clipData.created_at).format('l')}}</span>
-              <span class="d-flex px-3 align-center"><v-icon small class="pr-1">mdi-eye</v-icon>{{clipData.view_count}}</span>
+              <span class="d-flex align-center"><v-icon x-small class="pl-1">mdi-eye</v-icon>{{viewerkFormatter(clipData.view_count)}}</span>
             </div>
-            <div class="pa-3 twitch--text">
+            <div class="d-flex twitch--text">
               <router-link class="d-flex" :to="{name: 'Channel', query:{
               id: clipData.broadcaster_id}}">
               <div>{{clipData.broadcaster_name}}</div>
@@ -37,9 +37,10 @@
             </div>
           </div>
         </div>
-        <v-spacer></v-spacer>
-        <clipMenuVue :clip="{clipData:clipData, listData:clipListData}" :listData="listData"></clipMenuVue>
       </v-card-text>
+      <v-card-actions class="ma-0 pa-0">
+        <clipMenuVue :clip="{clipData:clipData, listData:clipListData}" :listData="listData"></clipMenuVue>
+      </v-card-actions>
     </v-card>
   </template>
   <div class="black d-flex justify-end">
@@ -77,6 +78,19 @@ export default {
     }
   },
   methods: {
+     viewerkFormatter(el) {
+      const num = el.toString();
+      if (num > 999999999) {
+        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
+      }
+      if (num > 999999) {
+        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
+      }
+      if (num > 999) {
+        return `${num.slice(0, -3)},${num.slice(-3)}`;
+      }
+      return Math.abs(num);
+    },
     setTimeHMSformat(item){
       const hour = Math.floor(item/3600);
       const min = Math.floor((item%3600)/60);
@@ -125,6 +139,17 @@ export default {
         return '100';
       } else {
         return '100';
+      }
+    },
+    titleWidth(){
+      if(this.$vuetify.breakpoint.xs) {
+        return '11rem';
+      } else if (this.$vuetify.breakpoint.sm) {
+        return '18rem';
+      } else if (this.$vuetify.breakpoint.md) {
+        return '25rem';
+      } else {
+        return ''
       }
     }
   },

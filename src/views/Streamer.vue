@@ -4,16 +4,16 @@
     <span class="text-h3 font-weight-bold">Streamer</span>
   </v-row>
   <v-divider></v-divider>
-  <v-subheader>Like</v-subheader>
-  <v-row v-if="loading.liked" class="d-flex justify-center align-center pa-10">
+  <v-subheader>Book Mark</v-subheader>
+  <v-row v-if="!loading.liked" class="d-flex justify-center align-center pa-3">
     <v-progress-circular indeterminate></v-progress-circular>
   </v-row>
-  <v-row class="d-flex justify-start pb-5" v-if="currlist.length > 0 && !loading.liked">
+  <v-row class="d-flex justify-start pa-3" v-if="likeList.length > 0 && loading.liked">
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
-    v-for="(item, index) in currlist"
+    v-for="item in likeList"
     :key="item.id">
-      <v-card outlined class="rounded-xl" width="400px">
-        <v-card-title>
+      <v-card outlined dark class="rounded-xl" width="280px">
+        <v-card-title class="d-flex align-center justify-space-between pa-2">
           <router-link class="d-flex" :to="{name: 'Channel', query:{
             q: item.login}}">
             <div aria-label="avatar" class="flex-direction: column">
@@ -25,42 +25,29 @@
                 overlap>
                 <v-avatar
                 outline
-                size="40">
+                size="36">
                     <v-img :src="item.thumbnail" alt="profile_img"></v-img>
                 </v-avatar>
               </v-badge>
-              <v-avatar size="40" v-else>
+              <v-avatar size="36" v-else>
                 <v-img :src="item.thumbnail" alt="profile_img"></v-img>
               </v-avatar>
-              <div class="rounded-xl d-flex justify-center" v-if="item.is_live">
-                <v-icon size="13" color="red">mdi-broadcast</v-icon>
-                <span class="red--text text-caption">LIVE</span>
-              </div>
-              <div class="rounded-xl d-flex justify-center" v-else>
-                <v-icon  size="13" color="blue">mdi-broadcast-off</v-icon>
-                <span class="blue--text text-caption">OFF</span>
-              </div>
             </div>
-            <div aria-label="streamer info" class="pl-3" style="max-width:130px">
-              <div class="d-flex text-truncate align-center">
+            <div aria-label="streamer info" class="pl-3" style="max-width:150px">
+              <div class="text-caption text-truncate font-weight-black">
                 {{item.display_name}}
-                <span v-if="item.viewer_count*1 > 0" class=" pl-1 red--text text-caption">{{
-                  viewerkFormatter(item.viewer_count)}}</span>
               </div>
               <div class="text-caption text-truncate">
               Followers: {{kFormatter(item.follower_count)}}
               </div>
             </div>
           </router-link>
-          <v-spacer></v-spacer>
-          <div>
-            <StarBtnDialogVue :liked="{data:item, index:index}"></StarBtnDialogVue>
-          </div>
+            <!-- <StarBtnDialogVue :liked="{data:item, index:index}"></StarBtnDialogVue> -->
         </v-card-title>
       </v-card>
     </v-col>
   </v-row>
-  <v-row v-else-if="currlist.length === 0 && !loading.liked" class="d-flex justify-center pa-10">
+  <v-row v-else-if="likeList.length === 0 && !loading.liked" class="d-flex justify-center pa-3">
     <v-alert type="error">
       <div>
         좋아요를 누른 스트리머가 없습니다.
@@ -69,10 +56,10 @@
   </v-row>
   <v-divider></v-divider>
   <v-subheader>On Live</v-subheader>
-  <v-row v-if="loading.stream" class="d-flex justify-center align-center pa-10">
+  <v-row v-if="loading.stream" class="d-flex justify-center align-center pa-3">
     <v-progress-circular indeterminate></v-progress-circular>
   </v-row>
-  <v-row class="d-flex justify-start pa-10" v-if="streamerList.stream.length > 0 && !loading.stream">
+  <v-row class="d-flex justify-start pa-3" v-if="streamerList.stream.length > 0 && !loading.stream">
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in streamerList.stream"
     :key="item.id">
@@ -113,7 +100,7 @@
       </v-card>
     </v-col>
   </v-row>
-  <v-row v-else-if="streamerList.stream.length === 0 && !loading.stream" class="d-flex justify-center pa-10">
+  <v-row v-else-if="streamerList.stream.length === 0 && !loading.stream" class="d-flex justify-center pa-3">
     <v-alert type="error">
       <div>
         생방송중인 스트리머가 없습니다.
@@ -122,10 +109,10 @@
   </v-row>
   <v-divider></v-divider>
   <v-subheader>All</v-subheader>
-  <v-row v-if="loading.follow" class="d-flex justify-center align-center pa-10">
+  <v-row v-if="loading.follow" class="d-flex justify-center align-center pa-3">
     <v-progress-circular indeterminate></v-progress-circular>
   </v-row>
-  <v-row class="d-flex justify-start pa-10" v-if="streamerList.follow.length > 0 && !loading.follow">
+  <v-row class="d-flex justify-start pa-3" v-if="streamerList.follow.length > 0 && !loading.follow">
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in streamerList.follow"
     :key="item.to_id">
@@ -174,7 +161,7 @@
       </v-hover>
     </v-col>
   </v-row>
-  <v-row v-else-if="streamerList.follow.length === 0 && !loading.follow" class="d-flex justify-center pa-10">
+  <v-row v-else-if="streamerList.follow.length === 0 && !loading.follow" class="d-flex justify-center pa-3">
     <v-alert type="error">
       <div>
         팔로우중인 스트리머가 없습니다.
@@ -190,7 +177,7 @@ import StarBtnDialogVue from '../components/dialog/StarBtnDialog.vue';
 
 export default {
   components: {
-    StarBtnDialogVue,
+    // StarBtnDialogVue,
   },
   data() {
     return {
@@ -206,6 +193,7 @@ export default {
         stream:[],
         liked:[],
       },
+      likeList:[],
       followList:[],
       streamFollowList:[],
       islogin: false,
@@ -374,8 +362,11 @@ export default {
     },
   },
   async mounted() {
-    console.log('hi');
     await this.postProcess();
+    this.likeList = JSON.parse(localStorage.getItem('alllikes'));
+    if(this.likeList.length > 0){
+      this.loading.liked = true;
+    }
   }
 };
 </script>

@@ -34,6 +34,7 @@
         <v-text-field
           v-model="$store.state.searchString"
           outlined
+          :rules="[rule.required]"
           color="twitch"
           @click:append="searchChannel($store.state.searchString)"
           full-width
@@ -44,7 +45,9 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="error" text @click="dialog=false">close</v-btn>
-      <v-btn color="success" @click="searchChannel($store.state.searchString)" text>search</v-btn>
+      <v-btn color="success" @click="searchChannel($store.state.searchString)"
+      :disabled="$store.state.searchString === ''"
+      text>search</v-btn>
     </v-card-actions>
 
   </v-card>
@@ -57,11 +60,15 @@ export default {
   data() {
     return {
       dialog: false,
+      rule:{
+        required: (value) => !!value || 'Required.',
+      }
     };
   },
 
   methods: {
     async searchChannel(el) {
+      if(el === '' || null){ return }
       this.$store.state.searchQuery = el;
       this.$router.push({
         path: '/search',

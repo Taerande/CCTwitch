@@ -48,6 +48,7 @@ export default {
 
  async created() {
     const likesInit = JSON.parse(localStorage.getItem('alllikes'))
+    this.$store.commit('SET_SignInDialog', false);
     // const userInfo = localStorage.getItem('userInfo');
     // if(userInfo){
     //   this.$store.commit('SET_UserInfo',userInfo)
