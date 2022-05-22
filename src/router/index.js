@@ -3,10 +3,21 @@ import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import About from '../views/About.vue';
 import store from '../store';
+
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+
 // import Channel from '../views/Channel.vue';
 // import Search from '../views/Search.vue';
-
 Vue.use(VueRouter);
+firebase.getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+      const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+          unsubscribe();
+          resolve(user);
+      }, reject);
+  })
+};
 
 // route level code-splitting
 // this generates a separate chunk (about.[hash].js) for this route
@@ -16,6 +27,8 @@ const Search = () => import(/* webpackChunkName: "search" */ '@/views/Search.vue
 const Channel = () => import(/* webpackChunkName: "channel" */ '@/views/Channel.vue');
 const User = () => import(/* webpackChunkName: "user" */ '@/views/User.vue');
 const UserInfo = () => import(/* webpackChunkName: "UserInfo" */ '@/components/User/index.vue');
+const Tag = () => import(/* webpackChunkName: "tag" */ '@/views/Tag.vue');
+const tagIndex = () => import(/* webpackChunkName: "UserInfo" */ '@/components/tag/index.vue');
 const Trending = () => import(/* webpackChunkName: "trending" */ '@/views/Trending.vue');
 const Cliplist = () => import(/* webpackChunkName: "cliplist" */ '@/views/Cliplist.vue');
 const cliplistList = () => import(/* webpackChunkName: "cliplistList" */ '@/components/cliplist/cliplistList.vue');
@@ -25,6 +38,7 @@ const streamer = () => import(/* webpackChunkName: "streamer" */ '@/views/Stream
 // const Analysis = () => import(/* webpackChunkName: "Analysis" */ '@/views/Analysis.vue');
 // const Random = () => import(/* webpackChunkName: "Random" */ '@/views/Random.vue');
 const PageNotFound = () => import(/* webpackChunkName: "PageNotFound" */ '@/views/PageNotFound.vue');
+
 
 const routes = [
   {
@@ -75,23 +89,25 @@ const routes = [
         component: cliplistIndex,
       },
     ],
-
+  },
+  {
+    path: '/tag',
+    name: 'Tag',
+    component: Tag,
+    children: [
+      {
+        path: ':id',
+        name: 'tagIndex',
+        component: tagIndex,
+      },
+    ],
   },
   {
     path: '/mycliplist',
     name: 'cliplistList',
     component: cliplistList,
-    beforeEnter: (to, from, next) => {
-      if(!store.state.userinfo.userInfo){
-        router.push({name:'Home'});
-        store.commit('SET_SignInDialog',true)
-        store.commit('SET_SnackBar',{
-          type:'error',
-          text:'로그인이 필요합니다.',
-          value:true,
-        })
-      }
-      next()
+    meta:{
+      requireAuth: true
     }
   },
   {
@@ -129,13 +145,19 @@ const router = new VueRouter({
 // base: process.env.BASE_URL,
 
 
-router.beforeEach((to, from, next) => {
+router.beforeEach( async (to, from, next) => {
   store.commit('INIT_SnackBar')
-  next()
-
-})
-router.afterEach((to, from) => {
-  // store.commit('SET_FirebaseLoad', false)
+  const requireAuth = to.meta.requireAuth;
+  const user = await firebase.getCurrentUser();
+  if(requireAuth && user){
+      next();
+    } else if(requireAuth && !user) {
+      next({name:'Home'});
+      store.commit('SET_SnackBar', {type:'error', text:'로그인이 필요합니다.', value:true})
+      store.commit('SET_SignInDialog', true)
+    } else {
+      next();
+    }
 })
 
 export default router;

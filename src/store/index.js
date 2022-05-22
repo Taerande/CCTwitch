@@ -70,7 +70,7 @@ export default new Vuex.Store({
       state.currentListData = payload;
     },
     SET_FirebaseLoad(state, payload){
-      state.firbaseLoaded = payload
+      state.firebaseLoaded = payload
     },
     INIT_SnackBar(state){
       state.snackbarArr = [];
@@ -82,7 +82,7 @@ export default new Vuex.Store({
       } else {
         state.snackbarArr.push(response);
         setTimeout(() =>{
-          state.snackbarArr.splice(0,1)} , 3000);
+          state.snackbarArr.splice(0,1)} , 5000);
       }
     },
     DELETE_snackBar(state, response){
@@ -141,7 +141,7 @@ export default new Vuex.Store({
     SET_LikedStreamer(state, response) {
       const existinglikes = JSON.parse(localStorage.getItem('alllikes'));
       const input = response;
-      if (existinglikes.length <= 9) {
+      if (existinglikes.length <= 19) {
         localStorage.setItem('liked', JSON.stringify(input));
         // Save allEntries back to local storage
         existinglikes.push(input);
@@ -323,6 +323,12 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    setUserInfo({ commit }, payload){
+      commit('SET_UserInfo', payload)
+    },
+    setFirebaeStatus({ commit }, payload){
+      commit('SET_FirebaseLoad', payload)
+    }
   },
   modules: {
     userinfo: userinfo,

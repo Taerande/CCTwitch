@@ -9,13 +9,12 @@
       :timeout="-1"
       :style="{ 'margin-bottom': `${index * 70 + 70}px` }"
       v-model="item.value"
-      :color="item.type"
     >
       <div class="d-flex justify-space-between align-center">
         <span class="text-truncate">
-          <v-icon v-if="item.type === 'info'">mdi-information-outline</v-icon>
-          <v-icon v-else-if="item.type === 'error'">mdi-alert-outline</v-icon>
-          <v-icon v-else-if="item.type === 'success'">mdi-check-circle-outline</v-icon>
+          <v-icon v-if="item.type === 'info'" :color="item.type">mdi-information-outline</v-icon>
+          <v-icon v-else-if="item.type === 'error'" :color="item.type">mdi-alert-outline</v-icon>
+          <v-icon v-else-if="item.type === 'success'" :color="item.type">mdi-check-circle-outline</v-icon>
           <span class="pl-1 text-truncate">
             {{ item.text }}
           </span>
@@ -37,6 +36,8 @@ export default {
     deleteSnacks(i) {
       this.$store.commit('DELETE_snackBar',i);
     },
+  },
+  mounted() {
   },
 }
 </script>

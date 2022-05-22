@@ -30,7 +30,7 @@
           <div class="d-flex align-center">
             <span class="text-h5">{{ userInfo.data.display_name }}</span>
             <span class="grey--text pl-1"
-              >{{ kFormatter(this.userInfo.follower_count) }}
+              >{{ kFormatter(userInfo.data.follower_count) }}
             </span>
             <v-btn
               v-if="
@@ -104,7 +104,7 @@
                   class="d-flex vid-list-item overflow-x-hidden"
                   cols="12"
                   xl="3"
-                  lg="3"
+                  lg="4"
                   md="4"
                   sm="6"
                   xs="12"
@@ -152,6 +152,7 @@
     ></SortButton>
     <v-row class="d-block" v-if="this.clipSort === 'vids'">
       <v-row
+        :style="{height:`${imgHeight}px`}"
         id="vidCarousel"
         justify="center"
         align="center"
@@ -167,15 +168,14 @@
         <v-divider></v-divider>
       </v-row>
       <v-row  v-for="(item, listIndex) in vidLists" :key="listIndex">
-        <v-row v-if="carsouelId == listIndex">
-          <clips
-            v-if="carsouelId == listIndex"
-            :listData="cliplist"
-            :clips="{
-              data: item.data,
-            }"
-          ></clips>
-        </v-row>
+        <clips
+        style="min-height:500px;"
+          v-if="carsouelId == listIndex"
+          :listData="cliplist"
+          :clips="{
+            data: item.data,
+          }"
+        ></clips>
       </v-row>
     </v-row>
     <v-row
@@ -321,11 +321,11 @@ export default {
           headers: this.$store.state.headerConfig,
         })
         .then((res) => {
-          this.userInfo.follower_count = res.data.total
+          this.userInfo.data.follower_count = res.data.total
         })
     },
     async getStreamData(element){
-      axios
+      await axios
         .get('https://api.twitch.tv/helix/streams', {
           params: {
             user_login: element,
@@ -333,9 +333,30 @@ export default {
           headers: this.$store.state.headerConfig,
         })
         .then((res) => {
-            this.userInfo.is_live = res.data.data['0'].type
+          console.log(res);
+          if(res.data.data.length > 0){
+            this.userInfo.is_live = res.data.data[0].type
             this.userInfo.viewer_count =
-              res.data.data['0'].viewer_count
+              res.data.data[0].viewer_count
+            // this.vidLists.push({
+            //   data:{
+            //     id: res.data.data[0].id,
+            //     user_id: res.data.data[0].user_id,
+            //     user_login: res.data.data[0].user_login,
+            //     user_name: res.data.data[0].user_name,
+            //     title: res.data.data[0].title,
+            //     thumbnail_url: this.setThumbnailSize(res.data.data[0].thumbnail_url),
+            //     view_count: 0,
+            //     duration: '0s',
+            //     url: `https://www.twitch.tv/${element}`,
+            //     created_at: res.data.data[0].started_at,
+            //   }
+            // })
+          } else {
+            this.userInfo.is_live = ''
+            this.userInfo.viewer_count = null
+
+          }
         })
     },
     like(el) {
@@ -356,12 +377,19 @@ export default {
     async process() {
       await this.getUserInfo(this.$route.query)
       await this.getFollower()
-      await this.getStreamData( this.userInfo.data.login)
+      await this.getStreamData(this.userInfo.data.login)
       await this.getVid(this.userInfo.data.id)
       this.dataLoading = true
     }
   },
   computed:{
+     imgHeight(){
+      if(this.$vuetify.breakpoint.mobile){
+        return `${285*9/16+50}`;
+      } else {
+        return `${480*9/16+50}`;
+      }
+    },
     imgWidth(){
       if(this.$vuetify.breakpoint.mobile){
         return '100px';
@@ -374,41 +402,35 @@ export default {
 
   },
   async created() {
-    await this.process();
-    this.$store.commit('SET_DateSort', {
-      text: null,
-      start: null,
-      end: null,
-    })
     let tempuserInfo = this.$store.state.userinfo.userInfo;
     if(!this.$store.state.userinfo.userInfo) {
       await this.$firebase.auth().onAuthStateChanged(async (user) => {
         if(user){
-          tempuserInfo = user;
           this.$store.commit('SET_UserInfo',user);
         }
       })
-      }
-      if(tempuserInfo){
-        this.unsubscribe = await this.$firestore.collection('cliplist').where('authorId','==',tempuserInfo.uid).onSnapshot((sn) => {
-          if(sn.empty){
-            this.cliplist = [];
-            return
+    }
+    if(tempuserInfo){
+      this.unsubscribe = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('authorId','==',tempuserInfo.uid).onSnapshot((sn) => {
+        if(sn.empty){
+          this.cliplist = [];
+          return
+          }
+          this.cliplist = sn.docs.map( v => {
+            const item = v.data()
+            return {
+              id: v.id,
+              title: item.title,
+              description: item.description,
+              createdAt: item.createdAt,
+              color: item.color,
+              clipCount: item.clipCount,
+              clipIds: item.clipIds,
             }
-            this.cliplist = sn.docs.map( v => {
-              const item = v.data()
-              return {
-                id: v.id,
-                title: item.title,
-                description: item.description,
-                createdAt: item.createdAt,
-                color: item.color,
-                clipCount: item.clipCount,
-                clipIds: item.clipIds,
-              }
-            })
           })
-      }
+        })
+    }
+    await this.process();
   },
   destroyed() {
     if(this.unsubscribe) this.unsubscribe()

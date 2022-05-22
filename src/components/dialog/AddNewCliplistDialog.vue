@@ -46,6 +46,7 @@
           hide-sliders
           hide-inputs
           show-swatches
+          width="800"
           :swatches="swatches"
           v-model="form.color"></v-color-picker>
       </div>
@@ -80,26 +81,38 @@
       <v-select
         color="twitch"
         outlined
-        item-color=""
         v-model="form.isPublic"
         :value="form.isPublic ? form.isPublic : 2"
         :items="selectItem"
         label="Public"
       >
-      <template v-slot:selection="{item}">
-      <div class="pa-2">
-        <v-icon class="pr-3" small>{{item.icon}}</v-icon>
-        <span class="text-caption">{{item.name}}</span>
-      </div>
-      </template>
-      <template v-slot:item="{item}">
-      <div class="pa-2">
-        <v-icon class="pr-3" small>{{item.icon}}</v-icon>
-        <span class="text-caption">{{item.name}}</span>
-      </div>
-      </template>
+        <template v-slot:selection="{item}">
+        <div class="pa-2">
+          <v-icon class="pr-3" small>{{item.icon}}</v-icon>
+          <span class="text-caption">{{item.name}}</span>
+        </div>
+        </template>
+        <template v-slot:item="{item}">
+        <div class="pa-2">
+          <v-icon class="pr-3" small>{{item.icon}}</v-icon>
+          <span class="text-caption">{{item.name}}</span>
+        </div>
+        </template>
       </v-select>
-
+      <v-combobox
+      color="twitch"
+      v-model="tags"
+      outlined
+      multiple
+      counter="5"
+      deletable-chips
+      small-chips
+      maxlength="15"
+      label="Tags"
+      placeholder="Tag는 5개까지, 15글자까지 저장 가능합니다."
+      clear-icon="mdi-close-circle"
+      clearable>
+      </v-combobox>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -133,6 +146,10 @@ export default {
   props: ['type'],
   data() {
     return {
+      tags:[],
+      comboboxCounterRule:[
+        v => v.length < 5 || 'Tag는 최대 5개입니다.',
+      ],
       selectItem:[
         {name: '공개', icon:'mdi-earth', value: 2},
         {name: '일부공개', icon:'mdi-eye', value: 1},
@@ -148,6 +165,7 @@ export default {
         createdAt:'',
         authorName:'',
         authorId:'',
+        tags:[],
       },
       titleRules:{
         required: (value) => !!value || 'Required.',
@@ -177,12 +195,20 @@ export default {
        ],
     };
   },
+  watch: {
+    tags (val) {
+      if (val.length > 5) {
+        this.$nextTick(() => this.tags.pop())
+    }
+    },
+  },
   methods: {
     initInput(){
       this.form.description = '';
       this.form.title = '';
       this.form.color = '';
-      this.form.isPublic = false;
+      this.form.isPublic = 2;
+      this.tags = [];
     },
     async saveCliplist(){
       this.loading = true;
@@ -191,6 +217,7 @@ export default {
       this.form.clipCount = 0;
       this.form.thumbnail_url = null;
       this.form.clipIds = [];
+      this.form.tags = this.tags;
       this.form.createdAt = new Date();
       this.form.authorName = this.$store.state.userinfo.userInfo.displayName || '';
       this.form.authorId = this.$store.state.userinfo.userInfo.uid || '';
@@ -209,6 +236,7 @@ export default {
         color : this.form.color,
         description : this.form.description,
         isPublic : this.form.isPublic,
+        tags : this.tags,
       }).then(() => {
         this.loading = false;
         this.dialog = false;
@@ -223,6 +251,7 @@ export default {
         this.form.description = this.type.data.description;
         this.form.color = this.type.data.color;
         this.form.title = this.type.data.title;
+        this.tags = this.type.data.tags;
       }
       this.dialog = false;
     }

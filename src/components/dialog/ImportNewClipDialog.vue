@@ -15,7 +15,7 @@
     </template>
     <v-card :disabled="loading" class="justify-center overflow-auto">
       <v-card-title class="twitch text-h5 font-weight-bold">
-        <div>Twitch 클립 가져오기</div>
+        <div class="white--text">Twitch 클립 가져오기</div>
       </v-card-title>
       <v-card-text class="d-flex justify-center">
           <v-text-field

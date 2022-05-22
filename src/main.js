@@ -13,12 +13,12 @@ Vue.use(Ads.Adsense)
 Vue.use(Ads.InArticleAdsense)
 Vue.use(Ads.InFeedAdsense)
 
-Vue.prototype
 
 Vue.config.productionTip = false;
+
 new Vue({
-  router,
   store,
+  router,
   vuetify,
   render: (h) => h(App),
 }).$mount('#app');

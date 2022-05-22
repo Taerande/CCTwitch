@@ -5,10 +5,10 @@
   </v-row>
   <v-divider></v-divider>
   <v-subheader>Book Mark</v-subheader>
-  <v-row v-if="!loading.liked" class="d-flex justify-center align-center pa-3">
+  <!-- <v-row v-if="!loading.liked" class="d-flex justify-center align-center pa-3">
     <v-progress-circular indeterminate></v-progress-circular>
-  </v-row>
-  <v-row class="d-flex justify-start pa-3" v-if="likeList.length > 0 && loading.liked">
+  </v-row> -->
+  <v-row class="d-flex justify-start pa-3" v-if="likeList.length > 0">
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in likeList"
     :key="item.id">
@@ -47,7 +47,7 @@
       </v-card>
     </v-col>
   </v-row>
-  <v-row v-else-if="likeList.length === 0 && !loading.liked" class="d-flex justify-center pa-3">
+  <v-row v-else-if="likeList.length === 0" class="d-flex justify-center pa-3">
     <v-alert type="error">
       <div>
         좋아요를 누른 스트리머가 없습니다.
@@ -317,8 +317,8 @@ export default {
           ,{
             headers: { 'Content-Type': 'application/json'}
           }).then(async (res) => {
-            await localStorage.setItem('twitchOAuthToken', JSON.stringify(res.data));
-            this.getStreamFollowList(userInfo);
+            localStorage.setItem('twitchOAuthToken', JSON.stringify(res.data));
+            await this.getStreamFollowList(userInfo);
           }).catch(() => {
             // refresh token도 망가졌음, 로그아웃 후 새롭게 로그인 유도
             this.logOut();
@@ -327,27 +327,23 @@ export default {
       },
     async logOut(){
       await this.$firebase.auth().signOut().then(() =>{
-        this.$store.commit('SET_UserInfo', null);
-        localStorage.removeItem('userInfo');
         localStorage.removeItem('twitchOAuthToken');
-        if(this.$route.path !== '/'){
-          this.$router.push({path:'/'})
-        }
+        this.$router.push({path:'/'}).catch(()=>{});
+        this.$store.commit('SET_SnackBar', {type:'error', text:'로그인 정보가 잘못되었습니다. 다시 로그인 해주세요', value:true});
       });
     },
     async postProcess(){
       try{
-        await this.$firebase.auth().onAuthStateChanged((user) => {
-          // const user = this.$store.state.userinfo.userInfo;
-          const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
-          if(user && twitchOAuthToken){
-            this.islogin = true;
-            this.getStreamFollowList(user);
-            this.getFollowList(user);
-          } else {
-            this.$store.commit('SET_SnackBar', {type:'error', text:'로그인 정보가 잘못되었습니다. 다시 로그인 해주세요', value:true});
-          }
-        });
+        const user = this.$store.state.userinfo.userInfo;
+        const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
+        if(user && twitchOAuthToken){
+          this.islogin = true;
+          await this.getStreamFollowList(user);
+          await this.getFollowList(user);
+        } else if(user && twitchOAuthToken === null) {
+          this.logOut();
+          // this.postProcess();
+        }
       } catch {
         (err) => {
           console.log(err.message);
@@ -362,11 +358,8 @@ export default {
     },
   },
   async mounted() {
-    await this.postProcess();
     this.likeList = JSON.parse(localStorage.getItem('alllikes'));
-    if(this.likeList.length > 0){
-      this.loading.liked = true;
-    }
+    await this.postProcess();
   }
 };
 </script>
@@ -393,13 +386,13 @@ export default {
   max-width: 20%;
   flex-basis: 20%;
 }
-.text-stroke {
-  text-shadow:
-  -1px -1px 0 #000,
-  1px -1px 0 #000,
-  -1px 1px 0 #000,
-  1px 1px 0 #000;
-}
+// .text-stroke {
+//   text-shadow:
+//   -1px -1px 0 #000,
+//   1px -1px 0 #000,
+//   -1px 1px 0 #000,
+//   1px 1px 0 #000;
+// }
 .v-card--reveal {
   align-items: center;
   bottom: 0;

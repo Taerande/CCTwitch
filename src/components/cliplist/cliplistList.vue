@@ -6,45 +6,66 @@
     <AddNewCliplistDialog v-if="$store.state.userinfo.userInfo" :type="{type:'add'}"></AddNewCliplistDialog>
   </v-row>
   <v-divider></v-divider>
-
   <v-row v-if="loading" class="absolute-center">
     <v-progress-circular indeterminate></v-progress-circular>
   </v-row>
-  <v-row class="d-flex pt-10" v-else-if="cliplist.length > 0 && !loading">
-    <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-3" v-for="(item,index) in cliplist" :key="item.id+index">
-      <v-card dark :height="imgHeight" class="d-flex flex-row" flat @click="$router.push({path:`cliplist/${item.id}`})" :img="item.thumbnail_url" style="background-size: cover;">
-        <v-card-title class="pa-0 ma-0" style="{opacity: 1, width: 0px;}">
-        </v-card-title>
-        <v-card-text class="d-flex justify-center align-center pa-0" :style="{background:item.color.substr(0,7)+'66', color: 'white'}">
-          <div class="d-flex flex-column align-center">
-            <v-icon color="white">mdi-playlist-play</v-icon>
-            <span class="py-1">{{item.clipCount}}</span>
-            <v-icon>{{publicIcon(item.isPublic)}}</v-icon>
-          </div>
-        </v-card-text>
-      </v-card>
-      <div class="py-1">
-        <span>{{item.title}}</span>
-      </div>
-      <div class="d-flex">
-        <span class="text-subtitle">{{item.display_name}}</span>
-        <v-spacer></v-spacer>
-        <div class="d-flex align-center pr-3">
-          <v-icon class="pr-1" small>mdi-thumb-up-outline</v-icon>
-          <span class="text-subtitle">{{item.likeCount}}</span>
-        </div>
-        <span class="text-subtitle">{{setDate(item.createdAt)}}</span>
-      </div>
-      <v-divider></v-divider>
-    </v-col>
-  </v-row>
-  <v-row v-else-if="cliplist.length === 0 && !loading" class="absolute-center">
-    <v-alert type="error">
-      Data Not Found
-    </v-alert>
-  </v-row>
-  <v-row v-if="lastVisible" class="d-felx justify-center">
-    <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
+  <v-row class="d-flex pt-5" v-else>
+    <v-tabs
+      color="twitch"
+      >
+        <v-tab class="text-capitalize">
+          <span>
+            Created
+          </span>
+        </v-tab>
+        <v-tab class="text-capitalize">
+          <span>Liked</span>
+        </v-tab>
+        <v-tab-item>
+          <v-divider color="twitch"></v-divider>
+          <v-row class="pt-3">
+            <v-spacer></v-spacer>
+            <clipListSortBtnVue :data="cliplist" @sortCliplist="sortCliplist"></clipListSortBtnVue>
+          </v-row>
+          <v-row v-if="cliplist.length >0">
+              <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-3" v-for="(item,index) in cliplist" :key="item.id+index">
+                <CliplistDefaultVue :item="item" :type="'mycliplist'"></CliplistDefaultVue>
+              </v-col>
+          </v-row>
+          <v-row v-else class="d-flex justify-center align-center" style="height:50vh;">
+            <v-alert type="error">
+              <div>
+                No Data
+              </div>
+            </v-alert>
+          </v-row>
+          <v-row v-if="lastVisible" class="d-felx justify-center">
+            <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
+          </v-row>
+        </v-tab-item>
+        <v-tab-item>
+          <v-divider color="twitch"></v-divider>
+            <v-row class="pt-3">
+            <v-spacer></v-spacer>
+            <clipListSortBtnVue :data="likedCliplist" @sortCliplist="sortlLkedCliplist"></clipListSortBtnVue>
+          </v-row>
+          <v-row v-if="likedCliplist.length > 0">
+              <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-3" v-for="(item,index) in likedCliplist" :key="item.id+index">
+                <CliplistDefaultVue :item="item" :type="'mycliplist'"></CliplistDefaultVue>
+              </v-col>
+          </v-row>
+          <v-row v-else class="d-flex justify-center align-center" style="height:50vh;">
+            <v-alert type="error">
+              <div>
+                No Data
+              </div>
+            </v-alert>
+          </v-row>
+          <v-row v-if="likedLastVisible" class="d-felx justify-center">
+            <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
+          </v-row>
+        </v-tab-item>
+    </v-tabs>
   </v-row>
 </v-container>
 </template>
@@ -52,21 +73,43 @@
 <script>
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog';
 import { last } from 'lodash';
+import CliplistDefaultVue from '../CliplistDefault.vue';
+import clipListSortBtnVue from '../clipListSortBtn.vue';
+
 
 export default {
   components: {
     AddNewCliplistDialog,
+    clipListSortBtnVue,
+    CliplistDefaultVue,
   },
   data() {
     return {
+      type:'created',
       lastVisible: null,
+      likedLastVisible: null,
       cliplist: [],
       loading: false,
       unsubscribe: null,
       dataLoading: false,
+      likedCliplist:[],
     };
   },
   methods: {
+    sortCliplist(el){
+      if(el.sort === 'desc'){
+        this.cliplist.sort((a,b) => b[el.data] - a[el.data])
+        } else {
+        this.cliplist.sort((a,b) => a[el.data] - b[el.data])
+      }
+    },
+    sortlLkedCliplist(el){
+      if(el.sort === 'desc'){
+        this.likedCliplist.sort((a,b) => b[el.data] - a[el.data])
+        } else {
+        this.likedCliplist.sort((a,b) => a[el.data] - b[el.data])
+      }
+    },
      async getMoreData(){
       this.dataLoading = true;
       try{
@@ -83,6 +126,7 @@ export default {
               display_name: item.authorName,
               clipIds: item.clipIds,
               color: item.color,
+              tags: item.tags,
               thumbnail_url: item.thumbnail_url,
               clipCount: item.clipCount,
               viewCount: item.viewCount,
@@ -112,7 +156,7 @@ export default {
 
     },
     setDate(el){
-      return this.$moment(el).format('llll');
+      return this.$moment(el).format('l');
     },
     sorting(){
        this.cliplist.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -141,54 +185,57 @@ export default {
       }
     }
   },
-  async created() {
+  async mounted() {
     if(this.unsubscribe) this.unsubscribe()
     this.loading = true;
-    await this.$firebase.auth().onAuthStateChanged( async (user) => {
-      this.$store.commit('SET_UserInfo',user)
-      if(user){
-        this.unsubscribe = await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('authorId','==',this.$store.state.userinfo.userInfo.uid).limit(12).onSnapshot( async (sn) => {
-          this.lastVisible = last(sn.docs);
-          if(sn.empty){
-            this.cliplist = []
-            return
+    const user = this.$store.state.userinfo.userInfo;
+    if(user){
+      this.unsubscribe = await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('authorId','==',this.$store.state.userinfo.userInfo.uid).limit(12).onSnapshot( async (sn) => {
+        this.lastVisible = last(sn.docs);
+        if(sn.empty){
+          this.cliplist = []
+          return
+        }
+        sn.docs.forEach((doc) => {
+          const exists = this.cliplist.some(item => doc.id === item.id)
+          if(!exists){
+            const item = doc.data();
+            item.id= doc.id;
+            item.createdAt= item.createdAt.toDate();
+            this.cliplist.push(item)
           }
-          sn.docs.forEach((doc) => {
-            const exists = this.cliplist.some(item => doc.id === item.id)
-            if(!exists){
-              const item = doc.data();
-              item.id= doc.id;
-              item.createdAt= item.createdAt.toDate();
-              this.cliplist.push(item)
-            }
-          })
-          this.cliplist.sort((b,a) => {
-            return a.createdAt - b.createdAt;
-          })
-          // this.cliplist = await sn.docs.map( v => {
-          //   const item = v.data()
-          //   return {
-          //     id: v.id,
-          //     title: item.title,
-          //     description: item.description,
-          //     createdAt: item.createdAt.toDate(),
-          //     display_name: item.authorName,
-          //     authorId: item.authorId,
-          //     clipIds: item.clipIds,
-          //     isPublic: item.isPublic,
-          //     color: item.color,
-          //     thumbnail_url: item.thumbnail_url,
-          //     clipCount: item.clipCount,
-          //     viewCount: item.viewCount,
-          //     likeCount: item.likeCount,
-          //   }
-          // });
-        });
+        })
+        this.cliplist.sort((b,a) => {
+          return a.createdAt - b.createdAt;
+        })
+      });
+      try{
+        const sn = await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('likeUids','array-contains',this.$store.state.userinfo.userInfo.uid).limit(12).get();
+        this.likedLastVisible = last(sn.docs);
+        if(sn.empty){
+          this.likedCliplist = []
+          return
+        }
+        sn.docs.forEach((doc) => {
+          const exists = this.likedCliplist.some(item => doc.id === item.id)
+          if(!exists){
+            const item = doc.data();
+            item.id= doc.id;
+            item.createdAt= item.createdAt.toDate();
+            this.likedCliplist.push(item)
+          }
+        })
+        this.likedCliplist.sort((b,a) => {
+          return a.createdAt - b.createdAt;
+        })
       }
-    });
+      catch{
+        (err) => {
+          console.log(err);
+        }
+      }
+    }
     this.loading = false;
-  },
-  mounted() {
   },
   destroyed() {
     if(this.unsubscribe) this.unsubscribe()
@@ -217,9 +264,9 @@ export default {
   max-width: 20%;
   flex-basis: 20%;
 }
-.v-card__title{
-  opacity: 1 !important;
-  width: 200% !important;
-}
-
+// .sortBtn{
+//   position:absolute;
+//   right:0;
+//   z-index: 3;
+// }
 </style>

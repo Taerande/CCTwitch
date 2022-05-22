@@ -1,84 +1,88 @@
 <template>
-  <v-carousel
-    height="inherit"
+<v-sheet
+style="width:-webkit-fill-available;">
+  <v-slide-group
     v-model="model"
+    height="inherit"
     :aspect-ratio="16/9"
     hide-delimiters
-    :progress="true"
-    progress-color="twitch"
     v-if="vidlist.length > 0"
   >
-    <v-carousel-item
+    <v-slide-item
       full-width
       v-ripple="false"
       v-for="(item, index) in vidlist"
       :key="index"
-      transition="none"
     >
     <v-sheet
-    :style="{height:`${imgHeight}px`}"
-    class="d-flex justify-center align-center pa-2"
+    class="d-flex justify-center align-center rounded-lg"
     :color="$vuetify.theme.dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'">
-      <v-img
+      <!-- <v-img
       @click.stop.prevent="index===0 ? model = vidlist.length-1 : model = index - 1"
       class="beforeVidImg rounded-lg rounded-r-0 hoverCursor"
       :max-width="imgWidth * 0.9"
-      :src="setThumbnailSize(item.data.thumbnail_url, index- 1) || `${require('@/assets/img/404.jpg')}`"
+      height="80%"
+      :src="setThumbnailSize(item.data.thumbnail_url, index- 1) || '@/assets/img/404.jpg'"
       lazy-src="@/assets/img/404.jpg"
       >
       <div class="white--text pa-2" style="background: rgb(0,0,0,0.3)">
         <div>{{setBAVidList(index - 1).title}}</div>
         <div class="text-caption">{{setDate(setBAVidList(index - 1).created_at)}}</div>
       </div>
-      </v-img>
+      </v-img> -->
+      <!-- @click="openVidsListDialog" -->
       <v-img
+      @click="model"
       class="hoverCursor rounded-lg white--text elevation-12"
       :max-width="imgWidth"
       style="position: relative;"
-      @click="openVidsListDialog"
-      :src="setThumbnailSize(item.data.thumbnail_url, index*1) || `${require('@/assets/img/404.jpg')}`"
+      height="100%"
+      :src="setThumbnailSize(item.data.thumbnail_url, index*1) || '@/assets/img/404.jpg'"
       lazy-src="@/assets/img/404.jpg"
       >
       <div class="vid-info pa-2">
-        <div class="d-flex">
+        <div>
         {{item.data.title}}
-        <v-spacer></v-spacer>
-        <v-btn v-if="item.data.is_live"
-          icon
-          small
-          color="twitch"
-          @click.stop.prevent="pushToTwitchVids(`https://www.twitch.tv/${item.data.user_login}`,item.data.title)"><v-icon>mdi-twitch</v-icon></v-btn>
-          <v-btn v-else
-          small
-          icon
-          color="twitch"
-          @click.stop.prevent="pushToTwitchVids(item.data.url,item.data.title)"><v-icon>mdi-twitch</v-icon></v-btn>
         </div>
         <div class="d-flex align-baseline pt-1 text-caption">
           <span>({{setDate(item.data.created_at)}})  [{{getDurationTime(item.data.duration)}}]</span>
           <span v-if="item.data.is_live" class="pl-1 red--text text-caption"><v-icon  color="error" small class="px-1">mdi-circle</v-icon>{{item.data.viewer_count}}</span>
           <v-spacer></v-spacer>
+          <v-btn v-if="item.data.is_live"
+          small
+          id="urlBtn"
+          class="white--text"
+          color="twitch"
+          @click.stop.prevent="pushToTwitchVids(`https://www.twitch.tv/${item.data.user_login}`,item.data.title)">이동</v-btn>
+          <v-btn v-else
+          small
+          class="white--text"
+          color="twitch"
+          id="urlBtn"
+          @click.stop.prevent="pushToTwitchVids(item.data.url,item.data.title)">이동</v-btn>
         </div>
       </div>
       </v-img>
-      <v-img
+      <!-- <v-img
       @click.stop.prevent="model = index + 1"
       class="afterVidImg rounded-lg rounded-l-0 hoverCursor"
-      :max-width="imgWidth * 0.9  "
-      :src="setThumbnailSize(item.data.thumbnail_url, index + 1) || `${require('@/assets/img/404.jpg')}`"
+      :max-width="imgWidth * 0.9"
+      height="80%"
+      :src="setThumbnailSize(item.data.thumbnail_url, index + 1) || '@/assets/img/404.jpg'"
       lazy-src="@/assets/img/404.jpg"
       >
       <div class="white--text pa-2" style="background: rgb(0,0,0,0.3)">
         <div>{{setBAVidList(index + 1).title}}</div>
         <div class="text-caption">{{setDate(setBAVidList(index + 1).created_at)}}</div>
       </div>
-      </v-img>
+      </v-img> -->
     </v-sheet>
-    </v-carousel-item>
-  </v-carousel>
+    </v-slide-item>
+  </v-slide-group>
   <div v-else class="d-flex align-center text-h4" style="height: 30vh;">
     😅There is no Vids
   </div>
+</v-sheet>
 </template>
 <script>
 import axios from 'axios';
@@ -171,15 +175,8 @@ export default {
       if(this.$vuetify.breakpoint.mobile){
         return '285';
       } else {
-        return '480';
+        return '400';
       }
-    },
-    imgHeight(){
-        if(this.$vuetify.breakpoint.mobile){
-          return `${285*9/16+50}`;
-        } else {
-          return `${480*9/16+50}`;
-        }
     }
   },
   mounted() {

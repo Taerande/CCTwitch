@@ -1,15 +1,14 @@
 <template>
  <v-dialog
+  app
   content-class="clipIframe"
   v-model="dialog"
   height="720"
   max-width="1280">
   <template v-slot:activator="{ on, attrs }">
     <v-img
-    class="mx-auto rounded-lg"
-    height="100%"
-    :max-width="imgWidth"
     :aspect-ratio="16/9"
+    class="rounded-lg"
     id="clip-thumbnail"
     @click="getVidOffset(clipData)"
     v-bind="attrs"
@@ -129,13 +128,6 @@ export default {
       }
   },
   computed:{
-    imgWidth(){
-      if(this.$vuetify.breakpoint.mobile){
-        return '285';
-      } else {
-        return '400'
-      }
-    }
   },
   mounted(){
   }

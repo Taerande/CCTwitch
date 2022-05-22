@@ -33,11 +33,19 @@
     <v-progress-linear value="100"  class="pb-3" :color="cliplist.color"></v-progress-linear>
   </v-row>
   <v-row class="d-block py-2">
+    <div class="d-flex align-center pb-2" v-if="cliplist.tags.length > 0">
+      <v-icon class="pr-2">mdi-label-multiple-outline</v-icon>
+      <v-chip class="d-flex align-center text-caption chipPill mx-1" v-for="(tag, index) in cliplist.tags" :key="index" :to="'/tag/'+tag">
+         {{tag}}
+      </v-chip>
+    </div>
     <div class="d-flex align-center">
-      <v-avatar
-        size="36">
-        <img :src="userInfo.profile_image_url" alt="alt">
-      </v-avatar>
+      <router-link :to="`/user/${userInfo.id}`">
+        <v-avatar
+          size="36">
+          <img :src="userInfo.profile_image_url" alt="alt">
+        </v-avatar>
+      </router-link>
       <div class="pl-1">
         <div>{{userInfo.display_name}}</div>
       </div>
@@ -94,6 +102,7 @@ export default {
         createdAt:'',
         authorId:'',
         authorName:'',
+        tags:[],
       },
       userInfo:'',
       gotDataStatus:false,
@@ -230,15 +239,17 @@ export default {
     },
   },
   async created(){
-    this.$store.commit('SET_CurrentClipList',[]);
-    await this.$firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        this.$store.commit('SET_UserInfo',user);
-      }
-    })
+    window.scroll(0,0);
   },
+  // async beforeMount() {
+  //   this.$store.commit('SET_CurrentClipList',[]);
+  //   await this.$firebase.auth().onAuthStateChanged((user) => {
+  //     if (user) {
+  //       this.$store.commit('SET_UserInfo',user);
+  //     }
+  //   })
+  // },
   async mounted() {
-    console.log(this.$vuetify.breakpoint);
     let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
     this.unsubscribe = await docRef.onSnapshot((doc) => {
       const item = doc.data();
@@ -254,6 +265,7 @@ export default {
             likeUids : item.likeUids,
             isPublic: item.isPublic,
             clipIds : item.clipIds,
+            tags : item.tags,
             createdAt: item.createdAt.toDate(),
             authorId: item.authorId,
             authorName: item.authorName,

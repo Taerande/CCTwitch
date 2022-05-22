@@ -1,6 +1,6 @@
 <template>
 <v-row class="d-flex align-center py-3">
-    <v-btn class="text-caption mr-3" :color="clipSort === 'vids' ? 'success' : ''" @click="changeSortType(), $store.commit('SET_DateSort',{text: null, start: null, end: null})">Sort By Vids</v-btn>
+    <v-btn class="text-caption mr-3" :color="clipSort === 'vids' ? 'success' : ''" @click="changeSortType()">Sort By Vids</v-btn>
     <v-menu
       v-model="menu"
       offset-y>

@@ -81,7 +81,7 @@ export default {
         // await this.$store.commit('DELETE_cliplist', data);
         this.btnLoading = false;
         this.dialog = false;
-        this.$router.push({ path: '/mycliplist' });
+        this.$router.push({ name: 'cliplistList' });
       } else if (type === 'importedClip') {
         this.$emit('delImportedClip', { index: this.delete.data.index, title: this.delete.data.target.title });
       }

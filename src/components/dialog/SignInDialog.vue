@@ -4,10 +4,7 @@
     <v-btn v-if="type.parent == 'pinclip'" icon>
       <v-icon v-on="on" size="20" color="red">mdi-plus-box-multiple</v-icon>
     </v-btn>
-    <v-btn v-on="on" :loading="loginLoading" v-else-if="type.parent == 'quickMenu'" width="100%" dark color="twitch">Login</v-btn>
-    <v-btn v-else v-on="on" class="twitch" :loading="loginLoading">
-      <span>로그인</span>
-    </v-btn>
+    <v-btn v-on="on" :loading="loginLoading" v-else-if="type.parent == 'appBar'" dark color="twitch">로그인</v-btn>
   </template>
   <v-card class="pa-5">
     <v-card-title class="d-flex justify-center">
@@ -34,7 +31,6 @@ export default {
   data() {
     return {
       loginLoading: false,
-      dialog:false,
     }
   },
   methods: {
@@ -50,19 +46,14 @@ export default {
       const code = await this.getCode(codeUri);
       const twitchOAuthToken = JSON.stringify(Buffer.from(code.twitchOAuthToken, 'base64').toString());
 
-      await this.$firebase.auth().setPersistence(this.$firebase.auth.Auth.Persistence.LOCAL).then(() => {
+      await this.$firebase.auth().setPersistence(this.$firebase.auth.Auth.Persistence.LOCAL).then((user) => {
         return this.$firebase.auth().signInWithCustomToken(code.token);
       })
-
       localStorage.setItem('twitchOAuthToken', JSON.parse(twitchOAuthToken));
-      if(this.type.parent === 'quickMenu'){
-        this.$store.commit('SET_Drawer', false);
-      }
       this.loginLoading = false;
       this.$store.commit('SET_SignInDialog', false);
-      if(this.$route.path !== '/'){
-        this.$router.push({path:'/'}).catch(()=>{});
-      }
+      this.$store.commit('SET_Drawer', false);
+      this.$router.push({name:'Home'}).catch(()=>{});
       this.$store.commit('SET_SnackBar',{type: 'info', text:'로그인 성공', value:true})
 
     },
@@ -86,10 +77,17 @@ export default {
       );
       let url = '';
 
+      setTimeout(() => {
+        authWindow.close();
+        clearInterval(tracking);
+        this.closeDialog()
+        this.$store.commit('SET_Drawer', false);
+        this.$store.commit('SET_SnackBar',{type: 'error', text:'대기시간을 초과했습니다.', value:true})
+      }, 60000);
       let tracking = setInterval(async () => {
         try {
           url = authWindow && authWindow.location && authWindow.location.search
-        } catch (e) {}
+        } catch (e) { clearInterval()}
         if (url) {
           const parsedCode = {
             'token' : url.split('?token=')[1].split('&twitchOAuthToken=')[0],
@@ -99,7 +97,7 @@ export default {
           clearInterval(tracking);
           resolve(parsedCode);
         }
-      }, 100);
+      }, 10);
     });
     },
   },

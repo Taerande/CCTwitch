@@ -7,13 +7,9 @@
       <div class="d-flex align-baseline">
       <h1>Clips</h1>
       </div>
-      <div>
-        <v-icon @click="refresh">mdi-refresh</v-icon>
-        <v-icon @click="shuffle">mdi-shuffle</v-icon>
-      </div>
     </v-row>
     <v-divider></v-divider>
-  <v-row class="d-flex">
+  <v-row class="d-flex col-12">
     <v-col
       v-for="(item, index) in this.cliplist"
       :key="index"
@@ -21,11 +17,11 @@
       class="pa-3 clip-item"
       :class="item.broadcaster_id"
       >
-      <v-lazy
-        v-model="item.id"
-        :options="{ threshold: 0.5}">
+       <v-card class="ma-0 pa-0">
+        <v-card-text class="d-flex justify-center pa-0 ma-0">
           <clipIframeDialog :clipData="item" :listData="listData"></clipIframeDialog>
-      </v-lazy>
+        </v-card-text>
+      </v-card>
       <div class="d-flex justify-center">{{item.title}}</div>
     </v-col>
   </v-row>

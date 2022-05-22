@@ -31,7 +31,6 @@
                     <v-text-field
                       v-model="$store.state.searchString"
                       @click:prepend="searchChannel($store.state.searchString)"
-                      @keydown.enter="$store.commit('SET_SnackBar',{type:'info', text:'Success', value:true})"
                       color="twitch"
                       outlined
                       flat
@@ -80,7 +79,7 @@
                   </v-card>
                   <v-card flat v-else>
                     <div class="d-flex justify-center px-10 pt-5">
-                     <SignInDialog :type="{parent:'quickMenu'}"></SignInDialog>
+                      <v-btn color="twitch" dark width="100%" @click="$store.commit('SET_SignInDialog', true)">로그인</v-btn>
                     </div>
                   </v-card>
                   <div class="text-caption pl-5 pt-8">Option</div>
@@ -135,12 +134,12 @@
             </div>
           </router-link>
         </div>
-        <v-spacer></v-spacer>
-        <div class="px-3">
-          <SearchBar></SearchBar>
-        </div>
       </v-row>
     </v-container>
+    <v-spacer></v-spacer>
+    <div class="px-3">
+      <SearchBar></SearchBar>
+    </div>
     <v-avatar
       v-if="$store.state.userinfo.userInfo"
       size="36"
@@ -148,9 +147,7 @@
       <img
       :src="$store.state.userinfo.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
     </v-avatar>
-    <v-btn v-else dark @click="$store.commit('SET_SignInDialog', true)" class="twitch">
-        <span>로그인</span>
-      </v-btn>
+    <SignInDialog v-else :type="{parent:'appBar'}"></SignInDialog>
   </v-app-bar>
 </template>
 <script>
@@ -182,15 +179,11 @@ export default {
     async logOut(){
       this.logoutLoading = true;
       await this.$firebase.auth().signOut().then(() =>{
-        this.$store.commit('SET_UserInfo', null);
-      localStorage.removeItem('userInfo');
-      if(this.$route.path !== '/'){
-        this.$router.push({path:'/'}).catch(()=>{});
-      }
       this.logoutLoading = false;
-      this.$store.commit('SET_Drawer', false);
+      this.changeDrawer(false);
+      this.$router.push({name:'Home'}).catch(()=>{});
       this.$store.commit('SET_SnackBar',{type: 'error', text:'로그아웃', value:true})
-      }, 500);
+      });
     },
     searchChannel(el) {
       if(el === '' || null){ return }
@@ -223,9 +216,9 @@ export default {
 .v-toolbar__extension{
   padding-top: 0px !important;
 }
-.v-text-field__details{
-  display: none;
-}
+// .v-text-field__details{
+//   display: none;
+// }
 #app-bar{
   position: absolute;
   top: 0;

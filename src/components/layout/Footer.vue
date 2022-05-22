@@ -1,5 +1,6 @@
 <template>
  <v-footer
+  class="mt-16"
     padless>
     <v-card
       class="py-2 app-container"

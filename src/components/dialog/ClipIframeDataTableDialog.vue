@@ -4,31 +4,36 @@
   max-width="1280"
   v-model="dialog">
   <template v-slot:activator="{ on }" class="d-flex">
-    <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" max-height="100" class="d-flex ma-0 pa-0" flat>
-      <v-card-title class="justify-center ma-0 pa-0 mx-auto" style="width:4rem;">
+    <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" :max-height="imgHeight" class="d-flex ma-0 pa-0" flat>
+      <v-card-title class="justify-center ma-0 pa-0" style="width:3rem;">
         <span class="handle" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId"> <v-icon>mdi-drag-horizontal-variant</v-icon></span>
         <span v-else class="text-caption font-weight-bold">{{index+1}}</span>
       </v-card-title>
       <v-card-text class="d-flex align-center ma-0 pa-0">
+        <!-- :max-height="imgHeight" -->
         <v-img
+        :max-width="imgWidth"
+        :aspect-ratio="16/9"
         v-on="on"
         class="pa-0 thumbnailImg ma-0 rounded-lg"
         @click="getVidOffset(clipData)"
-        height="100%"
-        :max-width="imgWidth"
         lazy-src="@/assets/img/404.jpg"
         :src="clipData.thumbnail_url">
-        <div v-if="hovering" class="d-flex justify-center hoveringImg" style="height:100%;">
-          <v-icon size="50" color="white">mdi-play</v-icon>
-        </div>
+          <v-container fluid fill-height class="d-flex align-content-space-between flex-wrap">
+            <v-row class="d-flex justify-start pa-1">
+              <span class="rounded-md text-caption white--text mx-1 px-1 rounded-lg" style="background-color: rgba( 0, 0, 0, 0.5 )">{{$moment(clipData.created_at).fromNow()}}</span>
+            </v-row>
+            <v-row class="d-flex justify-end pa-1">
+              <span class="text-caption white--text px-1 mx-1 rounded-lg" style="background-color: rgba( 0, 0, 0, 0.5 )"><v-icon class="white--text pr-1" x-small>mdi-eye</v-icon>{{viewerkFormatter(clipData.view_count)}}</span>
+            </v-row>
+          </v-container>
+          <div v-if="hovering" class="d-flex justify-center hoveringImg">
+            <v-icon size="60" color="white">mdi-play</v-icon>
+          </div>
         </v-img>
         <div class="pl-2 d-flex">
           <div class="d-flex flex-column" :style="{width:titleWidth}">
             <div class="text-truncate">{{clipData.title}}</div>
-            <div class="d-flex algin-center">
-              <span>{{$moment(clipData.created_at).format('l')}}</span>
-              <span class="d-flex align-center"><v-icon x-small class="pl-1">mdi-eye</v-icon>{{viewerkFormatter(clipData.view_count)}}</span>
-            </div>
             <div class="d-flex twitch--text">
               <router-link class="d-flex" :to="{name: 'Channel', query:{
               id: clipData.broadcaster_id}}">
@@ -141,6 +146,19 @@ export default {
         return '100';
       }
     },
+    imgHeight(){
+      if(this.$vuetify.breakpoint.lgAndUp){
+        return '112.5';
+      } else if(this.$vuetify.breakpoint.md) {
+        return '98.5';
+      } else if(this.$vuetify.breakpoint.sm) {
+        return '84';
+      } else if (this.$vuetify.breakpoint.xs) {
+        return '56';
+      } else {
+        return '56';
+      }
+    },
     titleWidth(){
       if(this.$vuetify.breakpoint.xs) {
         return '11rem';
@@ -163,6 +181,11 @@ export default {
   cursor: pointer;
 }
 .hoveringImg{
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0,0,0,0.2);
 }
 .handle{

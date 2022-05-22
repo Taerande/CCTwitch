@@ -2,22 +2,22 @@
   <v-app>
     <AppBar app></AppBar>
     <!-- <bookmark app></bookmark> -->
-    <v-main class="app-container" app>
-      <v-progress-circular v-if="this.$store.state.firebaseLoaded" class="absolute-center" color="twitch" size="60" width="6" indeterminate></v-progress-circular>
-      <v-container class="absolute-center" v-else-if="!initData">
+    <v-main class="app-container" app  v-if="$store.state.firebaseLoaded && initData">
+      <v-container class="absolute-center" v-if="!initData">
         <v-row>
-          <v-progress-circular class="mx-auto" indeterminate color="twitch" width="8" size="60"></v-progress-circular>
-        </v-row>
-        <v-row class="d-flex justify-center pa-10">
-          <div class="text-h5">Welcome to CCTwitch</div>
+          <v-progress-circular class="mx-auto" indeterminate color="twitch"></v-progress-circular>
         </v-row>
       </v-container>
       <router-view v-else class="mx-auto" :key="$route.fullPath" />
     </v-main>
+    <v-main v-else  class="app-container" app>
+      <v-container>
+        <v-progress-circular class="absolute-center" color="twitch" size="60" width="6" indeterminate></v-progress-circular>
+      </v-container>
+    </v-main>
     <SnackBar app></SnackBar>
     <Footer app></Footer>
   </v-app>
-
 </template>
 
 <script>
@@ -230,5 +230,23 @@ html.overflow-y-hidden{
 }
 .hoverCursor{
   cursor: pointer;
+}
+.text-stroke {
+  text-shadow:
+  -0.5px -0.5px 0 rgb(0,0,0,0.5),
+  0.5px -0.5px 0 rgb(0,0,0,0.5),
+  -0.5px 0.5px 0 rgb(0,0,0,0.5),
+  0.5px 0.5px 0 rgb(0,0,0,0.5);
+}
+.theme--dark.v-tabs > .v-tabs-bar{
+  background: none !important;
+}
+.theme--dark.v-tabs-items{
+  background: none !important;
+}
+.chipPill{
+  height: fit-content !important;
+  padding-bottom: 2px !important;
+  padding-top: 2px !important;
 }
 </style>
