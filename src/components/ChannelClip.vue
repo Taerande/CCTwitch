@@ -49,71 +49,21 @@ export default {
       currentId: '',
       dialog: false,
       paginationCursor: '',
-      infiniteData: {},
+      infiniteData: {
+        data:{},
+      },
       userInfo: '',
     };
   },
   methods: {
-    viewerkFormatter(el) {
-      const num = el.toString();
-      if (num > 999999999) {
-        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999999) {
-        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999) {
-        return `${num.slice(0, -3)},${num.slice(-3)}`;
-      }
-      return Math.abs(num);
-    },
-    // shuffle() {
-    //   const playlist = [...this.cliplist];
-    //   let listLength = playlist.length;
-    //   let t;
-    //   let i;
-    //   while (listLength) {
-    //     i = Math.floor(Math.random() * listLength);
-    //     listLength -= 1;
-    //     t = playlist[listLength];
-    //     playlist[listLength] = playlist[i];
-    //     playlist[i] = t;
-    //     this.cliplist = playlist;
-    //   }
-    //   this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 랜덤으로 정렬합니다.', value: true });
-    // },
-    // refresh() {
-    //   this.cliplist.sort((a, b) => b.view_count - a.view_count);
-    //   this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 조회수순으로 정렬합니다.', value: true });
-    // },
-    changeId(el) {
-      this.currentId = el;
-    },
-    getStartDate(el) {
-      const endedAt = new Date(el).getTime();
-      const startedAt = new Date(endedAt - 7 * 24 * 60 * 60 * 1000);
-      return startedAt.toISOString();
-    },
-    getEndDate(el) {
-      const startedAt = new Date(el).getTime();
-      const endedAt = new Date(startedAt + 7 * 24 * 60 * 60 * 1000);
-      return endedAt.toISOString();
-    },
-    setDate(el) {
-      const time = new Date(el).getTime();
-      const krTime = time + 9 * 60 * 60 * 1000;
-      const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
-      return dateFormatted;
-    },
-
     async channelInfiniteHandler($state) {
       await axios.get('https://api.twitch.tv/helix/clips', {
         headers: this.$store.state.headerConfig,
         params: {
-          broadcaster_id: this.infiniteData.data.broadcaster_id,
-          started_at: this.infiniteData.data.started_at,
-          ended_at: this.getEndDate(this.infiniteData.data.started_at),
-          first: this.infiniteData.data.first,
+          broadcaster_id: this.infiniteData.broadcaster_id,
+          started_at: this.infiniteData.started_at,
+          ended_at: this.infiniteData.ended_at,
+          first: this.infiniteData.first,
           after: this.paginationCursor,
         },
       }).then((res) => {
@@ -122,14 +72,18 @@ export default {
           $state.complete();
         } else if (res.data.pagination.cursor === undefined && res.data.data.length > 0) {
           res.data.data.map((el) => {
-            if (el.video_id === this.infiniteData.data.video_id) {
+            if (el.video_id === this.infiniteData.video_id) {
+              this.cliplist.push(el);
+            } else if( this.$moment(el.created_at).isBefore(this.infiniteData.broadcast_end) && el.video_id === ''){
               this.cliplist.push(el);
             }
           });
           $state.complete();
         } else {
           res.data.data.map((el) => {
-            if (el.video_id === this.infiniteData.data.video_id) {
+            if (el.video_id === this.infiniteData.video_id) {
+              this.cliplist.push(el);
+            } else if( this.$moment(el.created_at).isBefore(this.infiniteData.broadcast_end) && el.video_id === ''){
               this.cliplist.push(el);
             }
           });
@@ -137,22 +91,32 @@ export default {
         }
       });
     },
-
+     hmsToSec(el){
+       if(el.includes('h')){
+         const hour = el.split('h')[0];
+         const min = el.split('h')[1].split('m')[0];
+         const sec = el.split('s')[1];
+         return hour*3600 + min*60 + sec;
+       } else if(el.includes('m')){
+         const min = el.split('m')[0];
+         const sec = el.split('s')[1];
+         return min*60 + sec;
+       } else {
+         const sec = el.split('s')[0];
+         return sec;
+       }
+    }
   },
   mounted() {
-    this.infiniteData.data = {
+    this.infiniteData = {
+      broadcast_end: this.$moment(this.clips.data.created_at).add(this.hmsToSec(this.clips.data.duration),'seconds').toISOString(),
       broadcaster_id: this.clips.data.user_id,
       started_at: this.clips.data.created_at,
-      ended_at: new Date().toISOString(),
+      ended_at: this.$moment(this.clips.data.created_at).add(7,'days').toISOString(),
       first: 20,
       video_id: this.clips.data.id,
       viewalbe: this.clips.data.viewalbe,
     };
-  },
-computed: {
-    getTodayDate() {
-      return new Date().toISOString();
-    },
   },
 };
 </script>

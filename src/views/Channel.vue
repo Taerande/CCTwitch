@@ -124,7 +124,7 @@
                     <div class="text-truncate">{{ item.data.title }}</div>
                     <div class="text-caption d-flex align-center">
                       <v-icon class="pr-1" x-small>mdi-eye</v-icon>
-                      {{ viewerkFormatter(item.data.view_count) }}
+                      {{ item.data.view_count === -1 ? 'No Archive' : viewerkFormatter(item.data.view_count) }}
                     </div>
                     <div class="text-caption">
                       {{ getDurationTime(item.data.duration) }}
@@ -210,6 +210,7 @@ export default {
       dataLoading: false,
       cliplist:[],
       vidLists: [],
+      streamData:{},
       carsouelId: 0,
       userInfo: {
         data: '',
@@ -274,6 +275,13 @@ export default {
 
       return '1분 미만'
     },
+    setTimeHMSformat(item){
+      const hour = Math.floor(item/3600);
+      const min = Math.floor((item%3600)/60);
+      const sec = Math.floor((item%60));
+
+      return hour+'h'+min+'m'+sec+'s';
+    },
     async getVid(userId) {
       await axios
         .get('https://api.twitch.tv/helix/videos', {
@@ -285,11 +293,44 @@ export default {
           },
         })
         .then((res) => {
+          console.log({
+                id: new Date().getTime(),
+                is_live: 'live',
+                viewer_count: this.streamData.viewer_count,
+                user_login: this.streamData.user_login,
+                created_at: this.streamData.started_at,
+                thumbnail_url: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.streamData.user_login}-480x272.jpg`,
+                title: this.streamData.title,
+                duration: this.setTimeHMSformat(this.$moment().diff(this.streamData.started_at,'seconds')),
+              });
           res.data.data.forEach((el) => {
+            const width = /%{width}/;
+            const height = /%{height}/;
+            el.thumbnail_url = el.thumbnail_url.replace(width, '480').replace(height, '272');
             this.vidLists.push({
               data: el,
             })
           })
+          if(this.userInfo.is_live && this.vidLists[0].data.thumbnail_url === ''){
+            this.vidLists[0].data.thumbnail_url = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.userInfo.data.login}-480x272.jpg`;
+            this.vidLists[0].data.is_live = this.userInfo.is_live;
+            this.vidLists[0].data.viewer_count = this.userInfo.viewer_count;
+          } else if(this.userInfo.is_live && this.vidLists[0].data.thumbnail_url !== ''){
+            this.vidLists.unshift({
+              data:{
+                id: new Date().getTime(),
+                is_live: 'live',
+                viewer_count: this.streamData.viewer_count,
+                user_login: this.streamData.user_login,
+                user_id: this.streamData.user_id,
+                created_at: this.streamData.started_at,
+                view_count: -1,
+                thumbnail_url: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.streamData.user_login}-480x272.jpg`,
+                title: this.streamData.title,
+                duration: this.setTimeHMSformat(this.$moment().diff(this.streamData.started_at,'seconds')),
+              }
+            })
+          }
         })
         .catch((error) => console.log(error))
     },
@@ -333,29 +374,14 @@ export default {
           headers: this.$store.state.headerConfig,
         })
         .then((res) => {
-          console.log(res);
+          this.streamData = res.data.data[0]
           if(res.data.data.length > 0){
             this.userInfo.is_live = res.data.data[0].type
             this.userInfo.viewer_count =
               res.data.data[0].viewer_count
-            // this.vidLists.push({
-            //   data:{
-            //     id: res.data.data[0].id,
-            //     user_id: res.data.data[0].user_id,
-            //     user_login: res.data.data[0].user_login,
-            //     user_name: res.data.data[0].user_name,
-            //     title: res.data.data[0].title,
-            //     thumbnail_url: this.setThumbnailSize(res.data.data[0].thumbnail_url),
-            //     view_count: 0,
-            //     duration: '0s',
-            //     url: `https://www.twitch.tv/${element}`,
-            //     created_at: res.data.data[0].started_at,
-            //   }
-            // })
           } else {
             this.userInfo.is_live = ''
             this.userInfo.viewer_count = null
-
           }
         })
     },

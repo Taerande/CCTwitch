@@ -85,6 +85,7 @@ export default {
         this.$store.commit('SET_SnackBar',{type: 'error', text:'대기시간을 초과했습니다.', value:true})
       }, 60000);
       let tracking = setInterval(async () => {
+        console.log('track');
         try {
           url = authWindow && authWindow.location && authWindow.location.search
         } catch (e) { clearInterval()}
@@ -97,7 +98,7 @@ export default {
           clearInterval(tracking);
           resolve(parsedCode);
         }
-      }, 10);
+      }, 500);
     });
     },
   },

@@ -23,7 +23,7 @@
       @click.stop.prevent="index===0 ? model = vidlist.length-1 : model = index - 1"
       class="beforeVidImg rounded-lg rounded-r-0 hoverCursor"
       :max-width="imgWidth * 0.9"
-      :src="setThumbnailSize(item.data.thumbnail_url, index- 1) || `${require('@/assets/img/404.jpg')}`"
+      :src="setBAVidList(index - 1).thumbnail_url || `${require('@/assets/img/404.jpg')}`"
       lazy-src="@/assets/img/404.jpg"
       >
       <div class="white--text pa-2" style="background: rgb(0,0,0,0.3)">
@@ -36,7 +36,7 @@
       :max-width="imgWidth"
       style="position: relative;"
       @click="openVidsListDialog"
-      :src="setThumbnailSize(item.data.thumbnail_url, index*1) || `${require('@/assets/img/404.jpg')}`"
+      :src="item.data.thumbnail_url || `${require('@/assets/img/404.jpg')}`"
       lazy-src="@/assets/img/404.jpg"
       >
       <div class="vid-info pa-2">
@@ -65,7 +65,7 @@
       @click.stop.prevent="model = index + 1"
       class="afterVidImg rounded-lg rounded-l-0 hoverCursor"
       :max-width="imgWidth * 0.9  "
-      :src="setThumbnailSize(item.data.thumbnail_url, index + 1) || `${require('@/assets/img/404.jpg')}`"
+      :src="setBAVidList(index + 1).thumbnail_url || `${require('@/assets/img/404.jpg')}`"
       lazy-src="@/assets/img/404.jpg"
       >
       <div class="white--text pa-2" style="background: rgb(0,0,0,0.3)">
@@ -81,8 +81,6 @@
   </div>
 </template>
 <script>
-import axios from 'axios';
-
 export default {
   props: ['vids','carsouelId'],
   data() {
@@ -99,49 +97,43 @@ export default {
       return this.$moment(el).format('ll');
     },
     setBAVidList(index){
-      if( index === 0 || index === this.vidlist.length)
-      {return this.vidlist[0].data;}
-      else if (index === -1){
+      if( index === 0 || index === this.vidlist.length){
+        return this.vidlist[0].data;
+      } else if (index === -1){
         return this.vidlist[this.vidlist.length - 1].data;
       } else {
         return this.vidlist[index].data;
       }
     },
-    setThumbnailSize(el, index) {
-      const width = /%{width}/;
-      const height = /%{height}/;
-      if(el === '') {
-        this.getLiveThumbnail(this.vidlist[0], 0);
-        return this.vidlist[0].data.thumbnail_url;
-      }
-      else if (index === 0 || index === this.vidlist.length) {
-        return this.vidlist[0].data.thumbnail_url.replace(width, '480').replace(height, '272');
-      } else if (index === -1 ) {
-        return this.vidlist[this.vidlist.length - 1].data.thumbnail_url.replace(width, '480').replace(height, '272');
-      } else {
-        return this.vidlist[index].data.thumbnail_url.replace(width, '480').replace(height, '272');
-      }
-    },
+    // setThumbnailSize(el, index) {
+    //   if (index === 0 || index === this.vidlist.length) {
+    //     return this.vidlist[0].data.thumbnail_url;
+    //   } else if (index === -1 ) {
+    //     return this.vidlist[this.vidlist.length - 1].data.thumbnail_url;
+    //   } else {
+    //     return this.vidlist[index].data.thumbnail_url;
+    //   }
+    // },
     pushToTwitchVids(url, title) {
       if (window.confirm(`${title} 영상으로 이동하시겠습니까?`)) {
         window.open(url);
       }
     },
-    async getLiveThumbnail(el, index) {
-      await axios.get('https://api.twitch.tv/helix/streams', {
-        params: {
-          user_login: el.data.user_login,
-        },
-        headers: this.$store.state.headerConfig,
-      }).then((res) => {
-        const width2 = /{width}/;
-        const height2 = /{height}/;
-        const convert = res.data.data[0].thumbnail_url.replace(width2, '480').replace(height2, '272');
-        this.vidlist[index].data.thumbnail_url = convert;
-        this.vidlist[index].data.is_live = res.data.data[0].type;
-        this.vidlist[index].data.viewer_count = res.data.data[0].viewer_count;
-      });
-    },
+    // async getLiveThumbnail(el, index) {
+    //   await axios.get('https://api.twitch.tv/helix/streams', {
+    //     params: {
+    //       user_login: el.data.user_login,
+    //     },
+    //     headers: this.$store.state.headerConfig,
+    //   }).then((res) => {
+    //     const width2 = /{width}/;
+    //     const height2 = /{height}/;
+    //     const convert = res.data.data[0].thumbnail_url.replace(width2, '480').replace(height2, '272');
+    //     this.vidlist[index].data.thumbnail_url = convert;
+    //     this.vidlist[index].data.is_live = res.data.data[0].type;
+    //     this.vidlist[index].data.viewer_count = res.data.data[0].viewer_count;
+    //   });
+    // },
     getDurationTime(el) {
       const regex = /h|m|s/;
       const duration = el.split(regex);

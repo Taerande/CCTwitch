@@ -338,8 +338,8 @@ export default {
         const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
         if(user && twitchOAuthToken){
           this.islogin = true;
-          await this.getStreamFollowList(user);
-          await this.getFollowList(user);
+          this.getStreamFollowList(user);
+          this.getFollowList(user);
         } else if(user && twitchOAuthToken === null) {
           this.logOut();
           // this.postProcess();
