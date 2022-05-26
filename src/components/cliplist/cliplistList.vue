@@ -22,7 +22,6 @@
           <span>Liked</span>
         </v-tab>
         <v-tab-item>
-          <v-divider color="twitch"></v-divider>
           <v-row class="pt-3">
             <v-spacer></v-spacer>
             <clipListSortBtnVue :data="cliplist" @sortCliplist="sortCliplist"></clipListSortBtnVue>
@@ -34,9 +33,7 @@
           </v-row>
           <v-row v-else class="d-flex justify-center align-center" style="height:50vh;">
             <v-alert type="error">
-              <div>
-                No Data
-              </div>
+              😨 생성된 클립모음이 없습니다.
             </v-alert>
           </v-row>
           <v-row v-if="lastVisible" class="d-felx justify-center">
@@ -44,7 +41,6 @@
           </v-row>
         </v-tab-item>
         <v-tab-item>
-          <v-divider color="twitch"></v-divider>
             <v-row class="pt-3">
             <v-spacer></v-spacer>
             <clipListSortBtnVue :data="likedCliplist" @sortCliplist="sortlLkedCliplist"></clipListSortBtnVue>
@@ -56,9 +52,7 @@
           </v-row>
           <v-row v-else class="d-flex justify-center align-center" style="height:50vh;">
             <v-alert type="error">
-              <div>
-                No Data
-              </div>
+              😨 좋아요를 누른 클립모음이 없습니다.
             </v-alert>
           </v-row>
           <v-row v-if="likedLastVisible" class="d-felx justify-center">
@@ -85,11 +79,10 @@ export default {
   },
   data() {
     return {
-      type:'created',
       lastVisible: null,
       likedLastVisible: null,
       cliplist: [],
-      loading: false,
+      loading: true,
       unsubscribe: null,
       dataLoading: false,
       likedCliplist:[],
@@ -142,52 +135,15 @@ export default {
         this.$store.commit('SET_SnackBar',{type:'error', text:`No More Data`, value:true});
         this.dataLoading = false;
       }
-
     },
-    publicIcon(el){
-      if(el === 0){
-        return 'mdi-eye-off'
-      } else if(el === 1){
-        return 'mdi-eye'
-      } else {
-        return 'mdi-earth'
-      }
-
-
-    },
-    setDate(el){
-      return this.$moment(el).format('l');
-    },
-    sorting(){
-       this.cliplist.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-    },
-    setData(el) {
-      // await this.$store.commit('SET_currCliplist', {data:el});
-      this.$router.push({ path: `cliplist/${el.id}`});
-      // if (this.$store.state.currentCliplist.id === el.id) {
-      //   await this.$store.commit('INIT_currCliplist');
-      // } else {
-      //   await this.$store.commit('SET_currCliplist', { data: el, type: 'info', text: `Cliplist : ${el.title}를 표시합니다.` });
-      // }
-    },
-
   },
   computed:{
-    imgHeight(){
-      if(this.$vuetify.breakpoint.mobile){
-        return '200';
-      } else if(this.$vuetify.breakpoint.smAndDown){
-        return '225'
-      } else if (this.$vuetify.breakpoint.md){
-        return '175'
-      } else {
-        return '200'
-      }
-    }
+  },
+  created(){
+    document.title = 'My Cliplists - CCTWITCH';
   },
   async mounted() {
     if(this.unsubscribe) this.unsubscribe()
-    this.loading = true;
     const user = this.$store.state.userinfo.userInfo;
     if(user){
       this.unsubscribe = await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('authorId','==',this.$store.state.userinfo.userInfo.uid).limit(12).onSnapshot( async (sn) => {
@@ -214,6 +170,7 @@ export default {
         this.likedLastVisible = last(sn.docs);
         if(sn.empty){
           this.likedCliplist = []
+          this.loading = false;
           return
         }
         sn.docs.forEach((doc) => {
@@ -234,8 +191,9 @@ export default {
           console.log(err);
         }
       }
+      this.loading = false;
     }
-    this.loading = false;
+
   },
   destroyed() {
     if(this.unsubscribe) this.unsubscribe()
@@ -244,29 +202,4 @@ export default {
 </script>
 <style lang="scss" scoped>
 
-// .cliplist-canvas{
-//   cursor: pointer;
-//   border-radius: 3%;
-//   box-sizing: border-box;
-//   margin: 0;
-//   padding: 0;
-//   opacity: 0.5 !important;
-//   border: 1px ;
-// }
-// .cliplist-canvas:hover{
-//   transform: scale(1.05) !important;
-//   opacity: 1 !important;
-//   transition: all 0.1s;
-//   transition-timing-function: ease;
-// }
-.custom5cols {
-  // width: 20%;
-  max-width: 20%;
-  flex-basis: 20%;
-}
-// .sortBtn{
-//   position:absolute;
-//   right:0;
-//   z-index: 3;
-// }
 </style>

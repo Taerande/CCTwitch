@@ -8,7 +8,7 @@
   </template>
   <v-list class="text-caption">
     <v-list-item-group v-model="model" color="twitch">
-      <v-list-item v-for="(item ,index) in sortType" :key="index">
+      <v-list-item v-for="(item ,index) in sortType" :key="index" :disabled="model === index">
         <v-list-item-content @click="sortEmit(item.actions)">
           <span>
             <v-icon class="pa-0 ma-0" style="width:1rem;" small color="twitch">{{index !== model ? '' : 'mdi-check'}}</v-icon>
@@ -27,13 +27,11 @@ export default {
     return {
       model:0,
       sortType:[
-        {text:'날짜 가까운 순', actions:{data:'createdAt', sort:'desc'}},
-        {text:'날짜 먼 순', actions:{data:'createdAt', sort:'asc'}},
-        {text:'좋아요 많은 순', actions:{data:'likeCount', sort:'desc'}},
-        {text:'좋아요 적은 순', actions:{data:'likeCount', sort:'asc'}},
-        {text:'클립 많은 순', actions:{data:'clipCount', sort:'desc'}},
-        {text:'클립 적은 순', actions:{data:'clipCount', sort:'asc'}},
-        {text:'공개 상태', actions:{data:'isPublic', sort:'asc'}},
+        {text:'최신 순', actions:{data:'createdAt', sort:'desc'}},
+        {text:'오래된 순', actions:{data:'createdAt', sort:'asc'}},
+        {text:'인기 순', actions:{data:'likeCount', sort:'desc'}},
+        {text:'클립수 순', actions:{data:'clipCount', sort:'desc'}},
+        {text:'공개 상태', actions:{data:'isPublic', sort:'desc'}},
       ]
 
     }
@@ -50,5 +48,4 @@ export default {
 }
 </script>
 <style>
-
 </style>

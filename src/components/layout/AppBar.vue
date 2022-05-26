@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar class="white--text" height="90" app flat absolute dark>
+  <v-app-bar class="white--text blue" height="60" app flat absolute>
     <v-container
     class="align-center justify-center">
       <v-row class="d-flex align-center">
@@ -15,17 +15,16 @@
             transition="dialog-bottom-transition"
           >
             <v-card>
-              <v-card-title class="twitch">
+              <v-card-title class="blue">
                 <div class="white--text">Quick Menu</div>
                 <v-spacer></v-spacer>
                 <v-btn color="white" @click="changeDrawer(false)" icon>
                   <v-icon>mdi-chevron-double-down</v-icon>
                 </v-btn>
               </v-card-title>
-              <v-card-text class="pt-16">
+              <v-card-text class="pt-3">
                 <v-list>
                   <div class="text-caption pl-5">Search</div>
-                  <v-divider class="my-3"></v-divider>
                   <v-form
                   @submit.prevent="searchChannel($store.state.searchString)">
                     <v-text-field
@@ -58,10 +57,6 @@
                     <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
                   </v-list-item>
-                  <v-list-item to="/streamer" @click="changeDrawer(false)">
-                    <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-help</v-icon>
-                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Random</span>
-                  </v-list-item>
                   <div class="text-caption pl-5 pt-8">User</div>
                   <v-divider class="my-3"></v-divider>
                   <v-card flat v-if="$store.state.userinfo.userInfo">
@@ -82,20 +77,20 @@
                       <v-btn color="twitch" dark width="100%" @click="$store.commit('SET_SignInDialog', true)">로그인</v-btn>
                     </div>
                   </v-card>
-                  <div class="text-caption pl-5 pt-8">Option</div>
+                  <div class="text-caption pl-5 pt-3">Option</div>
                   <v-divider class="my-3"></v-divider>
                   <div>
                     <v-btn
                     depressed
                     v-if="!$vuetify.theme.dark"
-                    class="text-capitalize text-caption"
+                    class="text-capitalize text-caption pa-0 ma-0 px-1"
                     @click="toggleDarkTheme()">
                       <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
                       <span>Dark Mode</span>
                     </v-btn>
                     <v-btn v-else
                     depressed
-                    class="text-capitalize text-caption"
+                    class="text-capitalize text-caption pa-0 ma-0 px-1"
                     @click="toggleDarkTheme()">
                       <v-icon color="red">mdi-weather-sunny</v-icon>
                       <span>Dark Theme</span>
@@ -114,22 +109,22 @@
               width="30"
             />
           <div
-            class="text-lg-h4 text-h5 font-weight-bold d-flex align-center pl-3">CCTwitch</div>
+            class="text-lg-h4 text-h5 font-weight-bold d-flex align-center pl-3 appbar-text">CCTwitch</div>
           </router-link>
         </div>
-        <div v-if="$vuetify.breakpoint.mdAndUp" class="d-flex">
+        <div v-if="$vuetify.breakpoint.mdAndUp" class="d-flex pl-3">
           <router-link to="/trending">
-            <div class="px-2 rounded-pill">
+            <div class="px-2 appbar-text">
               <span class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
             </div>
           </router-link>
           <router-link to="/mycliplist">
-            <div class="px-2 rounded-pill">
+            <div class="px-2 appbar-text">
               <span class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
             </div>
           </router-link>
           <router-link class="ma-0 pa-0" to="/streamer">
-            <div class="px-2 rounded-pill">
+            <div class="px-2 appbar-text">
               <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
             </div>
           </router-link>
@@ -256,5 +251,8 @@ export default {
   left: 0;
   width: 100%;
 }
+}
+.appbar-text:hover{
+  color: var(--twitch-color);
 }
 </style>

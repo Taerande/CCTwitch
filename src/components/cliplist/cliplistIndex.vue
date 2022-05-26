@@ -2,14 +2,17 @@
 <v-container fluid>
   <v-row class="d-block">
     <div class="d-flex pt-10 align-baseline">
-      <span class="text-h4 font-weight-bold pr-3">{{cliplist.title}}</span>
-      <v-icon>{{likeIcon(cliplist.isPublic)}}</v-icon>
+      <span class="text-h4 font-weight-bold pr-3">Cliplist | {{cliplist.title}}</span>
     </div>
-    <div class="d-flex align-center pb-1">
+    <div class="d-flex align-center py-1">
+        <span class="text-title-1 pr-3">
+          <v-icon>{{likeIcon(cliplist.isPublic)}}</v-icon>
+          공개
+        </span>
         <span class="text-title-1 pr-3">
         <v-icon >mdi-playlist-play</v-icon>{{ cliplist.clipCount }}</span>
         <span class="text-title-1">
-        <v-icon class="pb-1" @click="likeCliplist()">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon><span class="pl-1">{{cliplist.likeCount}}</span></span>
+        <v-icon :color="liked ? 'twitch' : ''" class="pb-1" @click="likeCliplist()">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon><span class="pl-1">{{cliplist.likeCount}}</span></span>
       <v-spacer></v-spacer>
       <div class="d-flex" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === cliplist.authorId">
         <ImportNewClipDialogVue :parent="cliplist"></ImportNewClipDialogVue>
@@ -56,12 +59,13 @@
       {{cliplist.description}}
     </div>
   </v-row>
+  <v-divider class="my-2"></v-divider>
   <expandTableVue
     v-if="$store.state.currentCliplist.length > 0"
     :clipListData="cliplist">
   </expandTableVue>
   <v-row v-else style="height:60vh;" class="d-flex justify-center align-center">
-    <v-alert rounded="pill" class="d-inline-block" type="error">🤐 저장 혹은 공유된 클립 모음이 없습니다.</v-alert>
+    <v-alert class="d-inline-block" type="error">🤐 저장된 클립이 없습니다.</v-alert>
   </v-row>
   <v-row class="d-flex justify-center" v-if="cliplist.clipCount > $store.state.currentCliplist.length && loading">
     <v-icon large>mdi-dots-horizontal</v-icon>
@@ -106,20 +110,7 @@ export default {
       },
       userInfo:'',
       gotDataStatus:false,
-      currentTooltipId: '',
       loading: false,
-      dialogId: '',
-      nameSort: '',
-      viewSort: '',
-      createdSort: '',
-      currList: {
-        id: '',
-        title: '',
-        description: '',
-        color: '',
-        pinnedClips: [],
-      },
-      pinnedClipslist:[],
     };
   },
   methods: {
@@ -184,24 +175,6 @@ export default {
       this.$router.push({path:'/mycliplist'});
       this.$store.commit('SET_SnackBar',{type:'error', text:`Cliplist : ${this.cliplist.title}클립 모음집이 삭제되었습니다.`, value:true});
     },
-    async getClip(id, description) {
-      await axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          id: id,
-        },
-      }).then((res) => {
-        if (res.data.data.length > 1) {
-          this.pinnedClipslist = res.data.data;
-          for(let j=0; j < description.length; j++){
-            this.pinnedClipslist[j].description = description[j];
-          }
-        } else {
-          this.$store.commit('SET_SnackBar', { type: 'error', text: 'Import : 클립을 가져올 수 없습니다.', value: true });
-          this.importLoading = false;
-        }
-      });
-    },
     async getTwitchClipData(el){
       return await axios.get('https://api.twitch.tv/helix/clips', {
         headers: this.$store.state.headerConfig,
@@ -229,9 +202,6 @@ export default {
     }
   },
   computed: {
-    theme() {
-      return this.$vuetify.theme.dark ? 'dark-table' : 'light-table';
-    },
     liked(){
       if(!this.$store.state.userinfo.userInfo) return false;
       if(this.cliplist.likeUids === undefined) return false;
@@ -241,18 +211,11 @@ export default {
   async created(){
     window.scroll(0,0);
   },
-  // async beforeMount() {
-  //   this.$store.commit('SET_CurrentClipList',[]);
-  //   await this.$firebase.auth().onAuthStateChanged((user) => {
-  //     if (user) {
-  //       this.$store.commit('SET_UserInfo',user);
-  //     }
-  //   })
-  // },
   async mounted() {
     let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
     this.unsubscribe = await docRef.onSnapshot((doc) => {
       const item = doc.data();
+      document.title = `${item.title} | Cliplist - CCTWITCH`;
       this.getUserInfo(item.authorId)
         if(doc.exists){
           this.cliplist = {
@@ -298,35 +261,4 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-tr{
-  height: 56px;
-}
-th{
-  height: 56px;
-}
-table{
-  width: -webkit-fill-available;
-}
-tbody tr:nth-child(2n) {
-  background-color: rgb(0,0,0,0.05);
-}
-tbody tr:nth-child(2n+1) {
-  background-color: rgb(255,255,255,0.05)
-}
-.dark-table tr:hover{
-  background-color: rgb(255,255,255,0.2)
-}
-.light-table tr:hover{
-  background-color: rgb(0,0,0,0.2)
-}
-td{
-  text-align: center;
-  text-justify: center;
-}
-.canSort{
-  cursor: pointer;
-}
-.expand-enter-active {
-  transition: all 2s ease;
-}
 </style>

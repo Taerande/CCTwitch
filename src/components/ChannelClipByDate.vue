@@ -8,7 +8,6 @@
       <h1>Clips</h1>
       </div>
     </v-row>
-    <v-divider></v-divider>
   <v-row class="d-flex col-12">
     <v-col
       v-for="(item, index) in this.cliplist"

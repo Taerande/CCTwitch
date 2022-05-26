@@ -22,6 +22,7 @@
             v-model="clipUrl"
             :loading="importLoading"
             outlined
+            color="twitch"
             width="500"
             @click:append="getClip(clipUrl)"
             class="pt-5"
@@ -48,11 +49,7 @@
       >
         <v-card>
           <v-card-title primary-title>
-            <div>
-              {{clipResult.title}}
-            </div>
-            <v-spacer></v-spacer>
-            <div>{{setDate(clipResult.created_at)}}</div>
+            <div>{{$moment(clipResult.created_at).format('ll')}}</div>
           </v-card-title>
           <v-card-text class="d-flex justify-center align-center">
             <iframe v-if="clipDialog" class="black" :src="`${clipResult.embed_url}&parent=localhost&autoplay=false&muted=false&preload=auto`" width="200%"
@@ -67,15 +64,10 @@
       </v-dialog>
       <v-card-text>
         <v-list>
-          <v-list-item class="mx-3 py-1" v-for="(item,index) in pinnedClipslist" :key="index">
+          <v-list-item class="px-2 py-1" v-for="(item,index) in pinnedClipslist" :key="index">
             <v-list-item-content class="pa-0 ma-0">
-              <ImportedClipIframeDialog :clipData="item"></ImportedClipIframeDialog>
+              <ImportedClipIframeDialog :clipData="item" @deleteClip="deleteClip(item,index)"></ImportedClipIframeDialog>
             </v-list-item-content>
-            <v-list-item-action>
-              <v-btn icon>
-                <v-icon color="error" @click="deleteClip(item, index)">mdi-close</v-icon>
-              </v-btn>
-            </v-list-item-action>
           </v-list-item>
         </v-list>
       </v-card-text>
@@ -103,7 +95,6 @@
 </template>
 <script>
 import axios from 'axios';
-import clipdb from '@/assets/clipdata.json'
 import ImportedClipIframeDialog from '@/components/dialog/importedClipIframeDialog';
 export default {
   components: {
@@ -112,14 +103,10 @@ export default {
   props: ['type','parent'],
   data() {
     return {
-      clipdb: clipdb,
       clipDialog: false,
-      currentId: '',
       dialog: false,
-      color: '',
       loading:false,
       clipUrl: '',
-      result:'',
       clipResult:[],
       pinnedClipslist:[],
       importLoading: false,
@@ -127,32 +114,9 @@ export default {
     };
   },
   methods: {
-     viewerkFormatter(el) {
-      const num = el.toString()
-      if (num > 999999999) {
-        return `${num.slice(0, -9)},${num.slice(
-          num.length - 9,
-          -6,
-        )},${num.slice(num.length - 6, -3)},${num.slice(-3)}`
-      }
-      if (num > 999999) {
-        return `${num.slice(0, -6)},${num.slice(
-          num.length - 6,
-          -3,
-        )},${num.slice(-3)}`
-      }
-      if (num > 999) {
-        return `${num.slice(0, -3)},${num.slice(-3)}`
-      }
-      return Math.abs(num)
-    },
-    initailize(){
-      this.dialog = false;
-      this.pinnedClipslist = [];
-    },
     deleteClip(item, index){
       this.pinnedClipslist.splice(index, 1);
-       this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : ${item.title}을 목록에서 삭제합니다.`, value: true });
+      this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : ${item.title}을 목록에서 삭제합니다.`, value: true });
     },
     addToCliplist(el){
       if(this.pinnedClipslist.length + this.parent.clipCount > 100){
@@ -246,15 +210,6 @@ export default {
         });
       }
 
-    },
-    setDate(el) {
-      return this.$moment(el).format('ll');
-    },
-    dataType(el) {
-      if (el) {
-        return 'URL & String';
-      }
-      return 'Data File';
     },
   },
   created() {

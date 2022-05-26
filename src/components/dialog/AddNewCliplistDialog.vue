@@ -4,15 +4,15 @@
   max-width="800">
   <template v-slot:activator="{ on, attrs }">
     <v-btn
-      text
-      outlined
+      depressed
       v-if="type.type === 'add'"
       class="text-caption"
       color="success"
       v-bind="attrs"
       v-on="on"
     >
-    새 플레이 리스트 만들기
+    <v-icon class="pr-1">mdi-plus</v-icon>
+    리스트 만들기
     </v-btn>
     <v-list-item class="align-center pa-1 py-2"
     v-else-if="type.type === 'pin'"
@@ -274,14 +274,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.cliplist-canvas{
-  border-radius: 5%;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  width: 50px;
-  height: 50px;
-}
 .v-list-item__content{
   padding-left: 10px !important;
 }

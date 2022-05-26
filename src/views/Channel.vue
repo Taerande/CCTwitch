@@ -1,7 +1,7 @@
 <template>
   <v-container v-if="userInfo">
     <v-row class="py-5">
-      <span class="text-h3 font-weight-bold pr-3">Channel : {{userInfo.data.display_name}}</span>
+      <span class="text-h3 font-weight-bold pr-3">Channel | {{userInfo.data.display_name}}</span>
     </v-row>
     <v-divider></v-divider>
     <v-row class="pt-5 align-center">
@@ -60,8 +60,6 @@
                   display_name: userInfo.data.display_name,
                   thumbnail: userInfo.data.profile_image_url,
                   broadcaster_type: userInfo.data.broadcaster_type,
-                  follower_count: userInfo.data.follower_count,
-                  is_checked: false,
                 })
               "
             >
@@ -97,11 +95,11 @@
                 {{setDate(vidLists[0].data.created_at)}}
               </span>
             </div>
-            <v-container class="pa-3 mx-auto">
-              <v-row class="d-flex align-center">
+            <v-container class="pa-2 mx-auto">
+              <v-row class="align-center">
                 <v-col
                   @click="changeCarsouelId(index)"
-                  class="d-flex vid-list-item overflow-x-hidden"
+                  class="d-flex vid-list-item text-truncate"
                   cols="12"
                   xl="3"
                   lg="4"
@@ -120,7 +118,7 @@
                     lazy-src="@/assets/img/404.jpg"
                   >
                   </v-img>
-                  <div class="pl-2">
+                  <div class="pl-2 text-truncate" style="width:inherit">
                     <div class="text-truncate">{{ item.data.title }}</div>
                     <div class="text-caption d-flex align-center">
                       <v-icon class="pr-1" x-small>mdi-eye</v-icon>
@@ -158,14 +156,18 @@
         align="center"
       >
         <vids
+        v-if="vidLists.length > 0 && dataLoading"
           @openVidsListDialog="openVidsListDialog"
           :vids="vidLists"
           :carsouelId="carsouelId"
           @emitVidId="changeCarsouelId"
         ></vids>
-      </v-row>
-      <v-row class="pt-10">
-        <v-divider></v-divider>
+        <div v-else-if="dataLoading && vidLists.length === 0" class="d-flex align-center" style="height: 30vh;">
+          <v-alert v-if="vidLists.length === 0" type="error">
+            😟다시보기가 없고 생방송중이 아닙니다.
+          </v-alert>
+        </div>
+        <v-progress-circular v-else indeterminate color="twitch"></v-progress-circular>
       </v-row>
       <v-row  v-for="(item, listIndex) in vidLists" :key="listIndex">
         <clips
@@ -248,7 +250,7 @@ export default {
     setThumbnailSize(el) {
       const width = /%{width}/
       const height = /%{height}/
-      return el.replace(width, '1280').replace(height, '720')
+      return el.replace(width, '480').replace(height, '272')
     },
     openVidsListDialog() {
       this.dialog = true
@@ -293,43 +295,52 @@ export default {
           },
         })
         .then((res) => {
-          console.log({
-                id: new Date().getTime(),
-                is_live: 'live',
-                viewer_count: this.streamData.viewer_count,
-                user_login: this.streamData.user_login,
-                created_at: this.streamData.started_at,
-                thumbnail_url: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.streamData.user_login}-480x272.jpg`,
-                title: this.streamData.title,
-                duration: this.setTimeHMSformat(this.$moment().diff(this.streamData.started_at,'seconds')),
-              });
-          res.data.data.forEach((el) => {
-            const width = /%{width}/;
-            const height = /%{height}/;
-            el.thumbnail_url = el.thumbnail_url.replace(width, '480').replace(height, '272');
-            this.vidLists.push({
-              data: el,
+          if(res.data.data.length > 0){
+            res.data.data.forEach((el) => {
+              const width = /%{width}/;
+              const height = /%{height}/;
+              el.thumbnail_url = el.thumbnail_url.replace(width, '480').replace(height, '272');
+              this.vidLists.push({
+                data: el,
+              })
             })
-          })
-          if(this.userInfo.is_live && this.vidLists[0].data.thumbnail_url === ''){
-            this.vidLists[0].data.thumbnail_url = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.userInfo.data.login}-480x272.jpg`;
-            this.vidLists[0].data.is_live = this.userInfo.is_live;
-            this.vidLists[0].data.viewer_count = this.userInfo.viewer_count;
-          } else if(this.userInfo.is_live && this.vidLists[0].data.thumbnail_url !== ''){
-            this.vidLists.unshift({
-              data:{
-                id: new Date().getTime(),
-                is_live: 'live',
-                viewer_count: this.streamData.viewer_count,
-                user_login: this.streamData.user_login,
-                user_id: this.streamData.user_id,
-                created_at: this.streamData.started_at,
-                view_count: -1,
-                thumbnail_url: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.streamData.user_login}-480x272.jpg`,
-                title: this.streamData.title,
-                duration: this.setTimeHMSformat(this.$moment().diff(this.streamData.started_at,'seconds')),
-              }
-            })
+            if(this.userInfo.is_live && this.vidLists[0].data.thumbnail_url === ''){
+              this.vidLists[0].data.thumbnail_url = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.userInfo.data.login}-480x272.jpg`;
+              this.vidLists[0].data.is_live = this.userInfo.is_live;
+              this.vidLists[0].data.viewer_count = this.userInfo.viewer_count;
+            } else if(this.userInfo.is_live && this.vidLists[0].data.thumbnail_url !== ''){
+              this.vidLists.unshift({
+                data:{
+                  id: new Date().getTime(),
+                  is_live: 'live',
+                  viewer_count: this.streamData.viewer_count,
+                  user_login: this.streamData.user_login,
+                  user_id: this.streamData.user_id,
+                  created_at: this.streamData.started_at,
+                  view_count: -1,
+                  thumbnail_url: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.streamData.user_login}-480x272.jpg`,
+                  title: this.streamData.title,
+                  duration: this.setTimeHMSformat(this.$moment().diff(this.streamData.started_at,'seconds')),
+                }
+              })
+            }
+          } else {
+            if(this.streamData){
+              this.vidLists.push({
+                data:{
+                  id: new Date().getTime(),
+                  is_live: 'live',
+                  viewer_count: this.streamData.viewer_count,
+                  user_login: this.streamData.user_login,
+                  user_id: this.streamData.user_id,
+                  created_at: this.streamData.started_at,
+                  view_count: -1,
+                  thumbnail_url: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.streamData.user_login}-480x272.jpg`,
+                  title: this.streamData.title,
+                  duration: this.setTimeHMSformat(this.$moment().diff(this.streamData.started_at,'seconds')),
+                }
+              })
+            }
           }
         })
         .catch((error) => console.log(error))
@@ -346,6 +357,7 @@ export default {
           })
           .then((res) => {
             this.userInfo.data = res.data.data['0']
+            document.title = `${res.data.data['0'].display_name} | Channel - CCTWIICH`
           })
       }
       catch{(err) => {
@@ -423,9 +435,6 @@ export default {
         return '150px';
       }
     }
-  },
-  created() {
-
   },
   async created() {
     let tempuserInfo = this.$store.state.userinfo.userInfo;

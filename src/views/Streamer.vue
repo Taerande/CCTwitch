@@ -8,18 +8,16 @@
   <!-- <v-row v-if="!loading.liked" class="d-flex justify-center align-center pa-3">
     <v-progress-circular indeterminate></v-progress-circular>
   </v-row> -->
-  <v-row class="d-flex justify-start pa-3" v-if="likeList.length > 0">
-    <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
-    v-for="item in likeList"
+  <v-row class="d-flex justify-start pa-3" v-if="streamerList.liked.length > 0">
+    <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex flex-column  align-center"
+    v-for="item in streamerList.liked"
     :key="item.id">
-      <v-card outlined dark class="rounded-xl" width="280px">
-        <v-card-title class="d-flex align-center justify-space-between pa-2">
-          <router-link class="d-flex" :to="{name: 'Channel', query:{
+      <v-card outlined dark class="rounded-lg py-1" width="320px" :to="{name: 'Channel', query:{
             q: item.login}}">
+        <v-card-text class="d-flex align-center pa-2">
             <div aria-label="avatar" class="flex-direction: column">
               <v-badge
                 v-if="item.broadcaster_type == 'partner'"
-                bordered
                 color="rgb(119,44,232)"
                 icon="mdi-check"
                 overlap>
@@ -33,21 +31,16 @@
                 <v-img :src="item.thumbnail" alt="profile_img"></v-img>
               </v-avatar>
             </div>
-            <div aria-label="streamer info" class="pl-3" style="max-width:150px">
-              <div class="text-caption text-truncate font-weight-black">
+            <div aria-label="streamer info" class="d-flex align-center pl-3" style="max-width:150px">
+              <div class="text-caption text-truncate font-weight-black white--text">
                 {{item.display_name}}
               </div>
-              <div class="text-caption text-truncate">
-              Followers: {{kFormatter(item.follower_count)}}
-              </div>
             </div>
-          </router-link>
-            <!-- <StarBtnDialogVue :liked="{data:item, index:index}"></StarBtnDialogVue> -->
-        </v-card-title>
+        </v-card-text>
       </v-card>
     </v-col>
   </v-row>
-  <v-row v-else-if="likeList.length === 0" class="d-flex justify-center pa-3">
+  <v-row v-else-if="streamerList.liked.length === 0" class="d-flex justify-center pa-3">
     <v-alert type="error">
       <div>
         좋아요를 누른 스트리머가 없습니다.
@@ -63,8 +56,9 @@
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in streamerList.stream"
     :key="item.id">
-      <v-card dark outlined class="rounded-xl pa-0" width="280px">
-        <v-card-text class="d-flex align-center justify-space-between pa-2">
+      <v-card outlined dark class="py-1 rounded-lg" width="320px"  :to="{name: 'Channel', query:{
+            q: item.user_login}}">
+        <v-card-text class="d-flex align-center pa-2">
           <div>
             <v-badge
             v-if="item.userInfo.broadcaster_type === 'partner'"
@@ -73,6 +67,7 @@
             overlap
             >
               <v-avatar
+                outline
                 size="36"
               >
                 <img :src="item.userInfo.profile_image_url" alt="alt">
@@ -85,23 +80,30 @@
               <img :src="item.userInfo.profile_image_url" alt="alt">
             </v-avatar>
           </div>
-          <div class="text-truncate pl-2" style="width:150px;">
-            <div class="text-truncate" style="width:150px;">{{item.userInfo.display_name}}
-              <span class="text-caption">
-                {{item.title}}
-              </span>
+          <div class="text-truncate pl-4">
+            <div class="white--text">
+                {{item.user_name}}
             </div>
-            <div class="text-truncate text-caption" style="width:150px;">{{item.game_name}}</div>
+            <div class="text-caption text-truncate">
+              {{item.title}}
+            </div>
+            <div class="text-caption">{{item.game_name}}</div>
           </div>
-          <div>
-            <div class="error--text text-caption"><v-icon color="error" x-small class="pr-1">mdi-circle</v-icon>{{viewerkFormatter(item.viewer_count)}}</div>
+          <v-spacer></v-spacer>
+          <div class="d-flex justify-end">
+            <div class="d-flex error--text text-caption"><v-icon color="error" x-small class="pr-1">mdi-circle</v-icon>{{viewerkFormatter(item.viewer_count)}}</div>
           </div>
         </v-card-text>
       </v-card>
     </v-col>
   </v-row>
   <v-row v-else-if="streamerList.stream.length === 0 && !loading.stream" class="d-flex justify-center pa-3">
-    <v-alert type="error">
+    <v-alert type="error" v-if="!$store.state.userinfo.userInfo">
+      <div>
+        로그인이 필요한 기능입니다.
+      </div>
+    </v-alert>
+    <v-alert type="error" v-else>
       <div>
         생방송중인 스트리머가 없습니다.
       </div>
@@ -116,53 +118,42 @@
     <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in streamerList.follow"
     :key="item.to_id">
-      <v-hover v-slot="{ hover }">
-        <v-card dark class="rounded-xl pa-0" outlined width="280px"
-        :style="{'filter': hover ? 'grayscale(10%)' : 'none', 'opacity': hover ? '0.8' : '1'}"
-        :img="item.offline_image_url">
-          <v-card-text class="d-flex align-center justify-space-between pa-2">
-            <v-expand-x-transition>
-              <div
-                v-if="hover"
-                class="d-flex pa-0 ma-0 transition-slow-in-fast-out v-card--reveal white--text"
-                style="height: 100%; filter:none;"
-              >
-              <v-icon color="twitch" @click="pushToTwitchVids(`https://www.twitch.tv/${item.login}`,item.display_name)">mdi-twitch</v-icon>
-              <router-link :to="`/channel?q=${item.login}`">
-                <v-icon>mdi-magnify</v-icon>
-              </router-link>
-              </div>
-            </v-expand-x-transition>
-            <div>
-              <v-badge
-                x-small
-                v-if="item.broadcaster_type === 'partner'"
-                color="twitch"
-                icon="mdi-check"
-                overlap
+     <v-card outlined dark class="d-flex  py-1 align-center rounded-lg" width="320px" :img="reduceOfflineImgSize(item.offline_image_url)" :to="{name: 'Channel', query:{
+            q: item.login}}">
+        <v-card-title class="d-flex align-center justify-space-between pa-2">
+          <div aria-label="avatar" class="flex-direction: column">
+            <v-badge
+              v-if="item.broadcaster_type == 'partner'"
+              small
+              color="rgb(119,44,232)"
+              icon="mdi-check"
+              overlap>
+                <v-avatar
                 outline
-                >
-                  <v-avatar
-                    size="36"
-                  >
-                    <img :src="item.profile_image_url" alt="alt">
-                  </v-avatar>
-              </v-badge>
-              <v-avatar
-                v-else
-                size="36"
-              >
-                <img :src="item.profile_image_url" alt="alt">
-              </v-avatar>
+                size="36">
+                  <v-img :src="item.profile_image_url" alt="profile_img"></v-img>
+                </v-avatar>
+            </v-badge>
+            <v-avatar size="36" v-else>
+              <v-img :src="item.profile_image_url" alt="profile_img"></v-img>
+            </v-avatar>
+          </div>
+          <div aria-label="streamer info" class="d-flex align-center pl-3" style="max-width:150px">
+            <div class="text-caption text-truncate font-weight-black text-stroke-2 white--text">
+              {{item.display_name}}
             </div>
-            <span class="text-weight-bold white--text text-stroke">{{item.display_name}}</span>
-          </v-card-text>
-        </v-card>
-      </v-hover>
+          </div>
+        </v-card-title>
+      </v-card>
     </v-col>
   </v-row>
   <v-row v-else-if="streamerList.follow.length === 0 && !loading.follow" class="d-flex justify-center pa-3">
-    <v-alert type="error">
+    <v-alert type="error" v-if="!$store.state.userinfo.userInfo">
+      <div>
+        로그인이 필요한 기능입니다.
+      </div>
+    </v-alert>
+    <v-alert type="error" v-else>
       <div>
         팔로우중인 스트리머가 없습니다.
       </div>
@@ -173,11 +164,9 @@
 
 <script>
 import axios from 'axios';
-import StarBtnDialogVue from '../components/dialog/StarBtnDialog.vue';
 
 export default {
   components: {
-    // StarBtnDialogVue,
   },
   data() {
     return {
@@ -186,46 +175,30 @@ export default {
         stream: false,
         liked: false,
       },
-      currlist:[],
-      clips: [],
       streamerList:{
         follow:[],
         stream:[],
         liked:[],
       },
-      likeList:[],
       followList:[],
       streamFollowList:[],
       islogin: false,
     };
   },
   methods: {
+    reduceOfflineImgSize(el){
+      if(el){
+        const fw = el.split('1920x1080')[0];
+        const bw = el.split('1920x1080')[1];
+        return fw + '320x180' + bw;
+      } else {
+        return null;
+      }
+    },
     pushToTwitchVids(url, title) {
       if (window.confirm(`${title} 영상으로 이동하시겠습니까?`)) {
         window.open(url);
       }
-    },
-    setThumbnailSize(el, index) {
-      if (el === '') {
-        this.getLiveThumbnail(this.vidlist[index], index);
-        return this.vidlist[index].data.thumbnail_url;
-      }
-      const width = /%{width}/;
-      const height = /%{height}/;
-      return el.replace(width, '1280').replace(height, '720');
-    },
-    sortByFollower(element){
-      return element.sort((a,b) => b.follower_count - a.follower_count);
-    },
-    getEndDate(el) {
-      const startedAt = new Date(el).getTime();
-      const endedAt = new Date(startedAt + 48 * 60 * 60 * 1000);
-      return endedAt.toISOString();
-    },
-    getStartDate(el) {
-      const endedAt = new Date(el).getTime();
-      const startedAt = new Date(endedAt - 7 * 24 * 60 * 60 * 1000);
-      return startedAt.toISOString();
     },
     viewerkFormatter(el) {
       const num = el.toString();
@@ -239,18 +212,6 @@ export default {
         return `${num.slice(0, -3)},${num.slice(-3)}`;
       }
       return Math.abs(num);
-    },
-    like(el) {
-      this.$store.commit('SET_LikedStreamer', el);
-    },
-
-    kFormatter(el) {
-      if (el > 999999) {
-        return `${(Math.abs(el) / 1000000).toFixed(1)}M`;
-      } if (el > 999) {
-        return `${(Math.abs(el) / 1000).toFixed(1)}K`;
-      }
-      return Math.abs(el);
     },
     async getUserInfo(element) {
       return await axios.get('https://api.twitch.tv/helix/users',{
@@ -301,7 +262,11 @@ export default {
           const result = await this.getUserInfo([...this.streamFollowList]);
           res.data.data.forEach((element) => {
             const index = result.data.data.findIndex((v) => v.id === element.user_id);
-            element.userInfo = result.data.data[index];
+            element.userInfo =
+            {
+              broadcaster_type: result.data.data[index].broadcaster_type,
+              profile_image_url: result.data.data[index].profile_image_url,
+            }
           })
         }
         this.streamerList.stream = res.data.data;
@@ -338,8 +303,10 @@ export default {
         const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
         if(user && twitchOAuthToken){
           this.islogin = true;
-          this.getStreamFollowList(user);
-          this.getFollowList(user);
+          Promise.all([
+            this.getStreamFollowList(user),
+            this.getFollowList(user)
+          ])
         } else if(user && twitchOAuthToken === null) {
           this.logOut();
           // this.postProcess();
@@ -358,12 +325,15 @@ export default {
     },
   },
   async mounted() {
-    this.likeList = JSON.parse(localStorage.getItem('alllikes'));
+    this.streamerList.liked = JSON.parse(localStorage.getItem('alllikes')) || [];
     await this.postProcess();
+  },
+  created(){
+    document.title = 'Streamer - CCTWITCH';
   }
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .v-progress-circular {
   margin: 1rem;
 }
@@ -400,5 +370,12 @@ export default {
   justify-content: center;
   position: absolute;
   width: 100%;
+}
+
+.v-card:hover{
+  z-index: 3;
+  transition: all ease 0.2s 0s;
+  transform: scale(1.1) !important;
+  box-shadow: 5px 5px 0 var(--twitch-color);
 }
 </style>

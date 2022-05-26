@@ -1,65 +1,63 @@
 <template>
 <v-container fluid >
   <v-row class="py-5">
-    <span class="text-h3 font-weight-bold pr-3">Search : {{this.$route.query.q}}</span>
+    <span class="text-h3 font-weight-bold pr-3">Search | {{this.$route.query.q}}</span>
   </v-row>
   <v-divider></v-divider>
   <v-row
-  v-if="$store.state.searchList.length > 0 && !dataLoading"
+  v-if="searchList.length > 0 && !dataLoading"
   class="pa-0 pt-3 d-flex">
-    <v-col cols="12" xl="3" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
-    v-for="item in $store.state.searchList"
+    <v-col cols="12" xl="2" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
+    v-for="item in searchList"
     :key="item.id">
-      <v-card outlined class="rounded-xl" width="400px">
-        <v-card-title>
-          <router-link class="d-flex" :to="{name: 'Channel', query:{
-            q: item.broadcaster_login}}">
-            <div aria-label="avatar" class="flex-direction: column">
-              <v-badge
-                v-if="item.broadcaster_type == 'partner'"
-                bordered
-                color="rgb(119,44,232)"
-                icon="mdi-check"
-                overlap>
-                <v-avatar
-                outline
-                color="black"
-                size="40">
-                    <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
-                </v-avatar>
-                </v-badge>
-              <v-avatar size="40" v-else>
-                <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
+      <v-card outlined class="rounded-lg d-flex flex-row" style="width:400px;" :to="{name: 'Channel',
+        query:{
+            q: item.broadcaster_login
+          },
+        params:{
+          data:item
+        }
+      }">
+        <v-card-title style="width:inherit">
+          <div aria-label="avatar" class="d-flex">
+            <v-badge
+              v-if="item.broadcaster_type == 'partner'"
+              bordered
+              color="rgb(119,44,232)"
+              icon="mdi-check"
+              overlap>
+              <v-avatar
+              outline
+              color="black"
+              size="40">
+                  <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
               </v-avatar>
-              <div class="black rounded-xl d-flex justify-center" v-if="item.is_live">
-                <v-icon size="13" color="red">mdi-broadcast</v-icon>
-                <span class="red--text text-caption">LIVE</span>
-              </div>
-              <div class="black rounded-xl d-flex justify-center" v-else>
-                <v-icon  size="13" color="blue">mdi-broadcast-off</v-icon>
-                <span class="blue--text text-caption">OFF</span>
-              </div>
-            </div>
-            <div aria-label="streamer info" class="pl-3" style="max-width:130px">
-              <div class="text-truncate">
+            </v-badge>
+            <v-avatar size="40" v-else>
+              <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
+            </v-avatar>
+            <div aria-label="streamer info" class="pl-3">
+              <div class="text-truncate" style="width:inherit">
                 {{item.display_name}}
               </div>
               <div class="text-caption text-truncate">
-              Followers: {{kFormatter(item.follower_count)}}
+                Followers: {{kFormatter(item.follower_count)}}
               </div>
             </div>
-          </router-link>
-          <v-spacer></v-spacer>
-          <div>
-            <v-btn v-if="$store.state.likedStreamer.find(ele =>
-                ele.id == item.id)" icon @click="deleteFav({index:$store.state.likedStreamer.findIndex(el => el.id == item.id), display_name: item.display_name})">
-                <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
-              </v-btn>
-            <v-btn v-else icon @click="like({id:item.id ,login: item.broadcaster_login, display_name: item.display_name, thumbnail:item.thumbnail_url, broadcaster_type:item.broadcaster_type, follower_count: item.follower_count, is_checked:false,})">
-                <v-icon>mdi-star</v-icon>
-            </v-btn>
           </div>
         </v-card-title>
+        <v-card-text class="d-flex align-center justify-end pa-0 ma-0">
+          <v-icon small :color="item.is_live ? 'error' : 'blue'">mdi-circle</v-icon>
+        <div>
+          <v-btn v-if="$store.state.likedStreamer.find(ele =>
+              ele.id == item.id)" icon @click.prevent="deleteFav({index:$store.state.likedStreamer.findIndex(el => el.id == item.id), display_name: item.display_name})">
+              <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
+            </v-btn>
+          <v-btn v-else icon @click.prevent="like({id:item.id ,login: item.broadcaster_login, display_name: item.display_name, thumbnail:item.thumbnail_url, broadcaster_type:item.broadcaster_type})">
+              <v-icon>mdi-star</v-icon>
+          </v-btn>
+        </div>
+        </v-card-text>
       </v-card>
     </v-col>
   </v-row>
@@ -75,6 +73,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
+      searchList:[],
       dataLoading: false,
     };
   },
@@ -87,14 +86,12 @@ export default {
     },
     async searchChannel(el) {
       this.dataLoading = true;
-      const lists = [];
       await axios.get('https://api.twitch.tv/helix/search/channels', {
         params: {
           query: el,
         },
         headers: this.$store.state.headerConfig,
       }).then((res) => {
-        console.log(res);
         res.data.data.forEach((element) => {
           const data = element;
           if (element.title.length > 0 && element.game_id > 0) {
@@ -113,15 +110,14 @@ export default {
                 headers: this.$store.state.headerConfig,
               }).then((respp) => {
                 data.follower_count = respp.data.total;
-                lists.push(data);
-                lists.sort((a, b) => b.follower_count - a.follower_count);
+                this.searchList.push(data);
+                this.searchList.sort((a, b) => b.follower_count - a.follower_count);
               });
             });
           }
         });
       }).catch((error) => console.log(error));
       this.dataLoading = false;
-      this.$store.commit('SET_SearchList', lists);
     },
     kFormatter(el) {
       if (el > 999999) {
@@ -134,6 +130,7 @@ export default {
 
   },
   mounted() {
+    document.title = `${this.$route.query.q} | Search - CCTWITCH`
     this.searchChannel(this.$route.query.q);
   },
 };

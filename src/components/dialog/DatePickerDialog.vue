@@ -10,9 +10,6 @@
       >Custom</v-list-item-title>
     </template>
     <v-card class="justify-center pa-0 ma-0">
-      <!-- <v-card-title class="info">
-        Select Date
-      </v-card-title> -->
       <v-card-text class="justify-center pa-0 ma-0">
         <v-date-picker
         class="d-flex justify-center"
@@ -31,8 +28,8 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text color="success" @click="ApplyDate(dateReuslt), dialog = false">Apply</v-btn>
         <v-btn text color="error" @click="dialog = false">close</v-btn>
+        <v-btn text :disabled="dates.length < 2" color="success" @click="ApplyDate(dateReuslt), dialog = false">Apply</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

@@ -1,6 +1,5 @@
 <template>
 <v-row class="d-block py-3">
-  <v-divider class="my-2"></v-divider>
   <draggable
   v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId" v-model="currentCliplist"
   handle=".handle" ghost-class="ghost" @change="changeIndex" chosen-class="chosen" drag-class="drag">

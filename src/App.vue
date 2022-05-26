@@ -47,19 +47,9 @@ export default {
   },
 
  async created() {
-    const likesInit = JSON.parse(localStorage.getItem('alllikes'))
     this.$store.commit('SET_SignInDialog', false);
-    // const userInfo = localStorage.getItem('userInfo');
-    // if(userInfo){
-    //   this.$store.commit('SET_UserInfo',userInfo)
-    // }
     const appAccessToken = JSON.parse(localStorage.getItem('twitchAppAccessToken'));
     this.$store.commit('SET_TwitchAppAccessToken', appAccessToken);
-    if (likesInit === null) {
-      const likes = []
-      localStorage.setItem('alllikes', JSON.stringify(likes))
-    }
-    this.$store.commit('INIT_localStorage')
     this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'))
 
     // 백엔드에서 처리 해야댐.. twitch auth validation
@@ -238,6 +228,13 @@ html.overflow-y-hidden{
   -0.5px 0.5px 0 rgb(0,0,0,0.5),
   0.5px 0.5px 0 rgb(0,0,0,0.5);
 }
+.text-stroke-2 {
+  text-shadow:
+  -1px -1px 0 rgb(0,0,0,0.5),
+  1px -1px 0 rgb(0,0,0,0.5),
+  -1px 1px 0 rgb(0,0,0,0.5),
+  1px 1px 0 rgb(0,0,0,0.5);
+}
 .theme--dark.v-tabs > .v-tabs-bar{
   background: none !important;
 }
@@ -248,5 +245,9 @@ html.overflow-y-hidden{
   height: fit-content !important;
   padding-bottom: 2px !important;
   padding-top: 2px !important;
+}
+.v-progress-circular--indeterminate > svg{
+  animation: progress-circular-rotate 1s linear infinite !important;
+  transition: all 0.1s ease-in-out !important;
 }
 </style>

@@ -55,6 +55,9 @@ const routes = [
     path: '/channel',
     name: 'Channel',
     component: Channel,
+    meta:{
+      title: `Channel`
+    }
   },
   {
     path: '/user',
@@ -72,6 +75,9 @@ const routes = [
     path: '/search',
     name: 'Search',
     component: Search,
+    meta:{
+      title: `Search`
+    }
   },
   {
     path: '/trending',
@@ -99,6 +105,9 @@ const routes = [
         path: ':id',
         name: 'tagIndex',
         component: tagIndex,
+        meta:{
+          title: `Tag`
+        }
       },
     ],
   },
@@ -158,6 +167,9 @@ router.beforeEach( async (to, from, next) => {
     } else {
       next();
     }
+})
+
+router.afterEach((to, from) => {
 })
 
 export default router;

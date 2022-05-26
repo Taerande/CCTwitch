@@ -3,7 +3,6 @@
   app
   content-class="clipIframe"
   v-model="dialog"
-  height="720"
   max-width="1280">
   <template v-slot:activator="{ on, attrs }">
     <v-img
@@ -28,25 +27,36 @@
       </v-container>
     </v-img>
   </template>
-    <div class="black d-flex justify-end align-center" v-if="dialog">
-      <span class="white--text pl-5">{{this.$moment(clipData.created_at).format('ll')}}</span>
-      <v-spacer></v-spacer>
-      <v-btn :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
-      <pinClip v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
-      <v-btn v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon></v-btn>
-      <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
-    </div>
+  <v-card class="pa-0 ma-0 black">
+    <v-card-title class="d-block pa-0 ma-0">
+      <div class="d-flex justify-end align-center" v-if="dialog">
+        <span class="white--text pl-5">{{this.$moment(clipData.created_at).format('ll')}}</span>
+        <v-spacer></v-spacer>
+        <v-btn :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <v-btn color="error" icon @click="copyClip(clipData)">
+          <v-icon>mdi-clipboard-multiple-outline</v-icon>
+        </v-btn>
+        <v-btn color="error" icon @click="downloadClip(clipData)">
+          <v-icon>mdi-download</v-icon>
+        </v-btn>
+        <pinClip v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
+        <v-btn v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon></v-btn>
+        <v-btn class="ml-2" color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
+      </div>
+    </v-card-title>
+    <v-card-text style="height:70vh;" class="pa-0 ma-0 d-flex justify-center">
       <iframe
       id="clipIframe"
-      @keydown.esc="dialog = false"
       v-if="dialog"
-      class="black d-flex align-center"
+      class="black d-flex align-center pa-1"
       :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=false&muted=false&preload=auto`"
       preload="auto"
       frameborder="0"
-      :height="$vuetify.breakpoint.smAndUp ? 720 : 400"
+      height="100%"
       width="100%"
       allowfullscreen="true"></iframe>
+    </v-card-text>
+  </v-card>
 </v-dialog>
 </template>
 <script>
@@ -70,12 +80,31 @@ export default {
 
       return hour+'h'+min+'m'+sec+'s';
     },
+    copyClip(el) {
+      const tempArea2 = document.createElement('textarea');
+      const dialog = document.getElementsByClassName('clipIframe')[0];
+      dialog.appendChild(tempArea2);
+      tempArea2.value = el.url;
+      tempArea2.select();
+      document.execCommand('copy');
+      dialog.removeChild(tempArea2);
+      this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip URL : ${el.title} 가 복사되었습니다.`, value: true });
+    },
     pushToTwitchVids(url, title, time) {
       // const iframe = document.querySelector('iframe');
       // iframe.contentWindow.document.querySelector('video').pause();
       if (window.confirm(`${title}[${time}]으로 이동하시겠습니까?`)) {
         window.open(url, '_blank');
       }
+    },
+    downloadClip(el) {
+      let target = `${el.thumbnail_url.split('-preview')[0]}.mp4`;
+      let a = document.createElement('A');
+      a.href = target;
+      a.download = target.substr(target.lastIndexOf('/') + 1);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     },
     setDate(el) {
       // const time = new Date(el).getTime();

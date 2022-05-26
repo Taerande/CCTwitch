@@ -1,5 +1,8 @@
 <template>
 <v-container>
+  <v-row class="pt-10">
+    <v-divider></v-divider>
+  </v-row>
   <v-row
   class="pa-1 justify-space-between align-baseline"
   v-if="this.cliplist.length > 0">

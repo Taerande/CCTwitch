@@ -12,7 +12,6 @@
       {{userInfo.display_name}}
     </div>
   </v-row>
-  {{userInfo}}
   <v-divider></v-divider>
   <v-subheader>Created Cliplist</v-subheader>
   <v-row>
@@ -45,6 +44,7 @@ export default {
     await docRef.get().then(async (sn)=>{
       if(sn.exists()){
         this.userInfo = await sn.val();
+        document.title = `${this.userInfo.display_name} | User - CCTWITCH`
       }
     });
     const sn = await this.$firestore.collection('cliplist').where('authorId','==',`twitch:${this.$route.params.id}`).where('isPublic','==',2).orderBy('createdAt','desc').get();

@@ -33,6 +33,7 @@ export default {
 
   },
   async created() {
+    document.title = `${this.$route.params.id} | Tag - CCTWITCH`
     const sn = await this.$firestore.collection('cliplist').where('tags','array-contains',this.$route.params.id).where('isPublic','==',2).orderBy('createdAt','desc').get();
     this.cliplists = sn.docs.map( (v) => {
           const item = v.data();

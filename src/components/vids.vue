@@ -6,12 +6,11 @@
     hide-delimiters
     :progress="true"
     progress-color="twitch"
-    v-if="vidlist.length > 0"
   >
     <v-carousel-item
       full-width
       v-ripple="false"
-      v-for="(item, index) in vidlist"
+      v-for="(item, index) in vids"
       :key="index"
       transition="none"
     >
@@ -20,7 +19,8 @@
     class="d-flex justify-center align-center pa-2"
     :color="$vuetify.theme.dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'">
       <v-img
-      @click.stop.prevent="index===0 ? model = vidlist.length-1 : model = index - 1"
+      v-if="vids.length > 1"
+      @click.stop.prevent="index===0 ? model = vids.length-1 : model = index - 1"
       class="beforeVidImg rounded-lg rounded-r-0 hoverCursor"
       :max-width="imgWidth * 0.9"
       :src="setBAVidList(index - 1).thumbnail_url || `${require('@/assets/img/404.jpg')}`"
@@ -62,6 +62,7 @@
       </div>
       </v-img>
       <v-img
+      v-if="vids.length > 1"
       @click.stop.prevent="model = index + 1"
       class="afterVidImg rounded-lg rounded-l-0 hoverCursor"
       :max-width="imgWidth * 0.9  "
@@ -76,16 +77,12 @@
     </v-sheet>
     </v-carousel-item>
   </v-carousel>
-  <div v-else class="d-flex align-center text-h4" style="height: 30vh;">
-    😅There is no Vids
-  </div>
 </template>
 <script>
 export default {
   props: ['vids','carsouelId'],
   data() {
     return {
-      vidlist: [],
       currentPage: null,
     };
   },
@@ -97,12 +94,12 @@ export default {
       return this.$moment(el).format('ll');
     },
     setBAVidList(index){
-      if( index === 0 || index === this.vidlist.length){
-        return this.vidlist[0].data;
+      if( index === 0 || index === this.vids.length){
+        return this.vids[0].data;
       } else if (index === -1){
-        return this.vidlist[this.vidlist.length - 1].data;
+        return this.vids[this.vids.length - 1].data;
       } else {
-        return this.vidlist[index].data;
+        return this.vids[index].data;
       }
     },
     // setThumbnailSize(el, index) {
@@ -175,7 +172,6 @@ export default {
     }
   },
   mounted() {
-    this.vidlist = this.vids;
   },
 
 };

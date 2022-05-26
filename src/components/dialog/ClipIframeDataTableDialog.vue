@@ -4,12 +4,12 @@
   max-width="1280"
   v-model="dialog">
   <template v-slot:activator="{ on }" class="d-flex">
-    <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" :max-height="imgHeight" class="d-flex ma-0 pa-0" flat>
+    <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" class="d-flex ma-0 pa-0" flat>
       <v-card-title class="justify-center ma-0 pa-0" style="width:3rem;">
         <span class="handle" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId"> <v-icon>mdi-drag-horizontal-variant</v-icon></span>
         <span v-else class="text-caption font-weight-bold">{{index+1}}</span>
       </v-card-title>
-      <v-card-text class="d-flex align-center ma-0 pa-0">
+      <v-card-text class="d-flex align-center ma-0 pa-0 text-truncate">
         <!-- :max-height="imgHeight" -->
         <v-img
         :max-width="imgWidth"
@@ -31,15 +31,13 @@
             <v-icon size="60" color="white">mdi-play</v-icon>
           </div>
         </v-img>
-        <div class="pl-2 d-flex">
-          <div class="d-flex flex-column" :style="{width:titleWidth}">
-            <div class="text-truncate">{{clipData.title}}</div>
-            <div class="d-flex twitch--text">
-              <router-link class="d-flex" :to="{name: 'Channel', query:{
-              id: clipData.broadcaster_id}}">
-              <div>{{clipData.broadcaster_name}}</div>
-              </router-link>
-            </div>
+        <div class="pl-2 text-truncate">
+          <div class="text-truncate">{{clipData.title}}</div>
+          <div class="d-flex twitch--text">
+            <router-link class="d-flex" :to="{name: 'Channel', query:{
+            id: clipData.broadcaster_id}}">
+            <div>{{clipData.broadcaster_name}}</div>
+            </router-link>
           </div>
         </div>
       </v-card-text>
@@ -48,22 +46,34 @@
       </v-card-actions>
     </v-card>
   </template>
-  <div class="black d-flex justify-end">
-    <span class="white--text pl-5">{{this.$moment(clipData.created_at).format('ll')}}</span>
-    <v-spacer></v-spacer>
-    <pinClip :clipData="{data:clipData}" :listData="listData"></pinClip>
-     <v-btn dark :disabled="clipData.video_id.length === 0" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
-    <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
-  </div>
-  <iframe
-    class="black d-flex align-center"
-    v-if="dialog"
-    :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=true`"
-    preload="auto"
-    frameborder="0"
-    :height="$vuetify.breakpoint.mdAndUp ? 720 : 400"
-    width="1280"
-    allowfullscreen="true"></iframe>
+  <v-card class="pa-0 ma-0 black">
+    <v-card-title class="d-block pa-0 ma-0">
+      <div class="black d-flex justify-end">
+        <span class="white--text pl-5">{{this.$moment(clipData.created_at).format('ll')}}</span>
+        <v-spacer></v-spacer>
+        <v-btn dark :disabled="clipData.video_id.length === 0" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <v-btn color="error" icon @click="copyClip(clipData)">
+          <v-icon>mdi-clipboard-multiple-outline</v-icon>
+        </v-btn>
+        <v-btn color="error" icon @click="downloadClip(clipData)">
+          <v-icon>mdi-download</v-icon>
+        </v-btn>
+        <pinClip v-if="$store.state.userinfo.userInfo" :clipData="{data:clipData}" :listData="listData"></pinClip>
+        <v-btn class="ml-2" color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
+      </div>
+    </v-card-title>
+    <v-card-text class="pa-0 ma-0" style="height:70vh;">
+      <iframe
+        class="black d-flex align-center"
+        v-if="dialog"
+        :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=true`"
+        preload="auto"
+        frameborder="0"
+        height="100%"
+        width="100%"
+        allowfullscreen="true"></iframe>
+    </v-card-text>
+  </v-card>
 </v-dialog>
 </template>
 <script>
@@ -83,7 +93,25 @@ export default {
     }
   },
   methods: {
-     viewerkFormatter(el) {
+    copyClip(el) {
+      const tempArea = document.createElement('textarea');
+      document.body.appendChild(tempArea);
+      tempArea.value = el.url;
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+      this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip URL : ${el.title} 가 복사되었습니다.`, value: true });
+    },
+    downloadClip(el) {
+      let target = `${el.thumbnail_url.split('-preview')[0]}.mp4`;
+      let a = document.createElement('A');
+      a.href = target;
+      a.download = target.substr(target.lastIndexOf('/') + 1);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    },
+    viewerkFormatter(el) {
       const num = el.toString();
       if (num > 999999999) {
         return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;

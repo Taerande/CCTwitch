@@ -56,5 +56,8 @@ export default {
   methods: {
 
   },
+  mounted(){
+    document.title = 'Welcome CCTWITCH'
+  }
 };
 </script>

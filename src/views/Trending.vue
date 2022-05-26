@@ -14,7 +14,7 @@
   </v-row>
   <v-row v-else-if="cliplists.length === 0 && !loading" class="absolute-center">
     <v-alert type="error" class="rounded-xl">
-      Data Not Found
+      공유된 클립모음이 없습니다.
     </v-alert>
   </v-row>
   <v-row v-if="lastVisible" class="d-felx justify-center">
@@ -26,7 +26,6 @@
 
 <script>
 import { last } from 'lodash';
-import axios from 'axios';
 import CliplistDefaultVue from '@/components/CliplistDefault.vue';
 
 export default {
@@ -76,9 +75,6 @@ export default {
       }
 
     },
-    setDate(el){
-      return this.$moment(el).format('l');
-    },
     async loadData(){
       this.loading = true;
       try{
@@ -110,54 +106,10 @@ export default {
       }
 
     },
-    // async getUserInfo(item){
-    //   await axios.get('https://api.twitch.tv/helix/users',{
-    //       headers: this.$store.state.headerConfig,
-    //       params:{
-    //         id: item.userInfo.split('twitch:')[1],
-    //       }
-    //     }).then( res => {
-    //       item.userInfo = res.data.data[0]
-    //     }).then( async () => {
-
-    //     })
-    // },
-    async getClipData(item){
-      await axios.get('https://api.twitch.tv/helix/clips',{
-        headers: this.$store.state.headerConfig,
-        params:{
-          id: item.cliplist[0]
-        },
-      }).then( (res) => {
-        this.$set(item, 'thumbnail_url', res.data.data[0].thumbnail_url);
-      })
-    },
-    textColor(el){
-      return this.$store.state.darkColorSet.includes(el.substr(0,7)) ? 'white' : 'black';
-    }
-  },
-  computed: {
-    imgHeight(){
-      if(this.$vuetify.breakpoint.mobile){
-        return '200';
-      } else if(this.$vuetify.breakpoint.smAndDown){
-        return '225'
-      } else if (this.$vuetify.breakpoint.md){
-        return '150'
-      } else {
-        return '200'
-      }
-    }
   },
   async mounted() {
+    document.title = 'Trending - CCTWITCH'
     await this.loadData();
-    // this.cliplists.forEach(async (list) => {
-    // if(list.cliplist.length > 0){
-    //     await this.getClipData(list);
-    //   } else {
-    //     this.$set(list, 'thumbnail_url', "");
-    //   }
-    // })
     this.loading = false;
   },
 }

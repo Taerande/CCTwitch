@@ -77,15 +77,18 @@ export default {
       );
       let url = '';
 
-      setTimeout(() => {
-        authWindow.close();
-        clearInterval(tracking);
-        this.closeDialog()
-        this.$store.commit('SET_Drawer', false);
-        this.$store.commit('SET_SnackBar',{type: 'error', text:'대기시간을 초과했습니다.', value:true})
-      }, 60000);
+      let timeExceed = setTimeout(() => {
+        if(!authWindow.closed){
+          authWindow.close();
+          clearInterval(tracking);
+          this.closeDialog()
+          this.$store.commit('SET_Drawer', false);
+          this.$store.commit('SET_SnackBar',{type: 'error', text:'대기시간을 초과했습니다.', value:true})
+        } else {
+          clearInterval(tracking);
+        }
+      }, 300000);
       let tracking = setInterval(async () => {
-        console.log('track');
         try {
           url = authWindow && authWindow.location && authWindow.location.search
         } catch (e) { clearInterval()}
@@ -96,6 +99,7 @@ export default {
           }
           authWindow.close();
           clearInterval(tracking);
+          clearTimeout(timeExceed);
           resolve(parsedCode);
         }
       }, 500);

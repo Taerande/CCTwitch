@@ -5,23 +5,32 @@
   max-height="400"
   max-width="600">
   <template v-slot:activator="{ on, attrs }">
-    <v-container fluid fill-height class="d-flex align-center" v-on="on">
+    <div class="d-flex py-1 align-center text-truncate">
       <v-img
       v-on="on"
+      :max-width="imgWidth"
       :aspect-ratio="16/9"
-      max-width="130"
-      id="clip-thumbnail"
+      class="clip-thumbnail"
       @click="dialog = true"
       v-bind="attrs"
       lazy-src="@/assets/img/404.jpg"
       :src="clipData.thumbnail_url">
       </v-img>
-      <div class="pl-5">
-        <div class="">{{clipData.title}}</div>
-        <div><v-icon>mdi-eye</v-icon>{{clipData.view_count}}</div>
-        <div>{{setDate(clipData.created_at)}}</div>
+      <div class="pl-3 text-truncate">
+        <div class="text-truncate">{{clipData.title}}</div>
+        <div class="d-flex py-2">
+          <v-icon small class="pr-1">mdi-eye</v-icon>
+          <span class="text-caption">
+            {{clipData.view_count}}
+          </span>
+          <span class="pl-5 text-caption">{{$moment(clipData.created_at).format('l')}}</span>
+        </div>
       </div>
-    </v-container>
+      <v-spacer></v-spacer>
+      <v-btn icon>
+        <v-icon color="error" @click="deleteClip()">mdi-close</v-icon>
+      </v-btn>
+    </div>
   </template>
     <div class="black d-flex justify-end">
       <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
@@ -50,6 +59,9 @@ export default {
     }
   },
   methods: {
+    deleteClip(){
+      this.$emit('deleteClip')
+    },
     setTimeHMSformat(item){
       const hour = Math.floor(item/3600);
       const min = Math.floor((item%3600)/60);
@@ -63,9 +75,6 @@ export default {
       if (window.confirm(`${title}[${time}]으로 이동하시겠습니까?`)) {
         window.open(url, '_blank');
       }
-    },
-    setDate(el) {
-      return this.$moment(el).fromNow();
     },
      viewerkFormatter(el) {
       const num = el.toString();
@@ -81,12 +90,27 @@ export default {
       return Math.abs(num);
     },
   },
+  computed:{
+    imgWidth(){
+      if(this.$vuetify.breakpoint.lgAndUp){
+        return '200';
+      } else if(this.$vuetify.breakpoint.md) {
+        return '175';
+      } else if(this.$vuetify.breakpoint.sm) {
+        return '150';
+      } else if (this.$vuetify.breakpoint.xs) {
+        return '100';
+      } else {
+        return '100';
+      }
+    },
+  },
   mounted(){
   }
 }
 </script>
 <style lang="scss" scoped>
-#clip-thumbnail{
+.clip-thumbnail{
   cursor: pointer;
 }
 </style>
