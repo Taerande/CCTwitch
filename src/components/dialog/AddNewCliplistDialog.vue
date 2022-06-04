@@ -1,18 +1,21 @@
 <template>
 <v-dialog
   v-model="dialog"
+  scrollable
   max-width="800">
   <template v-slot:activator="{ on, attrs }">
     <v-btn
       depressed
       v-if="type.type === 'add'"
       class="text-caption"
-      color="success"
+      color="twitch"
       v-bind="attrs"
       v-on="on"
     >
-    <v-icon class="pr-1">mdi-plus</v-icon>
-    리스트 만들기
+    <v-icon size="16" class="pr-1" color="white">mdi-plus</v-icon>
+    <span class="white--text">
+      리스트 만들기
+    </span>
     </v-btn>
     <v-list-item class="align-center pa-1 py-2"
     v-else-if="type.type === 'pin'"
@@ -21,7 +24,7 @@
     >
       <div
       class="twitch cliplist-canvas d-flex justify-center align-center">
-        <v-icon color="white" large>mdi-plus</v-icon>
+        <v-icon color="white" x-large>mdi-plus</v-icon>
       </div>
       <span class="pl-3">
         새 플레이 리스트 추가
@@ -35,10 +38,13 @@
     <v-icon>mdi-pencil-outline</v-icon>
     </v-btn>
   </template>
-  <v-card class="justify-center" :loading="loading" :disabled="loading">
+  <v-card class="justify-center" :disabled="loading">
     <v-card-title class="text-h5" :style="{background:form.color, color: textColor}">
       Cliplist Information
     </v-card-title>
+    <div v-if="loading" class="absolute-center">
+        <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+      </div>
     <v-card-text class="justify-center">
       <div class="d-flex justify-center pa-3">
           <v-color-picker
@@ -121,7 +127,6 @@
       v-if="type.type === 'add' || type.type==='pin'"
         color="green darken-1"
         text
-        :loading="loading"
         :disabled="form.title === '' || form.title === null"
         @click="saveCliplist(), dialog = false"
       >
@@ -131,7 +136,6 @@
       v-if="type.type === 'edit'"
         color="green darken-1"
         text
-        :loading="loading"
         :disabled="form.title === '' || form.title === null"
         @click="updateClipListData()"
       >

@@ -21,7 +21,6 @@ firebase.auth().onAuthStateChanged( async (user) => {
     await store.dispatch('setUserInfo',user);
     // store.dispatch('SET_FirebaseLoad', true)
     // localStorage.setItem('userInfo',JSON.stringify(user));
-    // router.push('/')
   } else {
     await store.dispatch('setUserInfo',null);
   }

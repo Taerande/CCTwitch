@@ -1,13 +1,13 @@
 <template>
-<v-container>
+<v-container fluid>
   <v-row class="py-5 align-baseline">
     <span class="text-h3 font-weight-bold pr-3">My Cliplists</span>
     <v-spacer></v-spacer>
     <AddNewCliplistDialog v-if="$store.state.userinfo.userInfo" :type="{type:'add'}"></AddNewCliplistDialog>
   </v-row>
   <v-divider></v-divider>
-  <v-row v-if="loading" class="absolute-center">
-    <v-progress-circular indeterminate></v-progress-circular>
+   <v-row v-if="loading" class="absolute-center">
+    <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-flex pt-5" v-else>
     <v-tabs
@@ -22,7 +22,7 @@
           <span>Liked</span>
         </v-tab>
         <v-tab-item>
-          <v-row class="pt-3">
+          <v-row class="d-flex align-center pt-3">
             <v-spacer></v-spacer>
             <clipListSortBtnVue :data="cliplist" @sortCliplist="sortCliplist"></clipListSortBtnVue>
           </v-row>
@@ -37,7 +37,7 @@
             </v-alert>
           </v-row>
           <v-row v-if="lastVisible" class="d-felx justify-center">
-            <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
+            <v-btn :loading="dataLoading" @click="getMoreDataCreated()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
           </v-row>
         </v-tab-item>
         <v-tab-item>
@@ -56,7 +56,7 @@
             </v-alert>
           </v-row>
           <v-row v-if="likedLastVisible" class="d-felx justify-center">
-            <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
+            <v-btn :loading="dataLoading" @click="getMoreDataLiked()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
           </v-row>
         </v-tab-item>
     </v-tabs>
@@ -103,11 +103,52 @@ export default {
         this.likedCliplist.sort((a,b) => a[el.data] - b[el.data])
       }
     },
-     async getMoreData(){
+    async getMoreDataCreated(){
       this.dataLoading = true;
       try{
-        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('authorId','==',this.$store.state.userinfo.userInfo.uid).startAfter(this.lastVisible).limit(12).get().then((sn) => {
-          this.lastVisible = last(sn.docs);
+        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('authorId','==',this.$store.state.userinfo.userInfo.uid).startAfter(this.lastVisible).limit(20).get().then((sn) => {
+          if(sn.docs.length === 20){
+              this.lastVisible = last(sn.docs);
+            } else {
+              this.lastVisible = null;
+            }
+          if(sn.docs.length > 0){
+            sn.docs.forEach(async (el) => {
+              const item = el.data();
+              this.cliplist.push({
+              id: el.id,
+              title: item.title,
+              description: item.description,
+              createdAt: item.createdAt.toDate(),
+              display_name: item.authorName,
+              clipIds: item.clipIds,
+              color: item.color,
+              tags: item.tags,
+              thumbnail_url: item.thumbnail_url,
+              clipCount: item.clipCount,
+              viewCount: item.viewCount,
+              likeCount: item.likeCount,})
+            })
+          }else {
+            this.$store.commit('SET_SnackBar',{type:'error', text:`No More Data`, value:true});
+          }
+        }).then(() => {
+          this.dataLoading = false;
+        })
+      } catch(err){
+        this.$store.commit('SET_SnackBar',{type:'error', text:`No More Data`, value:true});
+        this.dataLoading = false;
+      }
+    },
+    async getMoreDataLiked(){
+      this.dataLoading = true;
+      try{
+        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('likeUids','array-contains',this.$store.state.userinfo.userInfo.uid).startAfter(this.likedLastVisible).limit(20).get().then((sn) => {
+          if(sn.docs.length === 20){
+              this.likedLastVisible = last(sn.docs);
+            } else {
+              this.likedLastVisible = null;
+            }
           if(sn.docs.length > 0){
             sn.docs.forEach(async (el) => {
               const item = el.data();
@@ -146,8 +187,12 @@ export default {
     if(this.unsubscribe) this.unsubscribe()
     const user = this.$store.state.userinfo.userInfo;
     if(user){
-      this.unsubscribe = await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('authorId','==',this.$store.state.userinfo.userInfo.uid).limit(12).onSnapshot( async (sn) => {
-        this.lastVisible = last(sn.docs);
+      this.unsubscribe = await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('authorId','==',this.$store.state.userinfo.userInfo.uid).limit(20).onSnapshot( async (sn) => {
+        if(sn.docs.length === 20){
+            this.lastVisible = last(sn.docs);
+          } else {
+            this.lastVisible = null;
+          }
         if(sn.empty){
           this.cliplist = []
           return
@@ -167,7 +212,11 @@ export default {
       });
       try{
         const sn = await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('likeUids','array-contains',this.$store.state.userinfo.userInfo.uid).limit(12).get();
-        this.likedLastVisible = last(sn.docs);
+        if(sn.docs.length === 20){
+            this.likedLastVisible = last(sn.docs);
+          } else {
+            this.likedLastVisible = null;
+          }
         if(sn.empty){
           this.likedCliplist = []
           this.loading = false;

@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar class="white--text blue" height="60" app flat absolute>
+  <v-app-bar class="white--text indigo lighten-3" height="60" app flat absolute>
     <v-container
     class="align-center justify-center">
       <v-row class="d-flex align-center">
@@ -12,6 +12,7 @@
             v-model="$store.state.drawer"
             no-click-animation
             fullscreen
+            scrollable
             transition="dialog-bottom-transition"
           >
             <v-card>
@@ -104,28 +105,28 @@
             <v-img
               class="shrink mr-1"
               contain
-              src="@/assets/img/TwitchGlitchBlackOps.png"
-              transition="scale-transition"
+              src="@/assets/logo.png"
               width="30"
             />
           <div
+            :class="$route.name === 'Home' ? 'twitch--text' : '' "
             class="text-lg-h4 text-h5 font-weight-bold d-flex align-center pl-3 appbar-text">CCTwitch</div>
           </router-link>
         </div>
         <div v-if="$vuetify.breakpoint.mdAndUp" class="d-flex pl-3">
           <router-link to="/trending">
-            <div class="px-2 appbar-text">
-              <span class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
+            <div class="px-1 appbar-text" to="/trending">
+              <span :class="$route.name === 'Trending' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
             </div>
           </router-link>
           <router-link to="/mycliplist">
-            <div class="px-2 appbar-text">
-              <span class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
+            <div class="px-1 appbar-text">
+              <span :class="$route.name === 'cliplistList' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
             </div>
           </router-link>
           <router-link class="ma-0 pa-0" to="/streamer">
-            <div class="px-2 appbar-text">
-              <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
+            <div class="px-1 appbar-text">
+              <span :class="$route.name === 'streamer' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
             </div>
           </router-link>
         </div>
@@ -233,21 +234,35 @@ export default {
 .v-dialog--fullscreen.drawer{
   border-radius: 5px;
   margin: 0;
-  height: 70%;
+  height: 50%;
   position: fixed;
   overflow-y: auto;
-  top: 30%;
+  top: 50%;
   left: 15%;
   width: 40%;
 }
-@media screen and (max-width: 600px){
+@media screen and (max-width: 1264px) {
   .v-dialog--fullscreen.drawer{
-  border-radius: 10px;
+  border-radius: 5px;
   margin: 0;
-  height: 70%;
+  height: 50%;
   position: fixed;
   overflow-y: auto;
-  top: 30%;
+  top: 50%;
+  left: 10px;
+  width: 70%;
+}
+
+}
+
+
+@media screen and (max-width: 600px){
+  .v-dialog--fullscreen.drawer{
+  margin: 0;
+  height: 100%;
+  position: fixed;
+  overflow-y: auto;
+  top: 60px;
   left: 0;
   width: 100%;
 }

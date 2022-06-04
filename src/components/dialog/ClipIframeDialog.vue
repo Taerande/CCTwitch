@@ -1,14 +1,13 @@
 <template>
  <v-dialog
-  app
-  content-class="clipIframe"
+  scrollable
+  :content-class="$vuetify.breakpoint.smAndDown ? 'iframeTop' : ''"
   v-model="dialog"
-  max-width="1280">
+  max-width="1080">
   <template v-slot:activator="{ on, attrs }">
     <v-img
     :aspect-ratio="16/9"
-    class="rounded-lg"
-    id="clip-thumbnail"
+    class="rounded-lg clip-thumbnail"
     @click="getVidOffset(clipData)"
     v-bind="attrs"
     v-on="on"
@@ -21,7 +20,7 @@
           <v-btn v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon></v-btn>
         </v-row>
         <v-row class="d-flex justify-space-between">
-          <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">{{setDate(clipData.created_at)}}</span>
+          <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">{{$moment(clipData.created_at).fromNow()}}</span>
           <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )"><v-icon class="white--text px-1" x-small>mdi-eye</v-icon>{{viewerkFormatter(clipData.view_count)}}</span>
         </v-row>
       </v-container>
@@ -29,10 +28,10 @@
   </template>
   <v-card class="pa-0 ma-0 black">
     <v-card-title class="d-block pa-0 ma-0">
-      <div class="d-flex justify-end align-center" v-if="dialog">
-        <span class="white--text pl-5">{{this.$moment(clipData.created_at).format('ll')}}</span>
+      <div class="d-flex justify-end align-center copyBody" v-if="dialog">
+        <span class="white--text pl-1">{{$moment(clipData.created_at).format('ll')}}</span>
         <v-spacer></v-spacer>
-        <v-btn :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <v-btn :disabled="clipData.video_id.length === 0" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
         <v-btn color="error" icon @click="copyClip(clipData)">
           <v-icon>mdi-clipboard-multiple-outline</v-icon>
         </v-btn>
@@ -41,20 +40,20 @@
         </v-btn>
         <pinClip v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
         <v-btn v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon></v-btn>
-        <v-btn class="ml-2" color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
+        <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
       </div>
     </v-card-title>
-    <v-card-text style="height:70vh;" class="pa-0 ma-0 d-flex justify-center">
-      <iframe
-      id="clipIframe"
-      v-if="dialog"
-      class="black d-flex align-center pa-1"
-      :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=false&muted=false&preload=auto`"
-      preload="auto"
-      frameborder="0"
-      height="100%"
-      width="100%"
-      allowfullscreen="true"></iframe>
+    <v-card-text class="pa-0 ma-0">
+      <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
+          <iframe
+          v-if="dialog"
+          :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=false&muted=false&preload=auto`"
+          preload="auto"
+          frameborder="0"
+          height="100%"
+          width="100%"
+          allowfullscreen="true"></iframe>
+      </v-responsive>
     </v-card-text>
   </v-card>
 </v-dialog>
@@ -82,17 +81,14 @@ export default {
     },
     copyClip(el) {
       const tempArea2 = document.createElement('textarea');
-      const dialog = document.getElementsByClassName('clipIframe')[0];
-      dialog.appendChild(tempArea2);
+      document.getElementsByClassName('copyBody')[0].appendChild(tempArea2);
       tempArea2.value = el.url;
       tempArea2.select();
       document.execCommand('copy');
-      dialog.removeChild(tempArea2);
+      document.getElementsByClassName('copyBody')[0].removeChild(tempArea2);
       this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip URL : ${el.title} 가 복사되었습니다.`, value: true });
     },
     pushToTwitchVids(url, title, time) {
-      // const iframe = document.querySelector('iframe');
-      // iframe.contentWindow.document.querySelector('video').pause();
       if (window.confirm(`${title}[${time}]으로 이동하시겠습니까?`)) {
         window.open(url, '_blank');
       }
@@ -105,15 +101,6 @@ export default {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-    },
-    setDate(el) {
-      // const time = new Date(el).getTime();
-      // const krTime = time + 9 * 60 * 60 * 1000;
-      // const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
-      // return dateFormatted;
-      const c = this.$moment(el).fromNow();
-
-      return c;
     },
      viewerkFormatter(el) {
       const num = el.toString();
@@ -163,7 +150,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-#clip-thumbnail{
+.clip-thumbnail{
   cursor: pointer;
 }
 </style>

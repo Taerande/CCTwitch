@@ -19,7 +19,7 @@
         <v-icon class="pinClip" color="red">mdi-plus-box-multiple</v-icon>
       </v-btn>
     </template>
-    <v-card width="400px" height="600px" :loading="loading" :disabled="loading">
+    <v-card width="400px" height="600px" :disabled="loading" loader-height="6">
       <v-card-title class="d-flex justify-center">
         <span>내 플레이리스트에 추가</span>
       </v-card-title>
@@ -38,9 +38,11 @@
               </v-list-item-content>
           </v-list-item>
         </v-list>
+        <div v-if="loading" class="d-flex absolute-center">
+          <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+        </div>
       </v-card-text>
       <v-card-actions class="d-flex justify-end pa-3">
-        <v-spacer></v-spacer>
         <v-btn text @click="dialog = false">
           <span class="error--text text-break">Close</span>
         </v-btn>
@@ -110,14 +112,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.cliplist-canvas{
-  border-radius: 5%;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  width: 50px;
-  height: 50px;
-}
 .v-list-item__content{
   padding-left: 10px !important;
 }
@@ -125,9 +119,4 @@ div[role=menuitem]:hover{
   cursor: pointer;
   background-color: rgba(0, 0, 0, 0.2) !important;
 }
-// .pinClip {
-//   transform: scale();
-//   border-radius: 100%;
-//   background: rgb(0, 0, 0, 0.3);
-// }
 </style>

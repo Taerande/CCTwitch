@@ -24,13 +24,17 @@
       <span>DELETE {{this.delete.type}}</span>
     </v-card-title>
     <v-card-text class="d-flex align-center justify-center pt-5">
-      <span class="twitch--text pl-1 text-title text-truncate">
-        <span class="text-uppercase" style="width:25rem;">
-          {{this.delete.type}}
-        </span>: {{this.delete.data.target.title}}</span>
-        <span v-if="this.delete.type === 'cliplist'">[<span class="red--text">{{this.delete.data.target.clipCount}}</span>]개 을 삭제합니다.</span>
-      <!-- <div>{{this.delete.data.target}}</div>
-      <div>{{this.$router.params}}</div> -->
+      <div>
+        <div class="twitch--text pl-1 text-title text-truncate">
+          <span class="text-uppercase">
+            {{this.delete.type}}
+          </span>: {{this.delete.data.target.title}}
+        </div>
+        <div class="d-flex justify-center">
+          <span v-if="this.delete.type === 'cliplist'">
+            [<span class="red--text">{{this.delete.data.target.clipCount}}</span>]개
+          </span>을(를) 삭제합니다.</div>
+      </div>
     </v-card-text>
     <v-card-actions class="pb-3 pt-0">
       <v-spacer></v-spacer>
@@ -62,7 +66,7 @@ export default {
           {
             clipIds: this.$firebase.firestore.FieldValue.arrayRemove(data.target.id),
             clipCount: this.$firebase.firestore.FieldValue.increment(-1),
-            thumbnail_url: this.$store.state.currentCliplist[1].fireData.thumbnail_url} :
+            thumbnail_url: this.$store.state.currentCliplist[1] === undefined ? null : this.$store.state.currentCliplist[1].fireData.thumbnail_url} :
           {
             clipIds: this.$firebase.firestore.FieldValue.arrayRemove(data.target.id),
             clipCount: this.$firebase.firestore.FieldValue.increment(-1)
@@ -81,7 +85,7 @@ export default {
         // await this.$store.commit('DELETE_cliplist', data);
         this.btnLoading = false;
         this.dialog = false;
-        this.$router.push({ name: 'cliplistList' }).catch(()=>{});
+        this.$router.push({ path: '/mycliplist' }).catch(()=>{});
       } else if (type === 'importedClip') {
         this.$emit('delImportedClip', { index: this.delete.data.index, title: this.delete.data.target.title });
       }

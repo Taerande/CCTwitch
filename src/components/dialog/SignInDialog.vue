@@ -8,7 +8,7 @@
   </template>
   <v-card class="pa-5">
     <v-card-title class="d-flex justify-center">
-      <span class="px-3">로그인</span>
+      <span class="px-3 text-h4 font-weight-black">로그인</span>
       <v-btn class="absolute-right" color="error" icon
       @click="closeDialog()"><v-icon>mdi-close</v-icon></v-btn>
     </v-card-title>
@@ -18,6 +18,10 @@
           <v-icon large>mdi-twitch</v-icon>
           <span>트위치로 로그인하기</span>
         </v-btn>
+      </v-row>
+      <v-row class="d-flex justify-center align-center">
+        <v-checkbox :disabled="loginLoading" color="twitch" v-model="autoLogin"></v-checkbox>
+        <span class="text-title" :class=" loginLoading ? 'text-decoration-line-through' : ''">로그인 상태 유지하기</span>
       </v-row>
     </v-card-text>
   </v-card>
@@ -30,6 +34,7 @@ export default {
   props:['type'],
   data() {
     return {
+      autoLogin: false,
       loginLoading: false,
     }
   },
@@ -38,23 +43,31 @@ export default {
       this.loginLoading = false;
       this.$store.commit('SET_SignInDialog', false);
     },
-    async AuthenticateWithTwitch(){
+     AuthenticateWithTwitch(){
       this.loginLoading = true;
       const state = crypto.randomBytes(16).toString("hex");
-      const codeUri =
-      `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&force_verify=true&redirect_uri=`+this.$store.state.redirectUri+`/signin/twitch/callback&scope=user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}&claims={"userinfo":{"preferred_username":null,"email":null,"email_verified":null,"picture":null}}`;
-      const code = await this.getCode(codeUri);
-      const twitchOAuthToken = JSON.stringify(Buffer.from(code.twitchOAuthToken, 'base64').toString());
-
-      await this.$firebase.auth().setPersistence(this.$firebase.auth.Auth.Persistence.LOCAL).then((user) => {
-        return this.$firebase.auth().signInWithCustomToken(code.token);
-      })
-      localStorage.setItem('twitchOAuthToken', JSON.parse(twitchOAuthToken));
-      this.loginLoading = false;
-      this.$store.commit('SET_SignInDialog', false);
-      this.$store.commit('SET_Drawer', false);
-      this.$router.push({name:'Home'}).catch(()=>{});
-      this.$store.commit('SET_SnackBar',{type: 'info', text:'로그인 성공', value:true})
+      localStorage.setItem('state',state);
+      localStorage.setItem('autoLogin',this.autoLogin);
+      // const codeUri =
+      // `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&redirect_uri=http://localhost:8080/login&scope=user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}`;
+      window.location.href = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&redirect_uri=${this.$store.state.redirectUri}&scope=user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}`;
+      // const code = await this.getCode(codeUri);
+      // const twitchOAuthToken = JSON.stringify(Buffer.from(code.twitchOAuthToken, 'base64').toString());
+      // if(this.autoLogin){
+      //   await this.$firebase.auth().setPersistence(this.$firebase.auth.Auth.Persistence.LOCAL).then(() => {
+      //     return this.$firebase.auth().signInWithCustomToken(code.token);
+      //   })
+      // } else {
+      //   await this.$firebase.auth().setPersistence(this.$firebase.auth.Auth.Persistence.SESSION).then(() => {
+      //     return this.$firebase.auth().signInWithCustomToken(code.token);
+      //   })
+      // }
+      // localStorage.setItem('twitchOAuthToken', JSON.parse(twitchOAuthToken));
+      // this.loginLoading = false;
+      // this.$store.commit('SET_SignInDialog', false);
+      // this.$store.commit('SET_Drawer', false);
+      // this.$router.push({name:'Home'}).catch(()=>{});
+      // this.$store.commit('SET_SnackBar',{type: 'info', text:'로그인 성공', value:true})
 
     },
     async getAuthToken(id){
@@ -115,10 +128,6 @@ export default {
 .absolute-right{
   position: absolute !important;
   right: 1rem !important;
-}
-.pinClip{
-  border-radius: 100%;
-  background: rgb(0, 0, 0, 0.3);
 }
 
 </style>

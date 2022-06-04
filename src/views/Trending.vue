@@ -1,23 +1,41 @@
-  <template>
+<template>
 <v-container>
   <v-row class="py-5">
     <span class="text-h3 font-weight-bold pr-3">Trending</span>
   </v-row>
   <v-divider></v-divider>
-  <v-row v-if="loading" class="absolute-center">
-    <v-progress-circular indeterminate></v-progress-circular>
+  <v-row v-if="loading" class="d-block absolute-center">
+    <div class="d-flex justify-center">
+      <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+    </div>
   </v-row>
-  <v-row class="pt-5" v-else-if="cliplists.length > 0 && !loading">
-    <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-2" v-for="item in cliplists" :key="item.id">
-      <CliplistDefaultVue :item="item"></CliplistDefaultVue>
-    </v-col>
+  <v-row class="d-flex pt-5 col-12" v-else-if="cliplists.length > 0 && !loading">
+    <v-row class="d-flex col-12" v-for="(chunk, index) in cliplistChunk" :key="index">
+      <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-2" v-for="(item, startIndex) in chunk.slice(0,index%7+4)" :key="item.id+startIndex">
+        <CliplistDefaultVue :item="item"></CliplistDefaultVue>
+      </v-col>
+      <v-col
+        style="min-width: 250px;"
+        v-if="chunk.length > index%7+4"
+        cols="12" xl="3" lg="4" md="4" sm ="6" xs="12" class="pa-2">
+          <InArticleAdsense
+          data-ad-client="ca-pub-8597405222136575"
+          data-ad-slot="1875328416"
+          data-ad-format="fluid"
+          ins-style="display:block;text-align:center;width:inherit;"
+          ></InArticleAdsense>
+      </v-col>
+      <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-2" v-for="(item, endIndex) in chunk.slice(index%7+4)" :key="item.id+endIndex">
+        <CliplistDefaultVue :item="item"></CliplistDefaultVue>
+      </v-col>
+    </v-row>
   </v-row>
   <v-row v-else-if="cliplists.length === 0 && !loading" class="absolute-center">
-    <v-alert type="error" class="rounded-xl">
+    <v-alert type="error">
       공유된 클립모음이 없습니다.
     </v-alert>
   </v-row>
-  <v-row v-if="lastVisible" class="d-felx justify-center">
+  <v-row v-if="lastVisible" class="d-flex justify-center">
     <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
   </v-row>
 </v-container>
@@ -25,7 +43,7 @@
 </template>
 
 <script>
-import { last } from 'lodash';
+import { last, chunk } from 'lodash';
 import CliplistDefaultVue from '@/components/CliplistDefault.vue';
 
 export default {
@@ -40,12 +58,21 @@ export default {
       dataLoading: false,
     };
   },
+  computed:{
+    cliplistChunk(){
+      return chunk(Object.values(this.cliplists),11);
+    }
+  },
   methods: {
     async getMoreData(){
       this.dataLoading = true;
       try{
-        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('isPublic','==',2).startAfter(this.lastVisible).limit(12).get().then((sn) => {
-          this.lastVisible = last(sn.docs);
+        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('isPublic','==',2).startAfter(this.lastVisible).limit(20).get().then((sn) => {
+          if(sn.docs.length === 20){
+              this.lastVisible = last(sn.docs);
+            } else {
+              this.lastVisible = null;
+            }
           if(sn.docs.length > 0){
             sn.docs.forEach(async (el) => {
               const item = el.data();
@@ -78,10 +105,12 @@ export default {
     async loadData(){
       this.loading = true;
       try{
-        const sn = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('isPublic','==',2).limit(12).get();
-
-        this.lastVisible = last(sn.docs);
-
+        const sn = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('isPublic','==',2).limit(20).get();
+        if(sn.docs.length === 20){
+            this.lastVisible = last(sn.docs);
+          } else {
+            this.lastVisible = null;
+          }
         this.cliplists = sn.docs.map( (v) => {
           const item = v.data();
           return {

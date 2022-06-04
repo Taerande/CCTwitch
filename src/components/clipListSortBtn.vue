@@ -4,7 +4,8 @@
     <v-btn color="twitch" text v-on="on" class="ma-0 pa-0">
     <v-icon>
       mdi-sort
-    </v-icon></v-btn>
+    </v-icon>
+    </v-btn>
   </template>
   <v-list class="text-caption">
     <v-list-item-group v-model="model" color="twitch">

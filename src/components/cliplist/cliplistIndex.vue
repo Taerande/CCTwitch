@@ -12,7 +12,10 @@
         <span class="text-title-1 pr-3">
         <v-icon >mdi-playlist-play</v-icon>{{ cliplist.clipCount }}</span>
         <span class="text-title-1">
-        <v-icon :color="liked ? 'twitch' : ''" class="pb-1" @click="likeCliplist()">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon><span class="pl-1">{{cliplist.likeCount}}</span></span>
+          <v-btn icon @click="likeCliplist()" :disabled="likeLoading">
+            <v-icon :color="liked ? 'twitch' : ''" class="pb-1">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon>
+          </v-btn>
+        <span class="pl-1">{{cliplist.likeCount}}</span></span>
       <v-spacer></v-spacer>
       <div class="d-flex" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === cliplist.authorId">
         <ImportNewClipDialogVue :parent="cliplist"></ImportNewClipDialogVue>
@@ -64,17 +67,14 @@
     v-if="$store.state.currentCliplist.length > 0"
     :clipListData="cliplist">
   </expandTableVue>
-  <v-row v-else style="height:60vh;" class="d-flex justify-center align-center">
+  <v-row v-else-if="$store.state.currentCliplist.length === 0 && loading" style="height:60vh;" class="d-flex justify-center align-center">
     <v-alert class="d-inline-block" type="error">🤐 저장된 클립이 없습니다.</v-alert>
-  </v-row>
-  <v-row class="d-flex justify-center" v-if="cliplist.clipCount > $store.state.currentCliplist.length && loading">
-    <v-icon large>mdi-dots-horizontal</v-icon>
   </v-row>
   <v-row v-if="cliplist.clipCount > $store.state.currentCliplist.length" class="d-block pb-16 pt-10" v-intersect="onIntersect">
     <div class="d-flex justify-center">
-      <v-progress-circular indeterminate></v-progress-circular>
+      <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
-    <div class="d-flex justify-center ">데이터 불러오는 중...</div>
+    <div class="d-flex justify-center ">데이터 불러오는 중</div>
   </v-row>
 </v-container>
 </template>
@@ -108,9 +108,10 @@ export default {
         authorName:'',
         tags:[],
       },
+      tempArr:[],
       userInfo:'',
-      gotDataStatus:false,
       loading: false,
+      likeLoading: false,
     };
   },
   methods: {
@@ -126,13 +127,14 @@ export default {
     onIntersect(entries , observer, isIntersecting)
     {
       setTimeout(() => {
-        if(isIntersecting && this.gotDataStatus && this.lastVisible){
+        if(isIntersecting && this.loading && this.lastVisible){
           this.getMoreClips()
         }
       }, 500);
     },
     async likeCliplist(){
       if(this.$store.state.userinfo.userInfo){
+        this.likeLoading = true
         let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
         let userDocs = await this.$firebase.database().ref().child('/users/' +this.$store.state.userinfo.userInfo.uid);
         let updates = {};
@@ -142,7 +144,9 @@ export default {
           docRef.update({
             likeCount: this.$firebase.firestore.FieldValue.increment(-1),
             likeUids: this.$firebase.firestore.FieldValue.arrayRemove(this.$store.state.userinfo.userInfo.uid)
-          }).then(() => {
+          })
+          .then(() => {
+            this.likeLoading = false
             this.$store.commit('SET_SnackBar',{type:'error', text:`Cliplist : "${this.cliplist.title}"을 좋아요 목록에서 제거합니다.`, value:true})
           })
         } else {
@@ -151,7 +155,9 @@ export default {
           docRef.update({
             likeCount: this.$firebase.firestore.FieldValue.increment(1),
             likeUids: this.$firebase.firestore.FieldValue.arrayUnion(this.$store.state.userinfo.userInfo.uid)
-          }).then(() => {
+          })
+          .then(() => {
+            this.likeLoading = false
             this.$store.commit('SET_SnackBar',{type:'success', text:`Cliplist : "${this.cliplist.title}"을 좋아요 목록에 추가합니다.`, value:true})
           })
         }
@@ -172,7 +178,7 @@ export default {
     },
     async deleteCliplist(){
       await this.$firestore.collection('cliplist').doc(this.$route.params.id).delete();
-      this.$router.push({path:'/mycliplist'});
+      this.$router.push({path:'/mycliplist'}).catch(()=>{});
       this.$store.commit('SET_SnackBar',{type:'error', text:`Cliplist : ${this.cliplist.title}클립 모음집이 삭제되었습니다.`, value:true});
     },
     async getTwitchClipData(el){
@@ -182,22 +188,23 @@ export default {
       })
     },
     async getMoreClips(){
-      this.gotDataStatus = false;
       let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
-      docRef.collection('clips').orderBy('createdAt','asc').startAfter(this.lastVisible).limit(10).get().then((collection) =>{
-        this.lastVisible = last(collection.docs);
+      docRef.collection('clips').orderBy('createdAt','asc').startAfter(this.lastVisible).limit(7).get().then(async (collection) =>{
+        this.lastVisible = await last(collection.docs);
         if(collection.docs.length > 0){
-          collection.docs.forEach(async (el) => {
-            let fireClip = await el.data();
-            let twitchClip = await this.getTwitchClipData(fireClip.clipId);
-            this.$store.commit('ADD_ClipInCurrentCliplist',{
-              clipData: twitchClip.data.data[0],
-              fireData: fireClip,
-            })
-        })
+          let clipIds = collection.docs.map((v) => {
+          return v.id
+          });
+        let twitchClips = await this.getTwitchClipData(clipIds);
+        this.tempArr = collection.docs.map((v) => {
+          const index = twitchClips.data.data.findIndex((el) => el.id === v.id);
+          return {
+            clipData: twitchClips.data.data[index],
+            fireData: v.data(),
+          }});
+        this.$store.commit('ADD_ClipInCurrentCliplist', this.tempArr);
         }
       }).then(() => {
-        this.gotDataStatus = true
       })
     }
   },
@@ -216,7 +223,9 @@ export default {
     this.unsubscribe = await docRef.onSnapshot((doc) => {
       const item = doc.data();
       document.title = `${item.title} | Cliplist - CCTWITCH`;
-      this.getUserInfo(item.authorId)
+      if(!this.userInfo){
+        this.getUserInfo(item.authorId)
+      }
         if(doc.exists){
           this.cliplist = {
             id: docRef.id,
@@ -236,21 +245,24 @@ export default {
         }
     });
 
-    await docRef.collection('clips').orderBy('createdAt','asc').limit(10).get().then(async (collection) =>{
+    await docRef.collection('clips').orderBy('createdAt','asc').limit(7).get().then(async (collection) =>{
       this.lastVisible = await last(collection.docs);
       if(collection.docs.length > 0){
-        await collection.docs.forEach( async (el, index) => {
-          let fireClip = await el.data();
-          let twitchClip = await this.getTwitchClipData(fireClip.clipId);
-          this.$store.commit('ADD_ClipInCurrentCliplist',{
-              clipData: twitchClip.data.data[0],
-              fireData: fireClip,
-            });
-            if(index + 1 === collection.docs.length){
-              this.gotDataStatus = true;
-            }
+        let clipIds = collection.docs.map((v) => {
+          return v.id
         });
-    }})
+        let twitchClips = await this.getTwitchClipData(clipIds);
+        this.tempArr = collection.docs.map((v) => {
+          const index = twitchClips.data.data.findIndex((el) => el.id === v.id);
+          return {
+            clipData: twitchClips.data.data[index],
+            fireData: v.data(),
+          }
+        })
+        this.$store.commit('ADD_ClipInCurrentCliplist', this.tempArr);
+      }
+    }).then(() => {
+    })
     this.loading = true;
   },
   destroyed() {

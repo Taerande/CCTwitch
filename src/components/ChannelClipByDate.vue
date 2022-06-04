@@ -1,5 +1,5 @@
 <template>
-<v-container>
+<v-container fluid>
   <v-row
   class="pa-1 justify-space-between align-baseline"
   v-if="this.cliplist.length > 0">
@@ -8,22 +8,46 @@
       <h1>Clips</h1>
       </div>
     </v-row>
-  <v-row class="d-flex col-12">
+    <v-row class="d-flex col-12" v-for="(chunk, index) in cliplistChunk" :key="index">
     <v-col
-      v-for="(item, index) in this.cliplist"
-      :key="index"
+     v-for="(item,startIndex) in chunk.slice(0,index%7+4)"
+          :key="item.id+startIndex"
       cols="12" lg="3" md="4" sm="6" xs="12"
-      class="pa-3 clip-item"
+      class="pa-2"
       :class="item.broadcaster_id"
       >
-       <v-card class="ma-0 pa-0">
+       <v-card class="ma-0 pa-0" flat style="width:inherit">
         <v-card-text class="d-flex justify-center pa-0 ma-0">
           <clipIframeDialog :clipData="item" :listData="listData"></clipIframeDialog>
         </v-card-text>
       </v-card>
-      <div class="d-flex justify-center">{{item.title}}</div>
+      <div class="d-flex justify-center pt-2" style="width:inherit">{{item.title}}</div>
     </v-col>
-  </v-row>
+    <v-col
+      v-if="chunk.length > index%7+4"
+      cols="12" xl="3" lg="4" md="4" sm ="6" xs="12" class="pa-2">
+        <InArticleAdsense
+          data-ad-client="ca-pub-8597405222136575"
+          data-ad-slot="1875328416"
+          data-ad-format="fluid"
+          ins-style="display:inline-block;text-align:center;"
+          ></InArticleAdsense>
+    </v-col>
+    <v-col
+     v-for="(item,endIndex) in chunk.slice(index%7+4)"
+          :key="item.id+endIndex"
+      cols="12" lg="3" md="4" sm="6" xs="12"
+      class="pa-2"
+      :class="item.broadcaster_id"
+      >
+       <v-card class="ma-0 pa-0" flat style="width:inherit">
+        <v-card-text class="d-flex justify-center pa-0 ma-0">
+          <clipIframeDialog :clipData="item" :listData="listData"></clipIframeDialog>
+        </v-card-text>
+      </v-card>
+      <div class="d-flex justify-center pt-2" style="width:inherit">{{item.title}}</div>
+    </v-col>
+    </v-row>
   </v-row>
   <infinite-loading @infinite="channelInfiniteHandler" spinner="spiral"></infinite-loading>
 </v-container>
@@ -32,6 +56,7 @@
 import axios from 'axios';
 import infiniteLoading from 'vue-infinite-loading';
 import clipIframeDialog from '@/components/dialog/ClipIframeDialog';
+import { chunk } from 'lodash';
 
 export default {
 
@@ -53,25 +78,6 @@ export default {
     };
   },
   methods: {
-    shuffle() {
-      const playlist = [...this.cliplist];
-      let listLength = playlist.length;
-      let t;
-      let i;
-      while (listLength) {
-        i = Math.floor(Math.random() * listLength);
-        listLength -= 1;
-        t = playlist[listLength];
-        playlist[listLength] = playlist[i];
-        playlist[i] = t;
-        this.cliplist = playlist;
-      }
-      this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 랜덤으로 정렬합니다.', value: true });
-    },
-    refresh() {
-      this.cliplist.sort((a, b) => b.view_count - a.view_count);
-      this.$store.commit('SET_SnackBar', { type: 'info', text: 'Filter : 조회수순으로 정렬합니다.', value: true });
-    },
     changeId(el) {
       this.currentId = el;
     },
@@ -129,6 +135,9 @@ export default {
 
   },
   computed: {
+    cliplistChunk(){
+      return chunk(Object.values(this.cliplist),11);
+    },
     getTodayDate() {
       return new Date().toISOString();
     },

@@ -1,7 +1,8 @@
 <template>
 <v-dialog
-  content-class="clipIframe"
-  max-width="1280"
+  scrollable
+  :content-class="$vuetify.breakpoint.smAndDown ? 'iframeTop' : ''"
+  max-width="1080"
   v-model="dialog">
   <template v-slot:activator="{ on }" class="d-flex">
     <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" class="d-flex ma-0 pa-0" flat>
@@ -10,7 +11,6 @@
         <span v-else class="text-caption font-weight-bold">{{index+1}}</span>
       </v-card-title>
       <v-card-text class="d-flex align-center ma-0 pa-0 text-truncate">
-        <!-- :max-height="imgHeight" -->
         <v-img
         :max-width="imgWidth"
         :aspect-ratio="16/9"
@@ -47,9 +47,9 @@
     </v-card>
   </template>
   <v-card class="pa-0 ma-0 black">
-    <v-card-title class="d-block pa-0 ma-0">
-      <div class="black d-flex justify-end">
-        <span class="white--text pl-5">{{this.$moment(clipData.created_at).format('ll')}}</span>
+    <v-card-title class="d-block pa-0 ma-0 copyBody">
+      <div class="black d-flex justify-end align-center">
+        <span class="white--text pl-2">{{this.$moment(clipData.created_at).format('ll')}}</span>
         <v-spacer></v-spacer>
         <v-btn dark :disabled="clipData.video_id.length === 0" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
         <v-btn color="error" icon @click="copyClip(clipData)">
@@ -59,19 +59,20 @@
           <v-icon>mdi-download</v-icon>
         </v-btn>
         <pinClip v-if="$store.state.userinfo.userInfo" :clipData="{data:clipData}" :listData="listData"></pinClip>
-        <v-btn class="ml-2" color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
+        <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
       </div>
     </v-card-title>
-    <v-card-text class="pa-0 ma-0" style="height:70vh;">
+    <v-card-text class="pa-0 ma-0">
+    <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
       <iframe
-        class="black d-flex align-center"
         v-if="dialog"
-        :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=true`"
+        :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=false&muted=false&preload=auto`"
         preload="auto"
         frameborder="0"
         height="100%"
         width="100%"
         allowfullscreen="true"></iframe>
+    </v-responsive>
     </v-card-text>
   </v-card>
 </v-dialog>
@@ -94,12 +95,12 @@ export default {
   },
   methods: {
     copyClip(el) {
-      const tempArea = document.createElement('textarea');
-      document.body.appendChild(tempArea);
-      tempArea.value = el.url;
-      tempArea.select();
+      const tempArea2 = document.createElement('textarea');
+      document.getElementsByClassName('copyBody')[0].appendChild(tempArea2);
+      tempArea2.value = el.url;
+      tempArea2.select();
       document.execCommand('copy');
-      document.body.removeChild(tempArea);
+      document.getElementsByClassName('copyBody')[0].removeChild(tempArea2);
       this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip URL : ${el.title} 가 복사되었습니다.`, value: true });
     },
     downloadClip(el) {

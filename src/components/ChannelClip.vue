@@ -1,5 +1,5 @@
 <template>
-<v-container>
+<v-container fluid>
   <v-row class="pt-10">
     <v-divider></v-divider>
   </v-row>
@@ -11,21 +11,40 @@
       <h1>Clips</h1>
       </div>
     </v-row>
-    <v-row class="d-flex col-12">
+    <v-row class="d-flex col-12" v-for="(chunk, index) in cliplistChunk" :key="index">
       <v-col
-        v-for="(item, index) in this.cliplist"
-        :key="index"
-        cols="12" xl="3" lg="4" md="4" sm="6" xs="12"
-        class="pa-2"
-        :class="item.broadcaster_id"
-
+        cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-2"
+        v-for="(item,startIndex) in chunk.slice(0,index%7+4)"
+        :key="item.id+startIndex"
         >
-        <v-card class="ma-0 pa-0">
+        <v-card class="ma-0 pa-0" flat style="width:inherit">
           <v-card-text class="d-flex justify-center pa-0 ma-0">
             <clipIframeDialog :clipData="item" :listData="listData"></clipIframeDialog>
           </v-card-text>
         </v-card>
-        <div class="d-flex justify-center" style="width:inherit">{{item.title}}</div>
+        <div class="d-flex justify-center pt-2" style="width:inherit">{{item.title}}</div>
+      </v-col>
+      <v-col
+        v-if="chunk.length > index%7+4"
+        cols="12" xl="3" lg="4" md="4" sm ="6" xs="12" class="pa-2">
+        <InArticleAdsense
+          data-ad-client="ca-pub-8597405222136575"
+          data-ad-slot="4467586752"
+          data-ad-format="auto"
+          ins-style="display:inline-block;background:red;"
+          ></InArticleAdsense>
+      </v-col>
+      <v-col
+        cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-2"
+        v-for="(item,endIndex) in chunk.slice(index%7+4)"
+        :key="item.id+endIndex+index%7+4"
+        >
+        <v-card class="ma-0 pa-0" elevation="0">
+        <v-card-text class="d-flex justify-center pa-0 ma-0">
+            <clipIframeDialog :clipData="item" :listData="listData"></clipIframeDialog>
+          </v-card-text>
+        </v-card>
+        <div class="d-flex justify-center pt-2" style="width:inherit">{{item.title}}</div>
       </v-col>
     </v-row>
   </v-row>
@@ -36,6 +55,7 @@
 import axios from 'axios';
 import infiniteLoading from 'vue-infinite-loading';
 import clipIframeDialog from '@/components/dialog/ClipIframeDialog';
+import { chunk } from 'lodash';
 
 export default {
   props: ['clips','listData'],
@@ -58,14 +78,19 @@ export default {
       userInfo: '',
     };
   },
+  computed:{
+    cliplistChunk(){
+      return chunk(Object.values(this.cliplist),11);
+    }
+  },
   methods: {
+    // ended_at: this.infiniteData.ended_at,
     async channelInfiniteHandler($state) {
       await axios.get('https://api.twitch.tv/helix/clips', {
         headers: this.$store.state.headerConfig,
         params: {
           broadcaster_id: this.infiniteData.broadcaster_id,
           started_at: this.infiniteData.started_at,
-          ended_at: this.infiniteData.ended_at,
           first: this.infiniteData.first,
           after: this.paginationCursor,
         },
@@ -115,7 +140,6 @@ export default {
       broadcast_end: this.$moment(this.clips.data.created_at).add(this.hmsToSec(this.clips.data.duration),'seconds').toISOString(),
       broadcaster_id: this.clips.data.user_id,
       started_at: this.clips.data.created_at,
-      ended_at: this.$moment(this.clips.data.created_at).add(7,'days').toISOString(),
       first: 20,
       video_id: this.clips.data.id,
       viewalbe: this.clips.data.viewalbe,

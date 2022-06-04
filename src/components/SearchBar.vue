@@ -1,6 +1,6 @@
 <template>
   <v-form
-    v-if="$vuetify.breakpoint.mdAndUp"
+    v-if="$vuetify.breakpoint.lgAndUp"
     class="d-flex align-center justify-center"
     @submit.prevent="searchChannel($store.state.searchString)">
       <v-text-field
@@ -22,18 +22,19 @@
     transition="dialog-transition"
   >
   <template v-slot:activator="{on}">
-    <v-icon large v-on="on">mdi-magnify</v-icon>
+    <v-icon color="white" v-on="on">mdi-magnify</v-icon>
   </template>
   <v-card>
-    <v-card-title class="ma-3">
-      Search Streamer
+    <v-card-title class="pa-3 info">
+        Search Streamer
     </v-card-title>
-    <v-card-text>
+    <v-card-text class="py-3">
       <v-form
        @submit.prevent="searchChannel($store.state.searchString)">
         <v-text-field
           v-model="$store.state.searchString"
           outlined
+          hide-details
           :rules="[rule.required]"
           color="twitch"
           @click:append="searchChannel($store.state.searchString)"
@@ -42,7 +43,7 @@
         </v-text-field>
       </v-form>
     </v-card-text>
-    <v-card-actions>
+    <v-card-actions class="pt-0">
       <v-spacer></v-spacer>
       <v-btn color="error" text @click="dialog=false">close</v-btn>
       <v-btn color="success" @click="searchChannel($store.state.searchString)"

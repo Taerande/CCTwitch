@@ -81,12 +81,16 @@ app.get('/signin/twitch/callback', async (req, res) => {
       `code=${code}&`+
       `grant_type=authorization_code&`,
       `redirect_uri=${redirectUri}`).
-      then((res) =>
-      data = res.data)
+      then((resp) =>{
+        data = resp.data
+      })
       .catch(()=>{
-        res.redirect(frontendUrl+'/error')
+        res.status(400).send({error:err});
       });
 
+    if(data === null){
+      return;
+    }
     const userData = await getUserInfo(data);
     const userInfo = userData.data[0];
     userInfo['publicData'] ={
@@ -96,15 +100,15 @@ app.get('/signin/twitch/callback', async (req, res) => {
       profile_image_url: userData.data[0].profile_image_url
     }
     const id = `twitch:${userInfo.id}`;
-    const twitchOAuthToken = Buffer.from(JSON.stringify(data)).toString('base64');
-
-    await updateUser(userInfo, id);
-    await authenticateUser(userInfo, id);
-    const token = await getAuthToken(id);
-    // res.send({token: token, userInfo: userInfo})
-    res.redirect(frontendUrl+'/?token='+token+'&twitchOAuthToken='+twitchOAuthToken);
+    // const twitchOAuthToken = Buffer.from(JSON.stringify(data)).toString('base64');
+    Promise.all([updateUser(userInfo, id), authenticateUser(userInfo, id), getAuthToken(id)]).then( result => {
+      res.send({token: result[2], userInfo: userInfo, twitchOAuthToken: data})
+    }).catch((err) => {
+      res.status(400).send({error:err});
+    });
+    // res.redirect(frontendUrl+'/?token='+token+'&twitchOAuthToken='+twitchOAuthToken);
   } catch (err) {
-    console.error(err);
+    res.status(400).send({error:err});
   }
 
 });

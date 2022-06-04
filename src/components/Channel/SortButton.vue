@@ -1,14 +1,18 @@
 <template>
-<v-row class="d-flex align-center py-3">
-    <v-btn class="text-caption mr-3" :color="clipSort === 'vids' ? 'success' : ''" @click="changeSortType()">Sort By Vids</v-btn>
+<v-container>
+  <v-row class="d-flex align-center py-3">
+    <v-btn class="text-caption mr-3" :color="clipSort === 'vids' ? 'twitch' : ''"
+    :class="clipSort === 'vids' ? 'white--text' : ''"
+    @click="changeSortType()">Sort By Vids</v-btn>
     <v-menu
       v-model="menu"
       offset-y>
       <template v-slot:activator="{ on }">
         <v-btn
           class="text-caption"
-          :color="clipSort === 'date' ? 'success' : ''"
+          :color="clipSort === 'date' ? 'twitch' : ''"
           v-on="on"
+          :class="clipSort === 'date' ? 'white--text' : ''"
         >
           {{$store.state.dateSort.text === null ? "Sort By Date" : $store.state.dateSort.text}}
         </v-btn>
@@ -54,10 +58,13 @@
         </v-list-item>
       </v-list>
     </v-menu>
-    <div v-if="this.clipSort === 'date'" class="pl-3 red--text text-caption">
-      <v-icon color="error" size="1rem">mdi-calendar-range</v-icon> {{setDateFormat($store.state.dateSort)}}
+  </v-row>
+  <v-row>
+    <div v-if="this.clipSort === 'date'" class="py-1 red--text text-subtitle-2">
+        <v-icon color="error" size="1rem">mdi-calendar-range</v-icon> {{setDateFormat($store.state.dateSort)}}
     </div>
-</v-row>
+  </v-row>
+</v-container>
 </template>
 
 <script>
@@ -76,7 +83,7 @@ export default {
   methods: {
     setDateFormat(el) {
       if (el.text === 'All') {
-        return '전체';
+        return 'All Time';
       }
       return `${this.$moment(el.start).format('ll')} ~ ${this.$moment(el.end).format('ll')}`;
     },
@@ -90,11 +97,20 @@ export default {
       this.$store.commit('SET_DateSort', el);
     },
     async changeSortType() {
-      const asd = () => {
+      if(this.clipSort === 'vids'){
+        this.$emit('openVidsListDialog');
+      } else {
+        const asd = () => {
         this.$emit('changeSort', '');
       };
       await asd();
+      this.$store.commit('SET_DateSort', {
+        text: null,
+        start: null,
+        end: null,
+      });
       this.$emit('changeSort', 'vids');
+      }
     },
   },
   computed: {

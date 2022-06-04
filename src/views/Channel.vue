@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="userInfo">
+  <v-container v-if="userInfo" fluid>
     <v-row class="py-5">
       <span class="text-h3 font-weight-bold pr-3">Channel | {{userInfo.data.display_name}}</span>
     </v-row>
@@ -66,11 +66,11 @@
               <v-icon>mdi-star</v-icon>
             </v-btn>
           </div>
-          <div v-if="this.userInfo.is_live">
+          <div v-if="userInfo.is_live">
             <v-icon color="red" small>mdi-circle</v-icon>
             <span class="red--text text-body-2 pa-1">LIVE</span>
             <span class="red--text text-caption">
-              {{ viewerkFormatter(this.userInfo.viewer_count) }}
+              {{ viewerkFormatter(userInfo.viewer_count) }}
             </span>
           </div>
           <div v-else>
@@ -80,61 +80,65 @@
         </div>
         <v-dialog
           height="100%"
+          scrollable
+          width="80%"
           :content-class="$vuetify.breakpoint.smAndUp ? '' : 'clipIframe'"
           v-model="dialog"
         >
           <v-card>
-            <v-card-title class="info">
-              <span class="text-h5"
+            <v-card-title class="twitch">
+              <span class="text-h5 white--text"
                 >{{ userInfo.data.display_name }}님의 Video List</span
               >
             </v-card-title>
-            <div class="d-flex justify-center align-center pa-3" v-if="vidLists.length > 0">
-              <span>
-                {{setDate(vidLists[vidLists.length-1].data.created_at)}} ~
-                {{setDate(vidLists[0].data.created_at)}}
-              </span>
-            </div>
-            <v-container class="pa-2 mx-auto">
-              <v-row class="align-center">
-                <v-col
-                  @click="changeCarsouelId(index)"
-                  class="d-flex vid-list-item text-truncate"
-                  cols="12"
-                  xl="3"
-                  lg="4"
-                  md="4"
-                  sm="6"
-                  xs="12"
-                  v-for="(item, index) in vidLists"
-                  :key="index"
-                >
-                  <v-img
-                    :max-width="imgWidth"
-                    :src="
-                      setThumbnailSize(item.data.thumbnail_url) ||
-                      '@/assets/img/404.jpg'
-                    "
-                    lazy-src="@/assets/img/404.jpg"
+            <v-card-text class="pa-0 ma-0">
+              <div class="d-flex justify-center align-center pa-3" v-if="vidLists.length > 0">
+                <span>
+                  {{$moment(vidLists[vidLists.length-1].data.created_at).format('ll')}} ~
+                  {{$moment(vidLists[0].data.created_at).format('ll')}}
+                </span>
+              </div>
+              <v-container class="pa-2 mx-auto">
+                <v-row class="align-center">
+                  <v-col
+                    @click="changeCarsouelId(index)"
+                    class="d-flex vid-list-item text-truncate"
+                    cols="12"
+                    xl="3"
+                    lg="4"
+                    md="4"
+                    sm="6"
+                    xs="12"
+                    v-for="(item, index) in vidLists"
+                    :key="index"
                   >
-                  </v-img>
-                  <div class="pl-2 text-truncate" style="width:inherit">
-                    <div class="text-truncate">{{ item.data.title }}</div>
-                    <div class="text-caption d-flex align-center">
-                      <v-icon class="pr-1" x-small>mdi-eye</v-icon>
-                      {{ item.data.view_count === -1 ? 'No Archive' : viewerkFormatter(item.data.view_count) }}
+                    <v-img
+                      :max-width="imgWidth"
+                      :src="
+                        item.data.thumbnail_url ||
+                        '@/assets/img/404.jpg'
+                      "
+                      lazy-src="@/assets/img/404.jpg"
+                    >
+                    </v-img>
+                    <div class="pl-2 text-truncate" style="width:inherit">
+                      <div class="text-truncate">{{ item.data.title }}</div>
+                      <div class="text-caption d-flex align-center">
+                        <v-icon class="pr-1" x-small>mdi-eye</v-icon>
+                        {{ item.data.view_count === -1 ? 'No Archive' : viewerkFormatter(item.data.view_count) }}
+                      </div>
+                      <div class="text-caption">
+                        {{ getDurationTime(item.data.duration) }}
+                      </div>
+                      <div class="text-caption">{{ $moment(item.data.created_at).format('ll') }}</div>
                     </div>
-                    <div class="text-caption">
-                      {{ getDurationTime(item.data.duration) }}
-                    </div>
-                    <div class="text-caption">{{ setDate(item.data.created_at) }}</div>
-                  </div>
-                </v-col>
-              </v-row>
-            </v-container>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="error" @click="dialog = false">Close</v-btn>
+              <v-btn color="error" text @click="dialog = false">Close</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -145,6 +149,7 @@
     </v-row>
     <SortButton
       @changeSort="changeDateSort"
+      @openVidsListDialog="openVidsListDialog"
       :userInfo="userInfo"
       :clipSort="clipSort"
     ></SortButton>
@@ -167,11 +172,12 @@
             😟다시보기가 없고 생방송중이 아닙니다.
           </v-alert>
         </div>
-        <v-progress-circular v-else indeterminate color="twitch"></v-progress-circular>
+        <div class="d-flex justify-center" v-else>
+          <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+        </div>
       </v-row>
       <v-row  v-for="(item, listIndex) in vidLists" :key="listIndex">
         <clips
-        style="min-height:500px;"
           v-if="carsouelId == listIndex"
           :listData="cliplist"
           :clips="{
@@ -224,10 +230,6 @@ export default {
     }
   },
   methods: {
-    setDate(el){
-      const date = this.$moment(el).format('ll');
-      return date;
-    },
     viewerkFormatter(el) {
       const num = el.toString()
       if (num > 999999999) {
@@ -246,11 +248,6 @@ export default {
         return `${num.slice(0, -3)},${num.slice(-3)}`
       }
       return Math.abs(num)
-    },
-    setThumbnailSize(el) {
-      const width = /%{width}/
-      const height = /%{height}/
-      return el.replace(width, '480').replace(height, '272')
     },
     openVidsListDialog() {
       this.dialog = true
@@ -296,13 +293,13 @@ export default {
         })
         .then((res) => {
           if(res.data.data.length > 0){
-            res.data.data.forEach((el) => {
-              const width = /%{width}/;
-              const height = /%{height}/;
-              el.thumbnail_url = el.thumbnail_url.replace(width, '480').replace(height, '272');
-              this.vidLists.push({
-                data: el,
-              })
+            const width = /%{width}/;
+            const height = /%{height}/;
+            this.vidLists = res.data.data.map((v) => {
+              v.thumbnail_url = v.thumbnail_url.replace(width, '480').replace(height, '272');
+              return {
+                data:v,
+              }
             })
             if(this.userInfo.is_live && this.vidLists[0].data.thumbnail_url === ''){
               this.vidLists[0].data.thumbnail_url = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.userInfo.data.login}-480x272.jpg`;
@@ -358,6 +355,14 @@ export default {
           .then((res) => {
             this.userInfo.data = res.data.data['0']
             document.title = `${res.data.data['0'].display_name} | Channel - CCTWIICH`
+          }).catch(()=>{
+            this.$router.push({path:'/'}).catch(()=>{});
+            this.$store.commit('SET_SnackBar',{
+              type:'error',
+              text:'스트리머를 찾을 수 없습니다.',
+              value:true,
+
+            })
           })
       }
       catch{(err) => {
@@ -437,6 +442,9 @@ export default {
     }
   },
   async created() {
+    if(!this.$route.query.q){
+      this.$router.push({path:'/'}).catch(()=>{});
+    }
     let tempuserInfo = this.$store.state.userinfo.userInfo;
     if(!this.$store.state.userinfo.userInfo) {
       await this.$firebase.auth().onAuthStateChanged(async (user) => {

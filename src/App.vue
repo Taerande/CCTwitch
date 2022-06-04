@@ -1,27 +1,28 @@
 <template>
-  <v-app>
+  <v-app v-if="$store.state.firebaseLoaded && initData">
     <AppBar app></AppBar>
-    <!-- <bookmark app></bookmark> -->
-    <v-main class="app-container" app  v-if="$store.state.firebaseLoaded && initData">
-      <v-container class="absolute-center" v-if="!initData">
-        <v-row>
-          <v-progress-circular class="mx-auto" indeterminate color="twitch"></v-progress-circular>
-        </v-row>
-      </v-container>
-      <router-view v-else class="mx-auto" :key="$route.fullPath" />
-    </v-main>
-    <v-main v-else  class="app-container" app>
+    <v-main class="app-container" app>
       <v-container>
-        <v-progress-circular class="absolute-center" color="twitch" size="60" width="6" indeterminate></v-progress-circular>
+        <router-view :key="$route.fullPath" />
       </v-container>
     </v-main>
     <SnackBar app></SnackBar>
     <Footer app></Footer>
   </v-app>
+  <v-app v-else>
+    <v-main class="app-container" app>
+      <v-row class="d-block absolute-center">
+        <div class="d-flex justify-center">
+          <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+        </div>
+        <div class="d-flex justify-center">
+        Initialize CCTwitch...
+      </div>
+      </v-row>
+    </v-main>
+  </v-app>
 </template>
-
 <script>
-// import bookmark from '@/components/layout/bookmark.vue'
 import SnackBar from '@/components/layout/SnackBar.vue'
 import AppBar from '@/components/layout/AppBar.vue'
 import Footer from '@/components/layout/Footer.vue'
@@ -32,7 +33,6 @@ export default {
   components: {
     AppBar,
     Footer,
-    // bookmark,
     SnackBar,
   },
   data() {
@@ -47,6 +47,7 @@ export default {
   },
 
  async created() {
+    this.$store.commit('INIT_localStorage');
     this.$store.commit('SET_SignInDialog', false);
     const appAccessToken = JSON.parse(localStorage.getItem('twitchAppAccessToken'));
     this.$store.commit('SET_TwitchAppAccessToken', appAccessToken);
@@ -88,7 +89,7 @@ export default {
 }
 .absolute-center{
   position: absolute;
-  top:40vh;
+  top:50%;
   left:50%;
   transform: translate(-50%, -50%);
 }
@@ -115,6 +116,9 @@ a {
   text-decoration: none !important;
   color: inherit !important;
 }
+.v-dialog--active{
+  margin:0 !important;
+}
 .hidden {
   display: none;
 }
@@ -122,8 +126,8 @@ div[role='dialog'] {
   box-shadow: none;
 }
 main {
-  margin-right: 15%;
-  margin-left: 15%;
+  margin-right: 20%;
+  margin-left: 20%;
 }
 
 ::-webkit-scrollbar {
@@ -214,12 +218,12 @@ html.overflow-y-hidden{
     display: none;
   }
 }
-
-.v-dialog.clipIframe {
-  margin: 0 !important;
-}
 .hoverCursor{
   cursor: pointer;
+}
+.iframeTop{
+  position: absolute;
+  top:0;
 }
 .text-stroke {
   text-shadow:
@@ -246,8 +250,88 @@ html.overflow-y-hidden{
   padding-bottom: 2px !important;
   padding-top: 2px !important;
 }
-.v-progress-circular--indeterminate > svg{
-  animation: progress-circular-rotate 1s linear infinite !important;
-  transition: all 0.1s ease-in-out !important;
+
+.custom5cols {
+  width: 20%;
+  max-width: 20%;
+  flex-basis: 20%;
+}
+
+.v-snack__content{
+  padding: 4px 6px !important;
+}
+
+.lds-ellipsis {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.cliplist-canvas{
+  border-radius: 5%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  width: 50px;
+  height: 50px;
+}
+.lds-ellipsis div {
+  position: absolute;
+  top: 33px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--twitch-color);
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+.v-skeleton-loader__image {
+  aspect-ratio: 16 / 9 !important;
+  height: auto !important;
+}
+.v-skeleton-loader__list-item-two-line{
+  height: auto !important;
+  padding: 0 !important;
+  padding-top: 5px !important;
+  margin-right: 20px !important;
+}
+.lds-ellipsis div:nth-child(1) {
+  left: 8px;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(2) {
+  left: 8px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(3) {
+  left: 32px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(4) {
+  left: 56px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(24px, 0);
+  }
 }
 </style>

@@ -16,7 +16,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 import ClipIframeDataTableDialog from '../dialog/ClipIframeDataTableDialog';
 import draggable from 'vuedraggable'
 export default {
@@ -77,58 +76,6 @@ export default {
         this.$store.commit('SET_SnackBar',{type:'error', text:`${err.message}`, value:true})
       });
       }
-    },
-    updateData(el) {
-      const idList = [];
-      el.pinnedClips.forEach((element) => {
-        idList.push(element.id);
-      });
-      axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          id: idList,
-          first: 100,
-        },
-      }).then((res) => {
-        this.$store.commit('UPDATE_pinndedClip', res.data.data);
-      });
-    },
-    compareArray(a, b) {
-      const result = a.length === b.length && a.every((value) => b.includes(value));
-      return result;
-    },
-    sortByViews() {
-      this.page = 1;
-      if (this.viewSort === 'asc') {
-        this.viewSort = 'desc';
-        this.$store.commit('SORT_cliplist', { data: this.$store.state.currentCliplist.pinnedClips, type: 'views', order: 'desc' });
-      } else {
-        this.viewSort = 'asc';
-        this.$store.commit('SORT_cliplist', { data: this.$store.state.currentCliplist.pinnedClips, type: 'views', order: 'asc' });
-      }
-    },
-    sortByCreated() {
-      this.page = 1;
-      if (this.createdSort === 'asc') {
-        this.createdSort = 'desc';
-        this.$store.commit('SORT_cliplist', { data: this.$store.state.currentCliplist.pinnedClips, type: 'created', order: 'desc' });
-      } else {
-        this.createdSort = 'asc';
-        this.$store.commit('SORT_cliplist', { data: this.$store.state.currentCliplist.pinnedClips, type: 'created', order: 'asc' });
-      }
-    },
-    sortByName() {
-      this.page = 1;
-      if (this.nameSort === 'asc') {
-        this.nameSort = 'desc';
-        this.$store.commit('SORT_cliplist', { data: this.$store.state.currentCliplist.pinnedClips, type: 'name', order: 'desc' });
-      } else {
-        this.nameSort = 'asc';
-        this.$store.commit('SORT_cliplist', { data: this.$store.state.currentCliplist.pinnedClips, type: 'name', order: 'asc' });
-      }
-    },
-    resetData() {
-      this.$store.commit('SET_currCliplist', { data: '' });
     },
   },
   computed: {
