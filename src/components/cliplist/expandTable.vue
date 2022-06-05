@@ -11,6 +11,16 @@
     <v-col v-else cols="12" v-for="(clip, index) in currentCliplist" :key="index">
         <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
       <v-divider class="my-2"></v-divider>
+      <v-card>
+        <Adsense
+          data-ad-client="ca-pub-8597405222136575"
+          data-ad-slot="5644022389"
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+          ins-style="display:inline-block;background:red;"
+        ></Adsense>
+      </v-card>
+
     </v-col>
 </v-row>
 </template>

@@ -88,7 +88,7 @@
           <v-card>
             <v-card-title class="twitch">
               <span class="text-h5 white--text"
-                >{{ userInfo.data.display_name }}님의 Video List</span
+                >{{ userInfo.data.display_name }}님의 Archive</span
               >
             </v-card-title>
             <v-card-text class="pa-0 ma-0">

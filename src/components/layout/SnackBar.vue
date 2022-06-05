@@ -2,14 +2,12 @@
   <div>
     <v-snackbar
       app
-      outlined
       max-width="1280"
       v-for="(item, index) in $store.state.snackbarArr"
       :key="index"
       :timeout="-1"
       class="d-flex justify-center"
-      :color="item.type"
-      :style="{ 'margin-bottom': `${index * 50 + 50}px` }"
+      :style="{ 'margin-bottom': `${index * 55 + 55}px` }"
       v-model="item.value"
     >
       <div class="d-flex align-center text-truncate">

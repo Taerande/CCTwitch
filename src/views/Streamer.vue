@@ -5,8 +5,9 @@
   </v-row>
   <v-divider></v-divider>
   <v-subheader>Book Mark</v-subheader>
+  <DisplyaAdContainerVue></DisplyaAdContainerVue>
   <v-row class="d-flex justify-start pa-3" v-if="streamerList.liked.length > 0">
-    <v-col cols="12" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex flex-column  align-center"
+    <v-col cols="6" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex flex-column  align-center"
     v-for="item in streamerList.liked"
     :key="item.id">
       <v-card outlined dark class="rounded-lg py-1" width="320px" :to="{name: 'Channel', query:{
@@ -44,19 +45,14 @@
       </div>
     </v-alert>
   </v-row>
-  <Adsense
-    data-ad-client="ca-pub-8597405222136575"
-    data-ad-slot="5644022389"
-    data-ad-format="rspv"
-    ins-style="display:inline-block;"
-    ></Adsense>
   <v-divider class="mt-5"></v-divider>
   <v-subheader>On Live</v-subheader>
+  <DisplyaAdContainerVue></DisplyaAdContainerVue>
   <v-row v-if="loading.stream" class="d-flex justify-center py-10">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-flex justify-start pa-3" v-if="streamerList.stream.length > 0 && !loading.stream">
-    <v-col cols="12" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
+    <v-col cols="12" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''" lg="3" md="4" sm="6" class="pa-2 d-flex justify-center"
     v-for="item in streamerList.stream"
     :key="item.id">
       <v-card outlined dark class="py-1 rounded-lg" width="320px"  :to="{name: 'Channel', query:{
@@ -112,19 +108,14 @@
       </div>
     </v-alert>
   </v-row>
-  <Adsense
-    data-ad-client="ca-pub-8597405222136575"
-    data-ad-slot="5644022389"
-    data-ad-format="rspv"
-    ins-style="display:inline-block;"
-    ></Adsense>
   <v-divider class="mt-5"></v-divider>
   <v-subheader>All</v-subheader>
+  <DisplyaAdContainerVue></DisplyaAdContainerVue>
   <v-row v-if="loading.follow" class="d-flex justify-center py-10">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-flex justify-start pa-3" v-if="streamerList.follow.length > 0 && !loading.follow">
-    <v-col cols="12" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
+    <v-col cols="6" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in streamerList.follow"
     :key="item.to_id">
      <v-card outlined dark class="d-flex  py-1 align-center rounded-lg" width="320px" :img="reduceOfflineImgSize(item.offline_image_url)" :to="{name: 'Channel', query:{
@@ -173,9 +164,11 @@
 
 <script>
 import axios from 'axios';
+import DisplyaAdContainerVue from '../components/DisplyaAdContainer.vue';
 
 export default {
   components: {
+    DisplyaAdContainerVue,
   },
   data() {
     return {
@@ -360,13 +353,6 @@ export default {
 .v-avatar:hover{
   cursor: pointer;
 }
-// .text-stroke {
-//   text-shadow:
-//   -1px -1px 0 #000,
-//   1px -1px 0 #000,
-//   -1px 1px 0 #000,
-//   1px 1px 0 #000;
-// }
 .v-card--reveal {
   align-items: center;
   bottom: 0;

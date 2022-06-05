@@ -17,20 +17,13 @@
       </v-col>
       <Search class="pt-6"></Search>
     </v-row>
-    <Adsense
-    data-adtest="on"
-      data-ad-client="ca-pub-8597405222136575"
-      data-ad-slot="5644022389"
-      data-ad-format="auto"
-      data-full-width-responsive="true"
-      ins-style="display:inline-block;background:red;"
-    ></Adsense>
+    <DisplyaAdContainerVue></DisplyaAdContainerVue>
     <div class="d-flex align-center">
       <span>Live Stream - {{lang}}</span>
     </div>
     <v-divider class="my-1"></v-divider>
     <v-row class="d-flex col-12" v-if="streamingList.length > 0 && loading">
-      <v-col v-for="item in streamingList" :key="item.id" cols="6" xl="2" lg="3" md="3" sm="6" class="pa-2">
+      <v-col v-for="item in streamingList" :key="item.id" cols="6" xl="2" lg="3" md="4" sm="6" class="pa-2">
         <v-card flat class="pa-0" :to="{name: 'Channel', query:{
             q: item.user_login
           }}">
@@ -62,20 +55,12 @@
       <v-btn :loading="dataLoading" @click="getLiveStreamWithLang()" color="twitch" class="white--text" small block><v-icon small color="white">mdi-chevron-double-down</v-icon>더 보기</v-btn>
     </v-row>
     <v-row class="d-flex col-12" v-else>
-      <v-col class="pa-2" cols="6" xl="2" lg="3" md="3" sm="6" v-for="(item, idx) in  skeletonCount" :key="idx">
+      <v-col class="pa-2" cols="6" xl="2" lg="3" md="4" sm="6" v-for="(item, idx) in  skeletonCount" :key="idx">
         <v-skeleton-loader
         type="image, list-item-two-line"
       ></v-skeleton-loader>
       </v-col>
     </v-row>
-    <Adsense
-    data-adtest="on"
-      data-ad-client="ca-pub-8597405222136575"
-      data-ad-slot="5644022389"
-      data-ad-format="auto"
-      data-full-width-responsive="true"
-      ins-style="display:inline-block;background:red;"
-    ></Adsense>
     <v-row class="d-flex pt-3 px-3">
       <div class="text-h2 font-weight-bold">
         <div>
@@ -95,10 +80,12 @@
 <script>
 import axios from 'axios';
 import Search from '../components/Search';
+import DisplyaAdContainerVue from '../components/DisplyaAdContainer.vue';
 export default {
   name: 'Home',
 
   components: {
+    DisplyaAdContainerVue,
     Search,
   },
   data() {
@@ -149,7 +136,7 @@ export default {
       if(this.$vuetify.breakpoint.smAndDown){
         return 6;
       } else if(this.$vuetify.breakpoint.mdAndDown) {
-        return 12;
+        return 18;
       } else {
         return 24;
       }
@@ -161,6 +148,9 @@ export default {
 
   },
   async mounted(){
+    document.addEventListener('DOMContentLoaded', (e) => {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    }, false)
     await this.getLiveStreamWithLang();
     this.loading = true;
     document.title = 'Welcome CCTWITCH'

@@ -12,6 +12,7 @@
         <span class="text-caption pl-1">클립 추가</span>
       </v-list-item>
       <v-btn
+        class="d-flex mx-auto"
         v-else
         v-on="on"
         v-bind="attrs"

@@ -1,31 +1,28 @@
 <template>
-<v-container>
+<v-container fluid>
   <v-row class="py-5">
     <span class="text-h3 font-weight-bold pr-3">Trending</span>
   </v-row>
   <v-divider></v-divider>
-  <v-row v-if="loading" class="d-block absolute-center">
-    <div class="d-flex justify-center">
-      <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
-    </div>
+  <v-row v-if="loading" class="absolute-center">
+    <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-flex pt-5 col-12" v-else-if="cliplists.length > 0 && !loading">
     <v-row class="d-flex col-12" v-for="(chunk, index) in cliplistChunk" :key="index">
-      <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-2" v-for="(item, startIndex) in chunk.slice(0,index%7+4)" :key="item.id+startIndex">
+      <v-col cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2" v-for="(item, startIndex) in chunk.slice(0,index%7+4)" :key="item.id+startIndex">
         <CliplistDefaultVue :item="item"></CliplistDefaultVue>
       </v-col>
       <v-col
-        style="min-width: 250px;"
         v-if="chunk.length > index%7+4"
-        cols="12" xl="3" lg="4" md="4" sm ="6" xs="12" class="pa-2">
+        cols="12" xl="3" lg="4" md="4" sm="12" class="pa-2">
           <InArticleAdsense
-          data-ad-client="ca-pub-8597405222136575"
-          data-ad-slot="1875328416"
-          data-ad-format="fluid"
-          ins-style="display:block;text-align:center;width:inherit;"
-          ></InArticleAdsense>
+            data-ad-client="ca-pub-8597405222136575"
+            data-ad-slot="1875328416"
+            data-ad-format="fluid"
+            ins-style="display:block;text-align:center;width:inherit;"
+            ></InArticleAdsense>
       </v-col>
-      <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-2" v-for="(item, endIndex) in chunk.slice(index%7+4)" :key="item.id+endIndex">
+      <v-col cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2" v-for="(item, endIndex) in chunk.slice(index%7+4)" :key="item.id+endIndex">
         <CliplistDefaultVue :item="item"></CliplistDefaultVue>
       </v-col>
     </v-row>

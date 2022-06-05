@@ -12,7 +12,7 @@
     <v-col
      v-for="(item,startIndex) in chunk.slice(0,index%7+4)"
           :key="item.id+startIndex"
-      cols="12" lg="3" md="4" sm="6" xs="12"
+      cols="12" lg="3" md="4" sm="6"
       class="pa-2"
       :class="item.broadcaster_id"
       >
@@ -24,19 +24,20 @@
       <div class="d-flex justify-center pt-2" style="width:inherit">{{item.title}}</div>
     </v-col>
     <v-col
+      style="min-width:250px;"
       v-if="chunk.length > index%7+4"
-      cols="12" xl="3" lg="4" md="4" sm ="6" xs="12" class="pa-2">
+      cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2">
         <InArticleAdsense
-          data-ad-client="ca-pub-8597405222136575"
-          data-ad-slot="1875328416"
-          data-ad-format="fluid"
-          ins-style="display:inline-block;text-align:center;"
-          ></InArticleAdsense>
+        data-ad-client="ca-pub-8597405222136575"
+        data-ad-slot="1875328416"
+        data-ad-format="auto"
+        ins-style="display:block;width:inherit;"
+        ></InArticleAdsense>
     </v-col>
     <v-col
      v-for="(item,endIndex) in chunk.slice(index%7+4)"
           :key="item.id+endIndex"
-      cols="12" lg="3" md="4" sm="6" xs="12"
+      cols="12" lg="3" md="4" sm="6"
       class="pa-2"
       :class="item.broadcaster_id"
       >

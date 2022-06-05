@@ -13,7 +13,8 @@
     </v-row>
     <v-row class="d-flex col-12" v-for="(chunk, index) in cliplistChunk" :key="index">
       <v-col
-        cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-2"
+      style="min-width:250px;"
+        cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2"
         v-for="(item,startIndex) in chunk.slice(0,index%7+4)"
         :key="item.id+startIndex"
         >
@@ -26,16 +27,18 @@
       </v-col>
       <v-col
         v-if="chunk.length > index%7+4"
-        cols="12" xl="3" lg="4" md="4" sm ="6" xs="12" class="pa-2">
+        style="min-width:250px;"
+        cols="12" xl="3" lg="4" md="4" sm="6">
         <InArticleAdsense
           data-ad-client="ca-pub-8597405222136575"
-          data-ad-slot="4467586752"
-          data-ad-format="auto"
-          ins-style="display:inline-block;background:red;"
+          data-ad-slot="1875328416"
+          data-ad-format="fluid"
+          ins-style="display:inline-block;width:100%;"
           ></InArticleAdsense>
       </v-col>
       <v-col
-        cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-2"
+      style="min-width:250px;"
+        cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2"
         v-for="(item,endIndex) in chunk.slice(index%7+4)"
         :key="item.id+endIndex+index%7+4"
         >

@@ -6,7 +6,7 @@
     <AddNewCliplistDialog v-if="$store.state.userinfo.userInfo" :type="{type:'add'}"></AddNewCliplistDialog>
   </v-row>
   <v-divider></v-divider>
-   <v-row v-if="loading" class="absolute-center">
+  <v-row v-if="loading" class="absolute-center">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-flex pt-5" v-else>
@@ -27,7 +27,7 @@
             <clipListSortBtnVue :data="cliplist" @sortCliplist="sortCliplist"></clipListSortBtnVue>
           </v-row>
           <v-row v-if="cliplist.length >0">
-              <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-3" v-for="(item,index) in cliplist" :key="item.id+index">
+              <v-col cols="12" xl="3" lg="4" md="4" sm="6" class="pa-3" v-for="(item,index) in cliplist" :key="item.id+index">
                 <CliplistDefaultVue :item="item" :type="'mycliplist'"></CliplistDefaultVue>
               </v-col>
           </v-row>
@@ -46,7 +46,7 @@
             <clipListSortBtnVue :data="likedCliplist" @sortCliplist="sortlLkedCliplist"></clipListSortBtnVue>
           </v-row>
           <v-row v-if="likedCliplist.length > 0">
-              <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" class="pa-3" v-for="(item,index) in likedCliplist" :key="item.id+index">
+              <v-col cols="12" xl="3" lg="4" md="4" sm="6" class="pa-3" v-for="(item,index) in likedCliplist" :key="item.id+index">
                 <CliplistDefaultVue :item="item" :type="'mycliplist'"></CliplistDefaultVue>
               </v-col>
           </v-row>

@@ -3683,3 +3683,66 @@ Issues? Report them at https://github.com/firebase/firebase-tools/issues and att
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
  
+[debug] [2022-06-05T01:12:45.086Z] ----------------------------------------------------------------------
+[debug] [2022-06-05T01:12:45.092Z] Command:       E:\NodeJs\node.exe C:\Users\Righteous\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only functions
+[debug] [2022-06-05T01:12:45.092Z] CLI Version:   10.2.1
+[debug] [2022-06-05T01:12:45.092Z] Platform:      win32
+[debug] [2022-06-05T01:12:45.093Z] Node Version:  v14.17.3
+[debug] [2022-06-05T01:12:45.095Z] Time:          Sun Jun 05 2022 10:12:45 GMT+0900 (대한민국 표준시)
+[debug] [2022-06-05T01:12:45.096Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-06-05T01:12:45.112Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2022-06-05T01:12:45.483Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-06-05T01:12:45.483Z] > authorizing via signed-in user (revive0405@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project twitchhotclip. This may result in unexpected behavior. 
+[debug] [2022-06-05T01:12:45.684Z] [hub] writing locator at C:\Users\RIGHTE~1\AppData\Local\Temp\hub-twitchhotclip.json
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, firestore, database, hosting, pubsub, storage {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mauth, firestore, database, hosting, pubsub, storage\u001b[22m"}}
+[info] +  functions: Using node@14 from host. {"metadata":{"emulator":{"name":"functions"},"message":"Using node@14 from host."}}
+[debug] [2022-06-05T01:12:45.803Z] defaultcredentials: writing to file C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json
+[debug] [2022-06-05T01:12:45.805Z] Setting GAC to C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Righteous\\AppData\\Roaming\\firebase\\revive0405_gmail_com_application_default_credentials.json"}}
+[debug] [2022-06-05T01:12:45.808Z] > refreshing access token with scopes: []
+[debug] [2022-06-05T01:12:45.809Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ <request body omitted>
+[debug] [2022-06-05T01:12:46.032Z] <<< HTTP RESPONSE 200 {"pragma":"no-cache","cache-control":"no-cache, no-store, max-age=0, must-revalidate","date":"Sun, 05 Jun 2022 01:12:48 GMT","expires":"Mon, 01 Jan 1990 00:00:00 GMT","content-type":"application/json; charset=utf-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[debug] [2022-06-05T01:12:46.066Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig [none]
+[debug] [2022-06-05T01:12:46.247Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2022-06-05T01:12:46.247Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2022-06-05T01:12:46.510Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig 200
+[debug] [2022-06-05T01:12:46.510Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig {"projectId":"twitchhotclip","databaseURL":"https://twitchhotclip-default-rtdb.asia-southeast1.firebasedatabase.app","storageBucket":"twitchhotclip.appspot.com","locationId":"asia-northeast3"}
+[debug] [2022-06-05T01:12:46.786Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2022-06-05T01:12:46.787Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2022-06-05T01:12:46.787Z] Starting Emulator UI with command {"binary":"node","args":["C:\\Users\\Righteous\\.cache\\firebase\\emulators\\ui-v1.6.5\\server.bundle.js"],"optionalArgs":[],"joinArgs":false} {"metadata":{"emulator":{"name":"ui"},"message":"Starting Emulator UI with command {\"binary\":\"node\",\"args\":[\"C:\\\\Users\\\\Righteous\\\\.cache\\\\firebase\\\\emulators\\\\ui-v1.6.5\\\\server.bundle.js\"],\"optionalArgs\":[],\"joinArgs\":false}"}}
+[info] i  ui: Emulator UI logging to ui-debug.log {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI logging to \u001b[1mui-debug.log\u001b[22m"}}
+[debug] [2022-06-05T01:12:47.745Z] Web / API server started at localhost:4000
+ {"metadata":{"emulator":{"name":"ui"},"message":"Web / API server started at localhost:4000\n"}}
+[info] i  functions: Watching "E:\Vue_Project\twitch-hot-clip-tracker\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"E:\\Vue_Project\\twitch-hot-clip-tracker\\functions\" for Cloud Functions..."}}
+[debug] [2022-06-05T01:12:48.015Z] Validating nodejs source
+[debug] [2022-06-05T01:13:21.197Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.0",
+    "firebase-admin": "^9.8.0",
+    "firebase-functions": "^3.21.2"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}
+[debug] [2022-06-05T01:13:21.197Z] Building nodejs source
+[debug] [2022-06-05T01:13:21.197Z] Analyzing nodejs backend spec

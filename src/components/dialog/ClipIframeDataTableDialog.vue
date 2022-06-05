@@ -7,7 +7,7 @@
   <template v-slot:activator="{ on }" class="d-flex">
     <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" class="d-flex ma-0 pa-0" flat>
       <v-card-title class="justify-center ma-0 pa-0" style="width:3rem;">
-        <span class="handle" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId"> <v-icon>mdi-drag-horizontal-variant</v-icon></span>
+        <span class="handle" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId && hovering"> <v-icon>mdi-drag-horizontal-variant</v-icon></span>
         <span v-else class="text-caption font-weight-bold">{{index+1}}</span>
       </v-card-title>
       <v-card-text class="d-flex align-center ma-0 pa-0 text-truncate">
@@ -48,17 +48,9 @@
   </template>
   <v-card class="pa-0 ma-0 black">
     <v-card-title class="d-block pa-0 ma-0 copyBody">
-      <div class="black d-flex justify-end align-center">
+      <div class="d-flex justify-end align-center">
         <span class="white--text pl-2">{{this.$moment(clipData.created_at).format('ll')}}</span>
         <v-spacer></v-spacer>
-        <v-btn dark :disabled="clipData.video_id.length === 0" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
-        <v-btn color="error" icon @click="copyClip(clipData)">
-          <v-icon>mdi-clipboard-multiple-outline</v-icon>
-        </v-btn>
-        <v-btn color="error" icon @click="downloadClip(clipData)">
-          <v-icon>mdi-download</v-icon>
-        </v-btn>
-        <pinClip v-if="$store.state.userinfo.userInfo" :clipData="{data:clipData}" :listData="listData"></pinClip>
         <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
       </div>
     </v-card-title>
@@ -74,6 +66,30 @@
         allowfullscreen="true"></iframe>
     </v-responsive>
     </v-card-text>
+     <div class="d-flex justify-center align-center pa-2">
+      <div class="px-1 mx-1">
+        <v-btn class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <div>다시보기</div>
+      </div>
+      <div class="px-1 mx-1">
+        <v-btn class="d-flex mx-auto" color="error" icon @click="copyClip(clipData)">
+          <v-icon>mdi-clipboard-multiple-outline</v-icon>
+        </v-btn>
+        <div>URL 복사</div>
+      </div>
+      <div class="px-1 mx-1">
+        <v-btn class="d-flex mx-auto" color="error" icon @click="downloadClip(clipData)">
+          <v-icon>mdi-download</v-icon>
+        </v-btn>
+        <div>다운로드</div>
+      </div>
+      <div class="px-1 mx-1">
+        <pinClip class="d-flex mx-auto" v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
+        <v-btn class="d-flex mx-auto" v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon>
+        </v-btn>
+        <div>추가하기</div>
+      </div>
+    </div>
   </v-card>
 </v-dialog>
 </template>

@@ -4,7 +4,7 @@
     no-click-animation
     scrollable
     @keydown:esc="dialog = !dialog"
-    max-width="1280">
+    max-width="1080">
     <template v-slot:activator="{ on, attrs }">
       <v-btn
         icon
@@ -49,26 +49,16 @@
           </template>
           </v-text-field>
       </v-form>
-      <v-card v-if="clipResult.id" class="pa-0 ma-0 rounded-lg">
-        <v-card-title class="pa-3">
+      <v-card v-if="clipResult.id" class="pa-3 ma-0">
+        <v-card-title class="pa-0 py-2">
           <div>{{$moment(clipResult.created_at).format('ll')}}</div>
           <v-spacer></v-spacer>
-          <v-btn color="erorr" icon @click="clipResult = ''"><v-icon color="error">mdi-close</v-icon></v-btn>
+          <v-btn color="erorr" icon @click="clipResult.id = ''"><v-icon color="error">mdi-close</v-icon></v-btn>
         </v-card-title>
-        <v-card-text class="pa-0">
-          <v-container fluid>
-            <v-row class="pa-3">
-              <v-col cols="12" xs="6" sm="8" md="7" class="pa-0">
-                <v-responsive :aspect-ratio="16/9">
-                  <iframe class="black" :src="`${clipResult.embed_url}&parent=${$store.state.embedUrl}&autoplay=false&muted=false&preload=auto`" width="100%" height="100%" allowfullscreen frameborder="0"></iframe>
-                </v-responsive>
-              </v-col>
-              <v-col cols="12" xs="6" sm="4" md="5" class="pa-0">
-                <v-btn color="twitch" class="white--text"> <v-icon color="white">mdi-download</v-icon> 다운로드 </v-btn>
-                <v-btn color="success">채널</v-btn>
-              </v-col>
-            </v-row>
-          </v-container>
+        <v-card-text class="pa-0 ma-0">
+          <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 16/9">
+            <iframe class="black" :src="`${clipResult.embed_url}&parent=${$store.state.embedUrl}&autoplay=false&muted=false&preload=auto`" width="100%" height="100%" allowfullscreen frameborder="0"></iframe>
+          </v-responsive>
         </v-card-text>
       </v-card>
       </v-card-text>
@@ -86,7 +76,7 @@
         :loading="loading"
         color="success"
         @click="addToFireStoreCliplist()"
-        :disabled="clipResult.id === null || isIn"
+        :disabled="clipResult.id === '' || isIn"
         >
         Add
         </v-btn>
@@ -106,7 +96,7 @@ export default {
       loading:false,
       clipUrl: '',
       clipResult:{
-        id:null,
+        id: '',
       },
       importLoading: false,
       resultId:'',
@@ -149,9 +139,7 @@ export default {
               this.$store.commit('ADD_CurrentCliplist', [stateData])
             }
             this.$store.commit('SET_SnackBar',{type:'success', text:`Clip: ${this.clipResult.title}을 저장했습니다.`});
-            this.clipResult = {
-              id:null,
-            }
+            this.clipResult.id = '';
             this.loading = false;
             this.clipUrl = null;
             this.dialog = false;
@@ -193,7 +181,7 @@ export default {
   },
   computed:{
     isIn(){
-      return this.parent.clipIds.find(element => element === this.resultId || element === this.clipResult.id)
+      return this.parent.clipIds.find(element => element === this.clipResult.id) === '';
     }
   },
   created() {

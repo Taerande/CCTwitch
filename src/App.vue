@@ -1,16 +1,15 @@
 <template>
   <v-app v-if="$store.state.firebaseLoaded && initData">
     <AppBar app></AppBar>
-    <v-main class="app-container" app>
-      <v-container>
-        <router-view :key="$route.fullPath" />
-      </v-container>
+    <v-main app>
+      <router-view :key="$route.fullPath" />
     </v-main>
     <SnackBar app></SnackBar>
+    <DisplyaAdContainerVue app></DisplyaAdContainerVue>
     <Footer app></Footer>
   </v-app>
   <v-app v-else>
-    <v-main class="app-container" app>
+    <v-main app>
       <v-row class="d-block absolute-center">
         <div class="d-flex justify-center">
           <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
@@ -27,6 +26,7 @@ import SnackBar from '@/components/layout/SnackBar.vue'
 import AppBar from '@/components/layout/AppBar.vue'
 import Footer from '@/components/layout/Footer.vue'
 import axios from 'axios'
+import DisplyaAdContainerVue from './components/DisplyaAdContainer.vue'
 
 export default {
   name: 'App',
@@ -34,6 +34,7 @@ export default {
     AppBar,
     Footer,
     SnackBar,
+    DisplyaAdContainerVue
   },
   data() {
     return {
@@ -78,7 +79,7 @@ export default {
         });
     }
     this.initData = true;
-  }
+  },
 }
 </script>
 <style lang="scss">
@@ -106,6 +107,7 @@ header {
 }
 html,
 body {
+  height: 100vh !important;
   box-sizing: border-box;
   font-family: 'Noto Sans KR', sans-serif;
 }
@@ -126,8 +128,8 @@ div[role='dialog'] {
   box-shadow: none;
 }
 main {
-  margin-right: 20%;
-  margin-left: 20%;
+  margin-right: 18%;
+  margin-left: 18%;
 }
 
 ::-webkit-scrollbar {
@@ -169,9 +171,6 @@ html.overflow-y-hidden{
   }
 }
 @media screen and (max-width: 960px) {
-  html {
-    font-size: 90%;
-  }
   header {
     padding-left: 3%;
     padding-right: 3%;
@@ -196,9 +195,6 @@ html.overflow-y-hidden{
   }
 }
 @media screen and (max-width: 600px) {
-  html {
-    font-size: 80%;
-  }
   header {
     padding-left: 3px;
     padding-right: 3px;

@@ -23,7 +23,7 @@
                   <v-icon>mdi-chevron-double-down</v-icon>
                 </v-btn>
               </v-card-title>
-              <v-card-text class="pt-3">
+              <v-card-text class="pt-3 pb-10">
                 <v-list>
                   <div class="text-caption pl-5">Search</div>
                   <v-form
@@ -137,6 +137,8 @@
       <SearchBar></SearchBar>
     </div>
     <v-avatar
+      class="hoverCursor"
+      @click="changeDrawer(!drawer)"
       v-if="$store.state.userinfo.userInfo"
       size="36"
     >
@@ -234,10 +236,10 @@ export default {
 .v-dialog--fullscreen.drawer{
   border-radius: 5px;
   margin: 0;
-  height: 50%;
+  height: 70%;
   position: fixed;
   overflow-y: auto;
-  top: 50%;
+  top: 30%;
   left: 15%;
   width: 40%;
 }
@@ -245,10 +247,10 @@ export default {
   .v-dialog--fullscreen.drawer{
   border-radius: 5px;
   margin: 0;
-  height: 50%;
+  height: 70%;
   position: fixed;
   overflow-y: auto;
-  top: 50%;
+  top: 30%;
   left: 10px;
   width: 70%;
 }
