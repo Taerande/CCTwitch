@@ -9,10 +9,16 @@
     </v-row>
     <v-row class="text-center justify-center align-center pb-5">
       <v-col cols="12">
-        <div class="d-flex justify-center">
-          <h1 class="display-1 font-weight-bold">
-            Find Streamer & Collect Clip
-          </h1>
+        <div class="d-flex justify-center align-center">
+          <h2 class="display-1 font-weight-bold">
+            Find Streamer
+          </h2>
+          <h2 class="display-1 font-weight-bold px-1">
+            &
+          </h2>
+          <h2 class="display-1 font-weight-bold">
+            Collect Clip
+          </h2>
         </div>
       </v-col>
       <Search class="pt-6"></Search>
@@ -20,10 +26,12 @@
     <DisplyaAdContainerVue></DisplyaAdContainerVue>
     <div class="d-flex align-center">
       <span>Live Stream - {{lang}}</span>
+      <v-spacer></v-spacer>
+      <v-btn color="twitch" @click="refresh()" icon><v-icon>mdi-refresh</v-icon></v-btn>
     </div>
     <v-divider class="my-1"></v-divider>
     <v-row class="d-flex col-12" v-if="streamingList.length > 0 && loading">
-      <v-col v-for="item in streamingList" :key="item.id" cols="6" xl="2" lg="3" md="4" sm="6" class="pa-2">
+      <v-col v-for="item in streamingList" :key="item.id+item.user_login" cols="6" xl="2" lg="3" md="4" sm="6" class="pa-2">
         <v-card flat class="pa-0" :to="{name: 'Channel', query:{
             q: item.user_login
           }}">
@@ -52,7 +60,7 @@
           <span>{{item.title}}</span>
         </div>
       </v-col>
-      <v-btn :loading="dataLoading" @click="getLiveStreamWithLang()" color="twitch" class="white--text" small block><v-icon small color="white">mdi-chevron-double-down</v-icon>더 보기</v-btn>
+      <!-- <v-btn :loading="dataLoading" @click="getLiveStreamWithLang()" color="twitch" class="white--text" small block><v-icon small color="white">mdi-chevron-double-down</v-icon>더 보기</v-btn> -->
     </v-row>
     <v-row class="d-flex col-12" v-else>
       <v-col class="pa-2" cols="6" xl="2" lg="3" md="4" sm="6" v-for="(item, idx) in  skeletonCount" :key="idx">
@@ -61,16 +69,16 @@
       ></v-skeleton-loader>
       </v-col>
     </v-row>
-    <v-row class="d-flex pt-3 px-3">
-      <div class="text-h2 font-weight-bold">
+    <v-row class="d-flex pt-3">
+      <div class="text-h3 font-weight-bold">
         <div>
-          <span class="twitch--text text-h1 font-weight-bold">C</span>lip
+          <span class="twitch--text text-h2 font-weight-bold">C</span>lip
         </div>
         <div>
-          <span class="twitch--text text-h1 font-weight-bold">C</span>ollector for
+          <span class="twitch--text text-h2 font-weight-bold">C</span>ollector for
         </div>
         <div>
-          <span class="twitch--text text-h1 font-weight-bold">TWITCH</span>
+          <span class="twitch--text text-h2 font-weight-bold">TWITCH</span>
         </div>
       </div>
     </v-row>
@@ -120,7 +128,7 @@ export default {
         headers:this.$store.state.headerConfig,
         params:{
           language: navigator.language.split('-')[0],
-          first: 24,
+          first: 100,
           after: this.cursor,
         }
       }).then(res => {
@@ -128,13 +136,17 @@ export default {
         this.cursor = res.data.pagination.cursor;
         this.dataLoading = false;
       })
-
+    },
+    async refresh(){
+      this.cursor = null;
+      this.streamingList = [];
+      await this.getLiveStreamWithLang();
     }
   },
   computed:{
     skeletonCount(){
       if(this.$vuetify.breakpoint.smAndDown){
-        return 6;
+        return 12;
       } else if(this.$vuetify.breakpoint.mdAndDown) {
         return 18;
       } else {
@@ -148,12 +160,12 @@ export default {
 
   },
   async mounted(){
-    document.addEventListener('DOMContentLoaded', (e) => {
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    }, false)
     await this.getLiveStreamWithLang();
     this.loading = true;
     document.title = 'Welcome CCTWITCH'
-  }
+  },
+  destroyed() {
+    this.streamingList = [];
+  },
 };
 </script>

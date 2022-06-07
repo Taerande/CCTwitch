@@ -1,18 +1,14 @@
 <template>
-<v-container fluid>
+<v-container fluid v-if="loading & cliplist.id.length > 0">
   <v-row class="d-block">
-    <div class="d-flex pt-10 align-baseline">
-      <span class="text-h4 font-weight-bold pr-3">Cliplist | {{cliplist.title}}</span>
+    <div class="d-flex pt-10 align-baseline" >
+      <span class="text-h4 font-weight-bold pr-3">{{cliplist.title}}</span>
     </div>
     <div class="d-flex align-center py-1">
         <span class="text-title-1 pr-3">
-          <v-icon>{{likeIcon(cliplist.isPublic)}}</v-icon>
-          공개
-        </span>
-        <span class="text-title-1 pr-3">
         <v-icon >mdi-playlist-play</v-icon>{{ cliplist.clipCount }}</span>
         <span class="text-title-1">
-          <v-btn icon @click="likeCliplist()" :disabled="likeLoading">
+          <v-btn small icon @click="likeCliplist()" :disabled="likeLoading">
             <v-icon :color="liked ? 'twitch' : ''" class="pb-1">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon>
           </v-btn>
         <span class="pl-1">{{cliplist.likeCount}}</span></span>
@@ -56,18 +52,20 @@
         <div>{{userInfo.display_name}}</div>
       </div>
       <span class="px-2">{{$moment(cliplist.createdAt).format('l')}}</span>
+      <v-icon>{{likeIcon(cliplist.isPublic)}}</v-icon>
     </div>
     <v-spacer></v-spacer>
     <div class="text-body-1 pl-10">
       {{cliplist.description}}
     </div>
   </v-row>
+  <DisplyaAdContainerVue></DisplyaAdContainerVue>
   <v-divider class="my-2"></v-divider>
   <expandTableVue
     v-if="$store.state.currentCliplist.length > 0"
     :clipListData="cliplist">
   </expandTableVue>
-  <v-row v-else-if="$store.state.currentCliplist.length === 0 && loading" style="height:60vh;" class="d-flex justify-center align-center">
+  <v-row v-else-if="$store.state.currentCliplist.length === 0" class="d-flex absolute-center justify-center align-center">
     <v-alert class="d-inline-block" type="error">🤐 저장된 클립이 없습니다.</v-alert>
   </v-row>
   <v-row v-if="cliplist.clipCount > $store.state.currentCliplist.length" class="d-block pb-16 pt-10" v-intersect="onIntersect">
@@ -75,6 +73,16 @@
       <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
     <div class="d-flex justify-center ">데이터 불러오는 중</div>
+  </v-row>
+</v-container>
+<v-container v-else-if="!loading" fluid>
+  <div class="d-flex justify-center absolute-center">
+      <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+    </div>
+</v-container>
+<v-container v-else fluid>
+  <v-row class="d-flex absolute-center justify-center align-center">
+    <v-alert class="d-inline-block" type="error">🤐 더 이상 사용할 수 없는 클립모음 입니다.</v-alert>
   </v-row>
 </v-container>
 </template>
@@ -86,7 +94,7 @@ import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import axios from 'axios';
 import expandTableVue from './expandTable';
 import ImportNewClipDialogVue from '../dialog/ImportNewClipDialog.vue';
-
+import DisplyaAdContainerVue from '../DisplyaAdContainer.vue';
 
 export default {
   components: {
@@ -94,6 +102,7 @@ export default {
     AddNewCliplistDialog,
     expandTableVue,
     ImportNewClipDialogVue,
+    DisplyaAdContainerVue,
 },
   data() {
     return {
@@ -189,7 +198,7 @@ export default {
     },
     async getMoreClips(){
       let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
-      docRef.collection('clips').orderBy('createdAt','asc').startAfter(this.lastVisible).limit(7).get().then(async (collection) =>{
+      docRef.collection('clips').orderBy('createdAt','asc').startAfter(this.lastVisible).limit(10).get().then(async (collection) =>{
         this.lastVisible = await last(collection.docs);
         if(collection.docs.length > 0){
           let clipIds = collection.docs.map((v) => {
@@ -220,6 +229,7 @@ export default {
   },
   async mounted() {
     let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
+
     this.unsubscribe = await docRef.onSnapshot((doc) => {
       const item = doc.data();
       document.title = `${item.title} | Cliplist - CCTWITCH`;
@@ -245,7 +255,7 @@ export default {
         }
     });
 
-    await docRef.collection('clips').orderBy('createdAt','asc').limit(7).get().then(async (collection) =>{
+    await docRef.collection('clips').orderBy('createdAt','asc').limit(10).get().then(async (collection) =>{
       this.lastVisible = await last(collection.docs);
       if(collection.docs.length > 0){
         let clipIds = collection.docs.map((v) => {

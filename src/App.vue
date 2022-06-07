@@ -3,9 +3,8 @@
     <AppBar app></AppBar>
     <v-main app>
       <router-view :key="$route.fullPath" />
+      <SnackBar app></SnackBar>
     </v-main>
-    <SnackBar app></SnackBar>
-    <DisplyaAdContainerVue app></DisplyaAdContainerVue>
     <Footer app></Footer>
   </v-app>
   <v-app v-else>
@@ -26,7 +25,6 @@ import SnackBar from '@/components/layout/SnackBar.vue'
 import AppBar from '@/components/layout/AppBar.vue'
 import Footer from '@/components/layout/Footer.vue'
 import axios from 'axios'
-import DisplyaAdContainerVue from './components/DisplyaAdContainer.vue'
 
 export default {
   name: 'App',
@@ -34,7 +32,6 @@ export default {
     AppBar,
     Footer,
     SnackBar,
-    DisplyaAdContainerVue
   },
   data() {
     return {
@@ -55,30 +52,34 @@ export default {
     this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'))
 
     // 백엔드에서 처리 해야댐.. twitch auth validation
-    if(localStorage.getItem('twitchAppAccessToken')){
-      await axios.get('https://id.twitch.tv/oauth2/validate',{
-        headers:{
-          Authorization: `OAuth ${JSON.parse(localStorage.getItem('twitchAppAccessToken'))}`
-          }
-      }).then((res) => {
-        //정상
-      }).catch(async (error) => {
-        //비정상, 앱엑세스 토큰 재발급 Backend 처리
-        await axios.get(this.$store.state.appTokenURL).then((res) => {
-          localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
-          this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
+    try{
+      if(localStorage.getItem('twitchAppAccessToken')){
+        await axios.get('https://id.twitch.tv/oauth2/validate',{
+          headers:{
+            Authorization: `OAuth ${JSON.parse(localStorage.getItem('twitchAppAccessToken'))}`
+            }
+        }).then((res) => {
+          //정상
+        }).catch(async (error) => {
+          //비정상, 앱엑세스 토큰 재발급 Backend 처리
+          await axios.get(this.$store.state.appTokenURL).then((res) => {
+            localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
+            this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
+          })
         })
-      })
-    } else {
-      //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
-      await axios.get(this.$store.state.appTokenURL)
-      .then((res) => {
-        //받아온 엑세스토큰 로컬스토리지에 저장
-        this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
-        localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
-        });
-    }
+      } else {
+        //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
+        await axios.get(this.$store.state.appTokenURL)
+        .then((res) => {
+          //받아온 엑세스토큰 로컬스토리지에 저장
+          this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
+          localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
+          });
+      }
     this.initData = true;
+    }catch{
+
+    }
   },
 }
 </script>
@@ -128,8 +129,8 @@ div[role='dialog'] {
   box-shadow: none;
 }
 main {
-  margin-right: 18%;
-  margin-left: 18%;
+  margin-right: 15%;
+  margin-left: 15%;
 }
 
 ::-webkit-scrollbar {
@@ -170,7 +171,10 @@ html.overflow-y-hidden{
     display: none;
   }
 }
-@media screen and (max-width: 960px) {
+@media screen and (max-width: 960px) and (min-width: 600px) {
+  html{
+    font-size: 95%;
+  }
   header {
     padding-left: 3%;
     padding-right: 3%;
@@ -195,6 +199,9 @@ html.overflow-y-hidden{
   }
 }
 @media screen and (max-width: 600px) {
+  html{
+    font-size: 90%;
+  }
   header {
     padding-left: 3px;
     padding-right: 3px;

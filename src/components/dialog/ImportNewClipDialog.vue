@@ -136,9 +136,10 @@ export default {
           batch.set(target.collection('clips').doc(stateData.fireData.clipId),stateData.fireData);
           await batch.commit().then(() => {
             if(this.parent.clipCount - 1 === this.$store.state.currentCliplist.length && this.$store.state.currentCliplist.length < 100){
-              this.$store.commit('ADD_CurrentCliplist', [stateData])
+              // this.$store.commit('ADD_CurrentCliplist', [stateData])
+              this.$store.commit('SET_SnackBar',{type:'success', text:`Clip: ${this.clipResult.title}을 저장했습니다.`});
             }
-            this.$store.commit('SET_SnackBar',{type:'success', text:`Clip: ${this.clipResult.title}을 저장했습니다.`});
+            // this.$store.commit('SET_SnackBar',{type:'success', text:`Clip: ${this.clipResult.title}을 저장했습니다.`});
             this.clipResult.id = '';
             this.loading = false;
             this.clipUrl = null;

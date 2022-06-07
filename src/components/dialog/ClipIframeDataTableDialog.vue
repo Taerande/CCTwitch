@@ -66,7 +66,7 @@
         allowfullscreen="true"></iframe>
     </v-responsive>
     </v-card-text>
-     <div class="d-flex justify-center align-center pa-2">
+     <div class="d-flex justify-center align-center pa-2 white--text">
       <div class="px-1 mx-1">
         <v-btn class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
         <div>다시보기</div>

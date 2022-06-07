@@ -81,11 +81,11 @@
         <v-dialog
           height="100%"
           scrollable
-          width="80%"
+          max-width="90%"
           :content-class="$vuetify.breakpoint.smAndUp ? '' : 'clipIframe'"
           v-model="dialog"
         >
-          <v-card>
+          <v-card outlined>
             <v-card-title class="twitch">
               <span class="text-h5 white--text"
                 >{{ userInfo.data.display_name }}님의 Archive</span
@@ -98,11 +98,11 @@
                   {{$moment(vidLists[0].data.created_at).format('ll')}}
                 </span>
               </div>
-              <v-container class="pa-2 mx-auto">
+              <v-container class="pa-0 mx-auto">
                 <v-row class="align-center">
                   <v-col
                     @click="changeCarsouelId(index)"
-                    class="d-flex vid-list-item text-truncate"
+                    class="d-flex vid-list-item text-truncate pa-1 align-center"
                     cols="12"
                     xl="3"
                     lg="4"
@@ -112,6 +112,7 @@
                     v-for="(item, index) in vidLists"
                     :key="index"
                   >
+                  <v-responsive :aspect-ratio="16/9" height="100%">
                     <v-img
                       :max-width="imgWidth"
                       :src="
@@ -121,6 +122,7 @@
                       lazy-src="@/assets/img/404.jpg"
                     >
                     </v-img>
+                  </v-responsive>
                     <div class="pl-2 text-truncate" style="width:inherit">
                       <div class="text-truncate">{{ item.data.title }}</div>
                       <div class="text-caption d-flex align-center">

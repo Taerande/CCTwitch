@@ -1,19 +1,34 @@
 <template>
-  <div>
+  <div class="d-flex justify-center">
     <Adsense
     data-ad-client="ca-pub-8597405222136575"
-    data-ad-slot="5644022389"
-    data-ad-format="horizontal"
-    ins-style="display:block;width:100%;"
+    data-ad-slot="3465851493"
+    :ins-style="`display:inline-block;width:${AdWidth};height:90px;`"
     ></Adsense>
   </div>
 </template>
 <script>
 export default {
   mounted(){
-  setTimeout(() => {
-    document.getElementsByClassName('v-application')[0].style['min-height'] = '100vh';
-  }, 100);
+  },
+  computed:{
+    AdWidth(){
+      if(this.$vuetify.breakpoint.xs){
+        return '270px';
+      }
+      else if(this.$vuetify.breakpoint.sm){
+        return '440px';
+      }
+      else if(this.$vuetify.breakpoint.md){
+        return '550px';
+      }
+      else if(this.$vuetify.breakpoint.lg){
+        return '728px';
+      }
+      else{
+        return '970px';
+      }
+    }
   }
 
 

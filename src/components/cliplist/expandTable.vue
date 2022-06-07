@@ -8,26 +8,32 @@
       <v-divider class="my-2"></v-divider>
     </v-col>
   </draggable>
-    <v-col v-else cols="12" v-for="(clip, index) in currentCliplist" :key="index">
-        <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+  <v-row class="d-flex col-12" v-for="(chunk, index) in cliplistChunk" :key="index" v-else>
+    <v-col  cols="12" class="pa-2"
+      v-for="(clip,startIndex) in chunk"
+      :key="clip.id"
+      >
+      <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
       <v-divider class="my-2"></v-divider>
-      <v-card>
-        <Adsense
-          data-ad-client="ca-pub-8597405222136575"
-          data-ad-slot="5644022389"
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-          ins-style="display:inline-block;background:red;"
-        ></Adsense>
-      </v-card>
-
     </v-col>
+    <v-col cols="12" v-if="chunk.length === 10">
+       <InFeedAdsense
+        data-ad-client="ca-pub-8597405222136575"
+        data-ad-slot="8126602496"
+        data-ad-format="fluid"
+        data-ad-layout-key="-gp+24+5f-4t-1o"
+        ins-style="display:block;width:inherit;"
+        ></InFeedAdsense>
+    </v-col>
+  </v-row>
 </v-row>
 </template>
 
 <script>
 import ClipIframeDataTableDialog from '../dialog/ClipIframeDataTableDialog';
 import draggable from 'vuedraggable'
+import { chunk } from 'lodash';
+
 export default {
   props:['clipListData'],
   components: {
@@ -89,6 +95,9 @@ export default {
     },
   },
   computed: {
+    cliplistChunk(){
+      return chunk(Object.values(this.currentCliplist),10);
+    },
     currentCliplist:{
       get(){
         return this.$store.state.currentCliplist

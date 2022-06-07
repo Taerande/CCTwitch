@@ -28,8 +28,9 @@
       <v-col
         v-if="chunk.length > index%7+4"
         style="min-width:250px;"
+        class="pa-0 ma-0"
         cols="12" xl="3" lg="4" md="4" sm="6">
-        <InArticleAdsense
+         <InArticleAdsense
           data-ad-client="ca-pub-8597405222136575"
           data-ad-slot="1875328416"
           data-ad-format="fluid"
@@ -37,7 +38,7 @@
           ></InArticleAdsense>
       </v-col>
       <v-col
-      style="min-width:250px;"
+        style="min-width:250px;"
         cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2"
         v-for="(item,endIndex) in chunk.slice(index%7+4)"
         :key="item.id+endIndex+index%7+4"

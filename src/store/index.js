@@ -9,11 +9,9 @@ export default new Vuex.Store({
     signInDialog: false,
     drawer: false,
     backendUrl: process.env.VUE_APP_BACKEND_URL_DEV,
-    globalLan:'ko',
     appTokenURL:process.env.VUE_APP_TWITCH_APPTOKEN_ISSUE_DEV,
     redirectUri:process.env.VUE_APP_TWITCH_REDIRECTURI_DEV,
     embedUrl:process.env.VUE_APP_EMBED_PARERNT_DEV,
-    clipCount:300,
     firebaseLoaded: false,
     snackbarArr:[],
     snackbar: {
@@ -83,7 +81,7 @@ export default new Vuex.Store({
       } else {
         state.snackbarArr.push(response);
         setTimeout(() =>{
-          state.snackbarArr.splice(0,1)} , 5000);
+          state.snackbarArr.splice(0,1)} , 500000);
       }
     },
     DELETE_snackBar(state, response){

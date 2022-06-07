@@ -10,10 +10,10 @@
     </v-row>
     <v-row class="d-flex col-12" v-for="(chunk, index) in cliplistChunk" :key="index">
     <v-col
+    style="min-width:250px;"
      v-for="(item,startIndex) in chunk.slice(0,index%7+4)"
           :key="item.id+startIndex"
-      cols="12" lg="3" md="4" sm="6"
-      class="pa-2"
+      cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2"
       :class="item.broadcaster_id"
       >
        <v-card class="ma-0 pa-0" flat style="width:inherit">
@@ -26,19 +26,20 @@
     <v-col
       style="min-width:250px;"
       v-if="chunk.length > index%7+4"
-      cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2">
+      class="pa-0 ma-0"
+      cols="12" xl="3" lg="4" md="4" sm="6">
         <InArticleAdsense
         data-ad-client="ca-pub-8597405222136575"
         data-ad-slot="1875328416"
-        data-ad-format="auto"
-        ins-style="display:block;width:inherit;"
+        data-ad-format="fluid"
+        ins-style="display:inline-block;width:100%;"
         ></InArticleAdsense>
     </v-col>
     <v-col
      v-for="(item,endIndex) in chunk.slice(index%7+4)"
+     style="min-width:250px;"
           :key="item.id+endIndex"
-      cols="12" lg="3" md="4" sm="6"
-      class="pa-2"
+      cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2"
       :class="item.broadcaster_id"
       >
        <v-card class="ma-0 pa-0" flat style="width:inherit">
