@@ -67,7 +67,7 @@
         <v-btn
           color="red darken-1"
           text
-          @click="dialog = false"
+          @click=" clipResult = { id: '' }, dialog = false"
         >
           Close
         </v-btn>
@@ -135,15 +135,13 @@ export default {
           )
           batch.set(target.collection('clips').doc(stateData.fireData.clipId),stateData.fireData);
           await batch.commit().then(() => {
-            if(this.parent.clipCount - 1 === this.$store.state.currentCliplist.length && this.$store.state.currentCliplist.length < 100){
-              // this.$store.commit('ADD_CurrentCliplist', [stateData])
-              this.$store.commit('SET_SnackBar',{type:'success', text:`Clip: ${this.clipResult.title}을 저장했습니다.`});
-            }
-            // this.$store.commit('SET_SnackBar',{type:'success', text:`Clip: ${this.clipResult.title}을 저장했습니다.`});
-            this.clipResult.id = '';
+            // if(this.parent.clipCount - 1 === this.$store.state.currentCliplist.length && this.$store.state.currentCliplist.length < 100){
+            //   this.$store.commit('ADD_CurrentCliplist', [stateData])
+            this.$store.commit('SET_SnackBar',{type:'success', text:`Clip: ${this.clipResult.title}을 저장했습니다.`});
             this.loading = false;
             this.clipUrl = null;
             this.dialog = false;
+            this.clipResult.id = '';
           })
           .catch( () => {
             this.$store.commit('SET_SnackBar',{type:'error', text:`Something wrong`, value:true})
@@ -152,6 +150,7 @@ export default {
       this.resultId = '';
       },
     async getClip(el) {
+      this.clipResult = [];
       this.importLoading = true;
       let preClipId = el.trim();
       if(preClipId.match('twitch.tv/')){
@@ -174,7 +173,19 @@ export default {
           } else {
              this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : 클립을 가져올 수 없습니다.`, value: true });
           }
-            this.importLoading = false;
+          this.importLoading = false;
+        }).then(() => {
+          if(this.isIn){
+              this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : 이미 추가된 클립입니다.`, value: true });
+            }
+        }).catch(async (error) => {
+          //비정상, 앱엑세스 토큰 재발급 Backend 처리
+          await axios.get(this.$store.state.appTokenURL).then((res) => {
+            localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
+            this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
+          }).then(() => {
+            this.getClip(el);
+          })
         });
       }
 
@@ -182,7 +193,7 @@ export default {
   },
   computed:{
     isIn(){
-      return this.parent.clipIds.find(element => element === this.clipResult.id) === '';
+      return this.parent.clipIds.find(element => element === this.clipResult.id) !== undefined;
     }
   },
   created() {

@@ -144,7 +144,7 @@ export default {
       broadcast_end: this.$moment(this.clips.data.created_at).add(this.hmsToSec(this.clips.data.duration),'seconds').toISOString(),
       broadcaster_id: this.clips.data.user_id,
       started_at: this.clips.data.created_at,
-      first: 20,
+      first: 24,
       video_id: this.clips.data.id,
       viewalbe: this.clips.data.viewalbe,
     };

@@ -87,14 +87,14 @@
                     class="text-capitalize text-caption pa-0 ma-0 px-1"
                     @click="toggleDarkTheme()">
                       <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
-                      <span>Dark Mode</span>
+                      <span>Dark Theme</span>
                     </v-btn>
                     <v-btn v-else
                     depressed
                     class="text-capitalize text-caption pa-0 ma-0 px-1"
                     @click="toggleDarkTheme()">
                       <v-icon color="red">mdi-weather-sunny</v-icon>
-                      <span>Dark Theme</span>
+                      <span>Light Theme</span>
                     </v-btn>
                   </div>
                 </v-list>

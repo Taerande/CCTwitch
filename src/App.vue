@@ -59,6 +59,7 @@ export default {
             Authorization: `OAuth ${JSON.parse(localStorage.getItem('twitchAppAccessToken'))}`
             }
         }).then((res) => {
+          this.initData = true;
           //정상
         }).catch(async (error) => {
           //비정상, 앱엑세스 토큰 재발급 Backend 처리
@@ -76,6 +77,7 @@ export default {
           localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
           });
       }
+
     this.initData = true;
     }catch{
 
@@ -261,7 +263,8 @@ html.overflow-y-hidden{
 }
 
 .v-snack__content{
-  padding: 4px 6px !important;
+  padding: 0;
+  width: inherit;
 }
 
 .lds-ellipsis {

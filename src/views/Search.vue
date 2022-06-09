@@ -14,7 +14,7 @@
     <v-col cols="12" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''"  lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in searchList"
     :key="item.id">
-      <v-card outlined class="rounded-lg d-flex flex-row" width="320px" :to="{name: 'Channel',
+      <v-card outlined dark class="rounded-lg d-flex flex-row" width="320px" :to="{name: 'Channel',
         query:{
             q: item.broadcaster_login
           },
@@ -31,7 +31,6 @@
               overlap>
               <v-avatar
               outline
-              color="black"
               size="36">
                   <v-img :src="item.thumbnail_url" alt="profile_img"></v-img>
               </v-avatar>
@@ -43,9 +42,6 @@
           <div aria-label="streamer info" class="pl-3 text-truncate">
             <div class="text-truncate">
               {{item.display_name}}
-            </div>
-            <div class="text-caption text-truncate">
-              Followers: {{kFormatter(item.follower_count)}}
             </div>
           </div>
           <v-spacer></v-spacer>
@@ -90,62 +86,43 @@ export default {
     like(el) {
       this.$store.commit('SET_LikedStreamer', el);
     },
-    async getUserInfo(){
-
-    },
-    async getFollower(){
-      axios.get('https://api.twitch.tv/helix/users/follows', {
+    async getUserInfo(element) {
+      return await axios.get('https://api.twitch.tv/helix/users',{
         params: {
-          to_id: element.id,
+          id : element,
         },
-        headers: this.$store.state.headerConfig,
-      }).then((respp) => {
-        data.follower_count = respp.data.total;
-        this.searchList.push(data);
-        this.searchList.sort((a, b) => b.follower_count - a.follower_count);
-        this.dataLoading = true;
+        headers:this.$store.state.headerConfig,
       });
-
     },
     async searchChannel(el) {
       await axios.get('https://api.twitch.tv/helix/search/channels', {
         params: {
           query: el,
+          first: 100,
         },
         headers: this.$store.state.headerConfig,
-      }).then((res) => {
+      }).then(async (res) => {
         if(res.data.data.length > 0){
-          res.data.data.forEach( async (element) => {
-            const data = element;
-            if (element.title.length > 0 && element.game_id > 0) {
-              await axios.get('https://api.twitch.tv/helix/users', {
-                params: {
-                  id: element.id,
-                },
-                headers: this.$store.state.headerConfig,
-              }).then((resp) => {
-                data.broadcaster_type = resp.data.data[0].broadcaster_type;
-              }).then(() => {
-                axios.get('https://api.twitch.tv/helix/users/follows', {
-                  params: {
-                    to_id: element.id,
-                  },
-                  headers: this.$store.state.headerConfig,
-                }).then((respp) => {
-                  data.follower_count = respp.data.total;
-                  this.searchList.push(data);
-                  this.searchList.sort((a, b) => b.follower_count - a.follower_count);
-                  this.dataLoading = true;
-                });
-              });
+          let ids = [];
+          res.data.data.map((element) => {
+            if(element.title.length > 0 && element.game_id > 0){
+              this.searchList.push(element);
+              return ids.push(element.id);
             }
-          });
-        } else {
-          this.dataLoading = true;
+          })
+          const result = await this.getUserInfo([...ids]);
+          this.searchList.forEach((element) => {
+            const index = result.data.data.findIndex((v) => v.id === element.id);
+            element.broadcaster_type = result.data.data[index].broadcaster_type;
+            element.view_count = result.data.data[index].view_count;
+          })
+          this.searchList.sort((a,b) => b.view_count - a.view_count);
         }
-      }).catch((error) =>{
-        console.log(error);
+      }).catch(() =>{
+        this.$router.push({name:'Home'}).catch(()=>{});
+        this.$store.commit('SET_SnackBar',{type:'error',text:'다시 검색하세요.',value:true})
       });
+      this.dataLoading = true;
 
     },
     kFormatter(el) {
@@ -158,17 +135,32 @@ export default {
     },
 
   },
-  mounted() {
+  async mounted() {
      if(!this.$route.query.q){
       this.$router.push({path:'/'}).catch(()=>{});
     }
     document.title = `${this.$route.query.q} | Search - CCTWITCH`
-    this.searchChannel(this.$route.query.q);
+    await this.searchChannel(this.$route.query.q);
   },
 };
 </script>
-<style>
+<style lang="scss" scoped>
 .v-progress-circular {
   margin: 1rem;
+}
+
+.v-card--reveal {
+  align-items: center;
+  bottom: 0;
+  filter: none;
+  justify-content: center;
+  position: absolute;
+  width: 100%;
+}
+.v-card:hover{
+  z-index: 3;
+  transition: all ease 0.2s 0s;
+  transform: scale(1.1) !important;
+  box-shadow: 5px 5px 0 var(--twitch-color);
 }
 </style>

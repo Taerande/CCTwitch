@@ -79,7 +79,7 @@ export default {
         params: {
           q: el,
         },
-      });
+      }).catch(()=>{});
       this.dialog = false;
     },
 

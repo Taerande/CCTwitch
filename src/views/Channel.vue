@@ -32,39 +32,41 @@
             <span class="grey--text pl-1"
               >{{ kFormatter(userInfo.data.follower_count) }}
             </span>
-            <v-btn
-              v-if="
-                $store.state.likedStreamer.find(
-                  (ele) => ele.id === userInfo.data.id,
-                )
-              "
-              icon
-              @click="
-                deleteFav({
-                  index: $store.state.likedStreamer.findIndex(
-                    (el) => el.id == userInfo.data.id,
-                  ),
-                  display_name: userInfo.data.display_name,
-                })
-              "
-            >
-              <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
-            </v-btn>
-            <v-btn
-              v-else
-              icon
-              @click="
-                like({
-                  id: userInfo.data.id,
-                  login: userInfo.data.login,
-                  display_name: userInfo.data.display_name,
-                  thumbnail: userInfo.data.profile_image_url,
-                  broadcaster_type: userInfo.data.broadcaster_type,
-                })
-              "
-            >
-              <v-icon>mdi-star</v-icon>
-            </v-btn>
+            <span v-if="dataLoading">
+              <v-btn
+                v-if="
+                  $store.state.likedStreamer.find(
+                    (ele) => ele.id === userInfo.data.id,
+                  )
+                "
+                icon
+                @click="
+                  deleteFav({
+                    index: $store.state.likedStreamer.findIndex(
+                      (el) => el.id == userInfo.data.id,
+                    ),
+                    display_name: userInfo.data.display_name,
+                  })
+                "
+              >
+                <v-icon color="rgb(119,44,232)">mdi-star</v-icon>
+              </v-btn>
+              <v-btn
+                v-else
+                icon
+                @click="
+                  like({
+                    id: userInfo.data.id,
+                    login: userInfo.data.login,
+                    display_name: userInfo.data.display_name,
+                    thumbnail: userInfo.data.profile_image_url,
+                    broadcaster_type: userInfo.data.broadcaster_type,
+                  })
+                "
+              >
+                <v-icon>mdi-star</v-icon>
+              </v-btn>
+            </span>
           </div>
           <div v-if="userInfo.is_live">
             <v-icon color="red" small>mdi-circle</v-icon>
@@ -85,7 +87,7 @@
           :content-class="$vuetify.breakpoint.smAndUp ? '' : 'clipIframe'"
           v-model="dialog"
         >
-          <v-card outlined>
+          <v-card>
             <v-card-title class="twitch">
               <span class="text-h5 white--text"
                 >{{ userInfo.data.display_name }}님의 Archive</span
@@ -363,7 +365,6 @@ export default {
               type:'error',
               text:'스트리머를 찾을 수 없습니다.',
               value:true,
-
             })
           })
       }
@@ -444,7 +445,7 @@ export default {
     }
   },
   async created() {
-    if(!this.$route.query.q){
+    if(!this.$route.query){
       this.$router.push({path:'/'}).catch(()=>{});
     }
     let tempuserInfo = this.$store.state.userinfo.userInfo;

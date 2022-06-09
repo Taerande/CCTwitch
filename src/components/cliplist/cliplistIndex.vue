@@ -127,8 +127,8 @@ export default {
     likeIcon(el){
       if(el === 0){
         return 'mdi-eye-off'
-      }else if(el === 0){
-        return 'mdi-eye-off'
+      }else if(el === 1){
+        return 'mdi-eye'
       }else{
         return 'mdi-earth'
       }
@@ -232,7 +232,7 @@ export default {
 
     this.unsubscribe = await docRef.onSnapshot((doc) => {
       const item = doc.data();
-      document.title = `${item.title} | Cliplist - CCTWITCH`;
+      document.title = `${item.title ? item.title : ''} | Cliplist - CCTWITCH`;
       if(!this.userInfo){
         this.getUserInfo(item.authorId)
       }

@@ -128,11 +128,12 @@ export default {
         headers:this.$store.state.headerConfig,
         params:{
           language: navigator.language.split('-')[0],
-          first: 100,
+          first: 24,
           after: this.cursor,
         }
       }).then(res => {
-        this.streamingList.push(...res.data.data);
+        this.streamingList = res.data.data
+        // this.streamingList.push(...res.data.data);
         this.cursor = res.data.pagination.cursor;
         this.dataLoading = false;
       })

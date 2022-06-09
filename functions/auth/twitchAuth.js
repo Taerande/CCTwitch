@@ -46,7 +46,7 @@ app.get('/signin/twitch/callback', async (req, res) => {
     try {
       return await admin.auth().updateUser(id, {
         displayName: userInfo.display_name,
-        email: userInfo.email,
+        email: userInfo.email ? userInfo.email : `${id}@cctwitch.com`,
         photoURL: userInfo.profile_image_url
       });
     } catch (err) {
@@ -55,7 +55,7 @@ app.get('/signin/twitch/callback', async (req, res) => {
         return await admin.auth().createUser({
           uid: id,
           displayName: userInfo.display_name,
-          email: userInfo.email,
+          email: userInfo.email ? userInfo.email : `${id}@cctwitch.com`,
           photoURL: userInfo.profile_image_url
         });
       } catch (err) {

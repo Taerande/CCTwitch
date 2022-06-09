@@ -75,13 +75,14 @@ export default new Vuex.Store({
       state.snackbarArr = [];
     },
     SET_SnackBar(state,response){
+      // state.SnackBar = response;
       if(state.snackbarArr.length >= 3){
         state.snackbarArr.push(response);
         state.snackbarArr.splice(0,1);
       } else {
         state.snackbarArr.push(response);
         setTimeout(() =>{
-          state.snackbarArr.splice(0,1)} , 500000);
+          state.snackbarArr.splice(0,1)} ,5000);
       }
     },
     DELETE_snackBar(state, response){
