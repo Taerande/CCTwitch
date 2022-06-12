@@ -116,3 +116,40 @@ app.get('/waktaverse', async (req, res) => {
 
 });
 module.exports = app
+
+
+// async test(){
+//   const sn = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userinfo.userInfo.uid).get();
+
+//   sn.docs.forEach( async (el) => {
+//      await this.$firestore.collection('cliplist').doc(el.id).update({
+//        isPublic: 2
+//      })
+//   });
+// }
+// // this.dbLoading = true;
+//   // await axios.get(this.$store.state.backendUrl+'/weeklyWaktaverse/waktaverse'+`?time=${el}`).then((res) => {
+//   //   this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
+//   //   console.log(res);
+//   //   this.dbLoading = false;
+//   // }).catch(()=>{
+//   //     this.dbLoading = false;
+//   //   })
+// <!-- <v-row>
+//   {{time}}
+//   <v-text-field
+//     v-model="time"
+//   ></v-text-field>
+// </v-row>
+// <v-row>
+//   21년은 53주차 까지 있다.
+// </v-row>
+// <v-row>
+//   {{ $moment(time).week(time).startOf('week').add(36,'hour') }}
+// </v-row>
+// <v-row>
+//   {{ $moment(time).week() }}
+// </v-row>
+// <v-row>
+//   <v-btn :loading="dbLoading" color="success" block @click="test()">test</v-btn>
+// </v-row> -->

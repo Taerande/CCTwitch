@@ -4,8 +4,8 @@ import Vue from 'vue';
 // import router from 'vue-router'
 
 
-Vue.config.errorHandler = (e) => {
+// Vue.config.errorHandler = (e) => {
   // if(e.response.data.status === 401){
   // }
   // axios
-}
+// }

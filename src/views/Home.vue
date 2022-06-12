@@ -23,25 +23,7 @@
       </v-col>
       <Search class="pt-6"></Search>
     </v-row>
-    <v-row>
-      {{time}}
-      <v-text-field
-        v-model="time"
-      ></v-text-field>
-    </v-row>
-    <v-row>
-      21년은 53주차 까지 있다.
-    </v-row>
-    <v-row>
-      {{ $moment(time).week(time).startOf('week').add(36,'hour') }}
-    </v-row>
-    <v-row>
-      {{ $moment(time).week() }}
-    </v-row>
-    <v-row>
-      <v-btn :loading="dbLoading" color="success" block @click="test()">test</v-btn>
-    </v-row>
-    <!-- <DisplyaAdContainerVue></DisplyaAdContainerVue>
+    <DisplyaAdContainerVue></DisplyaAdContainerVue>
     <div class="d-flex align-center">
       <span>Live Stream - {{lang}}</span>
       <v-spacer></v-spacer>
@@ -98,7 +80,7 @@
           <span class="twitch--text text-h2 font-weight-bold">TWITCH</span>
         </div>
       </div>
-    </v-row> -->
+    </v-row>
   </v-container>
 </template>
 
@@ -110,7 +92,7 @@ export default {
   name: 'Home',
 
   components: {
-    // DisplyaAdContainerVue,
+    DisplyaAdContainerVue,
     Search,
   },
   data() {
@@ -152,7 +134,6 @@ export default {
         }
       }).then(res => {
         this.streamingList = res.data.data
-        // this.streamingList.push(...res.data.data);
         this.cursor = res.data.pagination.cursor;
         this.dataLoading = false;
       })
@@ -162,23 +143,6 @@ export default {
       this.streamingList = [];
       await this.getLiveStreamWithLang();
     },
-    async test(){
-      const sn = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userinfo.userInfo.uid).get();
-
-      sn.docs.forEach( async (el) => {
-         await this.$firestore.collection('cliplist').doc(el.id).update({
-           isPublic: 2
-         })
-      });
-      // this.dbLoading = true;
-      // await axios.get(this.$store.state.backendUrl+'/weeklyWaktaverse/waktaverse'+`?time=${el}`).then((res) => {
-      //   this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
-      //   console.log(res);
-      //   this.dbLoading = false;
-      // }).catch(()=>{
-      //     this.dbLoading = false;
-      //   })
-    }
   },
   computed:{
     skeletonCount(){

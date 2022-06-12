@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 var serviceAccount = require('./twitchhotclip-firebase-adminsdk-2ku0j-3bb7c712e3.json');
+const { firestore } = require("firebase-admin");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -35,4 +36,6 @@ exports.delteClipsInCliplist = functions.region('asia-northeast3').firestore.doc
 exports.deleteUser = functions.region('asia-southeast1').auth.user().onDelete(async (user) => {
   const {uid} = user
   db.ref('users').child(uid).remove()
+  const batch = firestore.batch();
+  const sn = await firestore.collection('cliplist').where(uid, '==', )
 });

@@ -48,8 +48,8 @@
     </v-card>
   </template>
   <v-card class="pa-0 ma-0 black">
-    <v-card-title class="d-block pa-0 ma-0 copyBody">
-      <div class="d-flex justify-end align-center">
+    <v-card-title class="d-block pa-0 ma-0">
+      <div class="d-flex justify-end align-center copyBody" v-if="dialog">
         <span class="white--text pl-2">{{this.$moment(clipData.created_at).format('ll')}}</span>
         <v-spacer></v-spacer>
         <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>

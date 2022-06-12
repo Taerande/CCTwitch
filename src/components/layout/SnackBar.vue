@@ -2,6 +2,8 @@
   <div class="ma-0 pa-0">
     <v-snackbar
       app
+      bottom
+      left
       :light="$vuetify.theme.dark"
       :dark="!$vuetify.theme.dark"
       max-width="500"

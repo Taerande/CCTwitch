@@ -133,6 +133,7 @@ export default {
             clipIds: item.clipIds,
             tags: item.tags,
             color: item.color,
+            dataSet: item.dataSet,
             thumbnail_url: item.thumbnail_url,
             clipCount: item.clipCount,
             viewCount: item.viewCount,

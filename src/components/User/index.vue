@@ -51,7 +51,7 @@
 </template>
 <script>
 import CliplistDefaultVue from '../CliplistDefault.vue';
-import { last } from 'lodash';
+import { last, chunk } from 'lodash';
 export default {
   components:{
     CliplistDefaultVue
@@ -63,6 +63,11 @@ export default {
       userInfo:'',
       dataLoading:false,
       loading:false,
+    }
+  },
+  computed:{
+    cliplistChunk(){
+      return chunk(Object.values(this.cliplists),11);
     }
   },
   methods: {
