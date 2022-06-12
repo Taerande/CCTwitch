@@ -58,6 +58,7 @@
       </div>
       <v-text-field
         clearable
+        multi-line
         clear-icon="mdi-close-circle"
         v-model="form.title"
         outlined
@@ -72,6 +73,7 @@
       ></v-text-field>
       <v-textarea
         clearable
+        multi-line
         clear-icon="mdi-close-circle"
         class="pt-5"
         v-model="form.description"

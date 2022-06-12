@@ -10,7 +10,7 @@
   <v-list class="text-caption">
     <v-list-item-group v-model="model" color="twitch">
       <v-list-item v-for="(item ,index) in sortType" :key="index" :disabled="model === index">
-        <v-list-item-content @click="sortEmit(item.actions)">
+        <v-list-item-content @click="sortEmit(item)">
           <span>
             <v-icon class="pa-0 ma-0" style="width:1rem;" small color="twitch">{{index !== model ? '' : 'mdi-check'}}</v-icon>
             {{item.text}}

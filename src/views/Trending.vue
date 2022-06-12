@@ -64,8 +64,8 @@ export default {
     async getMoreData(){
       this.dataLoading = true;
       try{
-        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('isPublic','==',2).startAfter(this.lastVisible).limit(20).get().then((sn) => {
-          if(sn.docs.length === 20){
+        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('isPublic','==',2).startAfter(this.lastVisible).limit(24).get().then((sn) => {
+          if(sn.docs.length === 24){
               this.lastVisible = last(sn.docs);
             } else {
               this.lastVisible = null;
@@ -82,6 +82,7 @@ export default {
               clipIds: item.clipIds,
               color: item.color,
               tags: item.tags,
+              dataSet: item.dataSet,
               thumbnail_url: item.thumbnail_url,
               clipCount: item.clipCount,
               viewCount: item.viewCount,
@@ -102,8 +103,8 @@ export default {
     async loadData(){
       this.loading = true;
       try{
-        const sn = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('isPublic','==',2).limit(20).get();
-        if(sn.docs.length === 20){
+        const sn = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('isPublic','==',2).limit(24).get();
+        if(sn.docs.length === 24){
             this.lastVisible = last(sn.docs);
           } else {
             this.lastVisible = null;
@@ -119,6 +120,7 @@ export default {
             clipIds: item.clipIds,
             color: item.color,
             tags: item.tags,
+            dataSet: item.dataSet,
             thumbnail_url: item.thumbnail_url,
             clipCount: item.clipCount,
             viewCount: item.viewCount,

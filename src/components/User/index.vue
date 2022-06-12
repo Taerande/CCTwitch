@@ -24,10 +24,25 @@
       공유된 클립모음이 없습니다.
     </v-alert>
   </v-row>
-  <v-row v-else>
-    <v-col cols="12" xl="3" lg="4" md="4" sm="6" xs="12" v-for="(item, index) in cliplists" :key="index">
-      <CliplistDefaultVue :item="item"></CliplistDefaultVue>
-    </v-col>
+    <v-row class="d-flex pt-5 col-12" v-else-if="cliplists.length > 0 && !loading">
+    <v-row class="d-flex col-12" v-for="(chunk, index) in cliplistChunk" :key="index">
+      <v-col cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2" v-for="(item, startIndex) in chunk.slice(0,index%7+4)" :key="item.id+startIndex">
+        <CliplistDefaultVue :item="item"></CliplistDefaultVue>
+      </v-col>
+      <v-col
+        v-if="chunk.length > index%7+4"
+        cols="12" xl="3" lg="4" md="4" sm="12" class="pa-2">
+          <InArticleAdsense
+            data-ad-client="ca-pub-8597405222136575"
+            data-ad-slot="1875328416"
+            data-ad-format="fluid"
+            ins-style="display:block;text-align:center;width:inherit;"
+            ></InArticleAdsense>
+      </v-col>
+      <v-col cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2" v-for="(item, endIndex) in chunk.slice(index%7+4)" :key="item.id+endIndex">
+        <CliplistDefaultVue :item="item"></CliplistDefaultVue>
+      </v-col>
+    </v-row>
   </v-row>
   <v-row v-if="lastVisible" class="d-felx justify-center">
     <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
@@ -54,8 +69,8 @@ export default {
     async getMoreData(){
       this.dataLoading = true;
       try{
-        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('isPublic','==',2).startAfter(this.lastVisible).limit(20).get().then((sn) => {
-          if(sn.docs.length === 20){
+        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('isPublic','==',2).startAfter(this.lastVisible).limit(24).get().then((sn) => {
+          if(sn.docs.length === 24){
               this.lastVisible = last(sn.docs);
             } else {
               this.lastVisible = null;
@@ -72,6 +87,7 @@ export default {
               clipIds: item.clipIds,
               color: item.color,
               tags: item.tags,
+              dataSet: item.dataSet,
               thumbnail_url: item.thumbnail_url,
               clipCount: item.clipCount,
               viewCount: item.viewCount,
@@ -100,8 +116,8 @@ export default {
         document.title = `${this.userInfo.display_name} | User - CCTWITCH`
       }
     });
-    const sn = await this.$firestore.collection('cliplist').where('authorId','==',`twitch:${this.$route.params.id}`).where('isPublic','==',2).orderBy('createdAt','desc').limit(20).get();
-    if(sn.docs.length === 20){
+    const sn = await this.$firestore.collection('cliplist').where('authorId','==',`twitch:${this.$route.params.id}`).where('isPublic','==',2).orderBy('createdAt','desc').limit(24).get();
+    if(sn.docs.length === 24){
       this.lastVisible = last(sn.docs);
     } else {
       this.lastVisible = null;
@@ -116,6 +132,7 @@ export default {
             display_name: item.authorName,
             clipIds: item.clipIds,
             color: item.color,
+            dataSet: item.dataSet,
             thumbnail_url: item.thumbnail_url,
             tags: item.tags,
             clipCount: item.clipCount,

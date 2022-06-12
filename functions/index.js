@@ -22,6 +22,8 @@ exports.twitchOauthToken = functions.region('asia-northeast3').https.onRequest(r
 
 exports.twitchLiveClips = functions.region('asia-northeast3').https.onRequest(require('./twitch/clips.js'));
 
+exports.weeklyWaktaverse = functions.region('asia-northeast3').https.onRequest(require('./twitch/waktaverse.js'));
+
 exports.delteClipsInCliplist = functions.region('asia-northeast3').firestore.document('cliplist/{cliplistId}').onDelete( async (snap, context ) => {
   const batch = firstore.batch();
   const sn = await firstore.collection('cliplist').doc(context.params.cliplistId).collection('clips').get();

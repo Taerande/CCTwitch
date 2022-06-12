@@ -86,7 +86,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&display=swap');
+// @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&display=swap');
 :root {
   --twitch-color: rgb(119, 44, 232);
   --hoverBack-color: rgba(255, 255, 255, 0.3);

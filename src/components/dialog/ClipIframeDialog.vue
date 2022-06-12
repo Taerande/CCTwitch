@@ -37,8 +37,9 @@
     <v-card-text class="pa-0 ma-0">
       <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
           <iframe
+          allow="autoplay"
           v-if="dialog"
-          :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=false&muted=false&preload=auto`"
+          :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=true&preload=auto`"
           preload="auto"
           frameborder="0"
           height="100%"

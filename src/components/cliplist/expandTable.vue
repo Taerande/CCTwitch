@@ -1,20 +1,42 @@
 <template>
 <v-row class="d-block py-3">
   <draggable
-  v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId" v-model="currentCliplist"
+  v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId && clipListData.dataSet === undefined" v-model="currentCliplist"
   handle=".handle" ghost-class="ghost" @change="changeIndex" chosen-class="chosen" drag-class="drag">
     <v-col cols="12" v-for="(clip, index) in currentCliplist" :key="index">
       <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
-      <v-divider class="my-2"></v-divider>
+      <v-divider class="my-1"></v-divider>
     </v-col>
   </draggable>
+  <v-row class="d-flex col-12" v-else-if="clipListData.dataSet !== undefined">
+    <v-row class="d-flex col-12"  v-for="(chunk, index) in tempArrChunk" :key="index">
+
+      <v-col cols="12" class="pa-1"
+            v-for="(clip,startIndex) in chunk"
+            :key="clip.id"
+            >
+            <ClipIframeDataTableDialog  :clipData="clip" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+          <v-divider class="my-1"></v-divider>
+          </v-col>
+          <v-col cols="12" v-if="chunk.length === 10">
+            <InFeedAdsense
+              data-ad-client="ca-pub-8597405222136575"
+              data-ad-slot="8126602496"
+              data-ad-format="fluid"
+              data-ad-layout-key="-gp+24+5f-4t-1o"
+              ins-style="display:block;width:inherit;"
+              ></InFeedAdsense>
+              <v-divider class="my-1"></v-divider>
+          </v-col>
+    </v-row>
+  </v-row>
   <v-row class="d-flex col-12" v-for="(chunk, index) in cliplistChunk" :key="index" v-else>
-    <v-col  cols="12" class="pa-2"
+    <v-col  cols="12" class="pa-1"
       v-for="(clip,startIndex) in chunk"
       :key="clip.id"
       >
       <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
-      <v-divider class="my-2"></v-divider>
+      <v-divider class="my-1"></v-divider>
     </v-col>
     <v-col cols="12" v-if="chunk.length === 10">
        <InFeedAdsense
@@ -35,7 +57,7 @@ import draggable from 'vuedraggable'
 import { chunk } from 'lodash';
 
 export default {
-  props:['clipListData'],
+  props:['clipListData','tempArr'],
   components: {
     ClipIframeDataTableDialog,
     draggable,
@@ -43,15 +65,6 @@ export default {
   data() {
     return {
       AllCliplists:[],
-      vidIndex: 0,
-      currentTooltipId: '',
-      tableloading: false,
-      dialogId: '',
-      nameSort: '',
-      viewSort: '',
-      createdSort: '',
-      page: 1,
-      tempDate:0,
     };
   },
   methods: {
@@ -98,6 +111,9 @@ export default {
     cliplistChunk(){
       return chunk(Object.values(this.currentCliplist),10);
     },
+    tempArrChunk(){
+      return chunk(Object.values(this.tempArr),10);
+    },
     currentCliplist:{
       get(){
         return this.$store.state.currentCliplist
@@ -106,12 +122,6 @@ export default {
         this.$store.commit('SET_CurrentClipList', value);
       }
     },
-    theme() {
-      return this.$vuetify.theme.dark ? 'dark-table' : 'light-table';
-    },
-    listColor(){
-      return this.clipListData.color;
-    }
   },
   async mounted() {
     if(this.$store.state.userinfo.userInfo){
@@ -125,18 +135,19 @@ export default {
           return {
             id: v.id,
             title: item.title,
-            description: item.description,
             createdAt: item.createdAt,
             color: item.color,
             clipCount: item.clipCount,
             clipIds: item.clipIds,
           }
         })
+      this.AllCliplists.sort((a,b) => b.createdAt - a.createdAt);
       });
     }
   },
   destroyed() {
-    if(this.unsubscribe) this.unsubscribe()
+    if(this.unsubscribe) this.unsubscribe();
+    this.$store.commit('SET_CurrentClipList',[]);
   },
 };
 </script>
@@ -144,5 +155,4 @@ export default {
 .ghost {
   opacity: 0 !important;
 }
-
 </style>

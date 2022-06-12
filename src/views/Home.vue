@@ -23,7 +23,25 @@
       </v-col>
       <Search class="pt-6"></Search>
     </v-row>
-    <DisplyaAdContainerVue></DisplyaAdContainerVue>
+    <v-row>
+      {{time}}
+      <v-text-field
+        v-model="time"
+      ></v-text-field>
+    </v-row>
+    <v-row>
+      21년은 53주차 까지 있다.
+    </v-row>
+    <v-row>
+      {{ $moment(time).week(time).startOf('week').add(36,'hour') }}
+    </v-row>
+    <v-row>
+      {{ $moment(time).week() }}
+    </v-row>
+    <v-row>
+      <v-btn :loading="dbLoading" color="success" block @click="test()">test</v-btn>
+    </v-row>
+    <!-- <DisplyaAdContainerVue></DisplyaAdContainerVue>
     <div class="d-flex align-center">
       <span>Live Stream - {{lang}}</span>
       <v-spacer></v-spacer>
@@ -60,7 +78,6 @@
           <span>{{item.title}}</span>
         </div>
       </v-col>
-      <!-- <v-btn :loading="dataLoading" @click="getLiveStreamWithLang()" color="twitch" class="white--text" small block><v-icon small color="white">mdi-chevron-double-down</v-icon>더 보기</v-btn> -->
     </v-row>
     <v-row class="d-flex col-12" v-else>
       <v-col class="pa-2" cols="6" xl="2" lg="3" md="4" sm="6" v-for="(item, idx) in  skeletonCount" :key="idx">
@@ -81,7 +98,7 @@
           <span class="twitch--text text-h2 font-weight-bold">TWITCH</span>
         </div>
       </div>
-    </v-row>
+    </v-row> -->
   </v-container>
 </template>
 
@@ -93,7 +110,7 @@ export default {
   name: 'Home',
 
   components: {
-    DisplyaAdContainerVue,
+    // DisplyaAdContainerVue,
     Search,
   },
   data() {
@@ -103,6 +120,8 @@ export default {
       data:[],
       loading:false,
       dataLoading:false,
+      dbLoading:false,
+      time:'',
     };
   },
   methods: {
@@ -142,6 +161,23 @@ export default {
       this.cursor = null;
       this.streamingList = [];
       await this.getLiveStreamWithLang();
+    },
+    async test(){
+      const sn = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userinfo.userInfo.uid).get();
+
+      sn.docs.forEach( async (el) => {
+         await this.$firestore.collection('cliplist').doc(el.id).update({
+           isPublic: 2
+         })
+      });
+      // this.dbLoading = true;
+      // await axios.get(this.$store.state.backendUrl+'/weeklyWaktaverse/waktaverse'+`?time=${el}`).then((res) => {
+      //   this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
+      //   console.log(res);
+      //   this.dbLoading = false;
+      // }).catch(()=>{
+      //     this.dbLoading = false;
+      //   })
     }
   },
   computed:{

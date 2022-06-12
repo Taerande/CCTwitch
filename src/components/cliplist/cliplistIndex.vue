@@ -213,7 +213,6 @@ export default {
           }});
         this.$store.commit('ADD_ClipInCurrentCliplist', this.tempArr);
         }
-      }).then(() => {
       })
     }
   },
@@ -224,14 +223,14 @@ export default {
       return this.cliplist.likeUids.includes(this.$store.state.userinfo.userInfo.uid);
     },
   },
-  async created(){
-    window.scroll(0,0);
-  },
   async mounted() {
     let docRef = await this.$firestore.collection('cliplist').doc(this.$route.params.id);
 
     this.unsubscribe = await docRef.onSnapshot((doc) => {
       const item = doc.data();
+      if(item.dataSet){
+        this.$router.push({name:'clips',params:this.$route.params.id})
+      }
       document.title = `${item.title ? item.title : ''} | Cliplist - CCTWITCH`;
       if(!this.userInfo){
         this.getUserInfo(item.authorId)

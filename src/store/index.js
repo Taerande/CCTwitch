@@ -95,9 +95,6 @@ export default new Vuex.Store({
     TOGGLE_SearchBar(state) {
       state.searchBar = !state.searchBar;
     },
-    SET_CurrentClipList(state, response) {
-      state.currentCliplist = response;
-    },
     INIT_currCliplist(state) {
       state.currentCliplist = {
         id:'',
@@ -116,6 +113,9 @@ export default new Vuex.Store({
     },
     ADD_CurrentCliplist(state, payload){
       state.currentCliplist = [...state.currentCliplist, ...payload];
+    },
+    SET_CurrentClipList(state, payload){
+      state.currentCliplist = payload;
     },
     DELETE_LikedStreamer(state, response) {
       const temp = JSON.parse(localStorage.getItem('alllikes'));

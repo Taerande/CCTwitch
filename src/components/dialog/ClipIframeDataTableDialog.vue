@@ -5,7 +5,8 @@
   max-width="1080"
   v-model="dialog">
   <template v-slot:activator="{ on }" class="d-flex">
-    <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" class="d-flex ma-0 pa-0" flat>
+    <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" class="d-flex ma-0 pa-0"
+    flat>
       <v-card-title class="justify-center ma-0 pa-0" style="width:3rem;">
         <span class="handle" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId && hovering"> <v-icon>mdi-drag-horizontal-variant</v-icon></span>
         <span v-else class="text-caption font-weight-bold">{{index+1}}</span>
@@ -57,8 +58,9 @@
     <v-card-text class="pa-0 ma-0">
     <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
       <iframe
+        allow="autoplay"
         v-if="dialog"
-        :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=false&muted=false&preload=auto`"
+        :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=true&preload=auto`"
         preload="auto"
         frameborder="0"
         height="100%"
@@ -191,34 +193,7 @@ export default {
         return '100';
       }
     },
-    imgHeight(){
-      if(this.$vuetify.breakpoint.lgAndUp){
-        return '112.5';
-      } else if(this.$vuetify.breakpoint.md) {
-        return '98.5';
-      } else if(this.$vuetify.breakpoint.sm) {
-        return '84';
-      } else if (this.$vuetify.breakpoint.xs) {
-        return '56';
-      } else {
-        return '56';
-      }
-    },
-    titleWidth(){
-      if(this.$vuetify.breakpoint.xs) {
-        return '11rem';
-      } else if (this.$vuetify.breakpoint.sm) {
-        return '18rem';
-      } else if (this.$vuetify.breakpoint.md) {
-        return '25rem';
-      } else {
-        return ''
-      }
-    }
   },
-
-  mounted(){
-  }
 }
 </script>
 <style lang="scss" scoped>

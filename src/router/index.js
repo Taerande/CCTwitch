@@ -23,18 +23,22 @@ firebase.getCurrentUser = () => {
 // this generates a separate chunk (about.[hash].js) for this route
 // which is lazy-loaded when the route is visited.
 // const About = () => import(/* webpackChunkName: "about" */ '@/views/About.vue');
-const Search = () => import(/* webpackChunkName: "search" */ '@/views/Search.vue');
-const Channel = () => import(/* webpackChunkName: "channel" */ '@/views/Channel.vue');
-const User = () => import(/* webpackChunkName: "user" */ '@/views/User.vue');
-const Login = () => import(/* webpackChunkName: "login" */ '@/views/Login.vue');
+const Search = () => import(/* webpackChunkName: "123" */ '@/views/Search.vue');
+const Channel = () => import(/* webpackChunkName: "423123" */ '@/views/Channel.vue');
+const User = () => import(/* webpackChunkName: "User" */ '@/views/User.vue');
+const Login = () => import(/* webpackChunkName: "Login" */ '@/views/Login.vue');
 const UserInfo = () => import(/* webpackChunkName: "UserInfo" */ '@/components/User/index.vue');
-const Tag = () => import(/* webpackChunkName: "tag" */ '@/views/Tag.vue');
-const tagIndex = () => import(/* webpackChunkName: "UserInfo" */ '@/components/tag/index.vue');
-const Trending = () => import(/* webpackChunkName: "trending" */ '@/views/Trending.vue');
-const Cliplist = () => import(/* webpackChunkName: "cliplist" */ '@/views/Cliplist.vue');
-const cliplistList = () => import(/* webpackChunkName: "cliplistList" */ '@/components/cliplist/cliplistList.vue');
-const cliplistIndex = () => import(/* webpackChunkName: "cliplistIndex" */ '@/components/cliplist/cliplistIndex.vue');
-const streamer = () => import(/* webpackChunkName: "streamer" */ '@/views/Streamer.vue');
+const Tag = () => import(/* webpackChunkName: "Tag" */ '@/views/Tag.vue');
+const TagIndex = () => import(/* webpackChunkName: "TagIndex" */ '@/components/tag/index.vue');
+const Trending = () => import(/* webpackChunkName: "Trending" */ '@/views/Trending.vue');
+
+const Cliplist = () => import(/* webpackChunkName: "Cliplist" */ '@/views/Cliplist.vue');
+const CliplistIndex = () => import(/* webpackChunkName: "CliplistIndex" */ '@/components/cliplist/cliplistIndex.vue');
+const CliplistList = () => import(/* webpackChunkName: "CliplistList" */ '@/components/cliplist/cliplistList.vue');
+const SpecialList = () => import(/* webpackChunkName: "SpecialList" */ '@/views/Speciallist.vue');
+const SpecialListIndex = () => import(/* webpackChunkName: "SpecialListIndex" */ '@/components/cliplist/speciallistIndex.vue');
+
+const Streamer = () => import(/* webpackChunkName: "Streamer" */ '@/views/Streamer.vue');
 const PageNotFound = () => import(/* webpackChunkName: "PageNotFound" */ '@/views/PageNotFound.vue');
 
 
@@ -98,7 +102,19 @@ const routes = [
       {
         path: ':id',
         name: 'cliplistIndex',
-        component: cliplistIndex,
+        component: CliplistIndex,
+      },
+    ],
+  },
+  {
+    path: '/special',
+    name: 'Speciallist',
+    component: SpecialList,
+    children: [
+      {
+        path: ':id',
+        name: 'SpeciallistIndex',
+        component: SpecialListIndex,
       },
     ],
   },
@@ -109,8 +125,8 @@ const routes = [
     children: [
       {
         path: ':id',
-        name: 'tagIndex',
-        component: tagIndex,
+        name: 'TagIndex',
+        component: TagIndex,
         meta:{
           title: `Tag`
         }
@@ -119,8 +135,8 @@ const routes = [
   },
   {
     path: '/mycliplist',
-    name: 'cliplistList',
-    component: cliplistList,
+    name: 'CliplistList',
+    component: CliplistList,
     meta:{
       requireAuth: true
     }
@@ -128,7 +144,7 @@ const routes = [
   {
     path: '/streamer',
     name: 'streamer',
-    component: streamer,
+    component: Streamer,
   },
   // {
   //   path: '/analysis',

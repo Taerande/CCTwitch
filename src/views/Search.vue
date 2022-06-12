@@ -40,7 +40,7 @@
             </v-avatar>
           </div>
           <div aria-label="streamer info" class="pl-3 text-truncate">
-            <div class="text-truncate">
+            <div class="text-truncate white--text">
               {{item.display_name}}
             </div>
           </div>
@@ -118,9 +118,8 @@ export default {
           })
           this.searchList.sort((a,b) => b.view_count - a.view_count);
         }
-      }).catch(() =>{
-        this.$router.push({name:'Home'}).catch(()=>{});
-        this.$store.commit('SET_SnackBar',{type:'error',text:'다시 검색하세요.',value:true})
+      })
+      .catch(() =>{
       });
       this.dataLoading = true;
 
