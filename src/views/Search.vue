@@ -138,7 +138,7 @@ export default {
      if(!this.$route.query.q){
       this.$router.push({path:'/'}).catch(()=>{});
     }
-    document.title = `${this.$route.query.q} | Search - CCTWITCH`
+    document.title = `${this.$route.query.q} | Search - CCTwitch`
     await this.searchChannel(this.$route.query.q);
   },
 };

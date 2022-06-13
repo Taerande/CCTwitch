@@ -121,7 +121,7 @@
           </router-link>
           <router-link to="/mycliplist">
             <div class="px-1 appbar-text">
-              <span :class="$route.name === 'cliplistList' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
+              <span :class="$route.name === 'Mycliplist' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
             </div>
           </router-link>
           <router-link class="ma-0 pa-0" to="/streamer">

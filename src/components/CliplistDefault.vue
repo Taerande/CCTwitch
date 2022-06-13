@@ -1,6 +1,6 @@
 <template>
 <div>
-  <v-card elevation="5" class="ma-0 pa-0 rounded-lg" flat :to="item.dataSet ? {name:'SpeciallistIndex', params:{ id:item.id }} : {name:'cliplistIndex', params:{id:item.id}}">
+  <v-card elevation="5" class="ma-0 pa-0 rounded-lg" flat :to="item.dataSet ? {name:'SpecialList', params:{ id:item.id }} : {name:'Cliplist', params:{id:item.id}}">
     <v-card-text class="d-flex justify-center pa-0 ma-0">
       <v-img :src="item.thumbnail_url ? `${item.thumbnail_url}` : `${require('@/assets/img/404.jpg')}`" lazy-src="@/assets/img/404.jpg" class="rounded-lg">
         <v-container class="d-flex justify-end" fluid fill-height>

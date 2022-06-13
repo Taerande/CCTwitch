@@ -95,7 +95,7 @@ app.get('/waktaverse', async (req, res) => {
     firestore.collection('cliplist').add({
       authorId: "twitch:792857520",
       authorName: "클립콜렉터",
-      clipCount: 100,
+      clipCount: cliplist.length,
       clipIds: clipIds,
       createdAt: moment(),
       title: `주간 이세돌 핫클립 - 22년 ${weekNumber - 1}주차`,

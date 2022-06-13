@@ -26,14 +26,14 @@
         <CliplistDefaultVue :item="item"></CliplistDefaultVue>
       </v-col>
     </v-row>
+    <v-row v-if="lastVisible" class="d-flex justify-center">
+      <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
+    </v-row>
   </v-row>
   <v-row v-else-if="cliplists.length === 0 && !loading" class="absolute-center">
     <v-alert type="error">
       공유된 클립모음이 없습니다.
     </v-alert>
-  </v-row>
-  <v-row v-if="lastVisible" class="d-flex justify-center">
-    <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
   </v-row>
 </v-container>
 
@@ -50,7 +50,7 @@ export default {
   data() {
     return {
       lastVisible: null,
-      loading:false,
+      loading:true,
       cliplists:[],
       dataLoading: false,
     };
@@ -109,6 +109,11 @@ export default {
           } else {
             this.lastVisible = null;
           }
+        if(sn.empty){
+          this.cliplists = []
+          this.loading = false;
+          return
+        }
         this.cliplists = sn.docs.map( (v) => {
           const item = v.data();
           return {

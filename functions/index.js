@@ -25,6 +25,14 @@ exports.twitchLiveClips = functions.region('asia-northeast3').https.onRequest(re
 
 exports.weeklyWaktaverse = functions.region('asia-northeast3').https.onRequest(require('./twitch/waktaverse.js'));
 
+exports.timeLine = functions.region('asia-northeast3') .runWith({
+  // Ensure the function has enough memory and time
+  // to process large files
+  timeoutSeconds: 540,
+  memory: "1GB",
+})
+.https.onRequest(require('./twitch/timeLine.js'));
+
 exports.delteClipsInCliplist = functions.region('asia-northeast3').firestore.document('cliplist/{cliplistId}').onDelete( async (snap, context ) => {
   const batch = firstore.batch();
   const sn = await firstore.collection('cliplist').doc(context.params.cliplistId).collection('clips').get();
@@ -37,5 +45,7 @@ exports.deleteUser = functions.region('asia-southeast1').auth.user().onDelete(as
   const {uid} = user
   db.ref('users').child(uid).remove()
   const batch = firestore.batch();
-  const sn = await firestore.collection('cliplist').where(uid, '==', )
+  const sn = await firestore.collection('cliplist').where('authorId', '==', uid).get();
+  sn.docs.forEach( doc => batch.delete(doc.ref));
+  await batch.commit();
 });

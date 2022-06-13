@@ -25,22 +25,21 @@ firebase.getCurrentUser = () => {
 // const About = () => import(/* webpackChunkName: "about" */ '@/views/About.vue');
 const Search = () => import(/* webpackChunkName: "123" */ '@/views/Search.vue');
 const Channel = () => import(/* webpackChunkName: "423123" */ '@/views/Channel.vue');
-const User = () => import(/* webpackChunkName: "User" */ '@/views/User.vue');
 const Login = () => import(/* webpackChunkName: "Login" */ '@/views/Login.vue');
-const UserInfo = () => import(/* webpackChunkName: "UserInfo" */ '@/components/User/index.vue');
-const Tag = () => import(/* webpackChunkName: "Tag" */ '@/views/Tag.vue');
-const TagIndex = () => import(/* webpackChunkName: "TagIndex" */ '@/components/tag/index.vue');
 const Trending = () => import(/* webpackChunkName: "Trending" */ '@/views/Trending.vue');
 
+const Timeline = () => import(/* webpackChunkName: "Timeline" */ '@/views/Timeline.vue');
+
 const Cliplist = () => import(/* webpackChunkName: "Cliplist" */ '@/views/Cliplist.vue');
-const CliplistIndex = () => import(/* webpackChunkName: "CliplistIndex" */ '@/components/cliplist/cliplistIndex.vue');
-const CliplistList = () => import(/* webpackChunkName: "CliplistList" */ '@/components/cliplist/cliplistList.vue');
-const SpecialList = () => import(/* webpackChunkName: "SpecialList" */ '@/views/Speciallist.vue');
-const SpecialListIndex = () => import(/* webpackChunkName: "SpecialListIndex" */ '@/components/cliplist/speciallistIndex.vue');
+
+const Mycliplist = () => import(/* webpackChunkName: "Mycliplist" */ '@/views/Mycliplist.vue');
 
 const Streamer = () => import(/* webpackChunkName: "Streamer" */ '@/views/Streamer.vue');
 const PageNotFound = () => import(/* webpackChunkName: "PageNotFound" */ '@/views/PageNotFound.vue');
 
+const SpecialList = () => import(/* webpackChunkName: "SpecialList" */ '@/views/SpecialList.vue');
+const User = () => import(/* webpackChunkName: "User" */ '@/views/User.vue');
+const Tag = () => import(/* webpackChunkName: "Tag" */ '@/views/Tag.vue');
 
 const routes = [
   {
@@ -70,16 +69,9 @@ const routes = [
     }
   },
   {
-    path: '/user',
+    path: '/user/:id',
     name: 'User',
     component: User,
-    children:[
-      {
-        path:':id',
-        name:'userinfo',
-        component: UserInfo,
-      }
-    ]
   },
   {
     path: '/search',
@@ -95,48 +87,34 @@ const routes = [
     component: Trending,
   },
   {
-    path: '/cliplist',
+    path: '/cliplist/:id',
     name: 'Cliplist',
     component: Cliplist,
-    children: [
-      {
-        path: ':id',
-        name: 'cliplistIndex',
-        component: CliplistIndex,
-      },
-    ],
   },
   {
-    path: '/special',
-    name: 'Speciallist',
+    path:'/timeline/:id',
+    name: 'Timeline',
+    component: Timeline,
+  },
+  {
+    path: '/special/:id',
+    name: 'SpecialList',
     component: SpecialList,
-    children: [
-      {
-        path: ':id',
-        name: 'SpeciallistIndex',
-        component: SpecialListIndex,
-      },
-    ],
   },
   {
-    path: '/tag',
+    path: '/tag/:id',
     name: 'Tag',
     component: Tag,
-    children: [
-      {
-        path: ':id',
-        name: 'TagIndex',
-        component: TagIndex,
-        meta:{
-          title: `Tag`
-        }
-      },
-    ],
+  },
+  {
+    path: '/timeline/:id',
+    name: 'Timeline',
+    component: Timeline,
   },
   {
     path: '/mycliplist',
-    name: 'CliplistList',
-    component: CliplistList,
+    name: 'Mycliplist',
+    component: Mycliplist,
     meta:{
       requireAuth: true
     }
@@ -172,7 +150,6 @@ const router = new VueRouter({
 
 
 router.beforeEach( async (to, from, next) => {
-  window.scroll(0,0)
   store.commit('INIT_SnackBar')
   const requireAuth = to.meta.requireAuth;
   const user = await firebase.getCurrentUser();

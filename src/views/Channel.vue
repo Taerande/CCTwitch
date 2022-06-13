@@ -156,6 +156,7 @@
       @openVidsListDialog="openVidsListDialog"
       :userInfo="userInfo"
       :clipSort="clipSort"
+      :vidInfo="vidLists[carsouelId]"
     ></SortButton>
     <v-row class="d-block" v-if="this.clipSort === 'vids'">
       <v-row
@@ -358,7 +359,7 @@ export default {
           })
           .then((res) => {
             this.userInfo.data = res.data.data['0']
-            document.title = `${res.data.data['0'].display_name} | Channel - CCTWIICH`
+            document.title = `${res.data.data['0'].display_name} | Channel - CCTwitch`
           }).catch(()=>{
             this.$router.push({path:'/'}).catch(()=>{});
             this.$store.commit('SET_SnackBar',{

@@ -1,20 +1,26 @@
 <template>
 <v-container>
   <v-row class="d-flex align-center py-3">
-    <v-btn class="text-caption mr-3" :color="clipSort === 'vids' ? 'twitch' : ''"
+    <v-btn class="text-caption pa-0 px-2 mr-3" :color="clipSort === 'vids' ? 'twitch' : ''"
     :class="clipSort === 'vids' ? 'white--text' : ''"
-    @click="changeSortType()">Sort By Vids</v-btn>
+    @click="changeSortType()">
+    <v-icon small>mdi-video</v-icon>
+    <span class="px-1">Sort By Vids</span>
+    </v-btn>
     <v-menu
       v-model="menu"
       offset-y>
       <template v-slot:activator="{ on }">
         <v-btn
-          class="text-caption"
+          class="text-caption mr-3 pa-0 px-2"
           :color="clipSort === 'date' ? 'twitch' : ''"
           v-on="on"
           :class="clipSort === 'date' ? 'white--text' : ''"
         >
+        <v-icon small>mdi-calendar</v-icon>
+        <span class="px-1">
           {{$store.state.dateSort.text === null ? "Sort By Date" : $store.state.dateSort.text}}
+        </span>
         </v-btn>
       </template>
       <v-list>
@@ -58,9 +64,24 @@
         </v-list-item>
       </v-list>
     </v-menu>
+    <v-btn
+    v-if="vidInfo && $store.state.userinfo.userInfo"
+    @click="createTimeline(vidInfo.data.user_login, vidInfo.data.user_id, vidInfo.data.id)"
+    :loading="dbLoading"
+    :color="clipSort === 'vids' ? 'twitch' : ''"
+    :class="clipSort === 'vids' ? 'white--text' : ''"
+    class="text-caption mr-3 pa-0 px-2" :disabled="vidInfo.data.is_live === 'live' || clipSort === 'date'">
+    <v-icon small>mdi-timeline</v-icon><span class="px-2">Sort By Timeline</span></v-btn>
+    <v-btn
+    v-else
+    @click="$store.commit('SET_SignInDialog', true)"
+    class="text-caption mr-3 pa-0 px-2"
+    :color="clipSort === 'vids' ? 'twitch' : ''"
+    :class="clipSort === 'vids' ? 'white--text' : ''"
+    ><v-icon small>mdi-timeline</v-icon><span class="px-2">Sort By Timeline</span></v-btn>
   </v-row>
   <v-row>
-    <div v-if="this.clipSort === 'date'" class="py-1 red--text text-subtitle-2">
+    <div v-if="clipSort === 'date'" class="py-1 red--text text-subtitle-2">
         <v-icon color="error" size="1rem">mdi-calendar-range</v-icon> {{setDateFormat($store.state.dateSort)}}
     </div>
   </v-row>
@@ -69,15 +90,17 @@
 
 <script>
 import DatePickerDialog from '@/components/dialog/DatePickerDialog.vue';
+import axios from 'axios';
 
 export default {
-  props: ['userInfo', 'clipSort'],
+  props: ['userInfo', 'clipSort', 'vidInfo'],
   components: {
     DatePickerDialog,
   },
   data() {
     return {
       menu: false,
+      dbLoading: false,
     };
   },
   methods: {
@@ -95,6 +118,22 @@ export default {
       await asd();
       this.$emit('changeSort', 'date');
       this.$store.commit('SET_DateSort', el);
+    },
+    async createTimeline(user_login, broadcaster_id, vidId){
+      this.$store.commit('SET_SnackBar',{type:'info', text:'Timeline 생성은 3분 정도 소요됩니다.', value:true});
+      this.dbLoading = true;
+      await axios.post(this.$store.state.backendUrl+'/timeLine/timeline',{
+        user_login: user_login,
+        broadcaster_id: broadcaster_id,
+        vidId: vidId,
+        appAccessToken: `${this.$store.state.headerConfig.Authorization}`,
+      }).then((res) => {
+        this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
+        console.log(res);
+        this.dbLoading = false;
+      }).catch(()=>{
+          this.dbLoading = false;
+      })
     },
     async changeSortType() {
       if(this.clipSort === 'vids'){

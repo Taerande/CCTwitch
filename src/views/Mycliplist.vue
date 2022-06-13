@@ -67,8 +67,8 @@
 <script>
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog';
 import { last } from 'lodash';
-import CliplistDefaultVue from '../CliplistDefault.vue';
-import clipListSortBtnVue from '../clipListSortBtn.vue';
+import CliplistDefaultVue from '@/components/CliplistDefault.vue';
+import clipListSortBtnVue from '@/components/clipListSortBtn.vue';
 
 
 export default {
@@ -184,17 +184,18 @@ export default {
     document.title = 'My Cliplists - CCTWITCH';
   },
   async mounted() {
-    // if(this.unsubscribe) this.unsubscribe()
     const user = this.$store.state.userinfo.userInfo;
     if(user){
       const snap = await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('authorId','==',this.$store.state.userinfo.userInfo.uid).limit(24).get();
+      console.log(snap);
         if(snap.docs.length === 24){
             this.lastVisible = last(snap.docs);
           } else {
             this.lastVisible = null;
           }
         if(snap.empty){
-          this.cliplist = []
+          this.cliplist = [];
+          this.loading = false;
           return
         }
         snap.docs.forEach((doc) => {
@@ -210,6 +211,7 @@ export default {
           return a.createdAt - b.createdAt;
         })
       const sn = await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('likeUids','array-contains',this.$store.state.userinfo.userInfo.uid).limit(24).get();
+      console.log(sn);
       if(sn.docs.length === 24){
           this.likedLastVisible = last(sn.docs);
         } else {
@@ -232,12 +234,11 @@ export default {
       this.likedCliplist.sort((b,a) => {
         return a.createdAt - b.createdAt;
       })
-      this.loading = false;
     }
+    this.loading = false;
 
   },
   destroyed() {
-    // if(this.unsubscribe) this.unsubscribe()
   },
 };
 </script>

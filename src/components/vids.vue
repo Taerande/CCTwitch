@@ -151,6 +151,7 @@ export default {
     model:{
       get(){
         return this.carsouelId;
+
       },
       set(newValue){
         this.$emit('emitVidId',newValue);

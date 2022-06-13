@@ -23,6 +23,10 @@
       </v-col>
       <Search class="pt-6"></Search>
     </v-row>
+    <v-row>
+      <v-btn :loading="dbLoading" color="success" block @click="test('woowakgood','49045679','1457601908')">test</v-btn>
+      <v-btn color="twitch" block @click="test2()">asd</v-btn>
+    </v-row>
     <DisplyaAdContainerVue></DisplyaAdContainerVue>
     <div class="d-flex align-center">
       <span>Live Stream - {{lang}}</span>
@@ -138,11 +142,39 @@ export default {
         this.dataLoading = false;
       })
     },
+    getDurationTimeToSec(el) {
+      let hour = el.split('h')[0]*3600;
+      let min = el.split('h')[1].split('m')[0]*60;
+      let sec = el.split('m')[1].split('s')[0]*1;
+      return hour+min+sec;
+    },
     async refresh(){
       this.cursor = null;
       this.streamingList = [];
       await this.getLiveStreamWithLang();
     },
+    test2(){
+      let duration = this.$moment.duration(this.getDurationTimeToSec('30s'), 'seconds');
+      console.log(duration);
+      // if(this.$moment(resp.data.data[0].created_at).add(duration,'seconds').isAfter(this.$moment())){
+      //   vidData = resp.data.data;
+      // }
+    },
+    async test(user_login, broadcaster_id, vidId){
+      this.dbLoading = true;
+      await axios.post(this.$store.state.backendUrl+'/timeLine/timeline',{
+        user_login: user_login,
+        broadcaster_id: broadcaster_id,
+        vidId: vidId,
+        appAccessToken: `${this.$store.state.headerConfig.Authorization}`,
+      }).then((res) => {
+        this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
+        console.log(res);
+        this.dbLoading = false;
+      }).catch(()=>{
+          this.dbLoading = false;
+      })
+    }
   },
   computed:{
     skeletonCount(){
@@ -163,7 +195,7 @@ export default {
   async mounted(){
     await this.getLiveStreamWithLang();
     this.loading = true;
-    document.title = 'Welcome CCTWITCH'
+    document.title = 'CCTwitch - Clip Collector'
   },
   destroyed() {
     this.streamingList = [];
