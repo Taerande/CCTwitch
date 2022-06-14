@@ -1,7 +1,7 @@
 <template>
 <v-container>
   <v-row class="d-flex align-center py-3">
-    <v-btn class="text-caption pa-0 px-2 mr-3" :color="clipSort === 'vids' ? 'twitch' : ''"
+    <v-btn :block="$vuetify.breakpoint.smAndDown" class="text-caption pa-2 mr-3" :color="clipSort === 'vids' ? 'twitch' : ''"
     :class="clipSort === 'vids' ? 'white--text' : ''"
     @click="changeSortType()">
     <v-icon small>mdi-video</v-icon>
@@ -12,7 +12,8 @@
       offset-y>
       <template v-slot:activator="{ on }">
         <v-btn
-          class="text-caption mr-3 pa-0 px-2"
+          :block="$vuetify.breakpoint.smAndDown"
+          class="text-caption mr-3 pa-2"
           :color="clipSort === 'date' ? 'twitch' : ''"
           v-on="on"
           :class="clipSort === 'date' ? 'white--text' : ''"
@@ -66,16 +67,18 @@
     </v-menu>
     <v-btn
     v-if="vidInfo && $store.state.userinfo.userInfo"
+    :block="$vuetify.breakpoint.smAndDown"
     @click="createTimeline(vidInfo.data.user_login, vidInfo.data.user_id, vidInfo.data.id)"
     :loading="dbLoading"
     :color="clipSort === 'vids' ? 'twitch' : ''"
     :class="clipSort === 'vids' ? 'white--text' : ''"
-    class="text-caption mr-3 pa-0 px-2" :disabled="vidInfo.data.is_live === 'live' || clipSort === 'date'">
-    <v-icon small>mdi-timeline</v-icon><span class="px-2">Sort By Timeline</span></v-btn>
+    class="text-caption mr-3 pa-2" :disabled="vidInfo.data.is_live === 'live' || clipSort === 'date'">
+    <v-icon small>mdi-timeline</v-icon><span class="px-2">{{vidInfo.data.is_live ? "Disabled when live" : 'Sort By Timeline'}}</span></v-btn>
     <v-btn
     v-else
+    :block="$vuetify.breakpoint.smAndDown"
     @click="$store.commit('SET_SignInDialog', true)"
-    class="text-caption mr-3 pa-0 px-2"
+    class="text-caption mr-3 pa-2"
     :color="clipSort === 'vids' ? 'twitch' : ''"
     :class="clipSort === 'vids' ? 'white--text' : ''"
     ><v-icon small>mdi-timeline</v-icon><span class="px-2">Sort By Timeline</span></v-btn>
@@ -120,7 +123,7 @@ export default {
       this.$store.commit('SET_DateSort', el);
     },
     async createTimeline(user_login, broadcaster_id, vidId){
-      this.$store.commit('SET_SnackBar',{type:'info', text:'Timeline 생성은 3분 정도 소요됩니다.', value:true});
+      this.$store.commit('SET_SnackBar',{type:'info', text:'Timeline 생성은 1분 정도 소요됩니다.', value:true});
       this.dbLoading = true;
       await axios.post(this.$store.state.backendUrl+'/timeLine/timeline',{
         user_login: user_login,
@@ -128,8 +131,8 @@ export default {
         vidId: vidId,
         appAccessToken: `${this.$store.state.headerConfig.Authorization}`,
       }).then((res) => {
-        this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
-        console.log(res);
+        this.$router.push(`/timeline/${res.data.id}`).catch(()=>{})
+        this.$store.commit('SET_SnackBar', {type:'success', text:`${res.data.message}`, value:true})
         this.dbLoading = false;
       }).catch(()=>{
           this.dbLoading = false;

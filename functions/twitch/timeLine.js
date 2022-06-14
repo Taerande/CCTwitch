@@ -20,10 +20,11 @@ app.post('/timeline', async (req, res) => {
   let cliplist = [];
   let cursor = '';
   let result = [];
+  let resultR = [];
+  let thumbnail_url;
 
   // rules
-  // 1. 방송 종료 6시간 이후에 Timeline 생성 가능.
-  // 2. 최근 업데이트 12시간 이후에 업데이트 가능.
+  // 2. 최근 업데이트 3시간 이후에 업데이트 가능.
   // 3. vidId가 없으면 생성안댐.
   // 4. 인기 클립 100개 시간순으로 나열하자.
 
@@ -38,10 +39,8 @@ app.post('/timeline', async (req, res) => {
         id: el
       }
     }).then((resp) => {
-      let duration = moment.duration(resp.data.data[0].duration, 'seconds');
-      if(moment(resp.data.data[0].created_at).add(duration,'seconds').isAfter(moment())){
         vidData = resp.data.data;
-      }
+      // }
     }).catch(()=>{
       return res.send({id:null, message:"Can't find video any more!"});
     })
@@ -92,6 +91,8 @@ app.post('/timeline', async (req, res) => {
           cursor = '';
         }
       }
+    }).then(()=>{
+      thumbnail_url = cliplist[0].thumbnail_url
     }).catch((err) => console.log(err))
   }
 
@@ -127,12 +128,13 @@ app.post('/timeline', async (req, res) => {
       if(doc.exists){
         const item = doc.data();
         const timeDiff = moment().diff(item.updatedAt.toDate());
-        if( timeDiff < 21600000){
-          return res.send({id: sn.id, message:`There is timeline created befroe ${moment(item.updatedAt.toDate()).fromNow()}. Can update every 6 hours`});
+        if( timeDiff < 10800000 ){
+          return res.send({id: sn.id, message:`Timeline has been created ${moment(item.updatedAt.toDate()).fromNow()}.`});
         } else {
           // Update
           await getVid(vidId);
           await getClip(broadcaster_id);
+
           Promise.all(
             cliplist.map((v) => {
               return getVidOffset(v);
@@ -140,40 +142,73 @@ app.post('/timeline', async (req, res) => {
               cliplist.sort((a,b) => a.videoOffsetSeconds - b.videoOffsetSeconds);
               const last = cliplist[cliplist.length-1];
 
-              // 두 클립사이의 시간이 10초 미만인 경우 스킵
-              for(let i=0; i < cliplist.length-1;){
-                if(cliplist[i+1].videoOffsetSeconds - cliplist[i].videoOffsetSeconds < 10){
-                  if(cliplist[i+1].view_count - cliplist[i].view_count > 0){
-                    result.push({
-                      id: cliplist[i+1].id,
-                      offset: cliplist[i+1].videoOffsetSeconds
-                    })
-                    i += 2;
+                for(let i=0; i < cliplist.length-1;){
+                  if(cliplist[i+1].videoOffsetSeconds - cliplist[i].videoOffsetSeconds < 10){
+                    if(cliplist[i+1].view_count - cliplist[i].view_count >= 0){
+                      result.push({
+                        id: cliplist[i+1].id,
+                        view_count: cliplist[i+1].view_count,
+                        offset: cliplist[i+1].videoOffsetSeconds
+                      })
+                      i += 2;
+                    } else {
+                      result.push({
+                        id: cliplist[i].id,
+                        view_count: cliplist[i].view_count,
+                        offset: cliplist[i].videoOffsetSeconds
+                      })
+                      i += 2;
+                    }
                   } else {
                     result.push({
                       id: cliplist[i].id,
+                      view_count: cliplist[i].view_count,
                       offset: cliplist[i].videoOffsetSeconds
                     })
-                    i += 2;
+                    i += 1;
                   }
-                } else {
-                  result.push({
-                    id: cliplist[i].id,
-                    offset: cliplist[i].videoOffsetSeconds
-                  })
-                  i += 1;
                 }
-              }
-              if(last.id !== result[result.length-1].id){
-                result.push({
-                  id: last.id,
-                  offset: last.videoOffsetSeconds,
-                })
-              }
+                if(last.id !== cliplist[cliplist.length-1].id){
+                  result.push({
+                    id: last.id,
+                    view_count: last.view_count,
+                    offset: last.videoOffsetSeconds,
+                  })
+                }
+                const lastR = result[result.length-1];
+                for(let i=0; i < result.length-1;){
+                  if(result[i+1].offset - result[i].offset < 10){
+                    if(result[i+1].view_count - result[i].view_count >= 0){
+                      resultR.push({
+                        id: result[i+1].id,
+                        offset: result[i+1].offset
+                      })
+                      i += 2;
+                    } else {
+                      resultR.push({
+                        id: result[i].id,
+                        offset: result[i].offset
+                      })
+                      i += 2;
+                    }
+                  } else {
+                    resultR.push({
+                      id: result[i].id,
+                      offset: result[i].offset
+                    })
+                    i += 1;
+                  }
+                }
+                if(lastR.id !== result[result.length-1].id){
+                  result.push({
+                    id: lastR.id,
+                    offset: lastR.offset,
+                  })
+                }
               firestore.collection('timeline').doc(`${vidData[0].user_login}-${vidData[0].id}`).update({
-                clipCount: result.length,
-                thumbnail_url: vidData[0].thumbnail_url.split('%{width}x%{height}')[0]+'480x272.jpg',
-                dataSet: result,
+                clipCount: resultR.length,
+                thumbnail_url: thumbnail_url,
+                dataSet: resultR,
                 updatedAt: new Date(),
               })
             }).then(() =>{
@@ -192,19 +227,21 @@ app.post('/timeline', async (req, res) => {
             return getVidOffset(v);
           })).then(() => {
             cliplist.sort((a,b) => a.videoOffsetSeconds - b.videoOffsetSeconds);
-            const last = cliplist[cliplist.length-1];
+              const last = cliplist[cliplist.length-1];
 
               for(let i=0; i < cliplist.length-1;){
                 if(cliplist[i+1].videoOffsetSeconds - cliplist[i].videoOffsetSeconds < 10){
-                  if(cliplist[i+1].view_count - cliplist[i].view_count > 0){
+                  if(cliplist[i+1].view_count - cliplist[i].view_count >= 0){
                     result.push({
                       id: cliplist[i+1].id,
+                      view_count: cliplist[i+1].view_count,
                       offset: cliplist[i+1].videoOffsetSeconds
                     })
                     i += 2;
                   } else {
                     result.push({
                       id: cliplist[i].id,
+                      view_count: cliplist[i].view_count,
                       offset: cliplist[i].videoOffsetSeconds
                     })
                     i += 2;
@@ -212,26 +249,58 @@ app.post('/timeline', async (req, res) => {
                 } else {
                   result.push({
                     id: cliplist[i].id,
+                    view_count: cliplist[i].view_count,
                     offset: cliplist[i].videoOffsetSeconds
                   })
                   i += 1;
                 }
               }
-              if(last.id !== result[result.length-1].id){
+              if(last.id !== cliplist[cliplist.length-1].id){
                 result.push({
                   id: last.id,
+                  view_count: last.view_count,
                   offset: last.videoOffsetSeconds,
+                })
+              }
+              const lastR = result[result.length-1];
+              for(let i=0; i < result.length-1;){
+                if(result[i+1].offset - result[i].offset < 10){
+                  if(result[i+1].view_count - result[i].view_count >= 0){
+                    resultR.push({
+                      id: result[i+1].id,
+                      offset: result[i+1].offset
+                    })
+                    i += 2;
+                  } else {
+                    resultR.push({
+                      id: result[i].id,
+                      offset: result[i].offset
+                    })
+                    i += 2;
+                  }
+                } else {
+                  resultR.push({
+                    id: result[i].id,
+                    offset: result[i].offset
+                  })
+                  i += 1;
+                }
+              }
+              if(lastR.id !== result[result.length-1].id){
+                result.push({
+                  id: lastR.id,
+                  offset: lastR.offset,
                 })
               }
             firestore.collection('timeline').doc(`${vidData[0].user_login}-${vidData[0].id}`).set({
               authorId: 'twitch:792857520',
               broadcaster: vidData[0].user_login,
-              clipCount: result.length,
+              clipCount: resultR.length,
               videoId: vidData[0].id,
               vidCreated: vidData[0].created_at,
               vidTitle: vidData[0].title,
-              thumbnail_url: vidData[0].thumbnail_url.split('%{width}x%{height}')[0]+'480x272.jpg',
-              dataSet: result,
+              thumbnail_url: thumbnail_url,
+              dataSet: resultR,
               createdAt: new Date(),
               updatedAt: new Date(),
               viewCount: 0,

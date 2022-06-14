@@ -6,9 +6,14 @@
       class="py-2"
       flat
       tile>
-      <v-card-text class="pa-0 py-2 align-center justify-center">
+      <v-card-text class="pa-0 py-2 my-5 align-center justify-center">
         <div class="px-2">
           {{ new Date().getFullYear() }} — <strong>Clip Collector for TWITCH</strong>
+        </div>
+        <div class="d-flex px-2 pt-3 align-center">
+          <v-icon small>mdi-email</v-icon>
+          <span class="pr-3">Contact:</span>
+          <a class="twitch--text" href = "mailto: cctwitchxyz@gmail.com">cctwitchxyz@gmail.com</a>
         </div>
       </v-card-text>
     </v-card>

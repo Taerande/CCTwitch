@@ -22,12 +22,27 @@
 
       gtag('config', 'G-B8P868HW7Y');
     </script>
+    <script type="text/javascript">
+    function callBackFunc(elm) {  
+        text = [];  
+        text.push('<ins class="adsbygoogle"');  
+        text.push('style="display:inline-block;width:250px;height:250px"');  
+        text.push('data-ad-client="ca-pub-7893835816116192"');  
+        text.push('data-ad-slot="5918517081"></ins>');  
+       
+        elm.innerHTML = text.join(' ');  
+        (adsbygoogle = window.adsbygoogle || []).push({});  
+    }  
+    </script>
   </head>
   <body>
     <noscript>
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
-    <div id="app"></div>
+    <div id="app">
+    </div>
     <!-- built files will be auto injected -->
+    <script async type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js">
+    </script>
   </body>
 </html>

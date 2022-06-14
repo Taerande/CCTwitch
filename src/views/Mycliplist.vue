@@ -100,7 +100,6 @@ export default {
       this.order.sort = el.actions.sort;
       this.cliplist = [];
       this.lastVisible = null;
-      console.log(el);
       await this.getMoreDataCreated();
     },
     async sortlLkedCliplist(el){
@@ -109,7 +108,6 @@ export default {
       this.order.sort = el.actions.sort;
       this.cliplist = [];
       this.lastVisible = null;
-      console.log(el);
       await this.getMoreDataLiked();
     },
     async getMoreDataCreated(){
@@ -117,7 +115,6 @@ export default {
       this.loading = this.lastVisible ? false : true;
       const sn = this.lastVisible ? await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('authorId','==',this.$store.state.userinfo.userInfo.uid).startAfter(this.lastVisible).limit(24).get() : await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('authorId','==',this.$store.state.userinfo.userInfo.uid).limit(24).get();
 
-      console.log(sn);
 
       if(sn.docs.length === 24){
           this.lastVisible = last(sn.docs);
@@ -187,7 +184,6 @@ export default {
     const user = this.$store.state.userinfo.userInfo;
     if(user){
       const snap = await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('authorId','==',this.$store.state.userinfo.userInfo.uid).limit(24).get();
-      console.log(snap);
         if(snap.docs.length === 24){
             this.lastVisible = last(snap.docs);
           } else {
@@ -211,7 +207,6 @@ export default {
           return a.createdAt - b.createdAt;
         })
       const sn = await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('likeUids','array-contains',this.$store.state.userinfo.userInfo.uid).limit(24).get();
-      console.log(sn);
       if(sn.docs.length === 24){
           this.likedLastVisible = last(sn.docs);
         } else {

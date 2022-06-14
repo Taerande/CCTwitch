@@ -1,10 +1,15 @@
 <template>
   <div class="d-flex justify-center">
-    <Adsense
+    <ins class="kakao_ad_area" style="display:none;"
+      data-ad-unit    = "DAN-Pzsp2FJKieHwM62D"
+      data-ad-width   = "320"
+      data-ad-height  = "50"></ins>
+
+    <!-- <Adsense
     data-ad-client="ca-pub-8597405222136575"
     data-ad-slot="3465851493"
     :ins-style="`display:inline-block;width:${AdWidth};height:90px;`"
-    ></Adsense>
+    ></Adsense> -->
   </div>
 </template>
 <script>

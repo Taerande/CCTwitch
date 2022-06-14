@@ -1,6 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+  		match /timeline/{timelineId}{
+      	allow read: if true;
+        allow create: if request.auth != null;
+      }
     	match /cliplist/{cliplistId}{
       
       	function Authorization(){
