@@ -1,5 +1,24 @@
 <template>
 <v-container>
+  <v-dialog
+    v-model="dialog"
+    fullscreen
+    transition="none"
+    disabled
+    persistent>
+    <v-overlay>
+      <v-container fluid>
+        <v-row class="d-block">
+          <div class="d-flex justify-center">
+            <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+          </div>
+          <div>
+            Creating Timeline...
+          </div>
+        </v-row>
+      </v-container>
+    </v-overlay>
+  </v-dialog>
   <v-row class="d-flex align-center py-3">
     <v-btn :block="$vuetify.breakpoint.smAndDown" class="text-caption pa-2 mr-3" :color="clipSort === 'vids' ? 'twitch' : ''"
     :class="clipSort === 'vids' ? 'white--text' : ''"
@@ -66,7 +85,7 @@
       </v-list>
     </v-menu>
     <v-btn
-    v-if="vidInfo && $store.state.userinfo.userInfo"
+    v-if="vidInfo"
     :block="$vuetify.breakpoint.smAndDown"
     @click="createTimeline(vidInfo.data.user_login, vidInfo.data.user_id, vidInfo.data.id)"
     :loading="dbLoading"
@@ -77,7 +96,7 @@
     <v-btn
     v-else
     :block="$vuetify.breakpoint.smAndDown"
-    @click="$store.commit('SET_SignInDialog', true)"
+    disabled
     class="text-caption mr-3 pa-2"
     :color="clipSort === 'vids' ? 'twitch' : ''"
     :class="clipSort === 'vids' ? 'white--text' : ''"
@@ -104,6 +123,7 @@ export default {
     return {
       menu: false,
       dbLoading: false,
+      dialog:false,
     };
   },
   methods: {
@@ -123,8 +143,9 @@ export default {
       this.$store.commit('SET_DateSort', el);
     },
     async createTimeline(user_login, broadcaster_id, vidId){
-      this.$store.commit('SET_SnackBar',{type:'info', text:'Timeline 생성은 1분 정도 소요됩니다.', value:true});
+      this.dialog = true;
       this.dbLoading = true;
+      this.$store.commit('SET_SnackBar',{type:'info', text:'Timeline 생성은 1분 정도 소요됩니다.', value:true});
       await axios.post(this.$store.state.backendUrl+'/timeLine/timeline',{
         user_login: user_login,
         broadcaster_id: broadcaster_id,
@@ -134,7 +155,12 @@ export default {
         this.$router.push(`/timeline/${res.data.id}`).catch(()=>{})
         this.$store.commit('SET_SnackBar', {type:'success', text:`${res.data.message}`, value:true})
         this.dbLoading = false;
-      }).catch(()=>{
+        this.dialog = false;
+
+      }).catch((err)=>{
+          this.$store.commit('SET_SnackBar', {type:'error', text:`${err.message}`, value:true})
+          this.$store.commit('SET_SnackBar', {type:'error', text:`${res.data.message}`, value:true})
+          this.dialog = false;
           this.dbLoading = false;
       })
     },

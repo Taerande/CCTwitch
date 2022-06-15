@@ -50,6 +50,10 @@
                     <v-icon color="green" class="pr-1">mdi-trending-up</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
                   </v-list-item>
+                  <v-list-item to="/timelines" @click="changeDrawer(false)">
+                    <v-icon color="cyan" class="pa-0 ma-0 pr-1">mdi-timeline</v-icon>
+                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Timeline</span>
+                  </v-list-item>
                   <v-list-item to="/mycliplist" @click="changeDrawer(false)">
                     <v-icon color="blue" class="pr-1">mdi-playlist-check</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
@@ -119,6 +123,11 @@
               <span :class="$route.name === 'Trending' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
             </div>
           </router-link>
+          <router-link class="ma-0 pa-0" to="/timelines">
+            <div class="px-1 appbar-text">
+              <span :class="$route.name === 'Timelines' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">Timeline</span>
+            </div>
+          </router-link>
           <router-link to="/mycliplist">
             <div class="px-1 appbar-text">
               <span :class="$route.name === 'Mycliplist' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
@@ -134,7 +143,7 @@
     </v-container>
     <v-spacer></v-spacer>
     <div class="px-3">
-      <SearchBar></SearchBar>
+    <SearchBar></SearchBar>
     </div>
     <v-avatar
       class="hoverCursor"

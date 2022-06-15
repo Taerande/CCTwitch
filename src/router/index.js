@@ -34,6 +34,8 @@ const Cliplist = () => import(/* webpackChunkName: "Cliplist" */ '@/views/Clipli
 
 const Mycliplist = () => import(/* webpackChunkName: "Mycliplist" */ '@/views/Mycliplist.vue');
 
+const Timelines = () => import(/* webpackChunkName: "Timelines" */ '@/views/Timelinelist.vue');
+
 const Streamer = () => import(/* webpackChunkName: "Streamer" */ '@/views/Streamer.vue');
 const PageNotFound = () => import(/* webpackChunkName: "PageNotFound" */ '@/views/PageNotFound.vue');
 
@@ -97,6 +99,11 @@ const routes = [
     component: Timeline,
   },
   {
+    path:'/timelines',
+    name: 'Timelines',
+    component: Timelines,
+  },
+  {
     path: '/special/:id',
     name: 'SpecialList',
     component: SpecialList,
@@ -105,11 +112,6 @@ const routes = [
     path: '/tag/:id',
     name: 'Tag',
     component: Tag,
-  },
-  {
-    path: '/timeline/:id',
-    name: 'Timeline',
-    component: Timeline,
   },
   {
     path: '/mycliplist',

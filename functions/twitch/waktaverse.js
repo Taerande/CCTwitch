@@ -12,7 +12,8 @@ app.get('/waktaverse', async (req, res) => {
   // const userId = req.url.split('userId=')[1].split('&twitchAccesToken')[0]
   // const twitchAccesToken = req.url.split('Bearer+')[1];
   const clientId = process.env.TWITCH_CLIENT_ID;
-  const time = req.url.split('?time=')[1]
+  const time = req.query.time;
+  const appAccessToken = req.query.appAccessToken;
 
   const weekNumber = moment(time).week();
 
@@ -34,7 +35,7 @@ app.get('/waktaverse', async (req, res) => {
     await axios.get('https://api.twitch.tv/helix/users',{
       headers:{
         'Client-id': clientId,
-        Authorization: 'Bearer qezfxoyyg6zitp5dt93i644bh9wysn',
+        Authorization: appAccessToken,
         Accept: 'application/json',
       },
       params:{
@@ -48,7 +49,7 @@ app.get('/waktaverse', async (req, res) => {
     await axios.get('https://api.twitch.tv/helix/clips',{
       headers:{
         'Client-id': clientId,
-        Authorization: 'Bearer qezfxoyyg6zitp5dt93i644bh9wysn',
+        Authorization: appAccessToken,
         Accept: 'application/json',
       },
       params:{
@@ -102,7 +103,7 @@ app.get('/waktaverse', async (req, res) => {
       description:`기간: ${moment(started_at).format('LL')} ~ ${moment(ended_at).format('LL')}`,
       dataSet:dataSet,
       color: '#D81B60FF',
-      isPublic: 1,
+      isPublic: 2,
       tags: ['이세계 아이돌','이세돌','주간 이세돌 핫클립'],
       thumbnail_url: cliplist[0].thumbnail_url || null,
       likeCount: 0,
@@ -117,39 +118,22 @@ app.get('/waktaverse', async (req, res) => {
 });
 module.exports = app
 
+// <v-row>
+//    {{time}}
+//    <v-text-field
+//      v-model="time"
+//    ></v-text-field>
+//  </v-row>
+//    <v-btn :loading="dbLoading" color="success" block @click="wak(time)">test</v-btn>
 
-// async test(){
-//   const sn = await this.$firestore.collection('cliplist').where('authorId','==',this.$store.state.userinfo.userInfo.uid).get();
+// async wak(el){
+//   this.dbLoading = true;
+//   await axios.get(this.$store.state.backendUrl+'/weeklyWaktaverse/waktaverse'+`?time=${el}&appAccessToken=${this.$store.state.headerConfig.Authorization}`).then((res) => {
+//     this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
+//     console.log(res);
+//     this.dbLoading = false;
+//   }).catch(()=>{
+//       this.dbLoading = false;
+//     })
 
-//   sn.docs.forEach( async (el) => {
-//      await this.$firestore.collection('cliplist').doc(el.id).update({
-//        isPublic: 2
-//      })
-//   });
-// }
-// // this.dbLoading = true;
-//   // await axios.get(this.$store.state.backendUrl+'/weeklyWaktaverse/waktaverse'+`?time=${el}`).then((res) => {
-//   //   this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
-//   //   console.log(res);
-//   //   this.dbLoading = false;
-//   // }).catch(()=>{
-//   //     this.dbLoading = false;
-//   //   })
-// <!-- <v-row>
-//   {{time}}
-//   <v-text-field
-//     v-model="time"
-//   ></v-text-field>
-// </v-row>
-// <v-row>
-//   21년은 53주차 까지 있다.
-// </v-row>
-// <v-row>
-//   {{ $moment(time).week(time).startOf('week').add(36,'hour') }}
-// </v-row>
-// <v-row>
-//   {{ $moment(time).week() }}
-// </v-row>
-// <v-row>
-//   <v-btn :loading="dbLoading" color="success" block @click="test()">test</v-btn>
-// </v-row> -->
+// },

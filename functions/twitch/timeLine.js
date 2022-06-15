@@ -41,23 +41,7 @@ app.post('/timeline', async (req, res) => {
     }).then((resp) => {
         vidData = resp.data.data;
       // }
-    }).catch(()=>{
-      return res.send({id:null, message:"Can't find video any more!"});
-    })
-  }
-  async function getStream(user_login){
-    await axios.get('https://api.twitch.tv/helix/streams',{
-      headers:{
-        'Client-id': clientId,
-        Authorization: appAccessToken,
-        Accept: 'application/json',
-      },
-      params:{
-        user_login: user_login
-      }
-    }).then((resp) => {
-      isStream = resp.data.data.length > 0 ? true : false
-    }).catch((err) => {
+    }).catch((err)=>{
       res.status(400).send({message:err.message})
     })
   }
@@ -93,7 +77,9 @@ app.post('/timeline', async (req, res) => {
       }
     }).then(()=>{
       thumbnail_url = cliplist[0].thumbnail_url
-    }).catch((err) => console.log(err))
+    }).catch(() => {
+      res.status(400).send({message:err.message})
+    })
   }
 
   async function getVidOffset(element){
@@ -315,6 +301,7 @@ app.post('/timeline', async (req, res) => {
       }
     });
   } catch {
+    res.status(400).send({message:err.message})
   }
 });
 module.exports = app

@@ -446,6 +446,7 @@ export default {
     }
   },
   async created() {
+    console.log(this.$route.query);
     if(!this.$route.query){
       this.$router.push({path:'/'}).catch(()=>{});
     }
