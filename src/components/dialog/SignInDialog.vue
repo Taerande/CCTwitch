@@ -4,11 +4,11 @@
     <v-btn v-if="type.parent == 'pinclip'" icon>
       <v-icon v-on="on" size="20" color="red">mdi-plus-box-multiple</v-icon>
     </v-btn>
-    <v-btn v-on="on" :loading="loginLoading" v-else-if="type.parent == 'appBar'" dark color="twitch">로그인</v-btn>
+    <v-btn v-on="on" :loading="loginLoading" v-else-if="type.parent == 'appBar'" dark color="twitch">Log In</v-btn>
   </template>
   <v-card class="pa-5">
     <v-card-title class="d-flex justify-center">
-      <span class="px-3 text-h4 font-weight-black">로그인</span>
+      <span class="px-3 text-h4 font-weight-black">CCTwitch</span>
       <v-btn class="absolute-right" color="error" icon
       @click="closeDialog()"><v-icon>mdi-close</v-icon></v-btn>
     </v-card-title>
@@ -16,12 +16,12 @@
       <v-row class="d-flex justify-center py-5">
         <v-btn x-large dark color="twitch" depressed rounded class="mx-3" @click="AuthenticateWithTwitch()" :loading="loginLoading">
           <v-icon large>mdi-twitch</v-icon>
-          <span>트위치로 로그인하기</span>
+          <span>Sign In with Twitch</span>
         </v-btn>
       </v-row>
       <v-row class="d-flex justify-center align-center">
         <v-checkbox :disabled="loginLoading" color="twitch" v-model="autoLogin"></v-checkbox>
-        <span class="text-title" :class=" loginLoading ? 'text-decoration-line-through' : ''">로그인 상태 유지하기</span>
+        <span class="text-title" :class=" loginLoading ? 'text-decoration-line-through' : ''">Stay signed in</span>
       </v-row>
     </v-card-text>
   </v-card>

@@ -283,7 +283,7 @@ app.post('/timeline', async (req, res) => {
               broadcaster: vidData[0].user_login,
               clipCount: resultR.length,
               videoId: vidData[0].id,
-              vidCreated: vidData[0].created_at,
+              vidCreated: moment(vidData[0].created_at),
               vidTitle: vidData[0].title,
               thumbnail_url: thumbnail_url,
               dataSet: resultR,

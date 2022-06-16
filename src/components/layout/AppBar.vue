@@ -79,7 +79,7 @@
                   </v-card>
                   <v-card flat v-else>
                     <div class="d-flex justify-center px-10 pt-5">
-                      <v-btn color="twitch" dark width="100%" @click="$store.commit('SET_SignInDialog', true)">로그인</v-btn>
+                      <v-btn color="twitch" dark width="100%" @click="$store.commit('SET_SignInDialog', true)">Log In</v-btn>
                     </div>
                   </v-card>
                   <div class="text-caption pl-5 pt-3">Option</div>

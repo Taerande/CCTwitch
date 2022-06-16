@@ -38,30 +38,37 @@
               </div>
             </router-link>
             <span class="pl-3">
-             Archive : {{$moment(timelineData.createdAt).format('YY.MM.DD')}}
+             Archive : {{$moment(timelineData.createdAt).format('MM/DD/YY')}}
             </span>
             <v-spacer></v-spacer>
-            <div class="justify-end">
+            <div class="d-flex justify-end">
               <div>
-                <span class="text-caption">Updated: {{$moment(timelineData.updatedAt).fromNow()}}</span>
-              </div>
-              <div class="d-flex justify-center align-center">
-                <div class="text-caption px-1">
-                  <v-icon small>mdi-eye</v-icon>
-                  {{viewerkFormatter(timelineData.total_view || 0)}}
-                </div>
-                <div class="text-caption px-1">
-                  <v-icon small>mdi-movie-open-outline</v-icon>
-                  {{cliplist.length}}
-                </div>
-                <div>
+                <div class="text-caption">Updated: {{$moment(timelineData.updatedAt).fromNow()}}</div>
+                <div class="d-flex justify-center align-center">
+                  <div class="text-caption px-1">
+                    <v-icon small>mdi-movie-open-outline</v-icon>
+                    {{cliplist.length}}
+                  </div>
+                  <div class="text-caption px-1">
+                    <v-icon small>mdi-eye</v-icon>
+                    {{viewerkFormatter(timelineData.total_view || 0)}}
+                  </div>
                 </div>
               </div>
+
+              <v-tooltip bottom>
+                <template v-slot:activator="{on}">
+                  <div class="d-flex align-center" v-on="on">
+                    <v-btn @click="createTimeline(broadcaster.login, broadcaster.id, vidInfo[0].id)"  :disabled="!canUpdate" :loading="btnLoading" color="twitch" icon><v-icon>mdi-refresh</v-icon></v-btn>
+                  </div>
+                </template>
+                <span> {{vidInfo[0] === undefined ? "Video data is invalid. Can't update anymore" : 'Can update every 3 hour'}}</span>
+              </v-tooltip>
             </div>
           </v-card-title>
           <v-card-text>
             <v-img
-            width="250"
+            width="300"
             class="rounded-lg mx-auto"
             :src="timelineData.thumbnail_url"
             lazy-src="@/assets/img/404.jpg"
@@ -71,7 +78,6 @@
         </v-card>
       </v-col>
     </v-row>
-  </v-row>
   <v-row v-if="!loading" class="d-block">
     <div class="d-flex justify-center">
       <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
@@ -128,6 +134,7 @@
       </v-timeline-item>
     </v-timeline>
   </v-row>
+  </v-row>
 </v-container>
 </template>
 <script>
@@ -140,12 +147,14 @@ export default {
   },
   data() {
     return {
+      btnLoading:false,
       loading: false,
       cliplist: [],
       timelineData:{},
       broadcaster:{},
       unsubscribe: null,
       listData:[],
+      vidInfo:[],
     }
   },
   computed:{
@@ -179,6 +188,38 @@ export default {
         this.broadcaster = res.data.data[0];
       })
     },
+    async createTimeline(user_login, broadcaster_id, vidId){
+      this.btnLoading = true;
+      this.dbLoading = true;
+      this.$store.commit('SET_SnackBar',{type:'info', text:'Timeline 생성은 1분 정도 소요됩니다.', value:true});
+      await axios.post(this.$store.state.backendUrl+'/timeLine/timeline',{
+        user_login: user_login,
+        broadcaster_id: broadcaster_id,
+        vidId: vidId,
+        appAccessToken: `${this.$store.state.headerConfig.Authorization}`,
+      }).then((res) => {
+        this.postProccess();
+        this.$store.commit('SET_SnackBar', {type:'success', text:`${res.data.message}`, value:true})
+        this.dbLoading = false;
+        this.btnLoading = false;
+
+      }).catch((err)=>{
+          this.$store.commit('SET_SnackBar', {type:'error', text:`${err.message}`, value:true})
+          this.$store.commit('SET_SnackBar', {type:'error', text:`${res.data.message}`, value:true})
+          this.btnLoading = false;
+          this.dbLoading = false;
+      })
+    },
+    async getVidInfo(el){
+      await axios.get('https://api.twitch.tv/helix/videos',{
+        headers: this.$store.state.headerConfig,
+        params:{
+          id:el,
+        }
+      }).then((res) => {
+        this.vidInfo = res.data.data;
+      })
+    },
     async getClip(el){
       await axios.get('https://api.twitch.tv/helix/clips',{
         headers: this.$store.state.headerConfig,
@@ -198,10 +239,55 @@ export default {
         return `00:${this.$moment.duration(el,'seconds').format('mm:ss') }`;
       }
     },
+    async postProccess(){
+      this.timelineData = {};
+      this.cliplist = [];
+      const sn = await this.$firestore.collection('timeline').doc(this.$route.params.id).get();
+      if(sn.exists){
+        const item = await sn.data();
+        let clipIds = item.dataSet.map((v) => { return v.id });
+        document.title = `${item.vidTitle} (${item.broadcaster}) | Timeline - CCTWITCH`
+        this.timelineData = {
+          title: item.vidTitle,
+          createdAt: item.vidCreated.toDate(),
+          viewCount: item.viewCount,
+          thumbnail_url: item.thumbnail_url,
+          updatedAt: item.updatedAt.toDate(),
+          likeCount: item.likeCount,
+          title: item.vidTitle,
+          broadcaster_login: item.broadcaster,
+          total_view: 0,
+        }
+        if(this.broadcaster.id === undefined){
+          this.getUserInfo(item.broadcaster);
+          this.getVidInfo(this.$route.params.id.split(`${item.broadcaster}-`)[1]);
+        }
+        await this.getClip(clipIds);
+        this.cliplist.sort((a,b) => b.view_count - a.view_count);
+        for(let i = 0; i < 15; i++){
+          if(this.cliplist[i] === undefined) { break; }
+          this.cliplist[i].rank = i;
+        }
+        this.cliplist.map((v) => {
+          this.timelineData.total_view += v.view_count
+          v.offset = item.dataSet.find(x => x.id === v.id).offset
+        })
+        this.cliplist.sort((a,b) => a.offset - b.offset);
+        } else {
+          this.$router.push({name:'Home'}).catch(()=>{});
+          this.$store.commit('SET_SnackBar', {type:'error', text:"Can't find data", value:true});
+        }
+      this.loading = true;
+
+      }
+  },
+  computed:{
+    canUpdate(){
+      return this.$moment().add(-3,'hours').isAfter(this.timelineData.updatedAt) && this.vidInfo[0] !== undefined;
+    }
+
   },
   async created() {
-    const sn = await this.$firestore.collection('timeline').doc(this.$route.params.id).get();
-
     if(this.$store.state.userinfo.userInfo){
       this.unsubscribe = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('authorId','==',this.$store.state.userinfo.userInfo.uid).onSnapshot((sn) => {
         if(sn.empty){
@@ -221,39 +307,8 @@ export default {
           })
         })
     }
+    await this.postProccess();
 
-    if(sn.exists){
-      const item = sn.data();
-      let clipIds = item.dataSet.map((v) => { return v.id });
-      document.title = `${item.vidTitle} (${item.broadcaster}) | Timeline - CCTWITCH`
-      this.timelineData = {
-        title: item.vidTitle,
-        createdAt: item.vidCreated,
-        viewCount: item.viewCount,
-        thumbnail_url: item.thumbnail_url,
-        updatedAt: item.updatedAt.toDate(),
-        likeCount: item.likeCount,
-        title: item.vidTitle,
-        broadcaster_login: item.broadcaster,
-        total_view: 0,
-      }
-      await this.getUserInfo(item.broadcaster);
-      await this.getClip(clipIds);
-      this.cliplist.sort((a,b) => b.view_count - a.view_count);
-      for(let i = 0; i < 15; i++){
-        if(this.cliplist[i] === undefined) { break; }
-        this.cliplist[i].rank = i;
-      }
-      this.cliplist.map((v) => {
-        this.timelineData.total_view += v.view_count
-        v.offset = item.dataSet.find(x => x.id === v.id).offset
-      })
-      this.cliplist.sort((a,b) => a.offset - b.offset);
-      } else {
-        this.$router.push({name:'Home'}).catch(()=>{});
-        this.$store.commit('SET_SnackBar', {type:'error', text:"Can't find data", value:true});
-      }
-    this.loading = true;
   },
 
   destroyed() {
