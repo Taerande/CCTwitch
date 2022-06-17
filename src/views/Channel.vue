@@ -158,6 +158,9 @@
       :clipSort="clipSort"
       :vidInfo="vidLists[carsouelId]"
     ></SortButton>
+    <createClipVue
+    :vidInfo="vidLists[carsouelId]"
+    ></createClipVue>
     <v-row class="d-block" v-if="this.clipSort === 'vids'">
       <v-row
         :style="{height:`${imgHeight}px`}"
@@ -208,9 +211,10 @@ import clips from '../components/ChannelClip.vue'
 import clipsByDate from '../components/ChannelClipByDate.vue'
 import vids from '../components/vids.vue'
 import SortButton from '../components/Channel/SortButton'
-
+import createClipVue from '../components/Channel/createClip.vue'
 export default {
   components: {
+    createClipVue,
     clips,
     vids,
     clipsByDate,

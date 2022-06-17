@@ -14,9 +14,11 @@
   </v-row>
   <v-row class="d-flex mx-auto py-6 justify-center align-center" style="width:70%;">
     <v-text-field
+      :hide-details="true"
       color="twitch"
       prepend-inner-icon="mdi-magnify"
       label="Please input streamer login id."
+      @keyup.enter="getNewData(streamer)"
       v-model="streamer"
     >
     <template v-slot:append>
@@ -24,8 +26,9 @@
     </template>
     </v-text-field>
   </v-row>
-  <v-btn class="pa-2 ma-0" color="twitch" small text @click="getNewData()">show all</v-btn>
-  <v-row v-if="loading" class="absolute-center">
+  <DisplyaAdContainerVue></DisplyaAdContainerVue>
+  <v-btn class="pa-2 ma-0" color="twitch" small text @click="getNewData('')">show all</v-btn>
+  <v-row v-if="loading" class="d-flex justify-center">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-block justify-center" v-else>
@@ -39,8 +42,7 @@
       dense
       :headers="headers"
       :items="timelines"
-      :page.sync="page"
-      :items-per-page="100"
+      :items-per-page="30"
       item-key="name"
       hide-default-footer
       mobile-breakpoint="0"
@@ -51,13 +53,18 @@
       <span class="text-caption">{{item.vidCreatedAt}}</span>
     </div>
     </template>
+    <template v-slot:item.broadcaster="{item}">
+    <div>
+      <span class="pr-1 twitch--text" @click="toChannel(item.broadcaster)">{{item.broadcaster}}</span>
+    </div>
+    </template>
     <template v-slot:item.title="{item}">
     <div class="pt-1">
-      <span class="twitch--text hoverCursor" @click="toTimeline(item.id)">{{item.title}} <span class="px-1 text-caption grey--text">updated:{{item.updatedAt}}</span></span>
+      <span class="twitch--text hoverCursor" @click="toTimeline(item.id)">{{item.title}}</span>
+      <span class="pl-2 grey--text text-caption">updated:{{item.updatedAt}}</span>
     </div>
-    <div v-if="$vuetify.breakpoint.smAndDown" class="d-flex text-caption pb-1">
-      <div class="pr-1 twitch--text" @click="toChannel(item.broadcaster)">{{item.broadcaster}}</div>|
-      <div class="px-1">{{item.updatedAt}}</div>|
+    <div v-if="$vuetify.breakpoint.smAndDown" class="d-flex text-caption py-1">
+      <div class="text-caption grey--text">updated:{{item.updatedAt}}</div>
       <div class="px-1"><v-icon class="pr-1" x-small>mdi-movie-open-outline</v-icon>{{item.clipCount}}</div>
     </div>
     </template>
@@ -76,15 +83,23 @@
     </template>
     </v-data-table>
     </v-row>
+    <v-divider></v-divider>
+    <v-row class="d-flex justify-space-between pa-3">
+      <v-btn small text :loading="dbloading" :disabled="firstVisible === null" color="twitch" @click="getPrevData(streamer)"><v-icon small>mdi-chevron-double-left</v-icon>prev</v-btn>
+      <v-btn small text :loading="dbloading" :disabled="lastVisible === null" color="twitch" @click="getNextData(streamer)">next<v-icon small>mdi-chevron-double-right</v-icon></v-btn>
+    </v-row>
   </v-row>
 </v-container>
 </template>
 
 <script>
+import DisplyaAdContainerVue from '../components/DisplyaAdContainer.vue';
 
-// import { last } from 'lodash';
+import { last, head } from 'lodash';
+
 export default {
   components: {
+    DisplyaAdContainerVue,
   },
   data() {
     return {
@@ -92,17 +107,20 @@ export default {
       streamer:'',
       page:1,
       lastVisible: null,
+      firstVisible: null,
       loading:false,
       dbloading:false,
       pageCount:0,
       timelines:[],
       currentStreamer:'',
+      firstElement: null,
     };
   },
   computed:{
     headers(){
       return this.$vuetify.breakpoint.smAndDown ?
           [
+            { text: 'Broadcaster', value: 'broadcaster', align: 'center',divider: true},
             { text: 'Details', value: 'title', align: 'start', divider: true,},
             { text: 'Created', value: 'vidCreatedAt', align: 'center' }
           ] :
@@ -115,67 +133,84 @@ export default {
           ]
         }
   },
-  methods: {
-    // async getNextData(el){
+  methods:{
+    async getNextData(streamer){
+      this.dbloading = true;
+      const sn = streamer === '' ? await this.$firestore.collection('timeline').orderBy('vidCreated','desc').startAfter(this.lastVisible).limit(30).get() : await this.$firestore.collection('timeline').orderBy('vidCreated','desc').where('broadcaster','==',this.streamer).startAfter(this.lastVisible).limit(30).get();
 
-    //   // const sn = await this.$firestore.collection('timeline').where('broadcaster','==',this.streamer).orderBy('vidCreated','desc').startAfter(this.lastVisible).limit(30).get();
-    //   const sn = await this.$firestore.collection('timeline').orderBy('vidCreated','desc').startAfter(this.lastVisible).limit(30).get();
+      if(sn.docs.length === 30){
+        this.lastVisible = last(sn.docs);
+        this.firstVisible = head(sn.docs);
+      } else {
+        this.lastVisible = null;
+        this.firstVisible = head(sn.docs);
+      }
+      this.timelines = [];
+      sn.docs.forEach( (el) => {
+      const item = el.data();
+      this.timelines.push({
+        id: el.id,
+        clipCount: item.clipCount,
+        title: item.vidTitle,
+        viewCount: item.viewCount,
+        createdAt: item.createdAt.toDate(),
+        updatedAt: this.$moment(item.updatedAt.toDate()).fromNow(),
+        vidCreatedAt: this.$moment(item.vidCreated.toDate()).format('MM/DD'),
+        broadcaster: item.broadcaster,
+        thumbnail_url: item.thumbnail_url,
+      })
+    })
+    this.dbloading = false;
+    },
+    async getPrevData(streamer){
+      this.dbloading = true;
+      const sn = streamer === '' ? await this.$firestore.collection('timeline').orderBy('vidCreated','desc').endBefore(this.firstVisible).limitToLast(30).get() : await this.$firestore.collection('timeline').orderBy('vidCreated','desc').where('broadcaster','==',this.streamer).endBefore(this.firstVisible).limitToLast(30).get();
 
-    //   console.log(sn);
-    //   if(sn.docs.length === 30){
-    //     this.lastVisible = last(sn.docs);
-    //   } else {
-    //     this.lastVisible = null;
-    //   }
-    //   sn.docs.forEach( (el) => {
-    //   const item = el.data();
-    //   this.timelines.push({
-    //     id: el.id,
-    //     clipCount: item.clipCount,
-    //     title: item.vidTitle,
-    //     viewCount: item.viewCount,
-    //     createdAt: item.createdAt.toDate(),
-    //     updatedAt: this.$moment(item.updatedAt.toDate()).fromNow(),
-    //     vidCreatedAt: this.$moment(item.vidCreated.toDate()).format('MM/DD'),
-    //     broadcaster: item.broadcaster,
-    //     thumbnail_url: item.thumbnail_url,
-    //   })
-    // })
-    // this.page += 1;
-    // },
-    // async getPrevData(){
-    //   if(this.page === 1 ){
-    //     return;
-    //   }
-    //   this.page -= 1;
-
-    // },
+      if(sn.docs.length === 30){
+        this.lastVisible = last(sn.docs);
+        this.firstVisible = sn.docs[0].id === this.firstElement ? null : head(sn.docs);
+      } else {
+        this.firstVisible = head(sn.docs);
+        this.lastVisible = null;
+      }
+      this.timelines = [];
+      sn.docs.forEach( (el) => {
+      const item = el.data();
+      this.timelines.push({
+        id: el.id,
+        clipCount: item.clipCount,
+        title: item.vidTitle,
+        viewCount: item.viewCount,
+        createdAt: item.createdAt.toDate(),
+        updatedAt: this.$moment(item.updatedAt.toDate()).fromNow(),
+        vidCreatedAt: this.$moment(item.vidCreated.toDate()).format('MM/DD'),
+        broadcaster: item.broadcaster,
+        thumbnail_url: item.thumbnail_url,
+      })
+    })
+    this.dbloading = false;
+    },
     async getNewData(streamer){
+      this.lastVisible = null;
+      this.firstVisible = null;
+      if(streamer === ''){
+        this.streamer = ''
+      };
+      document.title = `${streamer ? streamer : 'ALL'} | Timelines - CCTWITCH`;
       this.timelines = [];
       this.loading = true;
       this.dbloading = true;
       this.currentStreamer = streamer;
-      if(streamer === undefined){
-        const sn = await this.$firestore.collection('timeline').orderBy('vidCreated','desc').limit(100).get();
-        sn.docs.forEach( (el,idx) => {
-        const item = el.data();
-        this.timelines.push({
-          id: el.id,
-          clipCount: item.clipCount,
-          title: item.vidTitle,
-          viewCount: item.viewCount,
-          createdAt: item.createdAt.toDate(),
-          updatedAt: this.$moment(item.updatedAt.toDate()).fromNow(),
-          vidCreatedAt: this.$moment(item.vidCreated.toDate()).format('MM/DD'),
-          broadcaster: item.broadcaster,
-          thumbnail_url: item.thumbnail_url,
-        })
-      })
-      this.loading = false;
-      this.dbloading = false;
+
+      const sn = streamer === '' ? await this.$firestore.collection('timeline').orderBy('vidCreated','desc').limit(30).get() : await this.$firestore.collection('timeline').orderBy('vidCreated','desc').where('broadcaster','==',this.streamer).limit(30).get();
+
+      if(sn.docs.length === 30){
+        this.lastVisible = last(sn.docs);
       } else {
-        const sn = await this.$firestore.collection('timeline').orderBy('vidCreated','desc').where('broadcaster','==',this.streamer).limit(100).get();
-        sn.docs.forEach( (el,idx) => {
+        this.lastVisible = null;
+      }
+
+        sn.docs.forEach( (el) => {
         const item = el.data();
         this.timelines.push({
           id: el.id,
@@ -189,9 +224,9 @@ export default {
           thumbnail_url: item.thumbnail_url,
         })
       })
+      this.page += 1;
       this.loading = false;
       this.dbloading = false;
-      }
     },
     toTimeline(el){
       this.$router.push({path:`/timeline/${el}`}).catch(()=>{});
@@ -204,13 +239,17 @@ export default {
   async created(){
     this.loading = true;
     document.title = 'Timelines - CCTWITCH';
-      const sn = await this.$firestore.collection('timeline').orderBy('vidCreated','desc').limit(100).get();
+      const sn = await this.$firestore.collection('timeline').orderBy('vidCreated','desc').limit(30).get();
 
-      // if(sn.docs.length === 30){
-      //   this.lastVisible = last(sn.docs);
-      // } else {
-      //   this.lastVisible = null;
-      // }
+
+      if(sn.docs.length === 30){
+        this.lastVisible = last(sn.docs);
+      } else {
+        this.lastVisible = null;
+      }
+
+      this.firstElement = sn.docs[0].id;
+
       sn.docs.forEach( (el) => {
         const item = el.data();
         this.timelines.push({

@@ -78,62 +78,62 @@
         </v-card>
       </v-col>
     </v-row>
-  <v-row v-if="!loading" class="d-block">
-    <div class="d-flex justify-center">
-      <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
-    </div>
-    <div class="d-flex justify-center ">Loading Data</div>
-  </v-row>
-  <v-row v-else-if="loading" class="d-flex justify-center">
-    <v-timeline
-    :dense="$vuetify.breakpoint.smAndDown"
-    :align-top="$vuetify.breakpoint.smAndDown"
-    >
-      <v-timeline-item
-      class="pa-0"
-      fill-dot
-      small
-      color="twitch"
-      v-for=" (clip) in cliplist" :key="clip.id">
-      <template v-slot:icon v-if="clip.rank !== undefined">
-        <v-icon :color="rankColor(clip.rank)">mdi-crown</v-icon>
-      </template>
-      <span v-if="!$vuetify.breakpoint.smAndDown" slot="opposite">
-        {{secToHMS(clip.offset)}}
-      </span>
-      <v-card
-        :dark="!$vuetify.theme.dark"
-        :light="$vuetify.theme.dark"
-        class="mx-auto rounded-lg pa-3"
-        :class="$vuetify.breakpoint.smAndDown ? 'mb-16 pt-0' : ''"
-        elevation="10"
-        :max-width="$vuetify.breakpoint.smAndDown ? '250' : '480'"
+    <v-row v-if="!loading" class="d-block">
+      <div class="d-flex justify-center">
+        <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+      </div>
+      <div class="d-flex justify-center ">Loading Data</div>
+    </v-row>
+    <v-row v-else-if="loading" class="d-flex justify-center">
+      <v-timeline
+      :dense="$vuetify.breakpoint.smAndDown"
+      :align-top="$vuetify.breakpoint.smAndDown"
       >
-      <v-card-title class="pa-0" v-if="$vuetify.breakpoint.smAndDown">
-        <strong>{{secToHMS(clip.offset)}}</strong>
-      </v-card-title>
-        <v-card-text class="ma-a pa-0">
-          <ClipIframeDialogVue :clipData="clip" :listData="listData"></ClipIframeDialogVue>
-          <div class="d-flex justify-center pt-2" :class="!$vuetify.theme.dark ? 'white--text':'black--text'">{{clip.title}}</div>
-        </v-card-text>
-      </v-card>
-        <!-- <div v-if="!$vuetify.breakpoint.smAndDown" slot="opposite">{{secToHMS(clip.offset)}}</div>
-        <div v-else class="d-flex justify-end">{{secToHMS(clip.offset || 0)}}</div>
-          <v-card
-            :dark="!$vuetify.theme.dark"
-            :light="$vuetify.theme.dark"
-            class="mx-auto rounded-lg pa-3"
-            elevation="12"
-            width="800"
-          >
-            <v-card-text class="ma-a pa-0">
-              <ClipIframeDialogVue :clipData="clip" :listData="listData"></ClipIframeDialogVue>
-              <div class="d-flex justify-center pt-2">{{clip.title}}</div>
-            </v-card-text>
-          </v-card> -->
-      </v-timeline-item>
-    </v-timeline>
-  </v-row>
+        <v-timeline-item
+        class="pa-0"
+        fill-dot
+        small
+        color="twitch"
+        v-for=" (clip) in cliplist" :key="clip.id">
+        <template v-slot:icon v-if="clip.rank !== undefined">
+          <v-icon :color="rankColor(clip.rank)">mdi-crown</v-icon>
+        </template>
+        <span v-if="!$vuetify.breakpoint.smAndDown" slot="opposite">
+          {{secToHMS(clip.offset)}}
+        </span>
+        <v-card
+          :dark="!$vuetify.theme.dark"
+          :light="$vuetify.theme.dark"
+          class="mx-auto rounded-lg pa-3"
+          :class="$vuetify.breakpoint.smAndDown ? 'mb-16 pt-0' : ''"
+          elevation="10"
+          :max-width="$vuetify.breakpoint.smAndDown ? '250' : '480'"
+        >
+        <v-card-title class="pa-0" v-if="$vuetify.breakpoint.smAndDown">
+          <strong>{{secToHMS(clip.offset)}}</strong>
+        </v-card-title>
+          <v-card-text class="ma-a pa-0">
+            <ClipIframeDialogVue :clipData="clip" :listData="listData"></ClipIframeDialogVue>
+            <div class="d-flex justify-center pt-2" :class="!$vuetify.theme.dark ? 'white--text':'black--text'">{{clip.title}}</div>
+          </v-card-text>
+        </v-card>
+          <!-- <div v-if="!$vuetify.breakpoint.smAndDown" slot="opposite">{{secToHMS(clip.offset)}}</div>
+          <div v-else class="d-flex justify-end">{{secToHMS(clip.offset || 0)}}</div>
+            <v-card
+              :dark="!$vuetify.theme.dark"
+              :light="$vuetify.theme.dark"
+              class="mx-auto rounded-lg pa-3"
+              elevation="12"
+              width="800"
+            >
+              <v-card-text class="ma-a pa-0">
+                <ClipIframeDialogVue :clipData="clip" :listData="listData"></ClipIframeDialogVue>
+                <div class="d-flex justify-center pt-2">{{clip.title}}</div>
+              </v-card-text>
+            </v-card> -->
+        </v-timeline-item>
+      </v-timeline>
+    </v-row>
   </v-row>
 </v-container>
 </template>
@@ -189,6 +189,7 @@ export default {
       })
     },
     async createTimeline(user_login, broadcaster_id, vidId){
+      this.loading = false;
       this.btnLoading = true;
       this.dbLoading = true;
       this.$store.commit('SET_SnackBar',{type:'info', text:'Timeline 생성은 1분 정도 소요됩니다.', value:true});
@@ -197,17 +198,18 @@ export default {
         broadcaster_id: broadcaster_id,
         vidId: vidId,
         appAccessToken: `${this.$store.state.headerConfig.Authorization}`,
-      }).then((res) => {
-        this.postProccess();
+      }).then( async (res) => {
+        await this.postProccess();
         this.$store.commit('SET_SnackBar', {type:'success', text:`${res.data.message}`, value:true})
+        this.loading = true;
         this.dbLoading = false;
         this.btnLoading = false;
 
       }).catch((err)=>{
-          this.$store.commit('SET_SnackBar', {type:'error', text:`${err.message}`, value:true})
-          this.$store.commit('SET_SnackBar', {type:'error', text:`${res.data.message}`, value:true})
-          this.btnLoading = false;
-          this.dbLoading = false;
+        this.$store.commit('SET_SnackBar', {type:'error', text:`${res.data.message}`, value:true})
+        this.loading = true;
+        this.btnLoading = false;
+        this.dbLoading = false;
       })
     },
     async getVidInfo(el){
