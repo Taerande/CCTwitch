@@ -1,7 +1,7 @@
 <template>
 <v-container fluid>
   <v-row class="py-5 align-baseline">
-    <span class="text-h3 font-weight-bold pr-3">Timeline | {{currentStreamer || 'ALL'}} </span>
+    <span class="text-h3 font-weight-bold pr-3">Timeline | {{this.$route.query.broadcaster === undefined ? 'ALL' : this.$route.query.broadcaster}} </span>
   </v-row>
   <v-divider></v-divider>
   <v-row class="d-block">
@@ -22,7 +22,7 @@
       v-model="streamer"
     >
     <template v-slot:append>
-      <v-btn :disabled="streamer.length === 0" :loading="dbloading" color="twitch" text @click="getNewData(streamer)" class="text-caption white--text" small>search</v-btn>
+      <v-btn :loading="dbloading" color="twitch" text @click="getNewData(streamer)" class="text-caption white--text" small>search</v-btn>
     </template>
     </v-text-field>
   </v-row>
@@ -61,7 +61,7 @@
     <template v-slot:item.title="{item}">
     <div class="pt-1">
       <span class="twitch--text hoverCursor" @click="toTimeline(item.id)">{{item.title}}</span>
-      <span class="pl-2 grey--text text-caption">updated:{{item.updatedAt}}</span>
+      <span v-if="!$vuetify.breakpoint.smAndDown" class="pl-2 grey--text text-caption">updated:{{item.updatedAt}}</span>
     </div>
     <div v-if="$vuetify.breakpoint.smAndDown" class="d-flex text-caption py-1">
       <div class="text-caption grey--text">updated:{{item.updatedAt}}</div>
@@ -79,6 +79,9 @@
     <template v-slot:no-data>
       <div>
         😫No Data
+      </div>
+      <div>
+        Search Streamer and Create Timeline first.
       </div>
     </template>
     </v-data-table>
@@ -112,7 +115,6 @@ export default {
       dbloading:false,
       pageCount:0,
       timelines:[],
-      currentStreamer:'',
       firstElement: null,
     };
   },
@@ -191,42 +193,52 @@ export default {
     this.dbloading = false;
     },
     async getNewData(streamer){
-      this.lastVisible = null;
-      this.firstVisible = null;
       if(streamer === ''){
-        this.streamer = ''
-      };
-      document.title = `${streamer ? streamer : 'ALL'} | Timelines - CCTWITCH`;
-      this.timelines = [];
-      this.loading = true;
-      this.dbloading = true;
-      this.currentStreamer = streamer;
-
-      const sn = streamer === '' ? await this.$firestore.collection('timeline').orderBy('vidCreated','desc').limit(30).get() : await this.$firestore.collection('timeline').orderBy('vidCreated','desc').where('broadcaster','==',this.streamer).limit(30).get();
-
-      if(sn.docs.length === 30){
-        this.lastVisible = last(sn.docs);
-      } else {
+        this.$router.replace({query:null}).catch(()=>{});
+        this.timelines = [];
         this.lastVisible = null;
-      }
+        this.firstVisible = null;
+        this.loading = true;
+        this.streamer = '';
+        document.title = 'ALL | Timelines - CCTWITCH';
+
+        const sn = await this.$firestore.collection('timeline').orderBy('vidCreated','desc').limit(30).get();
+
+        if(sn.docs.length === 30){
+          this.lastVisible = last(sn.docs);
+        } else {
+          this.lastVisible = null;
+        }
+        if(sn.docs[0] === undefined){
+          this.timelines = [];
+          this.$store.commit('SET_SnackBar',{type:'error', text:'Find Streamer & Create Timeline first!', value:true});
+          this.$store.commit('SET_SearchBar',true);
+          this.loading = false;
+          return
+        }
+        this.firstElement = sn.docs[0].id;
+
 
         sn.docs.forEach( (el) => {
-        const item = el.data();
-        this.timelines.push({
-          id: el.id,
-          clipCount: item.clipCount,
-          title: item.vidTitle,
-          viewCount: item.viewCount,
-          createdAt: item.createdAt.toDate(),
-          updatedAt: this.$moment(item.updatedAt.toDate()).fromNow(),
-          vidCreatedAt: this.$moment(item.vidCreated.toDate()).format('MM/DD'),
-          broadcaster: item.broadcaster,
-          thumbnail_url: item.thumbnail_url,
+          const item = el.data();
+          this.timelines.push({
+            id: el.id,
+            clipCount: item.clipCount,
+            title: item.vidTitle,
+            viewCount: item.viewCount,
+            createdAt: item.createdAt.toDate(),
+            updatedAt: this.$moment(item.updatedAt.toDate()).fromNow(),
+            vidCreatedAt: this.$moment(item.vidCreated.toDate()).format('MM/DD'),
+            broadcaster: item.broadcaster,
+            thumbnail_url: item.thumbnail_url,
+          })
         })
-      })
-      this.page += 1;
-      this.loading = false;
-      this.dbloading = false;
+        this.loading = false
+      } else {
+        this.$router.replace({query:{
+        broadcaster: streamer,
+      }}).catch(()=>{});
+      }
     },
     toTimeline(el){
       this.$router.push({path:`/timeline/${el}`}).catch(()=>{});
@@ -238,32 +250,41 @@ export default {
   },
   async created(){
     this.loading = true;
-    document.title = 'Timelines - CCTWITCH';
-      const sn = await this.$firestore.collection('timeline').orderBy('vidCreated','desc').limit(30).get();
+    this.streamer = this.$route.query.broadcaster === undefined ? '' : this.$route.query.broadcaster;
+    document.title = `${this.streamer === '' ? 'ALL' : this.streamer} | Timelines - CCTWITCH`;
+
+    const sn = this.streamer === '' ? await this.$firestore.collection('timeline').orderBy('vidCreated','desc').limit(30).get() : await this.$firestore.collection('timeline').orderBy('vidCreated','desc').where('broadcaster','==',this.streamer).limit(30).get();
+
+    if(sn.docs.length === 30){
+      this.lastVisible = last(sn.docs);
+    } else {
+      this.lastVisible = null;
+    }
+    if(sn.docs[0] === undefined){
+      this.timelines = [];
+      this.$store.commit('SET_SnackBar',{type:'error', text:'Find Streamer & Create Timeline first!', value:true});
+      this.$store.commit('SET_SearchBar',true);
+      this.loading = false;
+      return
+    }
+
+    this.firstElement = sn.docs[0].id;
 
 
-      if(sn.docs.length === 30){
-        this.lastVisible = last(sn.docs);
-      } else {
-        this.lastVisible = null;
-      }
-
-      this.firstElement = sn.docs[0].id;
-
-      sn.docs.forEach( (el) => {
-        const item = el.data();
-        this.timelines.push({
-          id: el.id,
-          clipCount: item.clipCount,
-          title: item.vidTitle,
-          viewCount: item.viewCount,
-          createdAt: item.createdAt.toDate(),
-          updatedAt: this.$moment(item.updatedAt.toDate()).fromNow(),
-          vidCreatedAt: this.$moment(item.vidCreated.toDate()).format('MM/DD'),
-          broadcaster: item.broadcaster,
-          thumbnail_url: item.thumbnail_url,
-        })
+    sn.docs.forEach( (el) => {
+      const item = el.data();
+      this.timelines.push({
+        id: el.id,
+        clipCount: item.clipCount,
+        title: item.vidTitle,
+        viewCount: item.viewCount,
+        createdAt: item.createdAt.toDate(),
+        updatedAt: this.$moment(item.updatedAt.toDate()).fromNow(),
+        vidCreatedAt: this.$moment(item.vidCreated.toDate()).format('MM/DD'),
+        broadcaster: item.broadcaster,
+        thumbnail_url: item.thumbnail_url,
       })
+    })
     // }
     this.loading = false
   },

@@ -65,6 +65,9 @@ export default new Vuex.Store({
     SET_TwitchAppAccessToken(state,payload){
       state.headerConfig.Authorization = `Bearer ${payload}`;
     },
+    SET_SearchString(state,payload){
+      state.searchString = payload;
+    },
     SET_CurrentListData(state, payload){
       state.currentListData = payload;
     },
@@ -92,8 +95,8 @@ export default new Vuex.Store({
       const existingCliplist = JSON.parse(localStorage.getItem('allCliplists'));
       state.isSaved = existingCliplist.find((el) => el.id === response);
     },
-    TOGGLE_SearchBar(state) {
-      state.searchBar = !state.searchBar;
+    SET_SearchBar(state,payload) {
+      state.searchBar = payload;
     },
     INIT_currCliplist(state) {
       state.currentCliplist = {
