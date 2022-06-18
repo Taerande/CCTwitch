@@ -1,16 +1,46 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+      function canUpdateList(resource, request, list){
+        return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(list);
+      }
   		match /timeline/{timelineId}{
       	allow read: if true;
+        allow create: if true;
+        allow update: if true;
+        allow delete: if request.auth.uid == 'twitch:792857520';
+      }
+      match /hotclip/{hotclipId}{
+      	allow read: if true;
+        allow create: if request.auth.uid != null;
+        allow update: if request.auth.uid == resource.data.authorId || canUpdateList(resource, request, ['viewCount','likeCount','likeUids']);
+        allow delete: if request.auth.uid == resource.data.authorId;
+        
+          match /comment/{commentId}{
+          allow read: if true;
+          allow create: if request.auth.uid != null;
+          allow update: if request.auth.uid == resource.data.authorId || canUpdateList(resource, request, ['likeCount','likeUids']);
+          allow delete: if request.auth.uid == resource.data.authorId;
+          }
+      }
+      match /metadata/{metadatas}{
+      	allow read: if true;
         allow create: if request.auth != null;
+        allow update: if true;
+        allow delete: if request.auth.uid == 'twitch:792857520';
+        
+        match /{clipCount}{
+          allow read: if true;
+          allow update: if true;
+        }
+        
       }
     	match /cliplist/{cliplistId}{
       
       	function Authorization(){
         	return request.auth.uid == resource.data.authorId;
         }
-      
         function incrementCliplistCount(before, after){
         	return before.authorId == after.authorId &&
           before.authorName == after.authorName &&
@@ -21,7 +51,7 @@ service cloud.firestore {
           before.title == after.title &&
           (before.likeCount != after.likeCount || before.likeUids != after.likeUids || before.clipCount != after.clipCount || before.clipIds != after.clipIds || before.thumbnail_url != after.thumbnail_url)
         }
-
+      
         allow read : if request.auth.uid in resource.data.likeUids || resource.data.isPublic > 0 || Authorization();
         allow create: if request.auth != null;
         allow update: if Authorization() || incrementCliplistCount(resource.data, request.resource.data);

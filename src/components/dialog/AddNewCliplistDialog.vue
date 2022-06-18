@@ -153,9 +153,6 @@ export default {
   data() {
     return {
       tags:[],
-      comboboxCounterRule:[
-        v => v.length < 5 || 'Tag는 최대 5개입니다.',
-      ],
       selectItem:[
         {name: '공개', icon:'mdi-earth', value: 2},
         {name: '일부공개', icon:'mdi-eye', value: 1},

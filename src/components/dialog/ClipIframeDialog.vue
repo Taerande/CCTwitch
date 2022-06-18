@@ -50,26 +50,27 @@
     <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
       <div class="px-1 mx-1">
         <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
-        <div>다시보기</div>
+        <div class="text-caption">다시보기</div>
       </div>
       <div class="px-1 mx-1">
         <v-btn class="d-flex mx-auto" color="error" icon @click="copyClip(clipData)">
           <v-icon>mdi-clipboard-multiple-outline</v-icon>
         </v-btn>
-        <div>URL 복사</div>
+        <div class="text-caption">URL 복사</div>
       </div>
       <div class="px-1 mx-1">
         <v-btn class="d-flex mx-auto" color="error" icon @click="downloadClip(clipData)">
           <v-icon>mdi-download</v-icon>
         </v-btn>
-        <div>다운로드</div>
+        <div class="text-caption">다운로드</div>
       </div>
       <div class="px-1 mx-1">
         <pinClip class="d-flex mx-auto" v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
         <v-btn class="d-flex mx-auto" v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon>
         </v-btn>
-        <div>추가하기</div>
+        <div class="text-caption">추가하기</div>
       </div>
+      <AddNewHotClipDialogVue :clipData="clipData"></AddNewHotClipDialogVue>
     </div>
   </v-card>
 </v-dialog>
@@ -77,9 +78,11 @@
 <script>
 import pinClip from '@/components/pinClip.vue';
 import axios from 'axios';
+import AddNewHotClipDialogVue from './AddNewHotClipDialog.vue';
 export default {
   components:{
     pinClip,
+    AddNewHotClipDialogVue,
   },
   props:['clipData','listData'],
   data() {

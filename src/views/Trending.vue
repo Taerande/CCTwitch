@@ -4,7 +4,11 @@
     <span class="text-h3 font-weight-bold pr-3">Trending</span>
   </v-row>
   <v-divider></v-divider>
-  <v-row v-if="loading" class="absolute-center">
+  <v-subheader>Clips</v-subheader>
+  <hotclipVue></hotclipVue>
+
+  <v-subheader>Cliplist</v-subheader>
+  <v-row v-if="loading" class="d-flex justify-center">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-flex pt-5 col-12" v-else-if="cliplists.length > 0 && !loading">
@@ -42,13 +46,16 @@
 <script>
 import { last, chunk } from 'lodash';
 import CliplistDefaultVue from '@/components/CliplistDefault.vue';
+import hotclipVue from '../components/Trending/HotClipList.vue';
 
 export default {
   components:{
     CliplistDefaultVue,
+    hotclipVue,
   },
   data() {
     return {
+      limit:11,
       lastVisible: null,
       loading:true,
       cliplists:[],
@@ -64,8 +71,8 @@ export default {
     async getMoreData(){
       this.dataLoading = true;
       try{
-        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('isPublic','==',2).startAfter(this.lastVisible).limit(24).get().then((sn) => {
-          if(sn.docs.length === 24){
+        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('isPublic','==',2).startAfter(this.lastVisible).limit(this.limit).get().then((sn) => {
+          if(sn.docs.length === this.limit){
               this.lastVisible = last(sn.docs);
             } else {
               this.lastVisible = null;
@@ -103,8 +110,8 @@ export default {
     async loadData(){
       this.loading = true;
       try{
-        const sn = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('isPublic','==',2).limit(24).get();
-        if(sn.docs.length === 24){
+        const sn = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('isPublic','==',2).limit(this.limit).get();
+        if(sn.docs.length === this.limit){
             this.lastVisible = last(sn.docs);
           } else {
             this.lastVisible = null;

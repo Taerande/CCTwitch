@@ -5,6 +5,7 @@ import axios from 'axios';
 
 
 Vue.config.errorHandler = async (e) => {
+  console.log(e);
   if(e.response.status === 401){
     try{
       if(localStorage.getItem('twitchAppAccessToken')){
@@ -32,5 +33,4 @@ Vue.config.errorHandler = async (e) => {
     }catch{
     }
   }
-  axios
 }

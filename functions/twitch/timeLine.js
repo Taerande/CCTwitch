@@ -10,6 +10,7 @@ app.use(cors());
 app.post('/timeline', async (req, res) => {
   const broadcaster_id = req.body.broadcaster_id;
   const user_login = req.body.user_login;
+  const isLive = req.body.isLive;
   const vidId = req.body.vidId;
   const appAccessToken = req.body.appAccessToken;
   const clientId = process.env.TWITCH_CLIENT_ID;
@@ -24,6 +25,7 @@ app.post('/timeline', async (req, res) => {
   let thumbnail_url;
 
   // rules
+  // 1. live면 10분.
   // 2. 최근 업데이트 3시간 이후에 업데이트 가능.
   // 3. vidId가 없으면 생성안댐.
   // 4. 인기 클립 100개 시간순으로 나열하자.
@@ -114,7 +116,8 @@ app.post('/timeline', async (req, res) => {
       if(doc.exists){
         const item = doc.data();
         const timeDiff = moment().diff(item.updatedAt.toDate());
-        if( timeDiff < 10800000 ){
+        let timeStandard = isLive === 'live' ? 3600000 : 10800000;
+        if( timeDiff < timeStandard){
           return res.send({id: sn.id, message:`Timeline has been created ${moment(item.updatedAt.toDate()).fromNow()}.`});
         } else {
           // Update

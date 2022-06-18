@@ -27,8 +27,9 @@
           ></v-img>
         </v-avatar>
         <div class="d-flex flex-column justify-center pl-5">
-          <div class="d-flex align-center">
+          <div class="d-flex align-baseline">
             <span class="text-h5">{{ userInfo.data.display_name }}</span>
+            <span class="px-1">({{userInfo.data.login}})</span>
             <span class="grey--text pl-1"
               >{{ kFormatter(userInfo.data.follower_count) }}
             </span>

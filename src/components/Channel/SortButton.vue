@@ -89,10 +89,12 @@
     :block="$vuetify.breakpoint.smAndDown"
     @click="createTimeline(vidInfo.data.user_login, vidInfo.data.user_id, vidInfo.data.id)"
     :loading="dbLoading"
+    :disabled="clipSort === 'date'"
     :color="clipSort === 'vids' ? 'twitch' : ''"
     :class="clipSort === 'vids' ? 'white--text' : ''"
-    class="text-caption mr-3 pa-2" :disabled="vidInfo.data.is_live === 'live' || clipSort === 'date'">
-    <v-icon small>mdi-timeline</v-icon><span class="px-2">{{vidInfo.data.is_live ? "Disabled when live" : 'Sort By Timeline'}}</span></v-btn>
+    class="text-caption mr-3 pa-2" >
+    <!-- :disabled="vidInfo.data.is_live === 'live' || clipSort === 'date'" -->
+    <v-icon small>mdi-timeline</v-icon><span class="px-2">Sort By Timeline</span></v-btn>
     <v-btn
     v-else
     :block="$vuetify.breakpoint.smAndDown"
@@ -150,6 +152,7 @@ export default {
         user_login: user_login,
         broadcaster_id: broadcaster_id,
         vidId: vidId,
+        isLive: this.vidInfo.data.is_live === undefined ? 'off' : 'live',
         appAccessToken: `${this.$store.state.headerConfig.Authorization}`,
       }).then((res) => {
         this.$router.push(`/timeline/${res.data.id}`).catch(()=>{})

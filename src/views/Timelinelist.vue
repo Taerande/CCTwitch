@@ -163,6 +163,7 @@ export default {
       })
     })
     this.dbloading = false;
+    window.scrollTo(0,0);
     },
     async getPrevData(streamer){
       this.dbloading = true;
@@ -191,6 +192,7 @@ export default {
       })
     })
     this.dbloading = false;
+    window.scrollTo(0,0);
     },
     async getNewData(streamer){
       if(streamer === ''){
