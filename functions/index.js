@@ -41,6 +41,14 @@ exports.delteClipsInCliplist = functions.region('asia-northeast3').firestore.doc
   await batch.commit();
 });
 
+exports.delteHotClip = functions.region('asia-northeast3').firestore.document('hotclip/{hotclipId}').onDelete( async (snap, context ) => {
+  const batch = firstore.batch();
+  const sn = await firstore.collection('hotclip').doc(context.params.hotclipId).collection('comments').get();
+  sn.docs.forEach( doc =>
+    batch.delete(doc.ref));
+  await batch.commit();
+});
+
 exports.deleteUser = functions.region('asia-southeast1').auth.user().onDelete(async (user) => {
   const {uid} = user
   db.ref('users').child(uid).remove()
