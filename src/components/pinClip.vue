@@ -27,7 +27,6 @@
       <v-card-subtitle class="d-flex justify-center pt-2 text-caption">
         리스트당 최대 100개의 클립을 기록할 수 있습니다.
       </v-card-subtitle>
-      <v-divider></v-divider>
       <v-card-text>
         <v-list class="pt-5">
             <AddNewCliplistDialog :type="{type:'pin',data:{text: 'Add New List'}}"></AddNewCliplistDialog>

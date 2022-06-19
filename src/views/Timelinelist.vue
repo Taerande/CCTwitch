@@ -14,15 +14,16 @@
   </v-row>
   <v-row class="d-flex mx-auto py-6 justify-center align-center" style="width:70%;">
     <v-text-field
-      :hide-details="true"
+      hide-details="auto"
       color="twitch"
+      type="text"
       prepend-inner-icon="mdi-magnify"
       label="Please input streamer login id."
       @keyup.enter="getNewData(streamer)"
       v-model="streamer"
     >
     <template v-slot:append>
-      <v-btn :loading="dbloading" color="twitch" text @click="getNewData(streamer)" class="text-caption white--text" small>search</v-btn>
+      <v-btn :loading="dbloading" :disabled="streamer.length === 0" color="twitch" text @click="getNewData(streamer)" class="text-caption white--text" small>search</v-btn>
     </template>
     </v-text-field>
   </v-row>

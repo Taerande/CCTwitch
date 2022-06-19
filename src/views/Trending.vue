@@ -6,7 +6,6 @@
   <v-divider></v-divider>
   <v-subheader>Clips</v-subheader>
   <hotclipVue></hotclipVue>
-
   <v-subheader>Cliplist</v-subheader>
   <v-row v-if="loading" class="d-flex justify-center">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>

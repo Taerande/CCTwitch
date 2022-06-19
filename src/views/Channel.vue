@@ -473,7 +473,6 @@ export default {
             return {
               id: v.id,
               title: item.title,
-              description: item.description,
               createdAt: item.createdAt,
               color: item.color,
               clipCount: item.clipCount,

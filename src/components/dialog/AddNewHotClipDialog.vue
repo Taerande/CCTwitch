@@ -30,6 +30,7 @@
         clearable
         counter="30"
         color="twitch"
+        type="text"
         name="name"
         maxlength="30"
         label="title"

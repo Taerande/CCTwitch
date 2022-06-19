@@ -47,6 +47,7 @@ export default {
       this.loginLoading = true;
       const state = crypto.randomBytes(16).toString("hex");
       localStorage.setItem('state',state);
+      localStorage.setItem('path',this.$route.fullPath);
       localStorage.setItem('autoLogin',this.autoLogin);
       // const codeUri =
       // `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&redirect_uri=http://localhost:8080/login&scope=user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}`;

@@ -29,6 +29,7 @@ export default {
   created(){
     document.title = 'Login - CCTWITCH'
     const autoLogin = localStorage.getItem('autoLogin');
+    const whereTo = localStorage.getItem('path');
     axios.get(`${this.$store.state.backendUrl}/twitchAuth/signin/twitch/callback?code=${this.$route.query.code}`).then( async (res) =>{
       if(autoLogin === 'true'){
         await this.$firebase.auth().setPersistence(this.$firebase.auth.Auth.Persistence.LOCAL).then(() => {
@@ -42,10 +43,11 @@ export default {
       localStorage.setItem('twitchOAuthToken', JSON.stringify(res.data.twitchOAuthToken));
     }).then(()=>{
       localStorage.setItem('state',null);
-      this.$router.push({name:'Home'});
+      this.$router.push({path:whereTo}).catch(()=>{});
+      localStorage.removeItem('path');
       this.$store.commit('SET_SnackBar',{type:'success', text:'로그인 성공', value:true})
     }).catch(() =>{
-      this.$router.push({name:'Home'});
+      this.$router.push({name:'Home'}).catch(()=>{});
       this.$store.commit('SET_SnackBar',{type:'error', text:'로그인 정보가 잘못되었습니다.', value:true})
     });
   },

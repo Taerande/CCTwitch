@@ -9,7 +9,7 @@
   </v-row>
   <v-row class="d-flex pt-5 col-12" v-else-if="hotclips.length > 0 && loading">
     <v-col class="pa-2" cols="6" xl="2" lg="3" md="3" sm="4" v-for="(item) in hotclips" :key="item.id">
-      <v-card :to="{path:`/hotclip/${item.id}`}" flat>
+      <v-card :to="{path:`/hotclip/${item.id}`,params:{title:item.title}}" flat>
         <v-card-text class="pa-0 ma-0">
           <v-img
           :src="item.thumbnail_url"

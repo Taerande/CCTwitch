@@ -96,7 +96,6 @@ import expandTableVue from './expandTable';
 import ImportNewClipDialogVue from '../dialog/ImportNewClipDialog.vue';
 import DisplyaAdContainerVue from '../DisplyaAdContainer.vue';
 
-
 export default {
   components: {
     DeleteDialog,

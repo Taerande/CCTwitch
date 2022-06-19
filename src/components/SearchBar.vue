@@ -10,8 +10,9 @@
       outlined
       color="twitch"
       @click:append="searchChannel(searchString)"
-      hide-details
+      hide-details="auto"
       solo
+      type="text"
       dense
       size="20"
       label="Search your Streamer" append-icon="mdi-magnify">

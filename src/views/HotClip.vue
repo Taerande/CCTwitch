@@ -1,16 +1,16 @@
 <template>
-<v-container fluid>
+<v-container fluid v-if="loading">
     <v-row class="d-flex align-center py-5">
     <div class="text-h3 font-weight-bold pr-3">
       Hot Clip |
     </div>
-    <div class="text-h4 font-weight-bold" v-if="hotClipData.title.length > 0">
+    <div class="text-h4 font-weight-bold" v-if="hotClipData.title">
       {{hotClipData.title}}
     </div>
   </v-row>
   <v-divider></v-divider>
   <v-row class="d-flex col-12 justify-center">
-    <v-col cols="12" xl="9" lg="9" md="9" sm="12" class="copyBody">
+    <v-col cols="12" xl="9" lg="9" md="9" sm="12" class="copyBody pa-0">
       <v-card class="pa-0 ma-0 black">
         <v-card-text class="pa-0 ma-0">
           <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 16/11" height="100%">
@@ -41,7 +41,7 @@
               <div class="text-caption">다운로드</div>
             </div>
             <div class="px-1 mx-1">
-              <pinClip class="d-flex mx-auto" v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
+              <pinClip class="d-flex mx-auto" v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:hotClipData.clipData}" :listData="cliplist"></pinClip>
               <v-btn class="d-flex mx-auto" v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon>
               </v-btn>
               <div class="text-caption">추가하기</div>
@@ -51,33 +51,44 @@
       </v-card>
     </v-col>
   </v-row>
-  <v-row class="d-flex justify-center" style="height:300px;">
-    <div>
-      here's hotclip data sortly. with broadcaster info
-    </div>
+  <v-row class="d-flex justify-center">
+    <hotclipInfoVue :hotClipData="hotClipData"></hotclipInfoVue>
   </v-row>
-  <v-row class="d-flex justify-center" style="height:300px;">
-    <div>
-      here's for comments
-    </div>
+  <v-row class="d-flex justify-center">
+    <hotclipCommentsVue :hotClipData="hotClipData"></hotclipCommentsVue>
   </v-row>
+</v-container>
+<v-container v-else>
+  <div class="d-flex justify-center absolute-center">
+    <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+  </div>
 </v-container>
 </template>
 <script>
 import axios from 'axios';
 import pinClip from '../components/pinClip.vue';
+import hotclipInfoVue from '../components/HotClip/hotclipInfo.vue';
+import hotclipCommentsVue from '../components/HotClip/hotclipComments.vue';
 
 export default {
   components:{
     pinClip,
+    hotclipCommentsVue,
+    hotclipInfoVue,
   },
   data() {
     return {
+      loading:false,
+      cliplist: [],
+      unsubscribe:null,
       hotClipData:{
         id:'',
+        author:{},
+        createdAt:null,
         title:'',
-        clipData:{},
+        clipData: {},
         commentCount:0,
+        viewCount:0,
         likeCount:0,
         title:'',
         tags:[],
@@ -94,6 +105,32 @@ export default {
       const sec = Math.floor((item%60));
 
       return hour+'h'+min+'m'+sec+'s';
+    },
+    async getVidOffset(element){
+      if(!element.video_id){
+        return
+      }
+      const json = JSON.stringify(
+        {
+          operationName: "ClipsFullVideoButton",
+          variables: {
+            slug: element.id
+          },
+          extensions: {
+            persistedQuery: {
+              version: 1,
+              sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
+              }
+          }
+        })
+      await axios.post('https://gql.twitch.tv/gql',json, {
+        headers: {
+          'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
+        },
+
+      }).then((res) => {
+          element.videoOffsetSeconds = res.data.data.clip.videoOffsetSeconds;
+      })
     },
     copyClip(el) {
       const tempArea2 = document.createElement('textarea');
@@ -135,25 +172,64 @@ export default {
       })
     }
   },
-  async created() {
+  async mounted() {
+    if(this.unsubscribe) this.unsubscribe()
+     let tempuserInfo = this.$store.state.userinfo.userInfo;
+    if(!this.$store.state.userinfo.userInfo) {
+      await this.$firebase.auth().onAuthStateChanged(async (user) => {
+        if(user){
+          this.$store.commit('SET_UserInfo',user);
+        }
+      })
+    }
+    if(tempuserInfo){
+      this.unsubscribe = await this.$firestore.collection('cliplist').orderBy("createdAt","desc").where('authorId','==',tempuserInfo.uid).onSnapshot((sn) => {
+       if(sn.empty){
+         this.cliplist = [];
+         return
+         }
+         this.cliplist = sn.docs.map( v => {
+           const item = v.data()
+           return {
+             id: v.id,
+             title: item.title,
+             createdAt: item.createdAt,
+             color: item.color,
+             clipCount: item.clipCount,
+             clipIds: item.clipIds,
+           }
+         })
+       });
+    }
+
     const sn = await this.$firestore.collection('hotclip').doc(this.$route.params.id);
 
-    sn.get().then( async (doc) => {
+    await sn.get().then( async (doc) => {
+
       const item = doc.data();
+
       if(doc.exists){
         this.hotClipData.id = doc.id;
+        this.hotClipData.author = await this.getBroadcasterInfo(item.authorId.split('twitch:')[1]);
         this.hotClipData.clipData = await this.getClipInfo(doc.id);
         this.hotClipData.broadcaster = await this.getBroadcasterInfo(item.broadcaster_id);
         this.hotClipData.commentCount = item.commentCount;
         this.hotClipData.likeCount = item.likeCount;
+        this.hotClipData.viewCount = item.viewCount;
         this.hotClipData.tags = item.tags;
         this.hotClipData.title = item.title;
+        this.hotClipData.createdAt = item.createdAt.toDate();
+
+        await this.getVidOffset(this.hotClipData.clipData);
       }
 
     })
 
-
-  }
+    this.loading = true;
+  },
+  destroyed() {
+    if(this.unsubscribe) this.unsubscribe()
+  },
 
 }
 </script>
