@@ -6,6 +6,7 @@
   <v-divider></v-divider>
   <v-subheader>Clips</v-subheader>
   <hotclipVue></hotclipVue>
+  <v-divider class="my-3"></v-divider>
   <v-subheader>Cliplist</v-subheader>
   <v-row v-if="loading" class="d-flex justify-center">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
@@ -125,13 +126,11 @@ export default {
           return {
             id: v.id,
             title: item.title,
-            description: item.description,
             createdAt: item.createdAt.toDate(),
             display_name: item.authorName,
-            clipIds: item.clipIds,
             color: item.color,
             tags: item.tags,
-            dataSet: item.dataSet,
+            dataSet: item.dataSet ? 'Yes' : null,
             thumbnail_url: item.thumbnail_url,
             clipCount: item.clipCount,
             viewCount: item.viewCount,

@@ -8,20 +8,20 @@
       {{hotClipData.title}}
     </div>
   </v-row>
-  <v-divider></v-divider>
-  <v-row class="d-flex col-12 justify-center">
+  <v-divider class="my-2"></v-divider>
+  <v-row class="d-flex col-12 justify-center pt-7">
     <v-col cols="12" xl="9" lg="9" md="9" sm="12" class="copyBody pa-0">
       <v-card class="pa-0 ma-0 black">
         <v-card-text class="pa-0 ma-0">
           <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 16/11" height="100%">
-          <iframe
+          <!-- <iframe
               allow="autoplay"
               :src="`https://clips.twitch.tv/embed?clip=${hotClipData.id}&parent=${$store.state.embedUrl}&preload=auto`"
               preload="auto"
               frameborder="0"
               height="100%"
               width="100%"
-              allowfullscreen="true"></iframe>
+              allowfullscreen="true"></iframe> -->
           </v-responsive>
           <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
             <div class="px-1 mx-1">
@@ -83,6 +83,7 @@ export default {
       unsubscribe:null,
       hotClipData:{
         id:'',
+        authorId:'',
         author:{},
         createdAt:null,
         title:'',
@@ -92,6 +93,8 @@ export default {
         likeCount:0,
         title:'',
         tags:[],
+        dateLabel:'',
+        likeUids:[],
         broadcaster:{},
       }
     }
@@ -203,19 +206,25 @@ export default {
     }
 
     const sn = await this.$firestore.collection('hotclip').doc(this.$route.params.id);
+    await sn.update({viewCount: this.$firebase.firestore.FieldValue.increment(1)});
 
     await sn.get().then( async (doc) => {
 
       const item = doc.data();
 
+
+      document.title = `${item.title} | Hot Clip - CCTwitch`;
       if(doc.exists){
         this.hotClipData.id = doc.id;
+        this.hotClipData.authorId = item.authorId,
         this.hotClipData.author = await this.getBroadcasterInfo(item.authorId.split('twitch:')[1]);
         this.hotClipData.clipData = await this.getClipInfo(doc.id);
         this.hotClipData.broadcaster = await this.getBroadcasterInfo(item.broadcaster_id);
         this.hotClipData.commentCount = item.commentCount;
         this.hotClipData.likeCount = item.likeCount;
+        this.hotClipData.likeUids = item.likeUids;
         this.hotClipData.viewCount = item.viewCount;
+        this.hotClipData.dateLabel = item.dateLabel;
         this.hotClipData.tags = item.tags;
         this.hotClipData.title = item.title;
         this.hotClipData.createdAt = item.createdAt.toDate();

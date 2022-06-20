@@ -22,7 +22,7 @@
     <v-card-title class="twitch white--text">
       Hot Clip 등록
     </v-card-title>
-    <v-card-text>
+    <v-card-text class="pa-3">
       <v-text-field
         outlined
         v-model="title"
@@ -44,6 +44,7 @@
       multiple
       counter="5"
       deletable-chips
+      type="text"
       small-chips
       maxlength="15"
       label="Tags"
@@ -56,7 +57,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="error" @click="dialog=false" text>close</v-btn>
-      <v-btn :loading="dbloading" color="success" @click="createHotClip()" text>Add</v-btn>
+      <v-btn :loading="dbloading" :disabled="title === ''" color="success" @click="createHotClip()" text>Add</v-btn>
     </v-card-actions>
 
   </v-card>
@@ -115,10 +116,12 @@ export default {
           let batch = this.$firestore.batch();
           batch.set(target, {
             authorId: this.$store.state.userinfo.userInfo.uid,
+            authorName: this.$store.state.userinfo.userInfo.displayName,
             createdAt: new Date(),
             tags: this.tags,
             title: this.title,
             viewCount: 0,
+            likeUids:[],
             thumbnail_url:this.clipData.thumbnail_url,
             likeCount: 0,
             dateLabel: today.format('YYYY-MM-DD'),

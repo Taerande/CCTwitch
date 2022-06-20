@@ -34,6 +34,7 @@
                       color="twitch"
                       outlined
                       flat
+                      type="text"
                       dense
                       prepend-inner-icon="mdi-magnify"
                       placeholder="Find streamer"

@@ -26,11 +26,11 @@ export default {
   },
   methods: {
   },
-  created(){
+  async created(){
     document.title = 'Login - CCTWITCH'
     const autoLogin = localStorage.getItem('autoLogin');
     const whereTo = localStorage.getItem('path');
-    axios.get(`${this.$store.state.backendUrl}/twitchAuth/signin/twitch/callback?code=${this.$route.query.code}`).then( async (res) =>{
+    await axios.get(`${this.$store.state.backendUrl}/twitchAuth/signin/twitch/callback?code=${this.$route.query.code}`).then( async (res) =>{
       if(autoLogin === 'true'){
         await this.$firebase.auth().setPersistence(this.$firebase.auth.Auth.Persistence.LOCAL).then(() => {
           return this.$firebase.auth().signInWithCustomToken(res.data.token);

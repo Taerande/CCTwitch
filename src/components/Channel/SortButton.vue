@@ -89,11 +89,10 @@
     :block="$vuetify.breakpoint.smAndDown"
     @click="createTimeline(vidInfo.data.user_login, vidInfo.data.user_id, vidInfo.data.id)"
     :loading="dbLoading"
-    :disabled="clipSort === 'date'"
+    :disabled="clipSort === 'date' || vidInfo.data.view_count === -1"
     :color="clipSort === 'vids' ? 'twitch' : ''"
     :class="clipSort === 'vids' ? 'white--text' : ''"
     class="text-caption mr-3 pa-2" >
-    <!-- :disabled="vidInfo.data.is_live === 'live' || clipSort === 'date'" -->
     <v-icon small>mdi-timeline</v-icon><span class="px-2">Sort By Timeline</span></v-btn>
     <v-btn
     v-else

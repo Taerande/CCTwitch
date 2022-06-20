@@ -64,6 +64,7 @@
         outlined
         class="pt-5 d-block"
         counter
+        type="text"
         maxlength="25"
         flat
         :rules="[titleRules.required, titleRules.counter]"
@@ -78,6 +79,7 @@
         class="pt-5"
         v-model="form.description"
         outlined
+        type="text"
         no-resize
         counter
         color="twitch"

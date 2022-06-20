@@ -103,12 +103,10 @@ export default {
         headers: this.$store.state.headerConfig,
       }).then(async (res) => {
         if(res.data.data.length > 0){
+          this.searchList = res.data.data;
           let ids = [];
           res.data.data.map((element) => {
-            if(element.title.length > 0 && element.game_id > 0){
-              this.searchList.push(element);
-              return ids.push(element.id);
-            }
+            return ids.push(element.id);
           })
           const result = await this.getUserInfo([...ids]);
           this.searchList.forEach((element) => {

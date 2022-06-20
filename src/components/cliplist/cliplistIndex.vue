@@ -65,7 +65,7 @@
     v-if="$store.state.currentCliplist.length > 0"
     :clipListData="cliplist">
   </expandTableVue>
-  <v-row v-else-if="$store.state.currentCliplist.length === 0" class="d-flex absolute-center justify-center align-center">
+  <v-row v-else-if="$store.state.currentCliplist.length === 0" class="d-flex py-10 justify-center align-center">
     <v-alert class="d-inline-block" type="error">🤐 저장된 클립이 없습니다.</v-alert>
   </v-row>
   <v-row v-if="cliplist.clipCount > $store.state.currentCliplist.length" class="d-block pb-16 pt-10" v-intersect="onIntersect">
