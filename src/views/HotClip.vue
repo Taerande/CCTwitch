@@ -14,14 +14,14 @@
       <v-card class="pa-0 ma-0 black">
         <v-card-text class="pa-0 ma-0">
           <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 16/11" height="100%">
-          <!-- <iframe
+          <iframe
               allow="autoplay"
               :src="`https://clips.twitch.tv/embed?clip=${hotClipData.id}&parent=${$store.state.embedUrl}&preload=auto`"
               preload="auto"
               frameborder="0"
               height="100%"
               width="100%"
-              allowfullscreen="true"></iframe> -->
+              allowfullscreen="true"></iframe>
           </v-responsive>
           <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
             <div class="px-1 mx-1">
@@ -52,7 +52,7 @@
     </v-col>
   </v-row>
   <v-row class="d-flex justify-center">
-    <hotclipInfoVue :hotClipData="hotClipData"></hotclipInfoVue>
+    <hotclipInfoVue :hotClipData="hotClipData" @changeInfo="changeInfo"></hotclipInfoVue>
   </v-row>
   <v-row class="d-flex justify-center">
     <hotclipCommentsVue :hotClipData="hotClipData"></hotclipCommentsVue>
@@ -102,6 +102,11 @@ export default {
   computed:{
   },
   methods: {
+    changeInfo(el){
+      this.hotClipData.title = el.title;
+      this.hotClipData.tags = el.tags;
+      document.title = `${el.title} | Hot Clip - CCTwitch`;
+    },
     setTimeHMSformat(item){
       const hour = Math.floor(item/3600);
       const min = Math.floor((item%3600)/60);

@@ -5,7 +5,7 @@
       Comments : {{hotClipData.commentCount}}
     </span>
   </v-row>
-  <v-row class="d-flex align-center px-1" v-if="$store.state.userinfo.userInfo">
+  <v-row class="d-flex align-center px-1 pt-7" v-if="$store.state.userinfo.userInfo">
     <v-avatar
       size="36"
     >
@@ -14,7 +14,7 @@
       ></v-img>
     </v-avatar>
     <v-text-field
-    class="pa-3"
+    class="pa-0 pl-3"
     color="twitch"
     full-width
     dense
@@ -35,12 +35,12 @@
     </div>
     <v-btn color="twitch" class="white--text" @click="$store.commit('SET_SignInDialog', true)" block><v-icon color="white">mdi-twitch</v-icon>Log In</v-btn>
   </v-row>
-  <v-row v-if="comments.length > 0 && loading" class="py-3">
+  <v-row v-if="comments.length > 0 && loading" class="py-7">
     <v-col cols="12" v-if="commentLoading" class="d-flex justify-center">
       <v-progress-circular color="twitch" width="3" indeterminate></v-progress-circular>
     </v-col>
-    <v-col cols="12" v-for="(item, idx) in comments" :key="idx">
-      <div class="d-flex py-2">
+    <v-col cols="12" v-for="(item, idx) in comments" :key="item.id">
+      <div class="d-flex pt-3">
         <div class="px-1">
           <v-avatar
             size="36"
@@ -66,7 +66,7 @@
             <span class="pl-1 text-caption">
               {{item.likeCount}}
             </span>
-            <v-btn @click="replyId = item.id" color="twitch" class="pa-0 ma-0" small text>답글</v-btn>
+            <v-btn v-if="$store.state.userinfo.userInfo" @click="replyId = item.id" color="twitch" class="pa-0 ma-0" small text>답글</v-btn>
           </div>
         </div>
         <v-text-field
@@ -89,6 +89,7 @@
         </v-text-field>
         <v-spacer v-if="item.id !== editId"></v-spacer>
         <v-menu
+        v-if="$store.state.userinfo.userInfo && item.authorId === $store.state.userinfo.userInfo.uid"
         transition="slide-x-transition"
         left
         nudge-left="5"
@@ -98,7 +99,7 @@
             <v-btn @click="dialogId = item.id" small v-on="on" slot="activator" icon><v-icon>mdi-dots-vertical</v-icon></v-btn>
           </div>
           </template>
-          <v-list class="text-caption pa-0" v-if="$store.state.userinfo.userInfo && item.authorId === $store.state.userinfo.userInfo.uid">
+          <v-list class="text-caption pa-0">
             <v-list-item class="pa-0 ma-0">
               <v-btn block text @click="openEdit(item)" class="text-caption">
                 <v-icon small class="px-1">mdi-pencil</v-icon> 수정
@@ -112,7 +113,7 @@
           </v-list>
         </v-menu>
       </div>
-      <replyCommentsVue :hotclipComment="item" :replyId="replyId" @closeReply="closeReply()"></replyCommentsVue>
+    <replyCommentsVue :hotclipComment="item" :replyId="replyId" @closeReply="closeReply()"></replyCommentsVue>
     </v-col>
   </v-row>
   <v-row v-else-if="hotClipData.commentCount > comments.length" class="d-block pb-16 pt-10" v-intersect="onIntersect">
@@ -186,6 +187,10 @@ export default {
       return timeDiff > 86400000 ? this.$moment(el).format('l') :this.$moment(el).fromNow();
     },
     async likeComment(item,idx){
+      if(!this.$store.state.userinfo.userInfo){
+        this.$store.commit('SET_SignInDialog',true);
+        return
+      }
       this.likeIdx = idx;
       let hotclipComment = this.$firestore.collection('hotclip').doc(this.hotClipData.id).collection('comments').doc(item.id);
       let batch = this.$firestore.batch();
@@ -201,6 +206,10 @@ export default {
       })
     },
     async removeLikeComment(item, idx){
+      if(!this.$store.state.userinfo.userInfo){
+        this.$store.commit('SET_SignInDialog',true);
+        return
+      }
       this.likeIdx = idx;
       let hotclipComment = this.$firestore.collection('hotclip').doc(this.hotClipData.id).collection('comments').doc(item.id);
       let batch = this.$firestore.batch();
