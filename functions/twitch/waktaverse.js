@@ -12,8 +12,8 @@ app.get('/waktaverse', async (req, res) => {
   // const userId = req.url.split('userId=')[1].split('&twitchAccesToken')[0]
   // const twitchAccesToken = req.url.split('Bearer+')[1];
   const clientId = process.env.TWITCH_CLIENT_ID;
-  const time = req.query.time;
-  const appAccessToken = req.query.appAccessToken;
+  const time = '2022-06-18';
+  const appAccessToken = 'Bearer 3facjgqkl2375bpld79j0usqx62saf';
 
   const weekNumber = moment(time).week();
 

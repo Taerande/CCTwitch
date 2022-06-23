@@ -85,6 +85,8 @@
 </template>
 
 <script>
+
+import crypto from 'crypto'
 import axios from 'axios';
 import Search from '../components/Search';
 import DisplyaAdContainerVue from '../components/DisplyaAdContainer.vue';

@@ -1,0 +1,23 @@
+{
+  "background_color": "#ffffff",
+  "description": "CCTwitch can make you search streamers and collect clips easily. Can save and download clips.",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "cctwitch",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "cctwitch",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "images/101x100.png",
+      "type": "image/png",
+      "sizes": "101x100"
+    },
+    {
+      "src": "/favicon.ico",
+      "type": "image/x-icon"
+    }
+  ]
+}

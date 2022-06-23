@@ -28,6 +28,8 @@ const Channel = () => import(/* webpackChunkName: "423123" */ '@/views/Channel.v
 const Login = () => import(/* webpackChunkName: "Login" */ '@/views/Login.vue');
 const Trending = () => import(/* webpackChunkName: "Trending" */ '@/views/Trending.vue');
 
+// const Test = () => import(/* webpackChunkName: "Test" */ '@/views/Test.vue');
+
 const Timeline = () => import(/* webpackChunkName: "Timeline" */ '@/views/Timeline.vue');
 
 const Cliplist = () => import(/* webpackChunkName: "Cliplist" */ '@/views/Cliplist.vue');
@@ -134,6 +136,11 @@ const routes = [
     name: 'streamer',
     component: Streamer,
   },
+  // {
+  //   path: '/test',
+  //   name: 'Test',
+  //   component: Test,
+  // },
   // {
   //   path: '/analysis',
   //   name: 'Analysis',

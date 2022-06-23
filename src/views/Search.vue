@@ -11,7 +11,7 @@
   </v-row>
   <v-row v-else-if="searchList.length > 0 && dataLoading"
   class="pa-0 pt-3 d-flex">
-    <v-col cols="12" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''"  lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
+    <v-col cols="6" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''"  lg="3" md="4" sm="6" xs="6"  class="pa-2 d-flex justify-center"
     v-for="item in searchList"
     :key="item.id">
       <v-card outlined dark class="rounded-lg d-flex flex-row" width="320px" :to="{name: 'Channel',
@@ -58,6 +58,11 @@
         </v-card-text>
       </v-card>
     </v-col>
+    <v-col cols="12" class="d-flex justify-center py-8">
+      <v-alert type="info" class="d-flex justify-cener" dense>
+        스트리머를 찾지 못했다면, 스트리머의 아이디를 더 구체적으로 입력하세요.
+      </v-alert>
+    </v-col>
   </v-row>
   <v-row v-else-if="searchList.length === 0 && dataLoading" class="absolute-center">
     <v-alert type="error" class="d-flex justify-center">
@@ -98,7 +103,7 @@ export default {
       await axios.get('https://api.twitch.tv/helix/search/channels', {
         params: {
           query: el,
-          first: 100,
+          first: 60,
         },
         headers: this.$store.state.headerConfig,
       }).then(async (res) => {

@@ -23,6 +23,8 @@ exports.twitchOauthToken = functions.region('asia-northeast3').https.onRequest(r
 
 exports.twitchLiveClips = functions.region('asia-northeast3').https.onRequest(require('./twitch/clips.js'));
 
+exports.twitchWebHook = functions.region('asia-northeast3').https.onRequest(require('./twitch/webhook.js'));
+
 exports.weeklyWaktaverse = functions.region('asia-northeast3').https.onRequest(require('./twitch/waktaverse.js'));
 
 exports.timeLine = functions.region('asia-northeast3') .runWith({

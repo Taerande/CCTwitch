@@ -35,7 +35,7 @@
       </div>
       <div v-if="item.tags.length > 0"  class="d-flex">
         <v-chip-group column>
-          <v-chip v-for="tag in item.tags" :key="tag" class="d-flex ma-1 chipPill" :to="'/tag/'+tag">
+          <v-chip v-for="tag in item.tags" :key="tag" class="d-flex ma-1 chipPill">
             <span class="text-caption">
               {{tag}}
             </span>
