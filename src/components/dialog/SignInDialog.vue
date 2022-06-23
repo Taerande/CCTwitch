@@ -51,7 +51,7 @@ export default {
       localStorage.setItem('autoLogin',this.autoLogin);
       // const codeUri =
       // `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&redirect_uri=http://localhost:8080/login&scope=user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}`;
-      window.location.href = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&redirect_uri=${this.$store.state.redirectUri}&scope=user%3Aread%3Aemail%20user%3Aread%3Afollows%20channel%3Aread%3Apredictions&state=${state}`;
+      window.location.href = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&redirect_uri=${this.$store.state.redirectUri}&scope=user%3Aread%3Aemail%20user%3Aread%3Afollows&state=${state}`;
       // const code = await this.getCode(codeUri);
       // const twitchOAuthToken = JSON.stringify(Buffer.from(code.twitchOAuthToken, 'base64').toString());
       // if(this.autoLogin){

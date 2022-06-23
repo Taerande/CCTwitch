@@ -1,0 +1,520 @@
+[debug] [2022-06-23T12:27:17.023Z] ----------------------------------------------------------------------
+[debug] [2022-06-23T12:27:17.027Z] Command:       E:\NodeJs\node.exe C:\Users\Righteous\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only functions
+[debug] [2022-06-23T12:27:17.028Z] CLI Version:   10.2.1
+[debug] [2022-06-23T12:27:17.028Z] Platform:      win32
+[debug] [2022-06-23T12:27:17.028Z] Node Version:  v14.17.3
+[debug] [2022-06-23T12:27:17.032Z] Time:          Thu Jun 23 2022 21:27:17 GMT+0900 (대한민국 표준시)
+[debug] [2022-06-23T12:27:17.033Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-06-23T12:27:17.281Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-06-23T12:27:17.282Z] > authorizing via signed-in user (revive0405@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project twitchhotclip. This may result in unexpected behavior. 
+[debug] [2022-06-23T12:27:17.417Z] [hub] writing locator at C:\Users\RIGHTE~1\AppData\Local\Temp\hub-twitchhotclip.json
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, firestore, database, hosting, pubsub, storage {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mauth, firestore, database, hosting, pubsub, storage\u001b[22m"}}
+[info] +  functions: Using node@14 from host. {"metadata":{"emulator":{"name":"functions"},"message":"Using node@14 from host."}}
+[debug] [2022-06-23T12:27:17.473Z] defaultcredentials: writing to file C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json
+[debug] [2022-06-23T12:27:17.475Z] Setting GAC to C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Righteous\\AppData\\Roaming\\firebase\\revive0405_gmail_com_application_default_credentials.json"}}
+[debug] [2022-06-23T12:27:17.486Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig [none]
+[debug] [2022-06-23T12:27:17.940Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig 200
+[debug] [2022-06-23T12:27:17.940Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig {"projectId":"twitchhotclip","databaseURL":"https://twitchhotclip-default-rtdb.asia-southeast1.firebasedatabase.app","storageBucket":"twitchhotclip.appspot.com","locationId":"asia-northeast3"}
+[warn] !  ui: Emulator UI unable to start on port 4000, starting on 4001 instead. {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI unable to start on port 4000, starting on 4001 instead."}}
+[debug] [2022-06-23T12:27:18.292Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2022-06-23T12:27:18.292Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2022-06-23T12:27:18.293Z] Starting Emulator UI with command {"binary":"node","args":["C:\\Users\\Righteous\\.cache\\firebase\\emulators\\ui-v1.6.5\\server.bundle.js"],"optionalArgs":[],"joinArgs":false} {"metadata":{"emulator":{"name":"ui"},"message":"Starting Emulator UI with command {\"binary\":\"node\",\"args\":[\"C:\\\\Users\\\\Righteous\\\\.cache\\\\firebase\\\\emulators\\\\ui-v1.6.5\\\\server.bundle.js\"],\"optionalArgs\":[],\"joinArgs\":false}"}}
+[info] i  ui: Emulator UI logging to ui-debug.log {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI logging to \u001b[1mui-debug.log\u001b[22m"}}
+[debug] [2022-06-23T12:27:19.298Z] Web / API server started at localhost:4001
+ {"metadata":{"emulator":{"name":"ui"},"message":"Web / API server started at localhost:4001\n"}}
+[info] i  functions: Watching "E:\Vue_Project\twitch-hot-clip-tracker\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"E:\\Vue_Project\\twitch-hot-clip-tracker\\functions\" for Cloud Functions..."}}
+[debug] [2022-06-23T12:27:19.437Z] Validating nodejs source
+[debug] [2022-06-23T12:27:33.993Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.0",
+    "firebase-admin": "^9.8.0",
+    "firebase-functions": "^3.21.2",
+    "moment": "^2.29.3",
+    "moment-duration-format": "^2.3.2"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}
+[debug] [2022-06-23T12:27:33.993Z] Building nodejs source
+[debug] [2022-06-23T12:27:33.993Z] Analyzing nodejs backend spec
+[info] +  functions[asia-northeast3-twitchAuth]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth)."}}
+[info] +  functions[asia-northeast3-twitchTokenValidation]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation)."}}
+[info] +  functions[asia-northeast3-twitchOauthToken]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken)."}}
+[info] +  functions[asia-northeast3-twitchLiveClips]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips)."}}
+[info] +  functions[asia-northeast3-twitchWebHook]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook)."}}
+[info] +  functions[asia-northeast3-weeklyWaktaverse]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse)."}}
+[info] +  functions[asia-northeast3-timeLine]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine)."}}
+[info] i  functions[asia-northeast3-delteClipsInCliplist]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[info] i  functions[asia-northeast3-delteHotClip]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[debug] [2022-06-23T12:27:37.833Z] addAuthTrigger {"eventTrigger":{"eventType":"providers/firebase.auth/eventTypes/user.delete","resource":"projects/twitchhotclip"}}
+[info] +  functions[asia-southeast1-deleteUser]: auth function initialized. {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mauth\u001b[22m function initialized."}}
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://localhost:4001                │
+└─────────────────────────────────────────────────────────────┘
+
+┌───────────┬────────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port      │ View in Emulator UI             │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Functions │ localhost:5001 │ http://localhost:4001/functions │
+└───────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub running at localhost:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2022-06-23T12:28:32.035Z] ----------------------------------------------------------------------
+[debug] [2022-06-23T12:28:32.040Z] Command:       E:\NodeJs\node.exe C:\Users\Righteous\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only functions
+[debug] [2022-06-23T12:28:32.042Z] CLI Version:   10.2.1
+[debug] [2022-06-23T12:28:32.042Z] Platform:      win32
+[debug] [2022-06-23T12:28:32.042Z] Node Version:  v14.17.3
+[debug] [2022-06-23T12:28:32.046Z] Time:          Thu Jun 23 2022 21:28:32 GMT+0900 (대한민국 표준시)
+[debug] [2022-06-23T12:28:32.046Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-06-23T12:28:32.264Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-06-23T12:28:32.265Z] > authorizing via signed-in user (revive0405@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project twitchhotclip. This may result in unexpected behavior. 
+[debug] [2022-06-23T12:28:32.379Z] [hub] writing locator at C:\Users\RIGHTE~1\AppData\Local\Temp\hub-twitchhotclip.json
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, firestore, database, hosting, pubsub, storage {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mauth, firestore, database, hosting, pubsub, storage\u001b[22m"}}
+[info] +  functions: Using node@14 from host. {"metadata":{"emulator":{"name":"functions"},"message":"Using node@14 from host."}}
+[debug] [2022-06-23T12:28:32.443Z] defaultcredentials: writing to file C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json
+[debug] [2022-06-23T12:28:32.445Z] Setting GAC to C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Righteous\\AppData\\Roaming\\firebase\\revive0405_gmail_com_application_default_credentials.json"}}
+[debug] [2022-06-23T12:28:32.460Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig [none]
+[debug] [2022-06-23T12:28:33.033Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig 200
+[debug] [2022-06-23T12:28:33.033Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig {"projectId":"twitchhotclip","databaseURL":"https://twitchhotclip-default-rtdb.asia-southeast1.firebasedatabase.app","storageBucket":"twitchhotclip.appspot.com","locationId":"asia-northeast3"}
+[warn] !  ui: Emulator UI unable to start on port 4000, starting on 4002 instead. {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI unable to start on port 4000, starting on 4002 instead."}}
+[debug] [2022-06-23T12:28:33.127Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2022-06-23T12:28:33.127Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2022-06-23T12:28:33.128Z] Starting Emulator UI with command {"binary":"node","args":["C:\\Users\\Righteous\\.cache\\firebase\\emulators\\ui-v1.6.5\\server.bundle.js"],"optionalArgs":[],"joinArgs":false} {"metadata":{"emulator":{"name":"ui"},"message":"Starting Emulator UI with command {\"binary\":\"node\",\"args\":[\"C:\\\\Users\\\\Righteous\\\\.cache\\\\firebase\\\\emulators\\\\ui-v1.6.5\\\\server.bundle.js\"],\"optionalArgs\":[],\"joinArgs\":false}"}}
+[info] i  ui: Emulator UI logging to ui-debug.log {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI logging to \u001b[1mui-debug.log\u001b[22m"}}
+[debug] [2022-06-23T12:28:34.307Z] Web / API server started at localhost:4002
+ {"metadata":{"emulator":{"name":"ui"},"message":"Web / API server started at localhost:4002\n"}}
+[info] i  functions: Watching "E:\Vue_Project\twitch-hot-clip-tracker\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"E:\\Vue_Project\\twitch-hot-clip-tracker\\functions\" for Cloud Functions..."}}
+[debug] [2022-06-23T12:28:34.370Z] Validating nodejs source
+[debug] [2022-06-23T12:28:52.970Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.0",
+    "firebase-admin": "^9.8.0",
+    "firebase-functions": "^3.21.2",
+    "moment": "^2.29.3",
+    "moment-duration-format": "^2.3.2"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}
+[debug] [2022-06-23T12:28:52.971Z] Building nodejs source
+[debug] [2022-06-23T12:28:52.971Z] Analyzing nodejs backend spec
+[info] +  functions[asia-northeast3-twitchAuth]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth)."}}
+[info] +  functions[asia-northeast3-twitchTokenValidation]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation)."}}
+[info] +  functions[asia-northeast3-twitchOauthToken]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken)."}}
+[info] +  functions[asia-northeast3-twitchLiveClips]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips)."}}
+[info] +  functions[asia-northeast3-twitchWebHook]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook)."}}
+[info] +  functions[asia-northeast3-weeklyWaktaverse]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse)."}}
+[info] +  functions[asia-northeast3-timeLine]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine)."}}
+[info] i  functions[asia-northeast3-delteClipsInCliplist]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[info] i  functions[asia-northeast3-delteHotClip]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[debug] [2022-06-23T12:28:56.379Z] addAuthTrigger {"eventTrigger":{"eventType":"providers/firebase.auth/eventTypes/user.delete","resource":"projects/twitchhotclip"}}
+[info] +  functions[asia-southeast1-deleteUser]: auth function initialized. {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mauth\u001b[22m function initialized."}}
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://localhost:4002                │
+└─────────────────────────────────────────────────────────────┘
+
+┌───────────┬────────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port      │ View in Emulator UI             │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Functions │ localhost:5001 │ http://localhost:4002/functions │
+└───────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub running at localhost:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2022-06-23T13:07:53.202Z] ----------------------------------------------------------------------
+[debug] [2022-06-23T13:07:53.206Z] Command:       E:\NodeJs\node.exe C:\Users\Righteous\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only functions
+[debug] [2022-06-23T13:07:53.207Z] CLI Version:   10.2.1
+[debug] [2022-06-23T13:07:53.207Z] Platform:      win32
+[debug] [2022-06-23T13:07:53.207Z] Node Version:  v14.17.3
+[debug] [2022-06-23T13:07:53.211Z] Time:          Thu Jun 23 2022 22:07:53 GMT+0900 (대한민국 표준시)
+[debug] [2022-06-23T13:07:53.211Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-06-23T13:07:53.464Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-06-23T13:07:53.465Z] > authorizing via signed-in user (revive0405@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project twitchhotclip. This may result in unexpected behavior. 
+[debug] [2022-06-23T13:07:53.555Z] [hub] writing locator at C:\Users\RIGHTE~1\AppData\Local\Temp\hub-twitchhotclip.json
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, firestore, database, hosting, pubsub, storage {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mauth, firestore, database, hosting, pubsub, storage\u001b[22m"}}
+[info] +  functions: Using node@14 from host. {"metadata":{"emulator":{"name":"functions"},"message":"Using node@14 from host."}}
+[debug] [2022-06-23T13:07:53.621Z] defaultcredentials: writing to file C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json
+[debug] [2022-06-23T13:07:53.626Z] Setting GAC to C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Righteous\\AppData\\Roaming\\firebase\\revive0405_gmail_com_application_default_credentials.json"}}
+[debug] [2022-06-23T13:07:53.632Z] > refreshing access token with scopes: []
+[debug] [2022-06-23T13:07:53.633Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ <request body omitted>
+[debug] [2022-06-23T13:07:53.881Z] <<< HTTP RESPONSE 200 {"cache-control":"no-cache, no-store, max-age=0, must-revalidate","date":"Thu, 23 Jun 2022 13:07:54 GMT","expires":"Mon, 01 Jan 1990 00:00:00 GMT","pragma":"no-cache","content-type":"application/json; charset=utf-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[debug] [2022-06-23T13:07:53.921Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig [none]
+[debug] [2022-06-23T13:07:54.334Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig 200
+[debug] [2022-06-23T13:07:54.335Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig {"projectId":"twitchhotclip","databaseURL":"https://twitchhotclip-default-rtdb.asia-southeast1.firebasedatabase.app","storageBucket":"twitchhotclip.appspot.com","locationId":"asia-northeast3"}
+[warn] !  ui: Emulator UI unable to start on port 4000, starting on 4003 instead. {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI unable to start on port 4000, starting on 4003 instead."}}
+[debug] [2022-06-23T13:08:01.641Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2022-06-23T13:08:01.642Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2022-06-23T13:08:01.643Z] Starting Emulator UI with command {"binary":"node","args":["C:\\Users\\Righteous\\.cache\\firebase\\emulators\\ui-v1.6.5\\server.bundle.js"],"optionalArgs":[],"joinArgs":false} {"metadata":{"emulator":{"name":"ui"},"message":"Starting Emulator UI with command {\"binary\":\"node\",\"args\":[\"C:\\\\Users\\\\Righteous\\\\.cache\\\\firebase\\\\emulators\\\\ui-v1.6.5\\\\server.bundle.js\"],\"optionalArgs\":[],\"joinArgs\":false}"}}
+[info] i  ui: Emulator UI logging to ui-debug.log {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI logging to \u001b[1mui-debug.log\u001b[22m"}}
+[debug] [2022-06-23T13:08:04.072Z] Web / API server started at localhost:4003
+ {"metadata":{"emulator":{"name":"ui"},"message":"Web / API server started at localhost:4003\n"}}
+[info] i  functions: Watching "E:\Vue_Project\twitch-hot-clip-tracker\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"E:\\Vue_Project\\twitch-hot-clip-tracker\\functions\" for Cloud Functions..."}}
+[debug] [2022-06-23T13:08:04.189Z] Validating nodejs source
+[debug] [2022-06-23T13:08:26.411Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.0",
+    "firebase-admin": "^9.8.0",
+    "firebase-functions": "^3.21.2",
+    "moment": "^2.29.3",
+    "moment-duration-format": "^2.3.2"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}
+[debug] [2022-06-23T13:08:26.412Z] Building nodejs source
+[debug] [2022-06-23T13:08:26.412Z] Analyzing nodejs backend spec
+[info] +  functions[asia-northeast3-twitchAuth]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth)."}}
+[info] +  functions[asia-northeast3-twitchTokenValidation]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation)."}}
+[info] +  functions[asia-northeast3-twitchOauthToken]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken)."}}
+[info] +  functions[asia-northeast3-twitchLiveClips]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips)."}}
+[info] +  functions[asia-northeast3-twitchWebHook]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook)."}}
+[info] +  functions[asia-northeast3-weeklyWaktaverse]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse)."}}
+[info] +  functions[asia-northeast3-timeLine]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine)."}}
+[info] i  functions[asia-northeast3-delteClipsInCliplist]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[info] i  functions[asia-northeast3-delteHotClip]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[debug] [2022-06-23T13:08:31.680Z] addAuthTrigger {"eventTrigger":{"eventType":"providers/firebase.auth/eventTypes/user.delete","resource":"projects/twitchhotclip"}}
+[info] +  functions[asia-southeast1-deleteUser]: auth function initialized. {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mauth\u001b[22m function initialized."}}
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://localhost:4003                │
+└─────────────────────────────────────────────────────────────┘
+
+┌───────────┬────────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port      │ View in Emulator UI             │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Functions │ localhost:5001 │ http://localhost:4003/functions │
+└───────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub running at localhost:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2022-06-23T13:23:35.920Z] ----------------------------------------------------------------------
+[debug] [2022-06-23T13:23:35.924Z] Command:       E:\NodeJs\node.exe C:\Users\Righteous\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only functions
+[debug] [2022-06-23T13:23:35.925Z] CLI Version:   10.2.1
+[debug] [2022-06-23T13:23:35.925Z] Platform:      win32
+[debug] [2022-06-23T13:23:35.925Z] Node Version:  v14.17.3
+[debug] [2022-06-23T13:23:35.929Z] Time:          Thu Jun 23 2022 22:23:35 GMT+0900 (대한민국 표준시)
+[debug] [2022-06-23T13:23:35.930Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-06-23T13:23:36.117Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-06-23T13:23:36.117Z] > authorizing via signed-in user (revive0405@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project twitchhotclip. This may result in unexpected behavior. 
+[debug] [2022-06-23T13:23:36.227Z] [hub] writing locator at C:\Users\RIGHTE~1\AppData\Local\Temp\hub-twitchhotclip.json
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, firestore, database, hosting, pubsub, storage {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mauth, firestore, database, hosting, pubsub, storage\u001b[22m"}}
+[info] +  functions: Using node@14 from host. {"metadata":{"emulator":{"name":"functions"},"message":"Using node@14 from host."}}
+[debug] [2022-06-23T13:23:36.294Z] defaultcredentials: writing to file C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json
+[debug] [2022-06-23T13:23:36.298Z] Setting GAC to C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Righteous\\AppData\\Roaming\\firebase\\revive0405_gmail_com_application_default_credentials.json"}}
+[debug] [2022-06-23T13:23:36.306Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig [none]
+[debug] [2022-06-23T13:23:36.737Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig 200
+[debug] [2022-06-23T13:23:36.737Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig {"projectId":"twitchhotclip","databaseURL":"https://twitchhotclip-default-rtdb.asia-southeast1.firebasedatabase.app","storageBucket":"twitchhotclip.appspot.com","locationId":"asia-northeast3"}
+[warn] !  ui: Emulator UI unable to start on port 4000, starting on 4004 instead. {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI unable to start on port 4000, starting on 4004 instead."}}
+[debug] [2022-06-23T13:23:36.856Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2022-06-23T13:23:36.856Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2022-06-23T13:23:36.856Z] Starting Emulator UI with command {"binary":"node","args":["C:\\Users\\Righteous\\.cache\\firebase\\emulators\\ui-v1.6.5\\server.bundle.js"],"optionalArgs":[],"joinArgs":false} {"metadata":{"emulator":{"name":"ui"},"message":"Starting Emulator UI with command {\"binary\":\"node\",\"args\":[\"C:\\\\Users\\\\Righteous\\\\.cache\\\\firebase\\\\emulators\\\\ui-v1.6.5\\\\server.bundle.js\"],\"optionalArgs\":[],\"joinArgs\":false}"}}
+[info] i  ui: Emulator UI logging to ui-debug.log {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI logging to \u001b[1mui-debug.log\u001b[22m"}}
+[debug] [2022-06-23T13:23:38.009Z] Web / API server started at localhost:4004
+ {"metadata":{"emulator":{"name":"ui"},"message":"Web / API server started at localhost:4004\n"}}
+[info] i  functions: Watching "E:\Vue_Project\twitch-hot-clip-tracker\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"E:\\Vue_Project\\twitch-hot-clip-tracker\\functions\" for Cloud Functions..."}}
+[debug] [2022-06-23T13:23:38.127Z] Validating nodejs source
+[debug] [2022-06-23T13:23:48.177Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.0",
+    "firebase-admin": "^9.8.0",
+    "firebase-functions": "^3.21.2",
+    "moment": "^2.29.3",
+    "moment-duration-format": "^2.3.2"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}
+[debug] [2022-06-23T13:23:48.177Z] Building nodejs source
+[debug] [2022-06-23T13:23:48.178Z] Analyzing nodejs backend spec
+[info] +  functions[asia-northeast3-twitchAuth]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth)."}}
+[info] +  functions[asia-northeast3-twitchTokenValidation]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation)."}}
+[info] +  functions[asia-northeast3-twitchOauthToken]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken)."}}
+[info] +  functions[asia-northeast3-twitchLiveClips]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips)."}}
+[info] +  functions[asia-northeast3-twitchWebHook]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook)."}}
+[info] +  functions[asia-northeast3-weeklyWaktaverse]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse)."}}
+[info] +  functions[asia-northeast3-timeLine]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine)."}}
+[info] i  functions[asia-northeast3-delteClipsInCliplist]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[info] i  functions[asia-northeast3-delteHotClip]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[debug] [2022-06-23T13:23:49.592Z] addAuthTrigger {"eventTrigger":{"eventType":"providers/firebase.auth/eventTypes/user.delete","resource":"projects/twitchhotclip"}}
+[info] +  functions[asia-southeast1-deleteUser]: auth function initialized. {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mauth\u001b[22m function initialized."}}
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://localhost:4004                │
+└─────────────────────────────────────────────────────────────┘
+
+┌───────────┬────────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port      │ View in Emulator UI             │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Functions │ localhost:5001 │ http://localhost:4004/functions │
+└───────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub running at localhost:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2022-06-23T13:31:35.743Z] ----------------------------------------------------------------------
+[debug] [2022-06-23T13:31:35.750Z] Command:       E:\NodeJs\node.exe C:\Users\Righteous\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only functions
+[debug] [2022-06-23T13:31:35.751Z] CLI Version:   10.2.1
+[debug] [2022-06-23T13:31:35.752Z] Platform:      win32
+[debug] [2022-06-23T13:31:35.752Z] Node Version:  v14.17.3
+[debug] [2022-06-23T13:31:35.756Z] Time:          Thu Jun 23 2022 22:31:35 GMT+0900 (대한민국 표준시)
+[debug] [2022-06-23T13:31:35.758Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-06-23T13:31:35.985Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-06-23T13:31:35.985Z] > authorizing via signed-in user (revive0405@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project twitchhotclip. This may result in unexpected behavior. 
+[debug] [2022-06-23T13:31:36.091Z] [hub] writing locator at C:\Users\RIGHTE~1\AppData\Local\Temp\hub-twitchhotclip.json
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, firestore, database, hosting, pubsub, storage {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mauth, firestore, database, hosting, pubsub, storage\u001b[22m"}}
+[info] +  functions: Using node@14 from host. {"metadata":{"emulator":{"name":"functions"},"message":"Using node@14 from host."}}
+[debug] [2022-06-23T13:31:36.145Z] defaultcredentials: writing to file C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json
+[debug] [2022-06-23T13:31:36.147Z] Setting GAC to C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Righteous\\AppData\\Roaming\\firebase\\revive0405_gmail_com_application_default_credentials.json"}}
+[debug] [2022-06-23T13:31:36.154Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig [none]
+[debug] [2022-06-23T13:31:36.632Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig 200
+[debug] [2022-06-23T13:31:36.633Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig {"projectId":"twitchhotclip","databaseURL":"https://twitchhotclip-default-rtdb.asia-southeast1.firebasedatabase.app","storageBucket":"twitchhotclip.appspot.com","locationId":"asia-northeast3"}
+[warn] !  ui: Emulator UI unable to start on port 4000, starting on 4005 instead. {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI unable to start on port 4000, starting on 4005 instead."}}
+[debug] [2022-06-23T13:31:36.725Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2022-06-23T13:31:36.726Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2022-06-23T13:31:36.726Z] Starting Emulator UI with command {"binary":"node","args":["C:\\Users\\Righteous\\.cache\\firebase\\emulators\\ui-v1.6.5\\server.bundle.js"],"optionalArgs":[],"joinArgs":false} {"metadata":{"emulator":{"name":"ui"},"message":"Starting Emulator UI with command {\"binary\":\"node\",\"args\":[\"C:\\\\Users\\\\Righteous\\\\.cache\\\\firebase\\\\emulators\\\\ui-v1.6.5\\\\server.bundle.js\"],\"optionalArgs\":[],\"joinArgs\":false}"}}
+[info] i  ui: Emulator UI logging to ui-debug.log {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI logging to \u001b[1mui-debug.log\u001b[22m"}}
+[debug] [2022-06-23T13:31:37.711Z] Web / API server started at localhost:4005
+ {"metadata":{"emulator":{"name":"ui"},"message":"Web / API server started at localhost:4005\n"}}
+[info] i  functions: Watching "E:\Vue_Project\twitch-hot-clip-tracker\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"E:\\Vue_Project\\twitch-hot-clip-tracker\\functions\" for Cloud Functions..."}}
+[debug] [2022-06-23T13:31:37.817Z] Validating nodejs source
+[debug] [2022-06-23T13:31:49.100Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.0",
+    "firebase-admin": "^9.8.0",
+    "firebase-functions": "^3.21.2",
+    "moment": "^2.29.3",
+    "moment-duration-format": "^2.3.2"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}
+[debug] [2022-06-23T13:31:49.100Z] Building nodejs source
+[debug] [2022-06-23T13:31:49.101Z] Analyzing nodejs backend spec
+[info] +  functions[asia-northeast3-twitchAuth]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth)."}}
+[info] +  functions[asia-northeast3-twitchTokenValidation]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation)."}}
+[info] +  functions[asia-northeast3-twitchOauthToken]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken)."}}
+[info] +  functions[asia-northeast3-twitchLiveClips]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips)."}}
+[info] +  functions[asia-northeast3-twitchWebHook]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook)."}}
+[info] +  functions[asia-northeast3-weeklyWaktaverse]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse)."}}
+[info] +  functions[asia-northeast3-timeLine]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine)."}}
+[info] i  functions[asia-northeast3-delteClipsInCliplist]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[info] i  functions[asia-northeast3-delteHotClip]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[debug] [2022-06-23T13:31:51.348Z] addAuthTrigger {"eventTrigger":{"eventType":"providers/firebase.auth/eventTypes/user.delete","resource":"projects/twitchhotclip"}}
+[info] +  functions[asia-southeast1-deleteUser]: auth function initialized. {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mauth\u001b[22m function initialized."}}
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://localhost:4005                │
+└─────────────────────────────────────────────────────────────┘
+
+┌───────────┬────────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port      │ View in Emulator UI             │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Functions │ localhost:5001 │ http://localhost:4005/functions │
+└───────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub running at localhost:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2022-06-23T13:42:55.501Z] ----------------------------------------------------------------------
+[debug] [2022-06-23T13:42:55.504Z] Command:       E:\NodeJs\node.exe C:\Users\Righteous\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only functions
+[debug] [2022-06-23T13:42:55.505Z] CLI Version:   10.2.1
+[debug] [2022-06-23T13:42:55.505Z] Platform:      win32
+[debug] [2022-06-23T13:42:55.506Z] Node Version:  v14.17.3
+[debug] [2022-06-23T13:42:55.509Z] Time:          Thu Jun 23 2022 22:42:55 GMT+0900 (대한민국 표준시)
+[debug] [2022-06-23T13:42:55.510Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-06-23T13:42:55.703Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-06-23T13:42:55.704Z] > authorizing via signed-in user (revive0405@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project twitchhotclip. This may result in unexpected behavior. 
+[debug] [2022-06-23T13:42:55.779Z] [hub] writing locator at C:\Users\RIGHTE~1\AppData\Local\Temp\hub-twitchhotclip.json
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, firestore, database, hosting, pubsub, storage {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mauth, firestore, database, hosting, pubsub, storage\u001b[22m"}}
+[info] +  functions: Using node@14 from host. {"metadata":{"emulator":{"name":"functions"},"message":"Using node@14 from host."}}
+[debug] [2022-06-23T13:42:55.829Z] defaultcredentials: writing to file C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json
+[debug] [2022-06-23T13:42:55.832Z] Setting GAC to C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Righteous\\AppData\\Roaming\\firebase\\revive0405_gmail_com_application_default_credentials.json"}}
+[debug] [2022-06-23T13:42:55.840Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig [none]
+[debug] [2022-06-23T13:42:56.301Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig 200
+[debug] [2022-06-23T13:42:56.301Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig {"projectId":"twitchhotclip","databaseURL":"https://twitchhotclip-default-rtdb.asia-southeast1.firebasedatabase.app","storageBucket":"twitchhotclip.appspot.com","locationId":"asia-northeast3"}
+[warn] !  ui: Emulator UI unable to start on port 4000, starting on 4006 instead. {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI unable to start on port 4000, starting on 4006 instead."}}
+[debug] [2022-06-23T13:42:56.550Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2022-06-23T13:42:56.551Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2022-06-23T13:42:56.551Z] Starting Emulator UI with command {"binary":"node","args":["C:\\Users\\Righteous\\.cache\\firebase\\emulators\\ui-v1.6.5\\server.bundle.js"],"optionalArgs":[],"joinArgs":false} {"metadata":{"emulator":{"name":"ui"},"message":"Starting Emulator UI with command {\"binary\":\"node\",\"args\":[\"C:\\\\Users\\\\Righteous\\\\.cache\\\\firebase\\\\emulators\\\\ui-v1.6.5\\\\server.bundle.js\"],\"optionalArgs\":[],\"joinArgs\":false}"}}
+[info] i  ui: Emulator UI logging to ui-debug.log {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI logging to \u001b[1mui-debug.log\u001b[22m"}}
+[debug] [2022-06-23T13:42:57.558Z] Web / API server started at localhost:4006
+ {"metadata":{"emulator":{"name":"ui"},"message":"Web / API server started at localhost:4006\n"}}
+[info] i  functions: Watching "E:\Vue_Project\twitch-hot-clip-tracker\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"E:\\Vue_Project\\twitch-hot-clip-tracker\\functions\" for Cloud Functions..."}}
+[debug] [2022-06-23T13:42:57.693Z] Validating nodejs source
+[debug] [2022-06-23T13:43:08.620Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.0",
+    "firebase-admin": "^9.8.0",
+    "firebase-functions": "^3.21.2",
+    "moment": "^2.29.3",
+    "moment-duration-format": "^2.3.2"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}
+[debug] [2022-06-23T13:43:08.620Z] Building nodejs source
+[debug] [2022-06-23T13:43:08.621Z] Analyzing nodejs backend spec
+[info] +  functions[asia-northeast3-twitchAuth]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchAuth)."}}
+[info] +  functions[asia-northeast3-twitchTokenValidation]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchTokenValidation)."}}
+[info] +  functions[asia-northeast3-twitchOauthToken]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchOauthToken)."}}
+[info] +  functions[asia-northeast3-twitchLiveClips]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchLiveClips)."}}
+[info] +  functions[asia-northeast3-twitchWebHook]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/twitchWebHook)."}}
+[info] +  functions[asia-northeast3-weeklyWaktaverse]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/weeklyWaktaverse)."}}
+[info] +  functions[asia-northeast3-timeLine]: http function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://localhost:5001/twitchhotclip/asia-northeast3/timeLine)."}}
+[info] i  functions[asia-northeast3-delteClipsInCliplist]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[info] i  functions[asia-northeast3-delteHotClip]: function ignored because the firestore emulator does not exist or is not running. {"metadata":{"emulator":{"name":"functions"},"message":"function ignored because the firestore emulator does not exist or is not running."}}
+[debug] [2022-06-23T13:43:09.772Z] addAuthTrigger {"eventTrigger":{"eventType":"providers/firebase.auth/eventTypes/user.delete","resource":"projects/twitchhotclip"}}
+[info] +  functions[asia-southeast1-deleteUser]: auth function initialized. {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mauth\u001b[22m function initialized."}}
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://localhost:4006                │
+└─────────────────────────────────────────────────────────────┘
+
+┌───────────┬────────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port      │ View in Emulator UI             │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Functions │ localhost:5001 │ http://localhost:4006/functions │
+└───────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub running at localhost:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 

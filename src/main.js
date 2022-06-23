@@ -6,6 +6,7 @@ import vuetify from './plugins/vuetify';
 import './plugins/firebase';
 import './plugins/moment';
 import Ads from 'vue-google-adsense'
+import './registerServiceWorker'
 // import './error'
 
 Vue.use(require('vue-script2'))
