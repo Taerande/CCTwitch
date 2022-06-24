@@ -73,10 +73,60 @@ app.post('/notification', async (req, res) => {
     } else {
         if (req.header("Twitch-Eventsub-Message-Type") === "webhook_callback_verification") {
             res.send(req.body.challenge) // Returning a 200 status with the received challenge to complete webhook creation flow
+            // make notification realtime database with user profile img
 
         } else if (req.header("Twitch-Eventsub-Message-Type") === "notification") {
           if(req.body.subscription.type === 'channel.update'){
-            await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}`).set(req.body.event);
+            await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}`).update(req.body.event);
+            const subscribers = admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}/subscribers`);
+            subscribers.get().then((snap) => {
+              if(snap.exists){
+                const item = snap.val();
+                Object.keys(item).map( async (v)=> {
+                  if(item[v] === false){ return }
+                  const notification_key = await admin.database().ref(`/users/${v}/notification_key`).get().then((sn) => {
+                    if(sn.exists){
+                      return sn.val();
+                    }
+                  });
+                  let user_profile_img_url;
+                  await axios.get('https://api.twitch.tv/helix/users',{
+                    headers:{
+                      "Accept": "application/json",
+                      "Client-ID": clientId,
+                      "Authorization": "Bearer 382bu9a287ut7lrwvl69nrfee59p35"
+                    },
+                    // AppAccessToken Check
+                    params:{
+                      id:req.body.event.broadcaster_user_id
+                    }
+                  }).then((res) => {
+                    user_profile_img_url = res.data.data[0].profile_image_url;
+                  });
+                  axios.post('https://fcm.googleapis.com/fcm/send',
+                  {
+                    "data": {
+                      "score": "5x1",
+                      "time": "15:10"
+                    },
+                    "notification":{
+                        "title":`${req.body.event.broadcaster_user_name}님의 상태변경`,
+                        "body":`Title:${req.body.event.title}, Category:${req.body.event.category_name}`,
+                        "icon":user_profile_img_url,
+                        },
+                    "to" : notification_key,
+                    "direct_boot_ok" : true
+                  },
+                  {
+                    headers:{
+                      'Content-Type':'application/json',
+                      'Authorization':'key=AAAAROg_IVk:APA91bHJsRjyQ6NvF_Gq0PMFFCY3WSkNlwtVP9AcgVndDoFjZ4_iRTHUV5jYn1D_zcmgT1xz0ZZPQQ4OwTEk6VNnjzcbHA45l8KltWudfDIJeMK_CLd0_i55l4pQiH1wqFHj9tvpVFFW',
+                    }
+                  }
+                  )
+                })
+              }
+            })
           } else if ( req.body.subscription.type.split('.')[0] === 'stream'){
             await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}/isStream`).set(req.body.event)
           }
@@ -86,11 +136,3 @@ app.post('/notification', async (req, res) => {
 })
 
 module.exports = app
-
-// const members = [203667951,707328484,195641865,169700336,237570548,702754423,49045679,137881582,132782743]
-
-
-
-
-
-

@@ -7,17 +7,22 @@
           <div>
             {{item.display_name}}
           </div>
+          <div>
+            {{item.id}}
+          </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="success" @click="subscribe(item.id)">subscribe</v-btn>
-          <v-btn color="error">unsubscribe</v-btn>
+          <v-btn :disabled="$store.state.userinfo.userInfo === null" color="success" @click="subNotification(item.id)">subscribe</v-btn>
+          <v-btn :disabled="$store.state.userinfo.userInfo === null" color="error" @click="unsubNotification(item.id)">unsubscribe</v-btn>
+          <v-btn color="info" icon @click="createNotification()"><v-icon>mdi-bell</v-icon></v-btn>
         </v-card-actions>
       </v-card>
-
     </v-col>
   </v-row>
-
+  <v-row>
+    {{fcmToken}}
+  </v-row>
 </v-container>
 </template>
 <script>
@@ -32,6 +37,7 @@ export default {
       totalCount:0,
       dbdata:null,
       streamerList : [],
+      fcmToken:'',
     }
   },
   methods: {
@@ -56,6 +62,41 @@ export default {
           break;
         };
       }
+    },
+    async subNotification(broadcaster_id){
+      await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
+        [this.$store.state.userinfo.userInfo.uid] : true
+      }).then(()=>{
+        console.log('success')
+      })
+    },
+    async unsubNotification(broadcaster_id){
+      await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
+        [this.$store.state.userinfo.userInfo.uid] : false
+      }).then(()=>{
+        console.log('success')
+      })
+    },
+    async createNotification(){
+      await axios.post(`https://fcm.googleapis.com/fcm/notification`,{
+        'operation': "create",
+        "notification_key_name": this.$store.state.userinfo.userInfo.uid,
+        "registration_ids": this.fcmToken,
+      },{headers:{'Content-Type':'application/json',Authorization: this.$store.state.fcm_api_key,project_id:this.$store.state.fcm_sender_id}}).then((res)=>{
+        this.$firertdb.ref(`/users/${this.$store.state.userinfo.userInfo.uid}/notification_key`).update(res.data.notification_key);
+      })
+    },
+    async getNotification(){
+      await axios.post(`https://fcm.googleapis.com/fcm/notification?notification_key_name=${this.$store.state.userinfo.userInfo.uid}`,{},{headers:{'Content-Type':'application/json',Authorization: this.$store.state.fcm_api_key,project_id:this.$store.state.fcm_sender_id}})
+    },
+    async addRemoveNotification(action){
+      await axios.post(`https://fcm.googleapis.com/fcm/notification?notification_key_name=${this.$store.state.userinfo.userInfo.uid}`,{
+        'operation': action,
+        "notification_key_name": this.$store.state.userinfo.userInfo.uid,
+        "registration_ids": this.fcmToken,
+      },{headers:{'Content-Type':'application/json',Authorization: this.$store.state.fcm_api_key,project_id:this.$store.state.fcm_sender_id}}).then((res)=>{
+        this.$firertdb.ref(`/users/${this.$store.state.userinfo.userInfo.uid}/notification_key`).update(res.data.notification_key);
+      })
     },
     async getLiveStreamWithLang(){
       await axios.get('https://api.twitch.tv/helix/streams',{
@@ -99,8 +140,12 @@ export default {
     },
   },
   async created() {
-    this.streamerList = JSON.parse(localStorage.getItem('alllikes'));
+    this.fcmToken = await this.$messaging.getToken({ vapidKey:'BKLOaHl9k-gFVZJIFGnxNOB5pJ8KHuyNuHQQnRmL5pQFqPgPavVFtD8gZzlUwinf1V0ZxGBqgkwIBZ1gM2IunXQ'});
 
+    this.$messaging.onMessage((payload) => {
+      console.log('received', payload);
+    });
+    this.streamerList = JSON.parse(localStorage.getItem('alllikes'));
     // let db = await this.$firebase.database().ref(`/prediction/116727016`);
     // db.on('value', (snapshot) =>{
     //   const data = snapshot.val();

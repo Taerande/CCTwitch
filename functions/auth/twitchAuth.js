@@ -37,7 +37,7 @@ app.get('/signin/twitch/callback', async (req, res) => {
       return await admin
         .database()
         .ref(`/users/${id}`)
-        .set(userInfo);
+        .update(userInfo);
     } catch (err) {
       throw err;
     }
