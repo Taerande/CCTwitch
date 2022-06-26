@@ -35,6 +35,8 @@ exports.timeLine = functions.region('asia-northeast3') .runWith({
 })
 .https.onRequest(require('./twitch/timeLine.js'));
 
+exports.fcm = functions.region('asia-northeast3').https.onRequest(require('./fcm/cloudMessaging.js'));
+
 exports.delteClipsInCliplist = functions.region('asia-northeast3').firestore.document('cliplist/{cliplistId}').onDelete( async (snap, context ) => {
   const batch = firstore.batch();
   const sn = await firstore.collection('cliplist').doc(context.params.cliplistId).collection('clips').get();

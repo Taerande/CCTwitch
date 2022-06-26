@@ -20,8 +20,21 @@
       </v-card>
     </v-col>
   </v-row>
+  <v-row class="col-12">
+    <v-col>
+      <v-card>
+        {{fcmToken}}
+      </v-card>
+    </v-col>
+    <v-col>
+      <v-card>
+        {{navi}}
+      </v-card>
+      <v-btn color="success" @click="enrollFCM()" icon><v-icon>mdi-bell-ring</v-icon></v-btn>
+    </v-col>
+  </v-row>
   <v-row>
-    {{fcmToken}}
+
   </v-row>
 </v-container>
 </template>
@@ -38,6 +51,7 @@ export default {
       dbdata:null,
       streamerList : [],
       fcmToken:'',
+      navi:''
     }
   },
   methods: {
@@ -63,6 +77,19 @@ export default {
         };
       }
     },
+    async enrollFCM(){
+      await axios.post(`${this.$store.state.backendUrl}/fcm/create`,{
+        uid: this.$store.state.userinfo.userInfo.uid,
+        fcmToken: this.fcmToken,
+        device: this.navi
+      },
+      {
+        'Content-Type':'application/json',
+      }).then((res) => {
+        console.log(res);
+      })
+
+    },
     async subNotification(broadcaster_id){
       await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
         [this.$store.state.userinfo.userInfo.uid] : true
@@ -75,27 +102,6 @@ export default {
         [this.$store.state.userinfo.userInfo.uid] : false
       }).then(()=>{
         console.log('success')
-      })
-    },
-    async createNotification(){
-      await axios.post(`https://fcm.googleapis.com/fcm/notification`,{
-        'operation': "create",
-        "notification_key_name": this.$store.state.userinfo.userInfo.uid,
-        "registration_ids": this.fcmToken,
-      },{headers:{'Content-Type':'application/json',Authorization: this.$store.state.fcm_api_key,project_id:this.$store.state.fcm_sender_id}}).then((res)=>{
-        this.$firertdb.ref(`/users/${this.$store.state.userinfo.userInfo.uid}/notification_key`).update(res.data.notification_key);
-      })
-    },
-    async getNotification(){
-      await axios.post(`https://fcm.googleapis.com/fcm/notification?notification_key_name=${this.$store.state.userinfo.userInfo.uid}`,{},{headers:{'Content-Type':'application/json',Authorization: this.$store.state.fcm_api_key,project_id:this.$store.state.fcm_sender_id}})
-    },
-    async addRemoveNotification(action){
-      await axios.post(`https://fcm.googleapis.com/fcm/notification?notification_key_name=${this.$store.state.userinfo.userInfo.uid}`,{
-        'operation': action,
-        "notification_key_name": this.$store.state.userinfo.userInfo.uid,
-        "registration_ids": this.fcmToken,
-      },{headers:{'Content-Type':'application/json',Authorization: this.$store.state.fcm_api_key,project_id:this.$store.state.fcm_sender_id}}).then((res)=>{
-        this.$firertdb.ref(`/users/${this.$store.state.userinfo.userInfo.uid}/notification_key`).update(res.data.notification_key);
       })
     },
     async getLiveStreamWithLang(){
@@ -140,6 +146,26 @@ export default {
     },
   },
   async created() {
+    console.log(navigator.userAgent);
+    if(navigator.userAgent.match(/iPad/i)){
+      this.navi = 'ipad';
+    } else if (navigator.userAgent.match(/Tablet/i)){
+      this.navi='adroid tablet'
+    } else if (navigator.userAgent.match(/Android/i)){
+      this.navi='android'
+    } else if (navigator.userAgent.match(/iPhone|iPod/i)){
+      this.navi='iphone'
+    } else if (navigator.userAgent.match(/chrome/i)){
+      this.navi='chrome'
+    } else if (navigator.userAgent.match(/safari/i)){
+      this.navi='safari'
+    } else if (navigator.userAgent.match(/firefox/i)){
+      this.navi = 'firefox'
+    } else if (navigator.userAgent.match(/opera/i)){
+      this.navi = 'opera'
+    } else {
+      this.navi='other'
+    }
     this.fcmToken = await this.$messaging.getToken({ vapidKey:'BKLOaHl9k-gFVZJIFGnxNOB5pJ8KHuyNuHQQnRmL5pQFqPgPavVFtD8gZzlUwinf1V0ZxGBqgkwIBZ1gM2IunXQ'});
 
     this.$messaging.onMessage((payload) => {

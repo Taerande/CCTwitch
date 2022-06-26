@@ -8,8 +8,6 @@ export default new Vuex.Store({
   state: {
     signInDialog: false,
     drawer: false,
-    fcm_sender_id: process.env.VUE_APP_FCM_SENDER_ID,
-    fcm_api_key: process.env.VUE_APP_FCM_API_KEY,
     backendUrl: process.env.VUE_APP_BACKEND_URL_DEV,
     appTokenURL:process.env.VUE_APP_TWITCH_APPTOKEN_ISSUE_DEV,
     redirectUri:process.env.VUE_APP_TWITCH_REDIRECTURI_DEV,

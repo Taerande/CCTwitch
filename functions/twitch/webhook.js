@@ -8,6 +8,8 @@ app.use(cors());
 const https = require('https')
 const crypto = require('crypto');
 
+const fcm_api_key = process.env.FCM_API_KEY
+
 
 let frontUrl = 'https://asia-northeast3-twitchhotclip.cloudfunctions.net/twitchWebHook'
 let clientId = 'c3ovwwcs9lhrx1rq13fsllzqfu9o9t'
@@ -63,6 +65,36 @@ function verifySignature(messageSignature, messageID, messageTimestamp, body) {
 
     return expectedSignatureHeader === messageSignature
 }
+function sendNotification(name, title, category, live, subscribers){
+  Object.keys(subscribers).map( async (v)=> {
+    if(subscribers[v] === false){ return }
+    const notification_key = await admin.database().ref(`/users/${v}/notification_key`).get().then((sn) => {
+      if(sn.exists){
+        return sn.val();
+      }
+    });
+    axios.post('https://fcm.googleapis.com/fcm/send',
+    {
+      "data": {
+        "score": "5x1",
+        "time": "15:10"
+      },
+      "notification":{
+          "title":`${name}님의 상태변경`,
+          "body":`Live:${live} | Title:${title} | Category:${category}`,
+          },
+      "to" : notification_key,
+      "direct_boot_ok" : true
+    },
+    {
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization': fcm_api_key,
+      }
+    }
+    )
+  })
+}
 
 app.post('/notification', async (req, res) => {
     if (!verifySignature(req.header("Twitch-Eventsub-Message-Signature"),
@@ -73,62 +105,33 @@ app.post('/notification', async (req, res) => {
     } else {
         if (req.header("Twitch-Eventsub-Message-Type") === "webhook_callback_verification") {
             res.send(req.body.challenge) // Returning a 200 status with the received challenge to complete webhook creation flow
-            // make notification realtime database with user profile img
 
         } else if (req.header("Twitch-Eventsub-Message-Type") === "notification") {
+          const info = await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}`).get().then((sn) => {
+            if(sn.exists){
+              return sn.val();
+            }else{
+              return null;
+            }
+          });
+          let isLive;
+          if(info.isStream === undefined){
+            isLive = 'OFF'
+          } else if(info.isStream.type === undefined){
+            isLive = 'OFF'
+          } else {
+            isLive = 'LIVE'
+          }
           if(req.body.subscription.type === 'channel.update'){
             await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}`).update(req.body.event);
-            const subscribers = admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}/subscribers`);
-            subscribers.get().then((snap) => {
-              if(snap.exists){
-                const item = snap.val();
-                Object.keys(item).map( async (v)=> {
-                  if(item[v] === false){ return }
-                  const notification_key = await admin.database().ref(`/users/${v}/notification_key`).get().then((sn) => {
-                    if(sn.exists){
-                      return sn.val();
-                    }
-                  });
-                  let user_profile_img_url;
-                  await axios.get('https://api.twitch.tv/helix/users',{
-                    headers:{
-                      "Accept": "application/json",
-                      "Client-ID": clientId,
-                      "Authorization": "Bearer 382bu9a287ut7lrwvl69nrfee59p35"
-                    },
-                    // AppAccessToken Check
-                    params:{
-                      id:req.body.event.broadcaster_user_id
-                    }
-                  }).then((res) => {
-                    user_profile_img_url = res.data.data[0].profile_image_url;
-                  });
-                  axios.post('https://fcm.googleapis.com/fcm/send',
-                  {
-                    "data": {
-                      "score": "5x1",
-                      "time": "15:10"
-                    },
-                    "notification":{
-                        "title":`${req.body.event.broadcaster_user_name}님의 상태변경`,
-                        "body":`Title:${req.body.event.title}, Category:${req.body.event.category_name}`,
-                        "icon":user_profile_img_url,
-                        },
-                    "to" : notification_key,
-                    "direct_boot_ok" : true
-                  },
-                  {
-                    headers:{
-                      'Content-Type':'application/json',
-                      'Authorization':'key=AAAAROg_IVk:APA91bHJsRjyQ6NvF_Gq0PMFFCY3WSkNlwtVP9AcgVndDoFjZ4_iRTHUV5jYn1D_zcmgT1xz0ZZPQQ4OwTEk6VNnjzcbHA45l8KltWudfDIJeMK_CLd0_i55l4pQiH1wqFHj9tvpVFFW',
-                    }
-                  }
-                  )
-                })
-              }
-            })
+            if(info.subscribers !== undefined){
+              sendNotification(info.broadcaster_user_name, req.body.event.title, req.body.event.category_name, isLive , info.subscribers);
+            };
           } else if ( req.body.subscription.type.split('.')[0] === 'stream'){
             await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}/isStream`).set(req.body.event)
+            if(info.subscribers !== undefined){
+              sendNotification(info.broadcaster_user_name, info.title, info.category_name, isLive , info.subscribers);
+            }
           }
           res.send("") // Default .send is a 200 status
         }
