@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <meta name="description" content="CCTwitch can make you search streamers and collect clips easily. Can save and download clips.">
+    <meta name="description" content="Twitch Clip Download, Search and Collect easily. CCTwitch can search clip by date and by videos. Also can save, download clips.">
     <link rel="icon" href="<%= BASE_URL %>new_logo.png">
     <title><%= htmlWebpackPlugin.options.title %></title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
@@ -28,6 +28,7 @@
         text.push('<ins class="adsbygoogle"');  
         text.push('style="display:inline-block;width:250px;height:250px"');  
         text.push('data-ad-client="ca-pub-7893835816116192"');  
+        text.push('overlays: { bottom: true }');  
         text.push('data-ad-slot="5918517081"></ins>');  
        
         elm.innerHTML = text.join(' ');  
@@ -42,7 +43,6 @@
     <div id="app">
     </div>
     <!-- built files will be auto injected -->
-    <script async type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js">
     </script>
   </body>
 </html>

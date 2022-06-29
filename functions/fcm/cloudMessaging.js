@@ -5,16 +5,11 @@ const cors = require('cors');
 
 app.use(cors());
 
-const https = require('https')
-const crypto = require('crypto');
-
-
 const fcm_api_key = process.env.FCM_API_KEY;
 const sender_id = process.env.FCM_SENDER_ID;
 
 
 async function addRemoveNoti(action, uid, fcmToken, noti_key){
-  console.log(action,'Noti');
   let notification_key = admin.database().ref(`/users/${uid}/notification_key`);
   await axios.post(`https://fcm.googleapis.com/fcm/notification`,{
     "operation": action,
@@ -22,22 +17,18 @@ async function addRemoveNoti(action, uid, fcmToken, noti_key){
     "notification_key": noti_key,
     "registration_ids": [fcmToken],
   },{headers:{'Content-Type':'application/json',Authorization: fcm_api_key,project_id:sender_id}}).then((resp)=>{
-    console.log('add ready');
     notification_key.set(resp.data.notification_key);
   }).catch((err) => {
     console.log(err);
   })
 }
-function createNoti(uid, fcmToken){
-  console.log('crete Noti');
+async function createNoti(uid, fcmToken){
   let notification_key = admin.database().ref(`/users/${uid}/notification_key`);
-  console.log('crete Noti2');
-  axios.post(`https://fcm.googleapis.com/fcm/notification`,{
+  await axios.post(`https://fcm.googleapis.com/fcm/notification`,{
     "operation": "create",
     "notification_key_name": uid,
     "registration_ids": [fcmToken],
   },{headers:{'Content-Type':'application/json',Authorization: fcm_api_key, project_id: sender_id}}).then((resp)=>{
-    console.log('create ready');
     notification_key.set(resp.data.notification_key);
   }).catch((err) => {
     console.log(err);
@@ -46,58 +37,42 @@ function createNoti(uid, fcmToken){
 
 
 app.post('/create', async (req, res) => {
-  console.log('start create');
   const uid = req.body.uid;
   const fcmToken = req.body.fcmToken;
   const device = req.body.device;
+  const name = req.body.name;
 
 // regiseter id 중복 판단.
   let register_ids = admin.database().ref(`/users/${uid}/register_ids`);
   let notification_key = admin.database().ref(`/users/${uid}/notification_key`);
 
-  try{
-    let isDuplicated = false;
-    await register_ids.get().then((sn) => {
-      console.log('check duplicated');
-      const item = sn.val();
-      console.log(item);
-      if(item === null){
-        isDuplicated = false;
-      }else if(item[fcmToken] !== undefined){
-        isDuplicated = false;
-      } else {
-        isDuplicated = true;
-      }
-    });
-    // 토큰 중복아니면 토큰 추가후 notification_key 새롭게 발급.
-    if(!isDuplicated){
-      console.log('duplicated false');
-      await register_ids.update({
-        [fcmToken]: device
-      });
-      // notification_key 유무 확인 후 없으면 create, 있으면 addremove
-      await notification_key.get().then( async (sn) => {
-        console.log('notikey check');
-        if(sn.val() !== null){
-          console.log('notikey add');
-          const noti_key = await sn.val();
-          await addRemoveNoti('add',uid, fcmToken, noti_key);
-        } else {
-          console.log('notikey create');
-          await createNoti(uid, fcmToken);
-        }
-      })
+
+  const updates = {};
+  updates[fcmToken] = {
+    device: device,
+    name: name,
+  };
+
+  await register_ids.update(updates);
+
+  await notification_key.get().then( async (sn) => {
+    if(sn.val() !== null){
+      const noti_key = await sn.val();
+      addRemoveNoti('add',uid, fcmToken, noti_key);
+    } else {
+      createNoti(uid, fcmToken);
     }
-    res.send({data:{
-      action: 'add or Create',
-      fcmToken : fcmToken
-    }, message:'Success'})
-  } catch {
-  }
+  });
+  res.send({data:{
+    action: 'add or Create',
+    fcmToken : fcmToken
+  }, message:'Success'})
 
 });
+
+app.use(cors());
+
 app.post('/delete', async (req, res) => {
-  console.log('start Delete');
   const uid = req.body.uid;
   const fcmToken = req.body.fcmToken;
 
@@ -105,21 +80,28 @@ app.post('/delete', async (req, res) => {
   let register_ids = admin.database().ref(`/users/${uid}/register_ids/${fcmToken}`);
   let notification_key = admin.database().ref(`/users/${uid}/notification_key`);
 
-  await register_ids.update(null);
+  await register_ids.remove();
 
-  console.log('delete register_id');
-
+  const registerExists = await register_ids.get().then(async (sn) => {
+    if(sn.exists()){
+      return true
+    } else {
+      return false;
+    }
+  })
   await notification_key.get().then( async (sn) => {
-    console.log('get noti key');
-    if(sn.exists){
-      console.log('noti key !null so remove reset notikey');
+    if(sn.exists()){
       const noti_key = await sn.val();
       await addRemoveNoti('remove',uid,fcmToken,noti_key);
     }
   })
+  if(!registerExists){
+    await notification_key.remove();
+  }
   res.send({data:{
     action: 'remove',
     fcmToken : fcmToken
   }, message:'Success'})
 });
+
 module.exports = app

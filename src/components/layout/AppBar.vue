@@ -23,8 +23,8 @@
                   <v-icon>mdi-chevron-double-down</v-icon>
                 </v-btn>
               </v-card-title>
-              <v-card-text class="pt-3 pb-10">
-                <v-list>
+              <v-card-text class="pt-3">
+                <v-list class="pb-16">
                   <div class="text-caption pl-5">Search</div>
                   <v-form
                   @submit.prevent="searchChannel($store.state.searchString)">
@@ -83,11 +83,58 @@
                       <v-btn color="twitch" dark width="100%" @click="$store.commit('SET_SignInDialog', true)">Log In</v-btn>
                     </div>
                   </v-card>
+                  <div class="pa-0 ma-0" v-if="$store.state.userinfo.userInfo">
+                    <div class="text-caption pl-5 pt-3">Alram</div>
+                    <v-divider class="my-3"></v-divider>
+                    <v-list>
+                      <v-subheader class="text-caption">Current Device</v-subheader>
+                      <v-list-item class="d-flex align-center" v-if="!isListed && !isIOS">
+                        <v-text-field
+                          v-model="deviceName"
+                          color="twitch"
+                          name="device name"
+                          :rules="[deviceRules.required, deviceRules.counter]"
+                          counter
+                          :disabled="subscribeDeviceLoading"
+                          flat
+                          type="text"
+                          maxlength="15"
+                          full-width
+                          label="Device Name"
+                          :prepend-icon="deviceLogo(navi)"
+                          dense
+                        >
+                          <template v-slot:append>
+                            <v-btn :disabled="deviceName === ''" :loading="subscribeDeviceLoading" @click="enrollFCM()" color="twitch" text class="text-caption" small><v-icon small>mdi-bell</v-icon> <span>구독하기</span></v-btn>
+                          </template>
+                        </v-text-field>
+                      </v-list-item>
+                      <v-list-item v-else-if="isIOS">
+                        <div class="text-caption error--text pa-0 ma-0">Can't available in IOS.</div>
+                      </v-list-item>
+                      <v-list-item v-else>
+                        <div class="text-subtitle error--text pa-0 ma-0">Already listed.</div>
+                      </v-list-item>
+                      <v-subheader class="text-caption">Listed Device</v-subheader>
+                      <v-list-item v-for="(item, index) in devices" :key="index" class="d-flex">
+                      <v-icon>{{deviceLogo(item[1].device)}}</v-icon>
+                      <span class="text-caption px-1">{{item[1].name}}</span>
+                      <span class="text-caption px-1 success--text" v-if="isListed">(current device)</span>
+                      <v-spacer></v-spacer>
+                      <v-btn small color="error" :loading="unsubscribeDeviceLoading" depressed class="text-caption" @click="disenrollFCM(item[0])"><v-icon small>mdi-bell-off-outline</v-icon><span>구독해제</span></v-btn>
+                      </v-list-item>
+                      <v-list-item v-if="devices.length === 0">
+                          <div class="text-caption error--text pa-0 ma-0">구독된 기기가 없습니다.</div>
+                      </v-list-item>
+                    </v-list>
+                    <v-icon>mdi-alram</v-icon>
+                  </div>
                   <div class="text-caption pl-5 pt-3">Option</div>
                   <v-divider class="my-3"></v-divider>
                   <div>
                     <v-btn
                     depressed
+                    dark
                     v-if="!$vuetify.theme.dark"
                     class="text-capitalize text-caption pa-0 ma-0 px-1"
                     @click="toggleDarkTheme()">
@@ -96,6 +143,7 @@
                     </v-btn>
                     <v-btn v-else
                     depressed
+                    light
                     class="text-capitalize text-caption pa-0 ma-0 px-1"
                     @click="toggleDarkTheme()">
                       <v-icon color="red">mdi-weather-sunny</v-icon>
@@ -162,9 +210,9 @@
 
 import SearchBar from '@/components/SearchBar.vue';
 import SignInDialog from '@/components/dialog/SignInDialog.vue';
+import axios from 'axios';
 import { mapState } from 'vuex'
 import { mapMutations } from 'vuex'
-
 export default {
   components: {
     SearchBar,
@@ -174,12 +222,44 @@ export default {
     return {
       dialog: false,
       logoutLoading: false,
+      subscribeDeviceLoading:false,
+      unsubscribeDeviceLoading:false,
+      devices:[],
+      fcmToken:'',
+      isListed:false,
+      navi:'',
+      deviceName:'',
+      deviceRules:{
+        required: (value) => !!value || 'Required.',
+        counter: (value) => value.length < 16 || 'Max 15 characters',
+      },
     };
   },
   methods: {
     ...mapMutations({
       changeDrawer: 'SET_Drawer',
     }),
+    deviceLogo(element){
+      if(element === 'Chrome'){
+        return 'mdi-google-chrome'
+      }else if (element === 'iPhone' || element === 'iPod' || element === 'iPad'){
+        return 'mdi-apple'
+      }else if (element === 'Android Tablet'){
+        return 'mdi-tablet-android'
+      }else if (element === 'Edge'){
+        return 'mdi-microsoft-edge'
+      }else if (element === 'Android'){
+        return 'mdi-android'
+      }else if (element === 'Safari'){
+        return 'mdi-apple-safari'
+      }else if (element === 'Firefox'){
+        return 'mdi-firefox'
+      }else if (element === 'Opera'){
+        return 'mdi-opera'
+      } else {
+        return 'mdi-web'
+      }
+    },
     toggleDarkTheme() {
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
       localStorage.setItem('dark', this.$vuetify.theme.dark);
@@ -192,6 +272,35 @@ export default {
       this.$router.push({name:'Home'}).catch(()=>{});
       this.$store.commit('SET_SnackBar',{type: 'error', text:'로그아웃', value:true})
       });
+    },
+    async enrollFCM(){
+      this.subscribeDeviceLoading = true;
+      await axios.post(`${this.$store.state.backendUrl}/fcm/create`,{
+        uid: this.$store.state.userinfo.userInfo.uid,
+        fcmToken: this.fcmToken,
+        device: this.navi,
+        name: this.deviceName,
+      },
+      {
+        'Content-Type':'application/json',
+      }).then((res) => {
+        this.deviceName = ''
+        this.subscribeDeviceLoading = false;
+      })
+
+    },
+    async disenrollFCM(fcmToken){
+      this.unsubscribeDeviceLoading = true;
+      await axios.post(`${this.$store.state.backendUrl}/fcm/delete`,{
+        uid: this.$store.state.userinfo.userInfo.uid,
+        fcmToken: fcmToken,
+      },
+      {
+        'Content-Type':'application/json',
+      }).then((res) => {
+        this.unsubscribeDeviceLoading = false;
+      })
+
     },
     searchChannel(el) {
       if(el === '' || null){ return }
@@ -211,9 +320,62 @@ export default {
   computed: {
     ...mapState({
       drawer: 'drawer',
-    })
+    }),
+    isIOS(){
+      if(this.navi === 'iPad' || this.nav === 'iPhone' || this.navi === 'Safari'){
+        return true;
+      } else {
+        return false;
+      }
+    }
   },
-  created() {
+  async created() {
+    if(navigator.userAgent.match(/iPad/i)){
+      this.navi = 'iPad';
+    } else if (navigator.userAgent.match(/Tablet/i)){
+      this.navi='Adroid Tablet'
+    } else if (navigator.userAgent.match(/Android/i)){
+      this.navi='Android'
+    } else if (navigator.userAgent.match(/iPhone|iPod/i)){
+      this.navi='iPhone'
+    } else if (navigator.userAgent.match(/Edg/i)){
+      this.navi = 'Edge'
+    } else if (navigator.userAgent.match(/Whale/i)){
+      this.navi = 'Whale'
+    } else if (navigator.userAgent.match(/firefox/i)){
+      this.navi = 'Firefox'
+    } else if (navigator.userAgent.match(/opera/i)){
+      this.navi = 'Opera'
+    } else if (navigator.userAgent.match(/chrome/i)){
+      this.navi='Chrome'
+    } else if (navigator.userAgent.match(/safari/i)){
+      this.navi='Safari'
+    } else {
+      this.navi='other'
+    }
+    this.$messaging.onMessage((payload) => {
+      console.log('received', payload);
+    });
+    if(this.navi !== 'ipad' && this.navi !== 'iphone' && this.navi !== 'safari'){
+      this.fcmToken = await this.$messaging.getToken({ vapidKey:this.$store.state.fcmApiKey}).catch(()=>{});
+    }
+
+    this.$firebase.auth().onAuthStateChanged( async (user) => {
+      if(user){
+        await this.$firertdb.ref(`/users/${this.$store.state.userinfo.userInfo.uid}/register_ids`).on('value', (sn) => {
+          if(sn.val() !== null){
+            const item = sn.val();
+            this.devices = Object.entries(item);
+            if(item[this.fcmToken] !== undefined){
+              this.isListed = true;
+            }
+          }else {
+            this.isListed = false;
+            this.devices = [];
+          }
+        })
+      }
+    })
   },
 };
 </script>

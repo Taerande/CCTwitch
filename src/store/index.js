@@ -12,6 +12,7 @@ export default new Vuex.Store({
     appTokenURL:process.env.VUE_APP_TWITCH_APPTOKEN_ISSUE_DEV,
     redirectUri:process.env.VUE_APP_TWITCH_REDIRECTURI_DEV,
     embedUrl:process.env.VUE_APP_EMBED_PARERNT_DEV,
+    fcmApiKey:process.env.VUE_APP_FCM_API_KEY,
     firebaseLoaded: false,
     snackbarArr:[],
     snackbar: {

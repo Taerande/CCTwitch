@@ -2,8 +2,10 @@
   <v-app v-if="$store.state.firebaseLoaded && initData">
     <AppBar app></AppBar>
     <v-main app>
+      <DisplyaAdContainerVue></DisplyaAdContainerVue>
       <router-view :key="$route.fullPath" />
       <SnackBar app></SnackBar>
+      <DisplyaAdContainerVue></DisplyaAdContainerVue>
     </v-main>
     <Footer app></Footer>
   </v-app>
@@ -25,6 +27,8 @@ import SnackBar from '@/components/layout/SnackBar.vue'
 import AppBar from '@/components/layout/AppBar.vue'
 import Footer from '@/components/layout/Footer.vue'
 import axios from 'axios'
+import DisplyaAdContainerVue from './components/DisplyaAdContainer.vue'
+
 
 export default {
   name: 'App',
@@ -32,6 +36,7 @@ export default {
     AppBar,
     Footer,
     SnackBar,
+    DisplyaAdContainerVue
   },
   data() {
     return {
@@ -62,6 +67,7 @@ export default {
           this.initData = true;
           //정상
         }).catch(async (error) => {
+          console.log(error);
           //비정상, 앱엑세스 토큰 재발급 Backend 처리
           await axios.get(this.$store.state.appTokenURL).then((res) => {
             localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));

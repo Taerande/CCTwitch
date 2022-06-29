@@ -97,6 +97,7 @@ function sendNotification(name, title, category, live, subscribers){
 }
 
 app.post('/notification', async (req, res) => {
+    console.log(req.body);
     if (!verifySignature(req.header("Twitch-Eventsub-Message-Signature"),
         req.header("Twitch-Eventsub-Message-Id"),
         req.header("Twitch-Eventsub-Message-Timestamp"),
@@ -114,24 +115,28 @@ app.post('/notification', async (req, res) => {
               return null;
             }
           });
-          let isLive;
-          if(info.isStream === undefined){
-            isLive = 'OFF'
-          } else if(info.isStream.type === undefined){
-            isLive = 'OFF'
-          } else {
-            isLive = 'LIVE'
-          }
           if(req.body.subscription.type === 'channel.update'){
             await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}`).update(req.body.event);
+            let isLive;
+            if(info.isStream === undefined){
+              isLive = 'OFF'
+            } else if(info.isStream.type === undefined){
+              isLive = 'OFF'
+            } else {
+              isLive = 'LIVE'
+            }
             if(info.subscribers !== undefined){
               sendNotification(info.broadcaster_user_name, req.body.event.title, req.body.event.category_name, isLive , info.subscribers);
             };
-          } else if ( req.body.subscription.type.split('.')[0] === 'stream'){
+          } else if ( req.body.subscription.type === 'stream.online'){
             await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}/isStream`).set(req.body.event)
+            let isLive = 'LIVE';
             if(info.subscribers !== undefined){
+              console.log('stream online');
               sendNotification(info.broadcaster_user_name, info.title, info.category_name, isLive , info.subscribers);
             }
+          } else if ( req.body.subscription.type === 'stream.offline'){
+            await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}/isStream`).set(req.body.event);
           }
           res.send("") // Default .send is a 200 status
         }

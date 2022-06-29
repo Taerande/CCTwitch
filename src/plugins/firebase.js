@@ -15,7 +15,6 @@ Vue.prototype.$firertdb = firebase.database();
 Vue.prototype.$firestore = firebase.firestore();
 Vue.prototype.$messaging = firebase.messaging();
 // Vue.prototype.$isAuth = false;
-
 firebase.auth().onAuthStateChanged( async (user) => {
   store.commit('SET_FirebaseLoad', true)
   if (user) {

@@ -10,7 +10,7 @@
     <v-col cols="6" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex flex-column  align-center"
     v-for="item in streamerList.liked"
     :key="item.id">
-      <v-card outlined dark class="rounded-lg py-1" width="320px" :to="{name: 'Channel', query:{
+      <v-card outlined dark class="d-flex rounded-lg py-1" width="320px" :to="{name: 'Channel', query:{
             q: item.login}}">
         <v-card-text class="d-flex align-center pa-2">
             <div aria-label="avatar" class="flex-direction: column">
@@ -35,6 +35,11 @@
               </div>
             </div>
         </v-card-text>
+        <!-- <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="success" @click.prevent="" icon><v-icon>mdi-bell</v-icon></v-btn>
+          <v-btn color="success" icon><v-icon>mdi-bell-off</v-icon></v-btn>
+        </v-card-actions> -->
       </v-card>
     </v-col>
   </v-row>
@@ -177,6 +182,7 @@ export default {
         stream: false,
         liked: false,
       },
+      notiLoading: false,
       streamerList:{
         follow:[],
         stream:[],
@@ -244,6 +250,22 @@ export default {
     }).then(() => {
       this.loading.follow = false;
     })
+    },
+    async subNotification(broadcaster_id){
+      this.notiLoading = true;
+      await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
+        [this.$store.state.userinfo.userInfo.uid] : true
+      }).then(()=>{
+        this.notiLoading = false;
+      })
+    },
+    async unsubNotification(broadcaster_id){
+      this.notiLoading = true;
+      await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
+        [this.$store.state.userinfo.userInfo.uid] : false
+      }).then(()=>{
+        this.notiLoading = false;
+      })
     },
     async getStreamFollowList(userInfo){
       this.loading.stream = true;

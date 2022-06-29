@@ -12,8 +12,8 @@ app.get('/waktaverse', async (req, res) => {
   // const userId = req.url.split('userId=')[1].split('&twitchAccesToken')[0]
   // const twitchAccesToken = req.url.split('Bearer+')[1];
   const clientId = process.env.TWITCH_CLIENT_ID;
-  const time = '2022-06-18';
-  const appAccessToken = 'Bearer 3facjgqkl2375bpld79j0usqx62saf';
+  const time = '2022-06-25';
+  const appAccessToken = 'Bearer z20zp0d6016h6zx46g8fzsk88fwwoj';
 
   const weekNumber = moment(time).week();
 
@@ -118,22 +118,22 @@ app.get('/waktaverse', async (req, res) => {
 });
 module.exports = app
 
-// <v-row>
-//    {{time}}
-//    <v-text-field
-//      v-model="time"
-//    ></v-text-field>
-//  </v-row>
-//    <v-btn :loading="dbLoading" color="success" block @click="wak(time)">test</v-btn>
+{/* <v-row>
+   {{time}}
+   <v-text-field
+     v-model="time"
+   ></v-text-field>
+ </v-row>
+   <v-btn :loading="dbLoading" color="success" block @click="wak(time)">test</v-btn>
 
-// async wak(el){
-//   this.dbLoading = true;
-//   await axios.get(this.$store.state.backendUrl+'/weeklyWaktaverse/waktaverse'+`?time=${el}&appAccessToken=${this.$store.state.headerConfig.Authorization}`).then((res) => {
-//     this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
-//     console.log(res);
-//     this.dbLoading = false;
-//   }).catch(()=>{
-//       this.dbLoading = false;
-//     })
+async wak(el){
+  this.dbLoading = true;
+  await axios.get(this.$store.state.backendUrl+'/weeklyWaktaverse/waktaverse'+`?time=${el}&appAccessToken=${this.$store.state.headerConfig.Authorization}`).then((res) => {
+    this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
+    console.log(res);
+    this.dbLoading = false;
+  }).catch(()=>{
+      this.dbLoading = false;
+    })
 
-// },
+}, */}

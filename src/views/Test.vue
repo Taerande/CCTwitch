@@ -1,4 +1,4 @@
-<template>
+tes<template>
 <v-container fluid>
   <v-row class="pt-10">
     <v-col cols="12" xl="3" lg="3" class="pa-2" v-for="item in streamerList" :key="item.id">
@@ -15,7 +15,7 @@
           <v-spacer></v-spacer>
           <v-btn :disabled="$store.state.userinfo.userInfo === null" color="success" @click="subNotification(item.id)">subscribe</v-btn>
           <v-btn :disabled="$store.state.userinfo.userInfo === null" color="error" @click="unsubNotification(item.id)">unsubscribe</v-btn>
-          <v-btn color="info" icon @click="createNotification()"><v-icon>mdi-bell</v-icon></v-btn>
+          <v-btn color="info" icon @click="subscribe(item.id)"><v-icon>mdi-bell</v-icon></v-btn>
         </v-card-actions>
       </v-card>
     </v-col>
@@ -30,7 +30,11 @@
       <v-card>
         {{navi}}
       </v-card>
+      <v-card>
+        {{userAgent}}
+      </v-card>
       <v-btn color="success" @click="enrollFCM()" icon><v-icon>mdi-bell-ring</v-icon></v-btn>
+      <v-btn color="error" @click="disenrollFCM()" icon><v-icon>mdi-bell-off</v-icon></v-btn>
     </v-col>
   </v-row>
   <v-row>
@@ -51,7 +55,8 @@ export default {
       dbdata:null,
       streamerList : [],
       fcmToken:'',
-      navi:''
+      navi:'',
+      userAgent:'',
     }
   },
   methods: {
@@ -82,6 +87,18 @@ export default {
         uid: this.$store.state.userinfo.userInfo.uid,
         fcmToken: this.fcmToken,
         device: this.navi
+      },
+      {
+        'Content-Type':'application/json',
+      }).then((res) => {
+        console.log(res);
+      })
+
+    },
+    async disenrollFCM(){
+      await axios.post(`${this.$store.state.backendUrl}/fcm/delete`,{
+        uid: this.$store.state.userinfo.userInfo.uid,
+        fcmToken: this.fcmToken,
       },
       {
         'Content-Type':'application/json',
@@ -146,7 +163,8 @@ export default {
     },
   },
   async created() {
-    console.log(navigator.userAgent);
+    console.log(navigator)
+    this.userAgent = navigator.userAgent;
     if(navigator.userAgent.match(/iPad/i)){
       this.navi = 'ipad';
     } else if (navigator.userAgent.match(/Tablet/i)){
@@ -155,22 +173,22 @@ export default {
       this.navi='android'
     } else if (navigator.userAgent.match(/iPhone|iPod/i)){
       this.navi='iphone'
-    } else if (navigator.userAgent.match(/chrome/i)){
-      this.navi='chrome'
-    } else if (navigator.userAgent.match(/safari/i)){
-      this.navi='safari'
+    } else if (navigator.userAgent.match(/Edg/i)){
+      this.navi = 'Edge'
+    } else if (navigator.userAgent.match(/Whale/i)){
+      this.navi = 'Whale'
     } else if (navigator.userAgent.match(/firefox/i)){
       this.navi = 'firefox'
     } else if (navigator.userAgent.match(/opera/i)){
       this.navi = 'opera'
+    } else if (navigator.userAgent.match(/safari/i)){
+        this.navi='safari'
+    } else if (navigator.userAgent.match(/chrome/i)){
+      this.navi='chrome'
     } else {
       this.navi='other'
     }
-    this.fcmToken = await this.$messaging.getToken({ vapidKey:'BKLOaHl9k-gFVZJIFGnxNOB5pJ8KHuyNuHQQnRmL5pQFqPgPavVFtD8gZzlUwinf1V0ZxGBqgkwIBZ1gM2IunXQ'});
-
-    this.$messaging.onMessage((payload) => {
-      console.log('received', payload);
-    });
+    this.fcmToken = await this.$messaging.getToken({ vapidKey:'BKLOaHl9k-gFVZJIFGnxNOB5pJ8KHuyNuHQQnRmL5pQFqPgPavVFtD8gZzlUwinf1V0ZxGBqgkwIBZ1gM2IunXQ'}).catch(()=>{});
     this.streamerList = JSON.parse(localStorage.getItem('alllikes'));
     // let db = await this.$firebase.database().ref(`/prediction/116727016`);
     // db.on('value', (snapshot) =>{
