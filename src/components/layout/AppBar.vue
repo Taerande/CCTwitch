@@ -119,9 +119,9 @@
                       <v-list-item v-for="(item, index) in devices" :key="index" class="d-flex">
                       <v-icon>{{deviceLogo(item[1].device)}}</v-icon>
                       <span class="text-caption px-1">{{item[1].name}}</span>
-                      <span class="text-caption px-1 success--text" v-if="isListed">(current device)</span>
+                      <span class="text-caption px-1 success--text" v-if="item[0] === fcmToken">(current device)</span>
                       <v-spacer></v-spacer>
-                      <v-btn small color="error" :loading="unsubscribeDeviceLoading" depressed class="text-caption" @click="disenrollFCM(item[0])"><v-icon small>mdi-bell-off-outline</v-icon><span>구독해제</span></v-btn>
+                      <v-btn small color="error" :loading="unsubloadingId === item[0]" depressed class="text-caption" @click="disenrollFCM(item[0])"><v-icon small>mdi-bell-off-outline</v-icon><span>구독해제</span></v-btn>
                       </v-list-item>
                       <v-list-item v-if="devices.length === 0">
                           <div class="text-caption error--text pa-0 ma-0">구독된 기기가 없습니다.</div>
@@ -223,7 +223,7 @@ export default {
       dialog: false,
       logoutLoading: false,
       subscribeDeviceLoading:false,
-      unsubscribeDeviceLoading:false,
+      unsubloadingId:'',
       devices:[],
       fcmToken:'',
       isListed:false,
@@ -290,7 +290,7 @@ export default {
 
     },
     async disenrollFCM(fcmToken){
-      this.unsubscribeDeviceLoading = true;
+      this.unsubloadingId = fcmToken;
       await axios.post(`${this.$store.state.backendUrl}/fcm/delete`,{
         uid: this.$store.state.userinfo.userInfo.uid,
         fcmToken: fcmToken,
@@ -298,7 +298,10 @@ export default {
       {
         'Content-Type':'application/json',
       }).then((res) => {
-        this.unsubscribeDeviceLoading = false;
+        if(fcmToken === this.fcmToken){
+          this.isListed = false;
+        };
+        this.unsubloadingId = '';
       })
 
     },
@@ -327,7 +330,7 @@ export default {
       } else {
         return false;
       }
-    }
+    },
   },
   async created() {
     if(navigator.userAgent.match(/iPad/i)){

@@ -8,6 +8,18 @@ app.use(cors());
 const fcm_api_key = process.env.FCM_API_KEY;
 const sender_id = process.env.FCM_SENDER_ID;
 
+async function getNewNotiKey(uid){
+  return await axios.get(`https://fcm.googleapis.com/fcm/notification?notification_key_name=${uid}`,{
+    headers:{
+      "content-type": "application/json",
+      "Authorization": fcm_api_key,
+      "project_id": sender_id,
+    }
+  }).then((rsp) => {
+    return rsp.data;
+  }).catch(()=>{})
+}
+
 
 async function addRemoveNoti(action, uid, fcmToken, noti_key){
   let notification_key = admin.database().ref(`/users/${uid}/notification_key`);
@@ -16,8 +28,13 @@ async function addRemoveNoti(action, uid, fcmToken, noti_key){
     "notification_key_name": uid,
     "notification_key": noti_key,
     "registration_ids": [fcmToken],
-  },{headers:{'Content-Type':'application/json',Authorization: fcm_api_key,project_id:sender_id}}).then((resp)=>{
-    notification_key.set(resp.data.notification_key);
+  },{headers:{'Content-Type':'application/json',Authorization: fcm_api_key,project_id:sender_id}}).then( async (resp)=>{
+    const newNotiKey = await getNewNotiKey(uid);
+    if(newNotiKey === undefined){
+      notification_key.remove();
+    } else {
+      notification_key.set(newNotiKey.notification_key);
+    }
   }).catch((err) => {
     console.log(err);
   })
@@ -55,9 +72,9 @@ app.post('/create', async (req, res) => {
 
   await register_ids.update(updates);
 
-  await notification_key.get().then( async (sn) => {
+  await notification_key.get().then((sn) => {
     if(sn.val() !== null){
-      const noti_key = await sn.val();
+      const noti_key = sn.val();
       addRemoveNoti('add',uid, fcmToken, noti_key);
     } else {
       createNoti(uid, fcmToken);
@@ -82,22 +99,12 @@ app.post('/delete', async (req, res) => {
 
   await register_ids.remove();
 
-  const registerExists = await register_ids.get().then(async (sn) => {
+  await notification_key.get().then( (sn) => {
     if(sn.exists()){
-      return true
-    } else {
-      return false;
+      const noti_key = sn.val();
+      addRemoveNoti('remove',uid,fcmToken,noti_key);
     }
   })
-  await notification_key.get().then( async (sn) => {
-    if(sn.exists()){
-      const noti_key = await sn.val();
-      await addRemoveNoti('remove',uid,fcmToken,noti_key);
-    }
-  })
-  if(!registerExists){
-    await notification_key.remove();
-  }
   res.send({data:{
     action: 'remove',
     fcmToken : fcmToken

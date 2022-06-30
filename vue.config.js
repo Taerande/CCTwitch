@@ -9,7 +9,7 @@ module.exports = {
       "dir": "ltr",
       "display": "standalone",
       "name": "cctwitch",
-      "orientation": "any",
+      "orientation": "portrait",
       "scope": "/",
       "short_name": "cctwitch",
       "start_url": "/",
