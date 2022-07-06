@@ -61,3 +61,11 @@ exports.deleteUser = functions.region('asia-southeast1').auth.user().onDelete(as
   sn.docs.forEach( doc => batch.delete(doc.ref));
   await batch.commit();
 });
+
+
+exports.twitchStreamDataCollector = functions.region('asia-northeast3').runWith({
+  timeoutSeconds: 540,
+  memory: "2GB",
+}).pubsub.schedule('*/15 * * * *')
+  .timeZone('Asia/Seoul') // Users can choose timezone - default is America/Los_Angeles
+  .onRun(require('./twitch/dailyStreamAnalyze'));

@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <v-row class="pt-10">
+    <v-row class="pt-5">
       <v-col class="d-flex justify-center">
         <span class="twitch--text display-3 font-weight-black">
           CCTWITCH

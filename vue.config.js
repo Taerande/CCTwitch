@@ -5,7 +5,7 @@ module.exports = {
   pwa:{
     manifestOptions:{
       "background_color": "#ffffff",
-      "description": "CCTwitch can make you search streamers and collect clips easily. Can save and download clips.",
+      "description": "Twitch Clip Download, Search and Collect easily. CCTwitch can search clip by date and by videos. Also can save, download clips.",
       "dir": "ltr",
       "display": "standalone",
       "name": "cctwitch",

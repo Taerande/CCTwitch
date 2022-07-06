@@ -67,6 +67,8 @@
               >
                 <v-icon>mdi-star</v-icon>
               </v-btn>
+              <v-btn v-if="isSubscribe" :disabled="subsLoading" color="twitch" @click="unsubNotification(userInfo.data.id)" icon><v-icon>mdi-bell</v-icon></v-btn>
+              <v-btn v-else :disabled="subsLoading" icon @click="subNotification(userInfo.data.id)"><v-icon>mdi-bell-off</v-icon></v-btn>
             </span>
           </div>
           <div v-if="userInfo.is_live">
@@ -212,6 +214,7 @@ import clips from '../components/ChannelClip.vue'
 import clipsByDate from '../components/ChannelClipByDate.vue'
 import vids from '../components/vids.vue'
 import SortButton from '../components/Channel/SortButton'
+import AddNewDeviceVue from '../components/dialog/AddNewDevice.vue'
 // import createClipVue from '../components/Channel/createClip.vue'
 // createClipVue,
 export default {
@@ -224,12 +227,14 @@ export default {
   data() {
     return {
       unsubscribe: null,
+      isSubscribe: false,
       dialog: false,
       dataLoading: false,
       cliplist:[],
       vidLists: [],
       streamData:{},
       carsouelId: 0,
+      subsLoading:false,
       userInfo: {
         data: '',
         follower_count: '',
@@ -426,9 +431,58 @@ export default {
       }
       return Math.abs(el)
     },
+    async isNotificated(){
+      let starCountRef = await this.$firertdb.ref('notification/' + this.userInfo.data.id + '/subscribers/' + this.$store.state.userinfo.userInfo.uid);
+      starCountRef.on('value', (snapshot) => {
+        this.isSubscribe = snapshot.val();
+      });
+    },
+    async subNotification(broadcaster_id){
+      this.subsLoading = true;
+      await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
+        [this.$store.state.userinfo.userInfo.uid] : true
+      }).then(() => {
+        this.subsLoading = false;
+      }).catch((err) => {
+        console.log(err)
+      })
+    },
+    async unsubNotification(broadcaster_id){
+      this.subsLoading = true;
+      await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
+        [this.$store.state.userinfo.userInfo.uid] : false
+      }).then(() => {
+        this.subsLoading = false;
+      }).catch((err) => {
+        console.log(err)
+      })
+    },
+    async subscribe(id){
+      let type = ['stream.offline','channel.update','stream.online'];
+      const token = JSON.parse(localStorage.getItem('twitchAppAccessToken'));
+      for(let i = 0; i < type.length; i++){
+        let error;
+        await axios.post(`${this.$store.state.backendUrl}/twitchWebHook/createWebhook`,{
+          id: id,
+          token: token,
+          type: type[i],
+        },
+        {
+          'Content-Type':'application/json',
+        }
+        ).then((res) => {
+          console.log(res);
+          error = res.data.error;
+        });
+        if(error !== undefined){
+          break;
+        };
+      }
+    },
     async process() {
       await this.getUserInfo(this.$route.query)
       await this.getFollower()
+      await this.isNotificated()
       await this.getStreamData(this.userInfo.data.login)
       await this.getVid(this.userInfo.data.id)
       this.dataLoading = true

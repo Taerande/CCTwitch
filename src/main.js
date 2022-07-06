@@ -7,15 +7,17 @@ import './plugins/firebase';
 import './plugins/moment';
 import Ads from 'vue-google-adsense'
 import './registerServiceWorker'
+import VueApexCharts from 'vue-apexcharts'
 // import './error'
 
-
+Vue.use(VueApexCharts)
 Vue.use(require('vue-script2'))
 Vue.use(Ads.Adsense)
 Vue.use(Ads.InArticleAdsense)
 Vue.use(Ads.InFeedAdsense)
 
 Vue.config.productionTip = false;
+Vue.component('apexchart', VueApexCharts)
 
 new Vue({
   store,

@@ -1,44 +1,25 @@
-tes<template>
+<template>
 <v-container fluid>
-  <v-row class="pt-10">
-    <v-col cols="12" xl="3" lg="3" class="pa-2" v-for="item in streamerList" :key="item.id">
-      <v-card>
-        <v-card-text>
-          <div>
-            {{item.display_name}}
-          </div>
-          <div>
-            {{item.id}}
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn :disabled="$store.state.userinfo.userInfo === null" color="success" @click="subNotification(item.id)">subscribe</v-btn>
-          <v-btn :disabled="$store.state.userinfo.userInfo === null" color="error" @click="unsubNotification(item.id)">unsubscribe</v-btn>
-          <v-btn color="info" icon @click="subscribe(item.id)"><v-icon>mdi-bell</v-icon></v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
+  <v-row v-if="loading">
+    <v-progress-linear :indeterminate="true"></v-progress-linear>
   </v-row>
-  <v-row class="col-12">
-    <v-col>
-      <v-card>
-        {{fcmToken}}
-      </v-card>
-    </v-col>
-    <v-col>
-      <v-card>
-        {{navi}}
-      </v-card>
-      <v-card>
-        {{userAgent}}
-      </v-card>
-      <v-btn color="success" @click="enrollFCM()" icon><v-icon>mdi-bell-ring</v-icon></v-btn>
-      <v-btn color="error" @click="disenrollFCM()" icon><v-icon>mdi-bell-off</v-icon></v-btn>
+  <v-row v-else>
+    <v-col cols="12">
+      <div id="chart">
+        <apexchart type="treemap" height="350" :options="chartOptions" :series="series"></apexchart>
+      </div>
     </v-col>
   </v-row>
   <v-row>
-
+    <v-col>생방송 갯수 {{streamerCount}}</v-col>
+    <v-col>토탈 카운트(시청자) {{totalCount}}</v-col>
+  </v-row>
+  <v-row>
+    <v-col v-for="item in streamData" :key="item.id" class="pa-1">
+      <v-card :img="item.box_art_url">
+        {{item}}
+      </v-card>
+    </v-col>
   </v-row>
 </v-container>
 </template>
@@ -53,10 +34,53 @@ export default {
       cursor:null,
       totalCount:0,
       dbdata:null,
+      streamerCount:0,
+      loading:false,
       streamerList : [],
       fcmToken:'',
       navi:'',
       userAgent:'',
+      series: [
+      ],
+      chartOptions: {
+        legend: {
+          show: false
+        },
+        chart: {
+          height: 350,
+          type: 'treemap'
+        },
+        fill: {
+          type: 'image',
+          image: {
+            src: [
+              "https://static-cdn.jtvnw.net/ttv-boxart/504504672_IGDB-173x230.jpg",
+              "https://static-cdn.jtvnw.net/ttv-boxart/509658-173x230.jpg",
+              "https://static-cdn.jtvnw.net/ttv-boxart/512111_IGDB-173x230.jpg",
+              "https://static-cdn.jtvnw.net/ttv-boxart/21779-173x230.jpg",
+              "https://static-cdn.jtvnw.net/ttv-boxart/504504672_IGDB-173x230.jpg",
+              "https://static-cdn.jtvnw.net/ttv-boxart/509658-173x230.jpg",
+              "https://static-cdn.jtvnw.net/ttv-boxart/504504672_IGDB-173x230.jpg",
+              "https://static-cdn.jtvnw.net/ttv-boxart/509658-173x230.jpg",
+              "https://static-cdn.jtvnw.net/ttv-boxart/504504672_IGDB-173x230.jpg",
+              "https://static-cdn.jtvnw.net/ttv-boxart/509658-173x230.jpg",
+              ],
+          },
+          pattern:{
+            style:'squares',
+          }
+        },
+        title: {
+          text: 'Distibuted Treemap (different color for each cell)',
+          align: 'center'
+        },
+        plotOptions: {
+          treemap: {
+            distributed: true,
+            enableShades: true,
+          }
+        }
+        },
     }
   },
   methods: {
@@ -107,6 +131,18 @@ export default {
       })
 
     },
+    async getBoxArt(id){
+      await axios.get('https://api.twitch.tv/helix/games',{
+        headers:this.$store.state.headerConfig,
+        params:{
+          id:id
+        }
+      }).then((res) => {
+        const duplicatedElement = this.streamData.findIndex(x => x.game_id === id );
+         this.streamData[duplicatedElement]['box_art_url'] = res.data.data[0].box_art_url.split('{width}x{height}')[0] + '173x230.jpg';
+      })
+
+    },
     async subNotification(broadcaster_id){
       await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
         [this.$store.state.userinfo.userInfo.uid] : true
@@ -122,15 +158,17 @@ export default {
       })
     },
     async getLiveStreamWithLang(){
+      this.loading = true;
       await axios.get('https://api.twitch.tv/helix/streams',{
         headers:this.$store.state.headerConfig,
         params:{
-          language: navigator.language.split('-')[0],
+          language: 'ko',
           first: 100,
           after: this.cursor,
         }
-      }).then(res => {
-        res.data.data.map((v) => {
+      }).then(async (res) => {
+        this.streamerCount += res.data.data.length;
+        await res.data.data.map(async (v) => {
           const duplicatedElement = this.streamData.find(x => x.game_id === v.game_id );
           if(duplicatedElement){
             duplicatedElement.viewer_count += v.viewer_count;
@@ -139,8 +177,11 @@ export default {
             this.totalCount += v.viewer_count;
             this.streamData.push({
               game_id: v.game_id,
+              box_art_url: null,
+              game_name: v.game_name,
               viewer_count: v.viewer_count,
             })
+            await this.getBoxArt(v.game_id);
           }
           this.streamingList.push({
             id: v.id,
@@ -150,46 +191,38 @@ export default {
             viewer_count: v.viewer_count,
           })
         })
-        this.streamingList.sort((a,b) => b.viewer_count - a.viewer_count)
-        this.streamData.sort((a,b) => b.viewer_count - a.viewer_count)
-        this.cursor = res.data.pagination.cursor;
-      }).then(()=>{
-        if(this.streamData.length < 100){
-          this.getLiveStreamWithLang();
-        } else {
-          this.streamData.splice(100);
-        }
+        // this.cursor = res.data.pagination.cursor;
+        // if(res.data.data.length !== 0){
+        //   this.getLiveStreamWithLang();
+        // } else {
+
+        // }
       })
     },
   },
   async created() {
-    console.log(navigator)
-    this.userAgent = navigator.userAgent;
-    if(navigator.userAgent.match(/iPad/i)){
-      this.navi = 'ipad';
-    } else if (navigator.userAgent.match(/Tablet/i)){
-      this.navi='adroid tablet'
-    } else if (navigator.userAgent.match(/Android/i)){
-      this.navi='android'
-    } else if (navigator.userAgent.match(/iPhone|iPod/i)){
-      this.navi='iphone'
-    } else if (navigator.userAgent.match(/Edg/i)){
-      this.navi = 'Edge'
-    } else if (navigator.userAgent.match(/Whale/i)){
-      this.navi = 'Whale'
-    } else if (navigator.userAgent.match(/firefox/i)){
-      this.navi = 'firefox'
-    } else if (navigator.userAgent.match(/opera/i)){
-      this.navi = 'opera'
-    } else if (navigator.userAgent.match(/safari/i)){
-        this.navi='safari'
-    } else if (navigator.userAgent.match(/chrome/i)){
-      this.navi='chrome'
-    } else {
-      this.navi='other'
-    }
-    this.fcmToken = await this.$messaging.getToken({ vapidKey:'BKLOaHl9k-gFVZJIFGnxNOB5pJ8KHuyNuHQQnRmL5pQFqPgPavVFtD8gZzlUwinf1V0ZxGBqgkwIBZ1gM2IunXQ'}).catch(()=>{});
-    this.streamerList = JSON.parse(localStorage.getItem('alllikes'));
+    await this.getLiveStreamWithLang();
+    this.streamingList.sort((a,b) => b.viewer_count - a.viewer_count)
+    this.streamData.sort((a,b) => b.viewer_count - a.viewer_count)
+    let newSeries1 = this.streamData.slice(0,10);
+    // let newSeries2 = this.streamData.slice(5,10);
+    // let boxart = []
+    // newSeries1.map((v) => {
+    //   boxart.push(v.box_art_url)
+    // });
+    // this.chartOptions.fill.image.src = boxart
+    // newSeries1 = newSeries1.map((v) => {
+    //   return {
+    //     x: v.game_name,
+    //     y: v.viewer_count,
+    //   }
+    // })
+    // this.series[0].data = newSeries1;
+    newSeries1.forEach(element => {
+      this.series.push({data:[{x:element.game_name, y:element.viewer_count}]})
+      // .src
+    })
+    this.loading = false;
     // let db = await this.$firebase.database().ref(`/prediction/116727016`);
     // db.on('value', (snapshot) =>{
     //   const data = snapshot.val();

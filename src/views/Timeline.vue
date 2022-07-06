@@ -89,49 +89,45 @@
       :dense="$vuetify.breakpoint.smAndDown"
       :align-top="$vuetify.breakpoint.smAndDown"
       >
-        <v-timeline-item
-        class="pa-0"
-        fill-dot
-        small
-        color="twitch"
-        v-for=" (clip) in cliplist" :key="clip.id">
-        <template v-slot:icon v-if="clip.rank !== undefined">
-          <v-icon :color="rankColor(clip.rank)">mdi-crown</v-icon>
-        </template>
-        <span v-if="!$vuetify.breakpoint.smAndDown" slot="opposite">
-          {{secToHMS(clip.offset)}}
-        </span>
-        <v-card
-          :dark="!$vuetify.theme.dark"
-          :light="$vuetify.theme.dark"
-          class="mx-auto rounded-lg pa-3"
-          :class="$vuetify.breakpoint.smAndDown ? 'mb-16 pt-0' : ''"
-          elevation="10"
-          :max-width="$vuetify.breakpoint.smAndDown ? '250' : '480'"
-        >
-        <v-card-title class="pa-0" v-if="$vuetify.breakpoint.smAndDown">
-          <strong>{{secToHMS(clip.offset)}}</strong>
-        </v-card-title>
-          <v-card-text class="ma-a pa-0">
-            <ClipIframeDialogVue :clipData="clip" :listData="listData"></ClipIframeDialogVue>
-            <div class="d-flex justify-center pt-2" :class="!$vuetify.theme.dark ? 'white--text':'black--text'">{{clip.title}}</div>
-          </v-card-text>
-        </v-card>
-          <!-- <div v-if="!$vuetify.breakpoint.smAndDown" slot="opposite">{{secToHMS(clip.offset)}}</div>
-          <div v-else class="d-flex justify-end">{{secToHMS(clip.offset || 0)}}</div>
-            <v-card
-              :dark="!$vuetify.theme.dark"
-              :light="$vuetify.theme.dark"
-              class="mx-auto rounded-lg pa-3"
-              elevation="12"
-              width="800"
-            >
-              <v-card-text class="ma-a pa-0">
-                <ClipIframeDialogVue :clipData="clip" :listData="listData"></ClipIframeDialogVue>
-                <div class="d-flex justify-center pt-2">{{clip.title}}</div>
-              </v-card-text>
-            </v-card> -->
-        </v-timeline-item>
+        <div v-for="(chunck, index) in cliplistChunk" :key="index" class="pa-0 ma-0">
+          <v-timeline-item
+          class="pa-0"
+          fill-dot
+          small
+          color="twitch"
+          v-for=" (clip) in chunck" :key="clip.id">
+          <template v-slot:icon v-if="clip.rank !== undefined">
+            <v-icon :color="rankColor(clip.rank)">mdi-crown</v-icon>
+          </template>
+          <span v-if="!$vuetify.breakpoint.smAndDown" slot="opposite">
+            {{secToHMS(clip.offset)}}
+          </span>
+          <v-card
+            :dark="!$vuetify.theme.dark"
+            :light="$vuetify.theme.dark"
+            class="mx-auto rounded-lg pa-3"
+            :class="$vuetify.breakpoint.smAndDown ? 'mb-16 pt-0' : ''"
+            elevation="10"
+            :max-width="$vuetify.breakpoint.smAndDown ? '250' : '480'"
+          >
+          <v-card-title class="pa-0" v-if="$vuetify.breakpoint.smAndDown">
+            <strong>{{secToHMS(clip.offset)}}</strong>
+          </v-card-title>
+            <v-card-text class="ma-a pa-0">
+              <ClipIframeDialogVue :clipData="clip" :listData="listData"></ClipIframeDialogVue>
+              <div class="d-flex justify-center pt-2" :class="!$vuetify.theme.dark ? 'white--text':'black--text'">{{clip.title}}</div>
+            </v-card-text>
+          </v-card>
+          </v-timeline-item>
+          <div class="pa-1 py-2 d-flex justify-center">
+            <InArticleAdsense
+              data-ad-client="ca-pub-8597405222136575"
+              data-ad-slot="1875328416"
+              data-ad-format="fluid"
+              ins-style="display:inline-block;width:90%;"
+            ></InArticleAdsense>
+          </div>
+        </div>
       </v-timeline>
     </v-row>
   </v-row>
@@ -140,6 +136,7 @@
 <script>
 import ClipIframeDialogVue from '../components/dialog/ClipIframeDialog.vue';
 import axios from 'axios';
+import { chunk } from 'lodash';
 
 export default {
   components:{
@@ -158,6 +155,12 @@ export default {
     }
   },
   computed:{
+    canUpdate(){
+      return this.$moment().add(-3,'hours').isAfter(this.timelineData.updatedAt) && this.vidInfo[0] !== undefined;
+    },
+    cliplistChunk(){
+      return chunk(Object.values(this.cliplist),10);
+    }
   },
   methods: {
     rankColor(el){
@@ -282,12 +285,6 @@ export default {
       this.loading = true;
 
       }
-  },
-  computed:{
-    canUpdate(){
-      return this.$moment().add(-3,'hours').isAfter(this.timelineData.updatedAt) && this.vidInfo[0] !== undefined;
-    }
-
   },
   async created() {
     if(this.$store.state.userinfo.userInfo){

@@ -344,9 +344,6 @@ export default {
     },
   },
   computed: {
-    getTodayDate() {
-      return new Date().toISOString();
-    },
   },
   async mounted() {
     this.streamerList.liked = JSON.parse(localStorage.getItem('alllikes')) || [];

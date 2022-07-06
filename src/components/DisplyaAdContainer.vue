@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex justify-center">
+  <div class="d-flex justify-center py-5">
     <Adsense
     data-ad-client="ca-pub-8597405222136575"
     data-ad-slot="3465851493"
