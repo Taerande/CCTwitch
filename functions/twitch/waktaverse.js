@@ -10,10 +10,10 @@ app.use(cors());
 app.get('/waktaverse', async (req, res) => {
   moment.locale('ko');
   // const userId = req.url.split('userId=')[1].split('&twitchAccesToken')[0]
-  // const twitchAccesToken = req.url.split('Bearer+')[1];
+  const twitchAccesToken = req.query.appAccessToken;
   const clientId = process.env.TWITCH_CLIENT_ID;
-  const time = '2022-06-25';
-  const appAccessToken = 'Bearer z20zp0d6016h6zx46g8fzsk88fwwoj';
+  const time = '2022-07-01';
+  const appAccessToken = twitchAccesToken;
 
   const weekNumber = moment(time).week();
 

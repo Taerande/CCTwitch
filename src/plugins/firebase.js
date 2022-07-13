@@ -10,8 +10,14 @@ import store from '../store'
 
 firebase.initializeApp(firebaseConfig);
 
+const app2 = firebase.initializeApp({
+  databaseURL:"https://cctwitch-streamdata-kor.asia-southeast1.firebasedatabase.app"
+},'app2')
+
+
 Vue.prototype.$firebase = firebase;
 Vue.prototype.$firertdb = firebase.database();
+Vue.prototype.$streamData = firebase.database(app2);
 Vue.prototype.$firestore = firebase.firestore();
 Vue.prototype.$messaging = firebase.messaging();
 // Vue.prototype.$isAuth = false;

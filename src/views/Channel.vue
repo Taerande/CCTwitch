@@ -68,7 +68,7 @@
                 <v-icon>mdi-star</v-icon>
               </v-btn>
               <v-btn v-if="isSubscribe" :disabled="subsLoading" color="twitch" @click="unsubNotification(userInfo.data.id)" icon><v-icon>mdi-bell</v-icon></v-btn>
-              <v-btn v-else :disabled="subsLoading" icon @click="subNotification(userInfo.data.id)"><v-icon>mdi-bell-off</v-icon></v-btn>
+              <v-btn v-else :disabled="subsLoading" icon @click="subNotification(userInfo.data.id)"><v-icon>mdi-bell</v-icon></v-btn>
             </span>
           </div>
           <div v-if="userInfo.is_live">
@@ -432,30 +432,44 @@ export default {
       return Math.abs(el)
     },
     async isNotificated(){
-      let starCountRef = await this.$firertdb.ref('notification/' + this.userInfo.data.id + '/subscribers/' + this.$store.state.userinfo.userInfo.uid);
-      starCountRef.on('value', (snapshot) => {
-        this.isSubscribe = snapshot.val();
-      });
+      if(this.$store.state.userinfo.userInfo){
+        let starCountRef = await this.$firertdb.ref('notification/' + this.userInfo.data.id + '/subscribers/' + this.$store.state.userinfo.userInfo.uid);
+        starCountRef.on('value', (snapshot) => {
+          this.isSubscribe = snapshot.val();
+        });
+      } else {
+        this.isSubscribe = false;
+      }
     },
     async subNotification(broadcaster_id){
-      this.subsLoading = true;
-      await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
-        [this.$store.state.userinfo.userInfo.uid] : true
-      }).then(() => {
-        this.subsLoading = false;
-      }).catch((err) => {
-        console.log(err)
-      })
+      if(this.$store.state.userinfo.userInfo){
+        this.subsLoading = true;
+        await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
+          [this.$store.state.userinfo.userInfo.uid] : true
+        }).then(() => {
+          this.$store.commit('SET_SnackBar',{type:'success', text:`${this.userInfo.data.display_name}님을 알람에 추가합니다.`, value:true})
+          this.subsLoading = false;
+        }).catch((err) => {
+          console.log(err)
+        })
+      } else {
+        this.$store.commit('SET_SignInDialog',true);
+      }
     },
     async unsubNotification(broadcaster_id){
+      if(this.$store.state.userinfo.userInfo){
       this.subsLoading = true;
       await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
         [this.$store.state.userinfo.userInfo.uid] : false
       }).then(() => {
+        this.$store.commit('SET_SnackBar',{type:'error', text:`${this.userInfo.data.display_name}님을 알람에서 제거합니다.`, value:true})
         this.subsLoading = false;
       }).catch((err) => {
         console.log(err)
       })
+      } else {
+        this.$store.commit('SET_SignInDialog',true);
+      }
     },
     async subscribe(id){
       let type = ['stream.offline','channel.update','stream.online'];

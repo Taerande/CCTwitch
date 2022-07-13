@@ -34,6 +34,8 @@ const Timeline = () => import(/* webpackChunkName: "Timeline" */ '@/views/Timeli
 
 const Cliplist = () => import(/* webpackChunkName: "Cliplist" */ '@/views/Cliplist.vue');
 
+const Report = () => import(/* webpackChunkName: "Report" */ '@/views/Report.vue');
+
 const Mycliplist = () => import(/* webpackChunkName: "Mycliplist" */ '@/views/Mycliplist.vue');
 
 const Timelines = () => import(/* webpackChunkName: "Timelines" */ '@/views/Timelinelist.vue');
@@ -135,6 +137,11 @@ const routes = [
     path: '/streamer',
     name: 'streamer',
     component: Streamer,
+  },
+  {
+    path: '/report',
+    name: 'Report',
+    component: Report,
   },
   {
     path: '/test',
