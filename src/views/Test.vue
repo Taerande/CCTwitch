@@ -29,6 +29,8 @@
     <v-btn color="success" block @click="getTreemap()">text</v-btn>
     <v-btn color="error" block @click="addNewData()">load Data</v-btn>
     <v-btn color="info" block @click="removeData()">remove</v-btn>
+    <v-btn color="orange" block @click="wak()">wak</v-btn>
+    <v-btn color="black" class="white--text" block @click="testRtdb()">rtdb</v-btn>
   </v-row>
   <v-row>
     <v-col>날짜 {{asdf}}</v-col>
@@ -178,6 +180,24 @@ export default {
     }
   },
   methods: {
+    async testRtdb(){
+      const topStream = this.$streamData.ref('/treemap/22-07-17/topStream');
+
+      await topStream.get().then(async(sn) => {
+        if(sn.exists()){
+          let tempArr = [];
+          for(let item in sn.val()){
+            tempArr.push({id:item, ...sn.val()[item]});
+          }
+          await tempArr.sort((a,b) => b.viewer_count - a.viewer_count);
+          console.log(tempArr.slice(0,24));
+          tempArr.slice(24).map( async (v) => {
+            await topStream.child(v.id).remove();
+          })
+
+        }
+      })
+    },
     async getUserInfo(element) {
       return await axios.get('https://api.twitch.tv/helix/users',{
         params: {
@@ -317,17 +337,17 @@ export default {
       })
       this.dataloading = true;
     },
-    // async wak(){
-    //   this.dbLoading = true;
-    //   await axios.get(this.$store.state.backendUrl+'/weeklyWaktaverse/waktaverse'+`?appAccessToken=${this.$store.state.headerConfig.Authorization}`).then((res) => {
-    //     this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
-    //     console.log(res);
-    //     this.dbLoading = false;
-    //   }).catch(()=>{
-    //       this.dbLoading = false;
-    //     })
+    async wak(){
+      this.dbLoading = true;
+      await axios.get(this.$store.state.backendUrl+'/weeklyWaktaverse/waktaverse'+`?appAccessToken=${this.$store.state.headerConfig.Authorization}`).then((res) => {
+        this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
+        console.log(res);
+        this.dbLoading = false;
+      }).catch(()=>{
+          this.dbLoading = false;
+        })
 
-    // },
+    },
 
     async subscribe(id){
       let type = ['stream.offline','channel.update','stream.online'];
