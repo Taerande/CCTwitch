@@ -15,6 +15,26 @@
     </v-col>
   </v-row>
   <v-row>
+    <v-card class="rounded-lg" color="black">
+      <v-card-title class="twitch pa-0 ma-0">
+        <div class="white--text">
+          12:30
+        </div>
+      </v-card-title>
+      <v-card-text>
+        <div class="text-caption white--text">
+          Viewer: 125233
+        </div>
+        <div class="text-catpion red--text">
+          Title: 고멤합방 없어
+        </div>
+        <div class="text-caption twitch--text">
+          Categroy: VRChat
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-row>
+  <v-row>
     <v-col>
       <v-text-field
         name="name"
