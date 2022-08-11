@@ -67,8 +67,8 @@
               >
                 <v-icon>mdi-star</v-icon>
               </v-btn>
-              <v-btn v-if="isSubscribe" :disabled="subsLoading" color="twitch" @click="unsubNotification(userInfo.data.id)" icon><v-icon>mdi-bell</v-icon></v-btn>
-              <v-btn v-else :disabled="subsLoading" icon @click="subNotification(userInfo.data.id)"><v-icon>mdi-bell</v-icon></v-btn>
+              <!-- <v-btn v-if="isSubscribe" :disabled="subsLoading" color="twitch" @click="unsubNotification(userInfo.data.id)" icon><v-icon>mdi-bell</v-icon></v-btn>
+              <v-btn v-else :disabled="subsLoading" icon @click="subNotification(userInfo.data.id)"><v-icon>mdi-bell</v-icon></v-btn> -->
             </span>
           </div>
           <div v-if="userInfo.is_live">
@@ -496,7 +496,7 @@ export default {
     async process() {
       await this.getUserInfo(this.$route.query)
       await this.getFollower()
-      await this.isNotificated()
+      // await this.isNotificated()
       await this.getStreamData(this.userInfo.data.login)
       await this.getVid(this.userInfo.data.id)
       this.dataLoading = true

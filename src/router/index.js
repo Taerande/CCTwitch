@@ -28,13 +28,11 @@ const Channel = () => import(/* webpackChunkName: "423123" */ '@/views/Channel.v
 const Login = () => import(/* webpackChunkName: "Login" */ '@/views/Login.vue');
 const Trending = () => import(/* webpackChunkName: "Trending" */ '@/views/Trending.vue');
 
-const Test = () => import(/* webpackChunkName: "Test" */ '@/views/Test.vue');
 
 const Timeline = () => import(/* webpackChunkName: "Timeline" */ '@/views/Timeline.vue');
 
 const Cliplist = () => import(/* webpackChunkName: "Cliplist" */ '@/views/Cliplist.vue');
 
-const Report = () => import(/* webpackChunkName: "Report" */ '@/views/Report.vue');
 
 const Mycliplist = () => import(/* webpackChunkName: "Mycliplist" */ '@/views/Mycliplist.vue');
 
@@ -49,6 +47,8 @@ const PageNotFound = () => import(/* webpackChunkName: "PageNotFound" */ '@/view
 const SpecialList = () => import(/* webpackChunkName: "SpecialList" */ '@/views/SpecialList.vue');
 const User = () => import(/* webpackChunkName: "User" */ '@/views/User.vue');
 const Tag = () => import(/* webpackChunkName: "Tag" */ '@/views/Tag.vue');
+const Test = () => import(/* webpackChunkName: "Test" */ '@/views/Test.vue');
+const Report = () => import(/* webpackChunkName: "Report" */ '@/views/Report.vue');
 
 const routes = [
   {

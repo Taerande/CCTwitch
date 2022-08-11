@@ -1,0 +1,27 @@
+[debug] [2022-08-10T07:08:00.800Z] ----------------------------------------------------------------------
+[debug] [2022-08-10T07:08:00.803Z] Command:       E:\NodeJs\node.exe C:\Users\Righteous\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
+[debug] [2022-08-10T07:08:00.803Z] CLI Version:   10.2.1
+[debug] [2022-08-10T07:08:00.803Z] Platform:      win32
+[debug] [2022-08-10T07:08:00.804Z] Node Version:  v14.17.3
+[debug] [2022-08-10T07:08:00.806Z] Time:          Wed Aug 10 2022 16:08:00 GMT+0900 (대한민국 표준시)
+[debug] [2022-08-10T07:08:00.807Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-08-10T07:08:00.940Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-08-10T07:08:00.941Z] > authorizing via signed-in user (revive0405@gmail.com)
+[debug] [2022-08-10T07:08:00.941Z] [iam] checking project twitchhotclip for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2022-08-10T07:08:00.946Z] > refreshing access token with scopes: []
+[debug] [2022-08-10T07:08:00.947Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ <request body omitted>
+[debug] [2022-08-10T07:08:01.232Z] <<< HTTP RESPONSE 200 {"date":"Wed, 10 Aug 2022 07:08:01 GMT","pragma":"no-cache","cache-control":"no-cache, no-store, max-age=0, must-revalidate","expires":"Mon, 01 Jan 1990 00:00:00 GMT","content-type":"application/json; charset=utf-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[debug] [2022-08-10T07:08:01.298Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/twitchhotclip:testIamPermissions [none]
+[debug] [2022-08-10T07:08:01.298Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/twitchhotclip:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2022-08-10T07:08:02.117Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/twitchhotclip:testIamPermissions 200
+[debug] [2022-08-10T07:08:02.117Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/twitchhotclip:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2022-08-10T07:08:02.118Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/twitchhotclip/serviceAccounts/twitchhotclip@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2022-08-10T07:08:02.118Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/twitchhotclip/serviceAccounts/twitchhotclip@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2022-08-10T07:08:02.929Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/twitchhotclip/serviceAccounts/twitchhotclip@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2022-08-10T07:08:02.929Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/twitchhotclip/serviceAccounts/twitchhotclip@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'twitchhotclip'...
+[info] 
+[info] i  deploying functions 

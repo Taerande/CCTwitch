@@ -1,6 +1,6 @@
 <template>
 <v-container>
-  <v-btn color="success" @click="getStream()" block>getStream</v-btn>
+  <v-btn color="success" @click="getGame()" block>getGame</v-btn>
   <v-row class="col-12">
     <v-col cols="12" class="py-3">
       <v-card  elevation="5">
@@ -13,7 +13,7 @@
 
           When click certain time, dialog pop out and show treemap at that time.
         </div>
-        <div id="chart" v-if="loading" class="ma-5">
+        <div id="chart" v-if="loading" class="ma-2">
           <apexchart type="line" height="350" :options="linechartOptions" :series="lineSeries"></apexchart>
         </div>
         <div v-else class="d-flex justify-center">
@@ -32,7 +32,7 @@
         v-for="streamer in topStreams" :key="streamer.id">
         <v-card
         width="80"
-        @click="toggle(streamer)"
+        @click="toggleTopStream(streamer)"
         flat
         :color="streamerModel.id === streamer.id ?  'rgb(0,0,0,0.2)' : 'rgb(0,0,0,0)'"
         class="pa-0 ma-0 d-flex justify-center align-center flex-column hoverCursor text-truncate">
@@ -64,23 +64,41 @@
       loader-height="10"
       v-if="streamerModel.id !== null"
     >
-      <v-card-title>
-        <v-avatar size="48" color="black">
-           <v-img
-             sizes="48"
-             :src="streamerModel.profile_image_url"
-             alt="profile_img"
-           >
-           </v-img>
-         </v-avatar>
-         <div>
-          {{streamerModel.display_name}}
-          ({{streamerModel.id}})
-         </div>
+      <v-card-title class="d-flex align-center">
+          <router-link :to="{name:'Channel', query:{
+            q:streamerModel.login}}" class="d-flex align-center">
+            <v-avatar size="48" color="black">
+               <v-img
+                 sizes="48"
+                 :src="streamerModel.profile_image_url"
+                 alt="profile_img"
+               >
+               </v-img>
+             </v-avatar>
+             <div class="twitch--text px-3">
+              {{streamerModel.display_name}}
+             </div>
+          </router-link>
+          <div>
+            <v-switch
+              v-model="annoXaxis"
+              flat
+              color="red"
+            ></v-switch>
+            <v-switch
+              v-model="annoPoint"
+              flat
+              color="twitch"
+            ></v-switch>
+          </div>
+          <v-spacer></v-spacer>
+          <v-icon @click="streamerModel = {
+            id:null
+          }" large>mdi-chevron-double-up</v-icon>
       </v-card-title>
       <v-card-text>
-        <div id="Streamchart" v-if="!streamLoading" class="ma-5">
-          <apexchart type="line" height="350" :options="streamLineChartOptions" :series="streamLineSeries"></apexchart>
+        <div v-if="!streamLoading" class="ma-2">
+          <apexchart id="Streamchart" type="line" height="350" :options="streamLineChartOptions" :series="streamLineSeries"></apexchart>
         </div>
         <div v-else class="d-flex align-center justify-center" style="height:350px;">
           <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
@@ -94,29 +112,73 @@
       center-active
       show-arrows>
       <v-slide-item
-        class="ma-2"
-        v-slot="{ active, toggle }"
+        class="pa-2"
          v-for="(game, idx) in topGames" :key="idx">
         <v-card
-        @click="toggle"
-        width="100" class="pa-0 ma-0" flat>
+        @click="toggleTopGame(game)"
+        class="pa-0 ma-0 d-flex justify-center align-center flex-column hoverCursor text-truncate"
+        :color="gameModel.id === game.id ?  'rgb(0,0,0,0.2)' : 'rgb(0,0,0,0)'"
+        width="100" flat>
         <v-img
-          size="150"
           :src="game.box_art_url"
+          class="d-flex justify-center align-center"
         >
-        <v-card class="d-flex justify-center align-center" height="100%" :color="active ?  'rgb(0,0,0,0.5)' : 'rgb(0,0,0,0)'">
-          <v-icon v-if="active" color="green" x-large>mdi-check-bold</v-icon>
-        </v-card>
+          <v-icon class="d-flex justify-center" v-if="gameModel.id === game.id" color="green lighten-4" x-large>mdi-check-bold</v-icon>
         </v-img>
         <div class="d-flex justify-center pr-3 pt-2">
           <span class="red--text d-flex text-body-2 align-baseline">
-            <v-icon color="red" small>mdi-account</v-icon>{{game.total_viewer}}
+            <v-icon color="red" small>mdi-account</v-icon>{{game.viewer_count}}
           </span>
         </div>
     </v-card>
       </v-slide-item>
      </v-slide-group>
   </v-row>
+  <v-expand-transition>
+    <v-card
+      height="500"
+      tile
+      loader-height="10"
+      class="d-flex align-center"
+      v-if="gameModel.id !== null"
+    >
+      <v-card-text>
+        <div v-if="!gameLoading" class="ma-2 d-flex align-center">
+        <div style="width:200px;">
+          <div class="d-flex justify-center pb-2">
+            <div class="d-flex align-center">
+              <v-icon color="red" class="pr-1">mdi-clock-outline</v-icon> {{$moment(gameModel.time).format('MM-DD HH:mm')}}
+            </div>
+          </div>
+          <v-img
+            width="200"
+            :src="gameModel.box_art_url"
+            class="rounded-lg rounded-b-0 d-flex align-center"
+          >
+          </v-img>
+          <div class="text-h6 white--text black rounded-lg rounded-t-0 d-flex justify-center">
+            {{gameModel.game_name}}
+          </div>
+          <div class="d-flex pt-3 px-2">
+            <div class="d-flex align-center">
+              <v-icon color="red" class="pr-1">mdi-account</v-icon>{{gameModel.viewer_count}}
+            </div>
+            <v-spacer></v-spacer>
+            <div class="d-flex align-center">
+              <v-icon color="red" class="pr-1">mdi-video</v-icon> {{gameModel.stream_count}}
+            </div>
+          </div>
+        </div>
+          <div id="topGameBarChart" class="ma-2">
+            <apexchart type="bar" height="350" :options="barCahrtOptions" :series="barSeries"></apexchart>
+          </div>
+        </div>
+        <div v-else class="d-flex align-center justify-center" style="height:350px;">
+          <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-expand-transition>
   <v-dialog
     scrollable
     v-model="dialog"
@@ -146,7 +208,6 @@
 </template>
 <script>
 import axios from 'axios';
-// import StreamerChartVue from './StreamerChart.vue';
 
 export default {
   components:{
@@ -154,8 +215,18 @@ export default {
   },
   data() {
     return {
+      annoXaxis:true,
+      annoPoint:true,
+      annotations:{
+        xaxis:[],
+        points:[],
+      },
+      tempGameIdList:[],
       streamLoading:false,
       categoryModel:null,
+      gameModel:{
+        id:null,
+      },
       streamerModel:{
         id:null,
         display_name:null,
@@ -165,6 +236,7 @@ export default {
       loading:false,
       dialog:false,
       dataloading:false,
+      gameLoading:false,
       streamerCount:0,
       topGames:[],
       tempIdList:[],
@@ -172,6 +244,30 @@ export default {
       viewerCount:0,
       dialogTime:0,
       streamData:[],
+      barCahrtOptions:{
+        chart:{
+          type:'bar',
+          height:500,
+        },
+        plotOptions: {
+            bar: {
+              borderRadius: 4,
+              horizontal: true,
+            }
+        },
+        dataLabels:{
+          enabled: false,
+          style:{
+            colors: '#000000'
+          }
+        },
+      },
+      barSeries:[
+        {
+          name:'Viewers',
+          data:[]
+        }
+      ],
       lineSeries:[
         {name:'Viewers', type:'line', data:[]},
         {name:'Streams', type:'column', data:[]}
@@ -270,9 +366,6 @@ export default {
           enabled: true,
           custom: function({series, seriesIndex, dataPointIndex, w}) {
             const time = new Date(w.config.labels[dataPointIndex]*1).toTimeString();
-            // const point = w.config.annotations.points.find(v => v.x <= w.config.labels[dataPointIndex]) === undefined ? {label:{
-            //   text:''
-            // }}: w.config.annotations.points.find(v => v.x === w.config.labels[dataPointIndex]);
             let points = []
             w.config.annotations.points.forEach((v) =>
             {
@@ -289,7 +382,7 @@ export default {
               }
             });
             const xaxis = xaxises.pop();
-            if(series[seriesIndex][dataPointIndex] !== null){
+            if(series[seriesIndex][dataPointIndex] !== null && points.length !== 0 && xaxises.length !== 0){
               return '<div class="rounded-md v-card">' +
               '<div class="v-card-title pa-1 ma-0 grey lighten-3">'+
                 '<div class="black--text text-caption pa-1">'+
@@ -300,6 +393,30 @@ export default {
                 '<div class="pa-1">' + '<span class="text-caption" style="color:#00E396;">'+'Viewers : '+'</span>'  + '<span class="text-caption text--black font-weight-black">'+series[seriesIndex][dataPointIndex]+'</span>' + '</div>' +
                 '<div class="pa-1 red--text text-caption">' + 'Title : ' + point.label.text + '</div>' +
                 '<div class="pa-1 twitch--text text-caption">' + 'Category : ' + xaxis.label.text + '</div>' +
+              '</div>'+
+            '</div>'
+            } else if(series[seriesIndex][dataPointIndex] !== null && points.length === 0 && xaxises.length !== 0){
+              return '<div class="rounded-md v-card">' +
+              '<div class="v-card-title pa-1 ma-0 grey lighten-3">'+
+                '<div class="black--text text-caption pa-1">'+
+                  time.split(' ')[0].slice(0,5) +
+                '</div>'+
+              '</div>'+
+              '<div class="v-card-text">'+
+                '<div class="pa-1">' + '<span class="text-caption" style="color:#00E396;">'+'Viewers : '+'</span>'  + '<span class="text-caption text--black font-weight-black">'+series[seriesIndex][dataPointIndex]+'</span>' + '</div>' +
+                '<div class="pa-1 twitch--text text-caption">' + 'Category : ' + xaxis.label.text + '</div>' +
+              '</div>'+
+            '</div>'
+            } else if(series[seriesIndex][dataPointIndex] !== null && points.length !== 0 && xaxises.length === 0){
+              return '<div class="rounded-md v-card">' +
+              '<div class="v-card-title pa-1 ma-0 grey lighten-3">'+
+                '<div class="black--text text-caption pa-1">'+
+                  time.split(' ')[0].slice(0,5) +
+                '</div>'+
+              '</div>'+
+              '<div class="v-card-text">'+
+                '<div class="pa-1">' + '<span class="text-caption" style="color:#00E396;">'+'Viewers : '+'</span>'  + '<span class="text-caption text--black font-weight-black">'+series[seriesIndex][dataPointIndex]+'</span>' + '</div>' +
+                '<div class="pa-1 red--text text-caption">' + 'Title : ' + point.label.text + '</div>' +
               '</div>'+
             '</div>'
             } else {
@@ -316,13 +433,11 @@ export default {
           points:[],
         },
         chart: {
+          id: 'Streamchart',
           },
-          height: 350,
-          type: "line",
-          backgroud:'#FFFFFF',
-        theme:{
-          mode:'light'
-        },
+        height: 350,
+        type: "line",
+        backgroud:'#FFFFFF',
         colors:['#00E396'],
         title: {
           text:''
@@ -352,6 +467,15 @@ export default {
     }
   },
   methods: {
+    cleaerAnnotation(){
+      this.annotations.xaxis = this.streamLineChartOptions.annotations.xaxis;
+      this.streamLineChartOptions = {
+        ...this.streamLineChartOptions,
+        annotations : {
+          xaxis:[],
+        }
+      }
+    },
     topOrBottom(curr, last, avg, top){
       const coefficient = Math.abs(curr-last.y)*0.3 / (Math.abs(top-avg));
       if(last.label.offsetY === -2){
@@ -369,13 +493,53 @@ export default {
       }
 
     },
-    async toggle(el){
+    async toggleTopGame(el){
+      const tempIds = [];
+      this.gameLoading = true;
+      if(el.id === this.gameModel.id){
+        this.gameModel = {
+          id:null,
+        };
+      } else {
+        this.gameModel = el;
+        this.barSeries[0].data = [];
+        el.topStreamer.forEach((el) => {
+          tempIds.push(el.id)
+        })
+        await axios.get('https://api.twitch.tv/helix/users',{
+          headers: this.$store.state.headerConfig,
+          params:{
+            id: tempIds,
+          }
+        }).then(async (res)=> {
+        await res.data.data.forEach((el) => {
+          const idx = this.gameModel.topStreamer.findIndex((x) => x.id === el.id );
+          this.gameModel.topStreamer[idx] = { ...this.gameModel.topStreamer[idx],...{
+            profile_image_url: el.profile_image_url,
+            login: el.login,
+          }};
+        })
+      });
+      this.gameModel.topStreamer.forEach((el) => {
+        this.barSeries[0].data.push({
+          x:el.user_name,
+          y:el.viewer_count
+        })
+      });
+      this.barSeries[0].data.sort((a,b) => b.y - a.y);
+      this.barSeries[0].data.splice(10);
+      }
+      this.gameLoading = false;
+    },
+    async toggleTopStream(el){
       this.streamLoading = true;
       if(el.id === this.streamerModel.id){
         this.streamerModel = {
           id:null,
           display_name:null,
         };
+        this.annoXaxis = false;
+        this.annoPoint = false;
         this.streamLoading = false;
         this.streamLineChartOptions.title.text = '';
         this.streamLineChartOptions.labels = [];
@@ -383,6 +547,8 @@ export default {
         this.streamLineChartOptions.annotations.points = [];
         this.streamLineSeries[0].data = [];
       } else {
+        this.annoXaxis = true;
+        this.annoPoint = true;
         this.streamerModel = el;
         this.streamLineChartOptions.labels = [];
         this.streamLineChartOptions.annotations.xaxis = [];
@@ -461,41 +627,17 @@ export default {
             this.streamLineChartOptions.labels.push( new Date(item*1).getTime());
             this.streamLineSeries[0].data.push(streamData[item].viewer_count);
           }
-        })
+        });
         this.streamLoading = false;
       }
     },
-    async getGame(){
-      this.topGames = [];
-      const tartget = this.$streamData.ref(`/treemap/22-07-14/topGame`).orderByChild('viewer_count').limitToLast(24);
-      tartget.get().then((sn) => {
-        for(let item in sn.val()){
-          this.topGames.push({id:item, ...sn.val()[item]});
-        }
-      this.topGames.sort((a,b) => b.viewer_count - a.viewer_count);
-      })
-
-    },
-    async getStream(){
+    async getTopStream(){
       this.topStreams = [];
-      const tartget = this.$streamData.ref(`/treemap/${this.date}/topStream`);
+      const tartget = this.$streamData.ref(`/treemap/${this.date}/topStream`).orderByChild('viewer_count').limitToLast(100);
       await tartget.get().then( async (sn) => {
         for(let item in sn.val()){
           this.topStreams.push({id:item, ...sn.val()[item]});
           this.tempIdList.push(item);
-
-          const idx = this.topGames.findIndex((x) => x.game_name === sn.val()[item].game_name);
-          if(idx >= 0){
-            this.topGames[idx].topStreamer.push(sn.val()[item]);
-            this.topGames[idx].total_viewer += sn.val()[item].viewer_count;
-          } else {
-            this.topGames.push({
-              game_name: sn.val()[item].game_name,
-              topStreamer: [sn.val()[item]],
-              total_viewer: sn.val()[item].viewer_count,
-              box_art_url: await this.getBoxArt(sn.val()[item].game_name)
-            })
-          }
         }
       });
       await axios.get('https://api.twitch.tv/helix/users',{
@@ -508,12 +650,57 @@ export default {
           const idx = this.topStreams.findIndex((x) => x.id === el.id );
           this.topStreams[idx] = { ...this.topStreams[idx],...{
             profile_image_url: el.profile_image_url,
+            login: el.login,
             display_name: el.display_name
           }};
         })
       })
     this.topStreams.sort((a,b) => b.viewer_count - a.viewer_count);
     this.topGames.sort((a,b) => b.total_viewer - a.total_viewer);
+    },
+
+    async getTopGame(){
+      this.topGames = [];
+      const tartget = this.$streamData.ref(`/treemap/${this.date}/topGame`).orderByChild('viewer_count').limitToLast(50);
+      await tartget.get().then( async (sn) => {
+        const data = sn.val();
+        for(let item in data){
+          const topStreamers = [];
+          for(let topStream in data[item].topStreamer){
+            topStreamers.push({
+              id:topStream,
+              title:data[item].topStreamer[topStream].title,
+              user_name:data[item].topStreamer[topStream].user_name,
+              viewer_count:data[item].topStreamer[topStream].viewer_count,
+            })
+          }
+          topStreamers.sort((a,b) => b.viewer_count - a.viewer_count);
+          topStreamers.splice(10);
+          this.topGames.push({
+            id: item,
+            time: data[item].time,
+            game_name: data[item].game_name,
+            stream_count: data[item].stream_count,
+            viewer_count: data[item].viewer_count,
+            topStreamer: topStreamers,
+          });
+          this.tempGameIdList.push(item);
+        }
+      });
+      await axios.get('https://api.twitch.tv/helix/games',{
+        headers: this.$store.state.headerConfig,
+        params:{
+          id: this.tempGameIdList,
+        }
+      }).then( async (res) => {
+        await res.data.data.forEach((el) => {
+          const idx = this.topGames.findIndex((x) => x.id === el.id );
+          this.topGames[idx] = { ...this.topGames[idx],...{
+            box_art_url: el.box_art_url.split('{width}x{height}')[0] + '200x346' + el.box_art_url.split('{width}x{height}')[1],
+          }};
+        })
+      })
+    this.topGames.sort((a,b) => b.viewer_count - a.viewer_count);
     },
     async getBoxArt(gameName){
       return await axios.get('https://api.twitch.tv/helix/games',{
@@ -522,9 +709,12 @@ export default {
           name:gameName
         }
       }).then((res) => {
-        return res.data.data[0].box_art_url.split('{width}x{height}')[0] + '100x173' + res.data.data[0].box_art_url.split('{width}x{height}')[1];
+        if(res.data.data[0] === undefined) {
+          return "https://static-cdn.jtvnw.net/ttv-static/404_boxart-200x346.jpg"
+        }else{
+          return res.data.data[0].box_art_url.split('{width}x{height}')[0] + '200x346' + res.data.data[0].box_art_url.split('{width}x{height}')[1];
+        }
       })
-// "https://static-cdn.jtvnw.net/ttv-boxart/516575-{width}x{height}.jpg"
     },
     async getTreemap(datetimeId){
       this.treemapSeries = [];
@@ -563,32 +753,53 @@ export default {
       })
       this.dataloading = false;
     },
-    async getStreamData(){
-      const topStream = this.$streamData.ref('/treemap/22-07-17/topStream');
-      // const sebom = this.$streamData.ref('/stream_data/49045679');
-
-      let data;
-      let topStreamData;
-      let viewCountLimit;
-      let lastId;
-      let temppArr = [];
-      await topStream.get().then( async (sn) => {
-        topStreamData = sn.val();
-        for(let item in topStreamData) {
-          temppArr.push({id:item, ...topStreamData[item]});
+  },
+  watch:{
+    annoXaxis(val){
+      console.log('annoX',val);
+      if(val){
+        this.annotations.xaxis = this.streamLineChartOptions.annotations.xaxis;
+        this.streamLineChartOptions = {
+          ...this.streamLineChartOptions,
+          annotations : {
+            xaxis:[],
+          }
         }
-        await temppArr.sort((a,b) => b.viewer_count - a.viewer_count);
-        viewCountLimit = temppArr[temppArr.length - 1].viewer_count;
-        lastId = temppArr[temppArr.length - 1].id;
-        // console.log(viewCountLimit, lastId);
-      })
-
-      console.log(topStreamData['49045679'].viewer_count);
-
+      }else{
+        this.streamLineChartOptions = {
+          ...this.streamLineChartOptions,
+          annotations : {
+            xaxis:this.annotations.xaxis,
+          }
+        }
+      }
     },
+    annoPoint(val){
+      console.log('annoPoint',val);
+      if(val){
+        this.annotations.points = this.streamLineChartOptions.annotations.points;
+        this.streamLineChartOptions = {
+          ...this.streamLineChartOptions,
+          annotations : {
+            point:[],
+          }
+        }
+      }else{
+        this.streamLineChartOptions = {
+          ...this.streamLineChartOptions,
+          annotations : {
+            point:this.annotations.points,
+          }
+        }
+      }
+    }
   },
   async created() {
-    this.date = this.$moment().add(-2,'days').format('YY-MM-DD')
+    if(new Date().getHours() > 6){
+      this.date = this.$moment().format('YY-MM-DD')
+    }else{
+      this.date = this.$moment().add(-1,'days').format('YY-MM-DD')
+    }
     await this.$streamData.ref(`/treemap/${this.date}/overall`).get().then((sn) =>{
       for(let item in sn.val()){
         this.linechartOptions.labels.push( new Date(item*1).getTime());
@@ -597,6 +808,8 @@ export default {
       }
     })
     this.loading = true
+    await this.getTopStream();
+    await this.getTopGame();
   },
 
 }

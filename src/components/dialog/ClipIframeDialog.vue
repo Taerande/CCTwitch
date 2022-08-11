@@ -47,6 +47,13 @@
           allowfullscreen="true"></iframe>
       </v-responsive>
     </v-card-text>
+    <div class="d-flex justify-center py-5">
+      <Adsense
+      data-ad-client="ca-pub-8597405222136575"
+      data-ad-slot="3465851493"
+      :ins-style="`display:inline-block;width:100%;height:90px;background:red;`"
+      ></Adsense>
+    </div>
     <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
       <div class="px-1 mx-1">
         <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>

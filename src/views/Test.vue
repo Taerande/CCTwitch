@@ -7,6 +7,10 @@
       </div>
     </v-col>
   </v-row>
+  <v-row class="red">
+    <div>{{minit}}</div>
+  </v-row>
+
   <v-row class="col-12" v-if="lineloading">
     <v-col cols="12">
       <div id="chart">
@@ -46,7 +50,7 @@
     </v-col>
   </v-row>
   <v-row>
-    <v-btn color="success" block @click="getTreemap()">text</v-btn>
+    <v-btn color="success" block @click="getTreemap()">getTreemap</v-btn>
     <v-btn color="error" block @click="addNewData()">load Data</v-btn>
     <v-btn color="info" block @click="removeData()">remove</v-btn>
     <v-btn color="orange" block @click="wak()">wak</v-btn>
@@ -75,6 +79,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
+      minit:'',
       userSearch:'',
       lineloading:false,
       streamData:[],
@@ -200,6 +205,12 @@ export default {
     }
   },
   methods: {
+    async test(){
+      await setTimeout(() => {
+
+      }, timeout);
+
+    },
     async testRtdb(){
       const topStream = this.$streamData.ref('/treemap/22-07-17/topStream');
 
@@ -263,21 +274,22 @@ export default {
           first: 100,
           after: this.cursor,
         }
-      }).then(async (res) => {
+      }).then((res) => {
+        console.log(res);
         this.cursor = res.data.pagination.cursor;
         this.streamerCount += res.data.data.length;
         res.data.data.forEach((element) => {
-          if(element.viewer_count < 20) {
-            this.viewerCount += 1;
-          }
+          this.viewerCount += element.viewer_count
         })
-        if(res.data.data.length !== 0){
-          await this.getTreemap()
+        if(res.data.pagination.cursor !== undefined){
+          this.getTreemap()
         }
       })
-      // .then(() => {
-      //   this.$streamData.ref('treemap/'+this.asdf).set(this.treemap);
-      // })
+      .then(() => {
+        console.log('success');
+      }).catch(() => {
+
+      });
     },
     async removeData(){
       this.linechartOptions.title.text = '22-07-09 Statistics (cctwitch.xyz)'
@@ -481,6 +493,7 @@ export default {
     },
   },
   async created() {
+    console.log(this.$moment('17:1','hh:mm'));
     // await this.getLiveStreamWithLang();
     // this.streamingList.sort((a,b) => b.viewer_count - a.viewer_count)
     // this.streamData.sort((a,b) => b.viewer_count - a.viewer_count)

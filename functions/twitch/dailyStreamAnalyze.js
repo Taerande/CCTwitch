@@ -13,10 +13,13 @@ const clientSecret = process.env.TWITCH_CLIENT_SECRET;
 
 let cursor;
 let treemap = {
-  total_stream:0,
-  total_viewer:0,
+  total:{
+    total_stream:0,
+    total_viewer:0,
+  }
 };
 
+let result = {};
 
 const min = moment().minutes();
 const hour = moment().hours();
@@ -54,21 +57,20 @@ async function getTreemap(){
     }
   }).then(async (res) => {
 
-    if(treemap.total_stream === 0){
+    if(treemap.total.total_stream === 0){
       // treemap 루프 처음에 시작하는거
       const topStream = firebaseStreamData.ref(`/treemap/${date}/topStream`);
-      let topStreamData;
       await topStream.get().then(async (sn) => {
-        topStreamData = sn.val();
+        const topStreamData = sn.val();
         if(sn.exists()){
           let temppArr = [];
           for(let item in topStreamData) {
             temppArr.push({id:item, ...topStreamData[item]});
           }
-          await temppArr.sort((a,b) => b.viewer_count - a.viewer_count);
+            temppArr.sort((a,b) => b.viewer_count - a.viewer_count);
           // 새롭게 가져온 데이터가 100개가 넘어가면 다 삭제
           temppArr.slice(100).map( async (v) => {
-          await topStream.child(v.id).remove();
+            await topStream.child(v.id).remove();
           })
           viewCountLimit = temppArr[temppArr.length - 1].viewer_count;
           lastId = temppArr[temppArr.length - 1].id;
@@ -77,7 +79,7 @@ async function getTreemap(){
             if(topStreamData[v.user_id] === undefined){
               if(viewCountLimit < v.viewer_count){
                 // 새로운 탑 스트리머
-                await topStream.child(`${v.user_id}`).set({
+                  await topStream.child(`${v.user_id}`).set({
                   title:v.title,
                   game_name:v.game_name,
                   viewer_count: v.viewer_count,
@@ -87,7 +89,7 @@ async function getTreemap(){
             } else {
               if(viewCountLimit < v.viewer_count && topStreamData[v.user_id].viewer_count < v.viewer_count){
                 // 기존 스트리머중 최고 시청자수 갱신
-                await topStream.child(`${v.user_id}`).update({
+                 await topStream.child(`${v.user_id}`).update({
                   title:v.title,
                   game_name:v.game_name,
                   viewer_count: v.viewer_count,
@@ -98,7 +100,7 @@ async function getTreemap(){
           });
         } else {
           // treemap ${date}에 정보가 없으면 처음 res.data.data 100개 바로 삽입
-          res.data.data.map(async (v) => {
+          res.data.data.map( async (v) => {
             await topStream.child(`${v.user_id}`).set({
               title:v.title,
               game_name:v.game_name,
@@ -109,12 +111,12 @@ async function getTreemap(){
         }
       });
     }
-    treemap.total_stream += res.data.data.length;
+    treemap.total.total_stream += res.data.data.length;
     cursor = res.data.pagination.cursor;
-    await res.data.data.map((v) => {
+    res.data.data.map( async (v) => {
       let game_id = v.game_id === '' ? 'undefined' : v.game_id;
       let game_name = v.game_name === '' ? 'undefined' : v.game_name;
-      treemap.total_viewer += v.viewer_count
+      treemap.total.total_viewer += v.viewer_count
       if(treemap[game_id] === undefined){
         treemap[game_id] = {
           game_name: v.game_name,
@@ -138,7 +140,7 @@ async function getTreemap(){
         };
       }
       if(v.viewer_count > 10) {
-        firebaseStreamData.ref(`/stream_data/${v.user_id}/${date}/${streamDateId}`).update({
+        await firebaseStreamData.ref(`/stream_data/${v.user_id}/${date}/${streamDateId}`).update({
           title:v.title,
           viewer_count: v.viewer_count,
           game_name:game_name
@@ -146,7 +148,7 @@ async function getTreemap(){
       }
     })
 
-    if(res.data.data.length !== 0){
+    if(res.data.pagination.cursor !== undefined){
       await getTreemap()
     }
   }).catch((err) => {
@@ -165,58 +167,101 @@ async function getAccessToken(){
     })
   } catch(err) {
   }
-}
+};
+
+async function getTopGame(){
+
+  // topGame 은 이미 정해진 treemap 데이터를 기반으로
+
+  const lastGame = firebaseStreamData.ref(`/treemap/${date}/topGame`);
+
+  let sortedTreemap = [];
+  let tempGames = [];
+
+
+  // treemap에 viewer_count 기준으로 50개 추출
+  for(let gameData in treemap){
+    if(gameData !== 'total' && gameData !== 'undefined'){
+      sortedTreemap.push({id:gameData, ...treemap[gameData], time:streamDateId});
+    }
+  };
+  sortedTreemap.sort((a,b) => b.viewer_count - a.viewer_count);
+  sortedTreemap.splice(50);
+
+  // 서버에서의 topGame 추출
+  await lastGame.get().then((sn) => {
+
+    // 데이터 있는 경우
+    if(sn.exists()){
+      const topGameData = sn.val();
+      for(let gameItem in topGameData){
+        tempGames.push({id:gameItem, ...topGameData[gameItem]});
+      }
+      tempGames.sort((a,b) => b.viewer_count - a.viewer_count);
+
+      // 서버에서 추출한 topGame중 중복이 있으면 viewer_count 기준으로 변경
+      // 중복 없으면 데이터 추가
+
+      tempGames.map((v) => {
+        const idx = sortedTreemap.findIndex((x) => x.id === v.id);
+        if(idx === -1){
+          sortedTreemap.push(v);
+        }else{
+          if(sortedTreemap[idx].viewer_count < v.viewer_count){
+            sortedTreemap.splice(idx,1,{
+              id: v.id,
+              game_name: v.game_name,
+              time: v.time,
+              viewer_count: v.viewer_count,
+              stream_count: v.stream_count,
+              topStreamer: v.topStreamer,
+            });
+          }
+        }
+      });
+
+      // 추가된 데이터까지 합쳐서 50개 추출
+      sortedTreemap.sort((a,b) => b.viewer_count - a.viewer_count);
+      sortedTreemap.splice(50);
+
+
+      // 추출된 데이터 object 형태로 변경
+      sortedTreemap.forEach((ele) => {
+        result[ele.id] = {
+          game_name:ele.game_name,
+          time:ele.time,
+          viewer_count: ele.viewer_count,
+          stream_count: ele.stream_count,
+          topStreamer: ele.topStreamer,
+        }
+      });
+
+    // 데이터 없는 경우
+
+    }else{
+      sortedTreemap.forEach((ele) => {
+        result[ele.id] = {
+          game_name:ele.game_name,
+          time:ele.time,
+          viewer_count: ele.viewer_count,
+          stream_count: ele.stream_count,
+          topStreamer: ele.topStreamer,
+        }
+      });
+    }
+  });
+
+};
 let app = async function(){
   await getAccessToken();
   await getTreemap();
+  await getTopGame();
   await firebaseStreamData.ref(`/treemap/${date}/overall/${streamDateId}`).set({
-    total_stream: treemap.total_stream,
-    total_viewer: treemap.total_viewer,
+    total_stream: treemap.total.total_stream,
+    total_viewer: treemap.total.total_viewer,
   });
-  await firebaseStreamData.ref(`/treemap/${date}/timeSeries/${streamDateId}`).set(treemap)
-
-  // topGame 은 TopStream 에서 일단 추출하는걸로 가자.
-
-  // const lastGame = firebaseStreamData.ref(`/treemap/${date}/topGame`);
-
-  // let lastGameId = '';
-
-  // let gameViewCountLimit = 0;
-
-  // await lastGame.get().then((sn) => {
-  //   const data = sn.val();
-  //   if(sn.exists()){
-  //     let tempGames = [];
-  //     for(let gameItem in data){
-  //       tempGames.push({id:gameItem, ...data[gameItem]});
-  //     }
-  //     tempGames.sort((a,b) => b.viewer_count - a.viewer_count);
-  //     tempGames.slice(24).map( async (v) => {
-  //       await lastGame.child(v.id).remove();
-  //     })
-  //     gameViewCountLimit = tempGames[tempGames.length - 1].viewer_count;
-  //     lastGameId = tempGames[tempGames.length - 1].id;
-  //   }
-  // })
-  // let temppArr2 = [];
-  // for(let games in treemap){
-  //   temppArr2.push({
-  //     game_name:v.game_name,
-  //     viewer_count: v.viewer_count,
-  //     stream_count: v.stream_count,
-  //     topStreamer: v.topStreamer,
-  //     });
-  // }
-  // temppArr2.sort((a,b) => b.viewer_count - a.viewer_count);
-  // temppArr2.slice(0,24).map((v, index) => {
-  //   if(gameViewCountLimit < v.viewer_count){
-  //     v.topStreamer.sort((a,b) => b.viewer_count - a.viewer_count)
-
-  //     firebaseStreamData.ref(`/treemap/${date}/topGame`).child(v.id).update(treemap[v.id]);
-  //   }
-  // })
-
+  await firebaseStreamData.ref(`/treemap/${date}/timeSeries/${streamDateId}`).set(treemap);
+  await firebaseStreamData.ref(`/treemap/${date}/topGame`).set(result);
 }
-// console.log('end');
 
 module.exports = app;
