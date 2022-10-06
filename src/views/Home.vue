@@ -31,8 +31,9 @@
     </div>
     <v-divider class="my-1"></v-divider>
     <v-row class="d-flex col-12" v-if="streamingList.length > 0 && loading">
-      <v-col v-for="item in streamingList" :key="item.id+item.user_login" cols="6" xl="2" lg="3" md="4" sm="6" class="pa-2">
-        <v-card flat class="pa-0" :to="{name: 'Channel', query:{
+      <v-col v-for="item in streamingList" :key="item.id+item.user_login" cols="6" xl="2" lg="3" md="4" sm="6" class="pa-2" :title="item.title">
+        <v-card
+        flat class="pa-0" :to="{name: 'Channel', query:{
             q: item.user_login
           }}">
           <v-card-text class="pa-0">
@@ -137,6 +138,11 @@ export default {
         this.streamingList = res.data.data
         this.cursor = res.data.pagination.cursor;
         this.dataLoading = false;
+      }).catch(async (e) => {
+        if(e.response.status === 401){
+          await this.$store.dispatch('setNewTwitchAppToken');
+          await this.getLiveStreamWithLang();
+        }
       })
     },
     getDurationTimeToSec(el) {

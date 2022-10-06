@@ -1,3 +1,4 @@
+import axios from 'axios';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { userinfo } from './modules/auth';
@@ -162,11 +163,25 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    async setNewTwitchAppToken({ commit, state }){
+      await axios.get(state.appTokenURL).then((res) => {
+        localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
+        commit('SET_TwitchAppAccessToken', res.data.access_token);
+      });
+    },
     setUserInfo({ commit }, payload){
       commit('SET_UserInfo', payload)
     },
     setFirebaeStatus({ commit }, payload){
       commit('SET_FirebaseLoad', payload)
+    },
+    async setNewTwitchOAuthToken({state}){
+      const token = JSON.parse(localStorage.getItem('twitchOAuthToken'));
+      await axios.post(`${state.backendUrl}/twitchOauthToken/oauthtoken/issue`,{
+        refresh_token: token.refresh_token
+      }).then((res) => {
+        localStorage.setItem('twitchOAuthToken', JSON.stringify(res.data));
+      });
     }
   },
   modules: {

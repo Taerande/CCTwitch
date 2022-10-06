@@ -119,12 +119,12 @@
             </v-card-text>
           </v-card>
           </v-timeline-item>
-          <div class="pa-1 py-2 d-flex justify-center">
+          <div class="d-flex justify-center align-center py-5">
             <InArticleAdsense
               data-ad-client="ca-pub-8597405222136575"
               data-ad-slot="1875328416"
               data-ad-format="fluid"
-              ins-style="display:inline-block;width:90%;"
+              ins-style="display:inline-block;width:90%;min-width:266px;"
             ></InArticleAdsense>
           </div>
         </div>
@@ -189,7 +189,12 @@ export default {
         }
       }).then((res) => {
         this.broadcaster = res.data.data[0];
-      })
+      }).catch( async (e) => {
+        if(e.response.status === 401){
+          await this.$store.dispatch('setNewTwitchAppToken');
+          await this.getUserInfo(el);
+        }
+      });
     },
     async createTimeline(user_login, broadcaster_id, vidId){
       this.loading = false;
@@ -223,7 +228,12 @@ export default {
         }
       }).then((res) => {
         this.vidInfo = res.data.data;
-      })
+      }).catch( async (e) => {
+          if(e.response.status === 401){
+            await this.$store.dispatch('setNewTwitchAppToken');
+            await this.getVidInfo(el);
+          }
+        });
     },
     async getClip(el){
       await axios.get('https://api.twitch.tv/helix/clips',{
@@ -233,7 +243,12 @@ export default {
         }
       }).then((res) => {
         this.cliplist = res.data.data;
-      })
+      }).catch( async (e) => {
+          if(e.response.status === 401){
+            await this.$store.dispatch('setNewTwitchAppToken');
+            await this.getClip(el);
+          }
+        });
     },
     secToHMS(el){
       if(el > 3600){
@@ -317,4 +332,9 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+// .adswrapper{
+//   display: flex;
+//   justify-content: center;
+//   margin: 10px 8px 30px 8px;
+// }
 </style>

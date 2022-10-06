@@ -1,220 +1,324 @@
 <template>
 <v-container>
-  <v-btn color="success" @click="getGame()" block>getGame</v-btn>
-  <v-row class="col-12">
-    <v-col cols="12" class="py-3">
-      <v-card  elevation="5">
-        <v-card-title>
-          <v-icon color="yellow" x-large>mdi-chart-timeline-variant-shimmer</v-icon>
-          <span class="px-1">Today's Viewers & Streams</span>
-        </v-card-title>
-        <div>
-          This Area is for Today's viewer, stream flow chart
-
-          When click certain time, dialog pop out and show treemap at that time.
-        </div>
+  <v-row class="d-flex justify-center align-center">
+    <!-- <v-icon color="twitch" :disabled="dateloading || this.date === '22-08-10'" x-large @click="beforeDate()">mdi-chevron-left</v-icon> -->
+    <v-dialog
+    v-model="dialog"
+    scrollable
+    max-width="500"
+    transition="dialog-transition"
+    >
+    <v-card class="justify-center pa-0 ma-0">
+      <v-card-text class="justify-center pa-0 ma-0">
+        <v-date-picker
+        class="d-flex justify-center"
+          v-model="reportDate"
+          color="twitch"
+          full-width
+          locale="ko-KR"
+          min="2022-08-10"
+          :max="new Date().getHours() > 6 ? this.$moment().format('YYYY-MM-DD') : this.$moment().add(-1,'days').format('YYYY-MM-DD')"
+        ></v-date-picker>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn text color="error" @click="dialog = !dialog">close</v-btn>
+        <v-btn text color="success" :disabled="reportDate === null"  @click="changeDate(), dialog = !dialog">Apply</v-btn>
+      </v-card-actions>
+    </v-card>
+    </v-dialog>
+    <span  @click="dialog = !dialog" class="d-flex align-center mx-16 hoverCursor">
+      <v-icon color="error" class="px-1">mdi-calendar</v-icon>
+      <span class="text-h5 twitch--text font-weight-blod">{{this.$moment(`20${this.date}`).format('ll')}}</span>
+    </span>
+    <!-- <v-icon color="twitch" :disabled="dateloading ||this.date === this.$moment().format('YY-MM-DD')" x-large @click="afterDate()">mdi-chevron-right</v-icon> -->
+  </v-row>
+  <v-row v-if="overallLoading">
+  <v-subheader>Viewers & Streams</v-subheader>
+    <v-col cols="12" class="py-3 d-flex justify-center align-center">
+      <v-card flat style="width:100%;">
         <div id="chart" v-if="loading" class="ma-2">
-          <apexchart type="line" height="350" :options="linechartOptions" :series="lineSeries"></apexchart>
+          <apexchart ref="linechart" type="line" height="350" :options="linechartOptions" :series="lineSeries"></apexchart>
         </div>
         <div v-else class="d-flex justify-center">
           <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
         </div>
       </v-card>
     </v-col>
-  </v-row>
-  <v-subheader>Top Streamers</v-subheader>
-  <v-row>
-    <v-slide-group
-      center-active
-      show-arrows>
-      <v-slide-item
-        class="pa-2"
-        v-for="streamer in topStreams" :key="streamer.id">
-        <v-card
-        width="80"
-        @click="toggleTopStream(streamer)"
-        flat
-        :color="streamerModel.id === streamer.id ?  'rgb(0,0,0,0.2)' : 'rgb(0,0,0,0)'"
-        class="pa-0 ma-0 d-flex justify-center align-center flex-column hoverCursor text-truncate">
-         <v-avatar size="48" color="black">
-           <v-img
-             sizes="48"
-             :src="streamer.profile_image_url"
-             alt="profile_img"
-           >
-            <v-icon v-if="streamerModel.id === streamer.id" color="green" large>mdi-check-bold</v-icon>
-           </v-img>
-         </v-avatar>
-         <div class="d-flex align-center text-caption text-truncate">
-           <span>{{streamer.display_name === undefined ? 'Undefined' : streamer.display_name}}</span>
-         </div>
-         <div class="d-flex justify-center pr-3">
-          <span class="red--text d-flex text-caption align-baseline">
-            <v-icon color="red" small>mdi-account</v-icon>{{streamer.viewer_count}}
-          </span>
-        </div>
-       </v-card>
-      </v-slide-item>
-    </v-slide-group>
-  </v-row>
-  <v-expand-transition>
-    <v-card
-      height="500"
-      tile
-      loader-height="10"
-      v-if="streamerModel.id !== null"
-    >
-      <v-card-title class="d-flex align-center">
-          <router-link :to="{name:'Channel', query:{
-            q:streamerModel.login}}" class="d-flex align-center">
-            <v-avatar size="48" color="black">
-               <v-img
-                 sizes="48"
-                 :src="streamerModel.profile_image_url"
-                 alt="profile_img"
-               >
-               </v-img>
-             </v-avatar>
-             <div class="twitch--text px-3">
-              {{streamerModel.display_name}}
-             </div>
-          </router-link>
-          <div>
-            <v-switch
-              v-model="annoXaxis"
-              flat
-              color="red"
-            ></v-switch>
-            <v-switch
-              v-model="annoPoint"
-              flat
-              color="twitch"
-            ></v-switch>
+    <v-subheader>Top Streamers</v-subheader>
+    <v-col class="pb-3 d-flex justify-center align-center" cols="12">
+      <v-slide-group
+        center-active
+        show-arrows>
+        <v-slide-item
+          class="pa-2"
+          v-for="streamer in topStreams" :key="streamer.id">
+          <v-card
+          width="80"
+          @click="toggleTopStream(streamer)"
+          flat
+          :color="streamerModel.id === streamer.id ?  'rgb(0,0,0,0.2)' : 'rgb(0,0,0,0)'"
+          class="pa-0 ma-0 d-flex justify-center align-center flex-column hoverCursor text-truncate">
+           <v-avatar size="48" color="black">
+             <v-img
+               sizes="48"
+               :src="streamer.profile_image_url"
+               alt="profile_img"
+             >
+              <v-icon v-if="streamerModel.id === streamer.id" color="green" large>mdi-check-bold</v-icon>
+             </v-img>
+           </v-avatar>
+           <div class="d-flex align-center text-caption text-truncate">
+             <span>{{streamer.display_name === undefined ? 'Undefined' : streamer.display_name}}</span>
+           </div>
+           <div class="d-flex justify-center pr-3">
+            <span class="red--text d-flex text-caption align-baseline">
+              <v-icon color="red" small>mdi-account</v-icon>{{streamer.viewer_count}}
+            </span>
           </div>
-          <v-spacer></v-spacer>
-          <v-icon @click="streamerModel = {
-            id:null
-          }" large>mdi-chevron-double-up</v-icon>
-      </v-card-title>
-      <v-card-text>
-        <div v-if="!streamLoading" class="ma-2">
-          <apexchart id="Streamchart" type="line" height="350" :options="streamLineChartOptions" :series="streamLineSeries"></apexchart>
-        </div>
-        <div v-else class="d-flex align-center justify-center" style="height:350px;">
-          <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
-        </div>
-      </v-card-text>
-    </v-card>
-  </v-expand-transition>
-  <v-subheader>Top Categories</v-subheader>
-   <v-row>
-    <v-slide-group
-      center-active
-      show-arrows>
-      <v-slide-item
-        class="pa-2"
-         v-for="(game, idx) in topGames" :key="idx">
-        <v-card
-        @click="toggleTopGame(game)"
-        class="pa-0 ma-0 d-flex justify-center align-center flex-column hoverCursor text-truncate"
-        :color="gameModel.id === game.id ?  'rgb(0,0,0,0.2)' : 'rgb(0,0,0,0)'"
-        width="100" flat>
-        <v-img
-          :src="game.box_art_url"
-          class="d-flex justify-center align-center"
-        >
-          <v-icon class="d-flex justify-center" v-if="gameModel.id === game.id" color="green lighten-4" x-large>mdi-check-bold</v-icon>
-        </v-img>
-        <div class="d-flex justify-center pr-3 pt-2">
-          <span class="red--text d-flex text-body-2 align-baseline">
-            <v-icon color="red" small>mdi-account</v-icon>{{game.viewer_count}}
-          </span>
-        </div>
-    </v-card>
-      </v-slide-item>
-     </v-slide-group>
-  </v-row>
-  <v-expand-transition>
-    <v-card
-      height="500"
-      tile
-      loader-height="10"
-      class="d-flex align-center"
-      v-if="gameModel.id !== null"
-    >
-      <v-card-text>
-        <div v-if="!gameLoading" class="ma-2 d-flex align-center">
-        <div style="width:200px;">
-          <div class="d-flex justify-center pb-2">
-            <div class="d-flex align-center">
-              <v-icon color="red" class="pr-1">mdi-clock-outline</v-icon> {{$moment(gameModel.time).format('MM-DD HH:mm')}}
-            </div>
-          </div>
-          <v-img
-            width="200"
-            :src="gameModel.box_art_url"
-            class="rounded-lg rounded-b-0 d-flex align-center"
-          >
-          </v-img>
-          <div class="text-h6 white--text black rounded-lg rounded-t-0 d-flex justify-center">
-            {{gameModel.game_name}}
-          </div>
-          <div class="d-flex pt-3 px-2">
-            <div class="d-flex align-center">
-              <v-icon color="red" class="pr-1">mdi-account</v-icon>{{gameModel.viewer_count}}
-            </div>
+         </v-card>
+        </v-slide-item>
+      </v-slide-group>
+    </v-col>
+    <v-expand-transition>
+      <v-card
+        outlined
+        v-if="streamerModel.id !== null"
+        style="width:100%;"
+      >
+      <v-subheader>Chart</v-subheader>
+        <v-card-title class="d-flex align-center">
+            <router-link :to="{name:'Channel', query:{
+              q:streamerModel.login}}" class="d-flex align-center">
+              <v-avatar size="48" color="black">
+                 <v-img
+                   sizes="48"
+                   :src="streamerModel.profile_image_url"
+                   alt="profile_img"
+                 >
+                 </v-img>
+               </v-avatar>
+               <div class="twitch--text px-3">
+                {{streamerModel.display_name}}
+               </div>
+            </router-link>
             <v-spacer></v-spacer>
-            <div class="d-flex align-center">
-              <v-icon color="red" class="pr-1">mdi-video</v-icon> {{gameModel.stream_count}}
+            <div class="d-flex align-center px-3">
+              <v-checkbox
+                class="pa-0 ma-0"
+                v-model="annoXaxis"
+                dense
+                label="Category"
+                :hide-details="true"
+                :hide-spin-buttons="true"
+                color="twitch"
+              >
+              <template v-slot:label>
+                <span class="text-caption pr-5" :class="annoXaxis ? 'twitch--text' : 'grey--text text-decoration-line-through'">Category</span>
+              </template>
+              </v-checkbox>
+              <v-checkbox
+                class="pa-0 ma-0"
+                v-model="annoPoint"
+                dense
+                :hide-details="true"
+                :hide-spin-buttons="true"
+                color="red"
+              >
+               <template v-slot:label>
+                <span class="text-caption" :class="annoPoint ? 'red--text' : 'grey--text text-decoration-line-through'">Title</span>
+              </template>
+              </v-checkbox>
             </div>
+            <v-icon color="red" @click="streamerModel = {
+              id:null
+            }">mdi-close</v-icon>
+        </v-card-title>
+        <v-card-text>
+          <div v-if="!streamLoading" class="ma-2">
+            <apexchart ref="streamchart" type="line" height="350" :options="streamLineChartOptions" :series="streamLineSeries"></apexchart>
           </div>
-        </div>
-          <div id="topGameBarChart" class="ma-2">
-            <apexchart type="bar" height="350" :options="barCahrtOptions" :series="barSeries"></apexchart>
+          <div v-else class="d-flex align-center justify-center" style="height:350px;">
+            <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
           </div>
-        </div>
-        <div v-else class="d-flex align-center justify-center" style="height:350px;">
-          <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
-        </div>
-      </v-card-text>
-    </v-card>
-  </v-expand-transition>
-  <v-dialog
-    scrollable
-    v-model="dialog"
-  >
-    <v-card v-if="!dataloading">
-      <v-card-title primary-title>
-        {{new Date(dialogTime*1)}}
-      </v-card-title>
-      <div id="chart">
-        <apexchart type="treemap" height="350" :options="treemapchartOptions" :series="treemapSeries"></apexchart>
-      </div>
-    </v-card>
-    <v-overlay
-    v-else
-    opacity="0"
-    >
-      <v-container fluid>
-        <v-row class="d-block">
-          <div class="d-flex justify-center">
-            <v-progress-circular size="36" width="6" color="twitch" :indeterminate="true"></v-progress-circular>
+        </v-card-text>
+        <DisplyaAdContainerVue></DisplyaAdContainerVue>
+        <v-subheader>Clips</v-subheader>
+        <v-row class="d-flex justify-center col-12" v-if="streamerClips.length > 0 && !clipLoading">
+          <v-col class="d-flex justify-center align-center py-10" cols="12">
+            <v-slide-group
+              center-active
+              show-arrows>
+              <v-slide-item
+              v-slot="{active, toggle}"
+              class="pa-2" v-for="item in streamerClips" :key="item.id">
+                <v-card
+                class="ma-0 pa-0" flat style="width:250px;" :color="active ?  'rgb(0,0,0,0.2)' : 'rgb(0,0,0,0)'">
+                  <div @click.capture="toggle">
+                    <ClipIframeDialogVue :listData="listData" :clipData="item"></ClipIframeDialogVue>
+                  </div>
+                  <div class="d-flex justify-center pt-2" style="width:inherit">{{item.title}}</div>
+                </v-card>
+              </v-slide-item>
+            </v-slide-group>
+          </v-col>
+        </v-row>
+        <v-row v-else-if="streamerClips.length === 0 && !clipLoading" class="d-flex justify-center col-12">
+          <v-col class="d-flex justify-center align-center py-10" cols="12">
+            No Clips
+          </v-col>
+        </v-row>
+        <v-row class="d-flex justify-center" v-else>
+          <div class="d-flex align-center justify-center" style="height:350px;">
+            <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
           </div>
         </v-row>
-      </v-container>
-    </v-overlay>
-  </v-dialog>
+      </v-card>
+    </v-expand-transition>
+    <v-col cols="12" class="pa-0 ma-0">
+      <DisplyaAdContainerVue></DisplyaAdContainerVue>
+    </v-col>
+    <v-subheader>Top Categories</v-subheader>
+     <v-col class="pb-3 d-flex justify-center align-center" cols="12">
+      <v-slide-group
+        v-model="topGameModel"
+        center-active
+        show-arrows>
+        <v-slide-item
+          v-slot="{active , toggle}"
+          class="pa-2"
+           v-for="(game, idx) in topGames" :key="idx">
+          <v-card
+          @click="toggle, toggleTopGame(game)"
+          class="pa-0 ma-0 d-flex justify-center align-center flex-column hoverCursor text-truncate"
+          :color="active ?  'rgb(0,0,0,0.2)' : 'rgb(0,0,0,0)'"
+          width="100" flat>
+          <v-img
+            :src="game.box_art_url"
+            class="d-flex justify-center align-center"
+          >
+            <v-icon class="d-flex justify-center" v-if="gameModel.id === game.id" color="green" x-large>mdi-check-bold</v-icon>
+          </v-img>
+          <div class="d-flex justify-center pr-3 pt-2">
+            <span class="red--text d-flex text-body-2 align-baseline">
+              <v-icon color="red" small>mdi-account</v-icon>{{game.viewer_count}}
+            </span>
+          </div>
+      </v-card>
+        </v-slide-item>
+       </v-slide-group>
+    </v-col>
+    <v-expand-transition>
+      <v-card
+        outlined
+        style="width:100%;"
+        v-if="gameModel.id !== null"
+      >
+        <v-subheader>
+          Top 10 Streams
+        </v-subheader>
+        <v-row v-if="!gameLoading" class="d-flex">
+          <v-col class="d-flex justify-center" cols="12" xl="3" lg="3" md="3" sm="6">
+            <div class="ma-2 d-flex align-center">
+              <div style="width:200px;">
+                <div class="d-flex justify-center pb-2">
+                  <div class="d-flex align-center">
+                    <v-icon color="red" class="pr-1">mdi-clock-outline</v-icon> {{$moment(gameModel.time).format('MM-DD HH:mm')}}
+                  </div>
+                </div>
+                <v-img
+                  width="200"
+                  :src="gameModel.box_art_url"
+                  class="rounded-lg rounded-b-0 d-flex align-center"
+                >
+                </v-img>
+                <div class="text-h6 white--text black rounded-lg rounded-t-0 d-flex justify-center">
+                  {{gameModel.game_name}}
+                </div>
+                <div class="d-flex pt-3 px-2">
+                  <div class="d-flex align-center">
+                    <v-icon color="red" class="pr-1">mdi-account</v-icon>{{gameModel.viewer_count}}
+                  </div>
+                  <v-spacer></v-spacer>
+                  <div class="d-flex align-center">
+                    <v-icon color="red" class="pr-1">mdi-video</v-icon> {{gameModel.stream_count}}
+                  </div>
+                </div>
+              </div>
+              <!-- <div id="topGameBarChart" class="ma-2" style="width:300px;">
+                <apexchart type="bar" height="350" :options="barCahrtOptions" :series="barSeries"></apexchart>
+              </div> -->
+            </div>
+          </v-col>
+          <v-col  cols="12" xl="9" lg="9" md="9" sm="6" class="pa-1">
+            <v-row class="d-flex col-12 justify-space-between">
+              <v-col
+              cols="12"
+              xl="4" lg="4" md="6"
+              v-for="streamer in gameModel.topStreamer" :key="streamer.id"
+              >
+                <v-card elevation="3" outlined class="d-flex rounded-lg py-1 streamer-list" style="width:100%;" :to="{name: 'Channel', query:{
+              q: streamer.login}}" :title="streamer.title">
+                  <v-card-text class="d-flex align-center justify-center pa-2">
+                      <div aria-label="avatar" class="flex-direction: column">
+                        <v-avatar size="36">
+                          <v-img :src="streamer.profile_image_url" alt="profile_img"></v-img>
+                        </v-avatar>
+                      </div>
+                      <div class="text-truncate pl-4">
+                        <div :class="isDark ? 'white--text' : 'twitch--text'">
+                          {{streamer.user_name}}
+                        </div>
+                        <div class="text-caption text-truncate font-weight-bold">
+                          {{streamer.title}}
+                        </div>
+                      </div>
+                      <v-spacer></v-spacer>
+                      <div class="d-flex justify-end">
+                        <div class="d-flex error--text text-caption"><v-icon color="error" x-small class="pr-1">mdi-account</v-icon>{{streamer.viewer_count}}</div>
+                      </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+        <v-row v-else class="d-flex align-center justify-center" style="height:350px;">
+          <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+        </v-row>
+      </v-card>
+    </v-expand-transition>
+  </v-row>
+  <v-row v-else class="d-flex justify-center align-center">
+    <div class="d-flex justify-center align-center" style="height:45vh;">
+        <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+    </div>
+  </v-row>
 </v-container>
 </template>
 <script>
 import axios from 'axios';
+import ClipIframeDialogVue from '../dialog/ClipIframeDialog.vue';
+import DisplyaAdContainerVue from '../DisplyaAdContainer.vue';
 
 export default {
+  props:['listData'],
   components:{
+    ClipIframeDialogVue,
+    DisplyaAdContainerVue,
     // StreamerChartVue,
   },
   data() {
     return {
+      clipModel:null,
+      topGameModel:null,
+      dialog:false,
+      afterCursor:'',
+      reportDate:null,
+      dateloading:false,
+      hotClips:[],
+      streamerClips:[],
+      overallLoading:false,
       annoXaxis:true,
       annoPoint:true,
       annotations:{
@@ -223,7 +327,6 @@ export default {
       },
       tempGameIdList:[],
       streamLoading:false,
-      categoryModel:null,
       gameModel:{
         id:null,
       },
@@ -234,8 +337,6 @@ export default {
       streamerInfo:null,
       date:'',
       loading:false,
-      dialog:false,
-      dataloading:false,
       gameLoading:false,
       streamerCount:0,
       topGames:[],
@@ -244,30 +345,30 @@ export default {
       viewerCount:0,
       dialogTime:0,
       streamData:[],
-      barCahrtOptions:{
-        chart:{
-          type:'bar',
-          height:500,
-        },
-        plotOptions: {
-            bar: {
-              borderRadius: 4,
-              horizontal: true,
-            }
-        },
-        dataLabels:{
-          enabled: false,
-          style:{
-            colors: '#000000'
-          }
-        },
-      },
-      barSeries:[
-        {
-          name:'Viewers',
-          data:[]
-        }
-      ],
+      // barCahrtOptions:{
+      //   chart:{
+      //     type:'bar',
+      //     height:500,
+      //   },
+      //   dataLabels:{
+      //     enabled: true,
+      //     style: {
+      //         colors: ['#000000']
+      //     },
+      //   },
+      //   plotOptions: {
+      //       bar: {
+      //         borderRadius: 4,
+      //         horizontal: true,
+      //       }
+      //   },
+      // },
+      // barSeries:[
+      //   {
+      //     name:'Viewers',
+      //     data:[]
+      //   }
+      // ],
       lineSeries:[
         {name:'Viewers', type:'line', data:[]},
         {name:'Streams', type:'column', data:[]}
@@ -284,22 +385,16 @@ export default {
           },
         },
         chart: {
-           events: {
-            dataPointSelection: (event, chartContext, config) => {
-              this.dialog = true;
-              this.getTreemap(this.linechartOptions.labels[config.dataPointIndex]);
-            }
-          },
           height: 350,
           type: "line",
           backgroud:'#FFFFFF',
         },
         theme:{
-          mode:'light'
+          mode:'light',
         },
         colors:['#00E396', '#6633ff'],
         title: {
-          text: "Viewers & Streams Twitch-KR (cctwitch.xyz)"
+          text: `Viewers & Streams Twitch-KR (cctwitch.xyz)`
         },
         xaxis: {
           type: "datetime",
@@ -329,32 +424,6 @@ export default {
         ],
         labels: [],
       },
-      treemapSeries:[],
-      treemapchartOptions:{
-         legend: {
-          show: true
-        },
-        chart: {
-          height: 500,
-          type: 'treemap',
-        },
-        fill: {
-          type: 'image',
-          image: {
-            src: [
-              ],
-              width:75,
-              height:100
-          },
-        },
-        theme:{
-          mode:'dark'
-        },
-        title: {
-          text: 'Distibuted Treemap (cctwitch.xyz)',
-          align: 'center'
-        },
-      },
       streamLineSeries:[
         {name:'Viewers', type:'line', data:[]},
       ],
@@ -382,7 +451,7 @@ export default {
               }
             });
             const xaxis = xaxises.pop();
-            if(series[seriesIndex][dataPointIndex] !== null && points.length !== 0 && xaxises.length !== 0){
+            if(series[seriesIndex][dataPointIndex] !== null && w.config.annotations.points.length !== 0 && w.config.annotations.xaxis.length !== 0){
               return '<div class="rounded-md v-card">' +
               '<div class="v-card-title pa-1 ma-0 grey lighten-3">'+
                 '<div class="black--text text-caption pa-1">'+
@@ -395,7 +464,7 @@ export default {
                 '<div class="pa-1 twitch--text text-caption">' + 'Category : ' + xaxis.label.text + '</div>' +
               '</div>'+
             '</div>'
-            } else if(series[seriesIndex][dataPointIndex] !== null && points.length === 0 && xaxises.length !== 0){
+            } else if(series[seriesIndex][dataPointIndex] !== null && w.config.annotations.points.length === 0 && w.config.annotations.xaxis.length !== 0){
               return '<div class="rounded-md v-card">' +
               '<div class="v-card-title pa-1 ma-0 grey lighten-3">'+
                 '<div class="black--text text-caption pa-1">'+
@@ -407,7 +476,7 @@ export default {
                 '<div class="pa-1 twitch--text text-caption">' + 'Category : ' + xaxis.label.text + '</div>' +
               '</div>'+
             '</div>'
-            } else if(series[seriesIndex][dataPointIndex] !== null && points.length !== 0 && xaxises.length === 0){
+            } else if(series[seriesIndex][dataPointIndex] !== null && w.config.annotations.points.length !== 0 && w.config.annotations.xaxis.length === 0){
               return '<div class="rounded-md v-card">' +
               '<div class="v-card-title pa-1 ma-0 grey lighten-3">'+
                 '<div class="black--text text-caption pa-1">'+
@@ -419,14 +488,28 @@ export default {
                 '<div class="pa-1 red--text text-caption">' + 'Title : ' + point.label.text + '</div>' +
               '</div>'+
             '</div>'
-            } else {
-              return null;
+            } else if(series[seriesIndex][dataPointIndex] !== null) {
+              return '<div class="rounded-md v-card">' +
+              '<div class="v-card-title pa-1 ma-0 grey lighten-3">'+
+                '<div class="black--text text-caption pa-1">'+
+                  time.split(' ')[0].slice(0,5) +
+                '</div>'+
+              '</div>'+
+              '<div class="v-card-text">'+
+                '<div class="pa-1">' + '<span class="text-caption" style="color:#00E396;">'+'Viewers : '+'</span>'  + '<span class="text-caption text--black font-weight-black">'+series[seriesIndex][dataPointIndex]+'</span>' + '</div>' +
+              '</div>'+
+            '</div>'
+            }else {
+              return null
             }
           },
           x:{
             show:true,
             format: 'HH:mm'
           },
+        },
+        theme:{
+          mode: 'light',
         },
         annotations:{
           xaxis:[],
@@ -464,9 +547,30 @@ export default {
         ],
         labels: [],
       },
+      clipLoading:true,
     }
   },
   methods: {
+    async getClips(el){
+      this.streamerClips = [];
+      this.clipLoading = true;
+      await axios.get('https://api.twitch.tv/helix/clips',{
+        params:{
+          broadcaster_id:el,
+          started_at:new Date(this.streamLineChartOptions.labels[0]).toISOString(),
+          ended_at:new Date(this.streamLineChartOptions.labels[this.streamLineChartOptions.labels.length - 1]).toISOString(),
+        },
+        headers:this.$store.state.headerConfig
+      }).then((res) => {
+        this.streamerClips = res.data.data;
+        this.clipLoading = false;
+      }).catch(async (e) => {
+        if(e.response.status === 401){
+          await this.$store.dispatch('setNewTwitchAppToken');
+          await this.getClips(el);
+        }
+      })
+    },
     cleaerAnnotation(){
       this.annotations.xaxis = this.streamLineChartOptions.annotations.xaxis;
       this.streamLineChartOptions = {
@@ -502,7 +606,7 @@ export default {
         };
       } else {
         this.gameModel = el;
-        this.barSeries[0].data = [];
+        // this.barSeries[0].data = [];
         el.topStreamer.forEach((el) => {
           tempIds.push(el.id)
         })
@@ -520,19 +624,23 @@ export default {
           }};
         })
       });
-      this.gameModel.topStreamer.forEach((el) => {
-        this.barSeries[0].data.push({
-          x:el.user_name,
-          y:el.viewer_count
-        })
-      });
-      this.barSeries[0].data.sort((a,b) => b.y - a.y);
-      this.barSeries[0].data.splice(10);
+      // this.gameModel.topStreamer.forEach((el) => {
+      //   this.barSeries[0].data.push({
+      //     x:el.user_name,
+      //     y:el.viewer_count
+      //   })
+      // });
+      // this.barSeries[0].data.sort((a,b) => b.y - a.y);
+      // this.barSeries[0].data.splice(10);
       }
       this.gameLoading = false;
     },
     async toggleTopStream(el){
+      this.streamLineChartOptions.labels = [];
+      this.streamerClips = [];
+      this.streamLineSeries[0].data = [];
       this.streamLoading = true;
+      this.streamLineChartOptions.theme.mode = this.$vuetify.theme.isDark ? 'dark' : 'light';
       if(el.id === this.streamerModel.id){
         this.streamerModel = {
           id:null,
@@ -542,19 +650,13 @@ export default {
         this.annoPoint = false;
         this.streamLoading = false;
         this.streamLineChartOptions.title.text = '';
-        this.streamLineChartOptions.labels = [];
-        this.streamLineChartOptions.annotations.xaxis = [];
-        this.streamLineChartOptions.annotations.points = [];
-        this.streamLineSeries[0].data = [];
+        this.annotations.xaxis = [];
+        this.annotations.points = [];
       } else {
         this.annoXaxis = true;
         this.annoPoint = true;
         this.streamerModel = el;
-        this.streamLineChartOptions.labels = [];
-        this.streamLineChartOptions.annotations.xaxis = [];
-        this.streamLineChartOptions.annotations.points = [];
-        this.streamLineSeries[0].data = [];
-        this.streamLineChartOptions.title.text = `${el.display_name}'s ${this.date} viewers (cctwitch.xyz)'`
+        this.streamLineChartOptions.title.text = `${el.display_name}'s ${this.date} viewers (cctwitch.xyz)`
         await this.$streamData.ref(`/stream_data/${el.id}/${this.date}`).get().then((sn) => {
           const streamData = sn.val();
           let formerGameName = '';
@@ -565,6 +667,8 @@ export default {
           }
           viewerStreams.sort((a,b) => b-a);
           const avg = (viewerStreams[0]+viewerStreams[viewerStreams.length-1])/2;
+          this.streamLineChartOptions.annotations.xaxis = [];
+          this.streamLineChartOptions.annotations.points = [];
           for(let item in streamData){
             const diffIdx = (item*1 - this.streamLineChartOptions.labels[this.streamLineChartOptions.labels.length-1])/1800000;
             const lastPoint = this.streamLineChartOptions.annotations.points[this.streamLineChartOptions.annotations.points.length - 1] === undefined ? {
@@ -628,11 +732,19 @@ export default {
             this.streamLineSeries[0].data.push(streamData[item].viewer_count);
           }
         });
+        this.annotations.xaxis = this.streamLineChartOptions.annotations.xaxis;
+        this.annotations.points = this.streamLineChartOptions.annotations.points;
+        this.streamLineSeries[0].data.unshift(null);
+        this.streamLineChartOptions.labels.unshift( this.streamLineChartOptions.labels[0] - 1800000);
+        this.streamLineChartOptions.labels.push( this.streamLineChartOptions.labels[this.streamLineChartOptions.labels.length - 1] + 1800000);
+        this.streamLineSeries[0].data.push(null);
+        await this.getClips(el.id);
         this.streamLoading = false;
       }
     },
     async getTopStream(){
       this.topStreams = [];
+      this.tempIdList = [];
       const tartget = this.$streamData.ref(`/treemap/${this.date}/topStream`).orderByChild('viewer_count').limitToLast(100);
       await tartget.get().then( async (sn) => {
         for(let item in sn.val()){
@@ -661,6 +773,7 @@ export default {
 
     async getTopGame(){
       this.topGames = [];
+      this.tempGameIdList = [];
       const tartget = this.$streamData.ref(`/treemap/${this.date}/topGame`).orderByChild('viewer_count').limitToLast(50);
       await tartget.get().then( async (sn) => {
         const data = sn.val();
@@ -716,49 +829,84 @@ export default {
         }
       })
     },
-    async getTreemap(datetimeId){
-      this.treemapSeries = [];
-      this.streamData = [];
-      this.treemapchartOptions.fill.image.src = [];
-      this.dataloading = true;
-      const tartget = this.$streamData.ref(`/treemap/${this.date}/timeSeries/${datetimeId}`).orderByChild('viewer_count').limitToLast(10);
-      await tartget.get().then((sn) => {
-        for (let name in sn.val()){
-          this.streamData.push(sn.val()[name])
-        }
-        this.streamData.sort((a,b) => b.viewer_count - a.viewer_count);
+    async beforeDate(){
+      this.dateloading = true;
+      this.date = this.$moment(`20${this.date}`).add(-1,'days').format('YY-MM-DD');
+      this.reportDate = '20' + this.date;
+      await this.newOverall();
+      this.dateloading = false;
 
-      });
-      let newSeries1 = this.streamData.slice(0,10);
-      newSeries1.sort((a,b) => b.viewer_count - a.viewer_count);
-      newSeries1.forEach( async (element, index) => {
-        const result = await this.getBoxArt(element.game_name);
-        this.treemapchartOptions.fill.image.src.push(result);
-        let topStreamer = element.topStreamer
-        let topStremers = [];
-        let etcView = element.viewer_count;
-        let etcStream = element.stream_count;
-        for (let name in topStreamer){
-          if(topStreamer[name].viewer > 99){
-            etcView -= topStreamer[name].viewer;
-            topStremers.push({x: topStreamer[name].user_name, y:topStreamer[name].viewer});
-          }
+    },
+    async afterDate(){
+      this.dateloading = true;
+      this.date = this.$moment(`20${this.date}`).add(1,'days').format('YY-MM-DD');
+      this.reportDate = '20'+this.date;
+      await this.newOverall();
+      this.dateloading = false;
+    },
+    async changeDate(){
+      this.date = this.$moment(this.reportDate).format('YY-MM-DD');
+      await this.newOverall();
+    },
+    async newOverall(){
+      this.streamerModel = {id:null};
+      this.gameModel = {id:null};
+      this.overallLoading = false;
+      this.loading = false;
+      this.linechartOptions.labels = [];
+      this.linechartOptions.theme.mode = this.$vuetify.theme.isDark ? 'dark' : 'light';
+      this.lineSeries[0].data = [];
+      this.lineSeries[1].data = [];
+      await this.$streamData.ref(`/treemap/${this.date}/overall`).get().then((sn) =>{
+        for(let item in sn.val()){
+          this.linechartOptions.labels.push( new Date(item*1).getTime());
+          this.lineSeries[0].data.push(sn.val()[item].total_viewer);
+          this.lineSeries[1].data.push(sn.val()[item].total_stream);
         }
-        topStremers.sort((a,b) => b.y - a.y);
-        etcStream -= topStremers.length;
-        this.treemapSeries.push({name:`${element.game_name}[${element.viewer_count}(${element.stream_count})]`,viewer:element.viewer_count, data: index > 5 ? topStremers.slice(0,5) : topStremers.slice(0,7)} )
-        this.treemapSeries[this.treemapSeries.length-1].data.push({x:`etc(${etcStream
-        })`, y:etcView})
-        this.treemapSeries.sort((a,b) => b.viewer_count - a.viewer_count);
       })
-      this.dataloading = false;
+      this.linechartOptions.title.text = `20${this.date} KR Viewers & Streams (cctwitch.xyz)`
+      await this.getTopStream();
+      await this.getTopGame();
+      this.hotClips = [];
+      // this.tempGameIdList.forEach(async (el) => {
+      //   await this.getHotClips(el);
+      //   this.hotClips.sort((a,b) => b.view_count - a.view_count);
+      //   this.hotClips.splice(100);
+      // })
+      // this.tempIdList.forEach(async (el) => {
+      //   await this.getHotClips(el);
+      //   this.hotClips.sort((a,b) => b.view_count - a.view_count);
+      //   this.hotClips.splice(100);
+      // })
+      this.overallLoading = true;
+      this.loading = true;
+    },
+    async getHotClips(game_id){
+      await axios.get('https://api.twitch.tv/helix/clips',{
+        params:{
+          game_id: game_id,
+          started_at: this.$moment(`20${this.date}`).add(7,'hours').toISOString(),
+          ended_at: this.$moment(`20${this.date}`).add(31,'hours').toISOString(),
+          first:100,
+          after:this.afterCursor
+        },
+        headers:this.$store.state.headerConfig
+      }).then( async (res) => {
+        this.afterCursor = res.data.pagination.cursor;
+        res.data.data.forEach((el) => {
+          if(el.language === 'ko' && el.view_count > 99){
+            this.hotClips.push(el)
+          }
+        });
+        // if(res.data.data[0].view_count > this.hotClips[this.hotClips.length - 1].view_count){
+        //   await this.getHotClips(game_id);
+        // }
+      })
     },
   },
   watch:{
     annoXaxis(val){
-      console.log('annoX',val);
-      if(val){
-        this.annotations.xaxis = this.streamLineChartOptions.annotations.xaxis;
+      if(!val){
         this.streamLineChartOptions = {
           ...this.streamLineChartOptions,
           annotations : {
@@ -775,46 +923,55 @@ export default {
       }
     },
     annoPoint(val){
-      console.log('annoPoint',val);
-      if(val){
-        this.annotations.points = this.streamLineChartOptions.annotations.points;
+      if(!val){
         this.streamLineChartOptions = {
           ...this.streamLineChartOptions,
           annotations : {
-            point:[],
+            points:[],
           }
         }
       }else{
         this.streamLineChartOptions = {
           ...this.streamLineChartOptions,
           annotations : {
-            point:this.annotations.points,
+            points:this.annotations.points,
           }
+        }
+      }
+    },
+    isDark:{
+      deep: true,
+      handler(){
+        if(this.isDark){
+          this.$refs.linechart.updateOptions({theme:{mode: 'dark'},chart:{background:'#424242'}});
+          this.$refs.streamchart.updateOptions({theme:{mode: 'dark'},chart:{background:'#424242'}});
+        }else{
+          this.$refs.linechart.updateOptions({theme:{mode: 'light'},chart:{background:'#FFFFFF'}});
+          this.$refs.streamchart.updateOptions({theme:{mode: 'light'},chart:{background:'#FFFFFF'}});
         }
       }
     }
   },
+  computed: {
+    isDark(){
+      return this.$vuetify.theme.isDark;
+    }
+  },
   async created() {
     if(new Date().getHours() > 6){
-      this.date = this.$moment().format('YY-MM-DD')
+      this.date = this.$moment().format('YY-MM-DD');
     }else{
-      this.date = this.$moment().add(-1,'days').format('YY-MM-DD')
+      this.date = this.$moment().add(-1,'days').format('YY-MM-DD');
     }
-    await this.$streamData.ref(`/treemap/${this.date}/overall`).get().then((sn) =>{
-      for(let item in sn.val()){
-        this.linechartOptions.labels.push( new Date(item*1).getTime());
-        this.lineSeries[0].data.push(sn.val()[item].total_viewer);
-        this.lineSeries[1].data.push(sn.val()[item].total_stream);
-      }
-    })
-    this.loading = true
-    await this.getTopStream();
-    await this.getTopGame();
+    document.title = `Overall | Report - CCTWITCH`
+    await this.newOverall();
   },
-
 }
 </script>
-<style>
+<style scoped>
+.v-input--selection-controls__ripple {
+  margin: 0;
+}
 .v-slide-group__content {
   justify-content: center;
 }
@@ -826,5 +983,10 @@ export default {
 }
 .apexcharts-point-annotation-label{
   z-index: -1 !important;
+}
+.streamer-list:hover{
+  z-index: 3;
+  transition: all ease 0.2s 0s;
+  transform: scale(1.1) !important;
 }
 </style>

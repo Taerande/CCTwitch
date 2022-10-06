@@ -8,7 +8,6 @@
     <v-img
     :aspect-ratio="16/9"
     class="rounded-lg clip-thumbnail"
-    @click="getVidOffset(clipData)"
     v-bind="attrs"
     v-on="on"
     lazy-src="@/assets/img/404.jpg"
@@ -34,6 +33,11 @@
         <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
       </div>
     </v-card-title>
+    <!-- <v-card-text class="pa-0 ma-0">
+      <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
+        <video autoplay controls :src="`${clipData.thumbnail_url.split('-preview')[0]}.mp4`"></video>
+      </v-responsive>
+    </v-card-text> -->
     <v-card-text class="pa-0 ma-0">
       <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
           <iframe
@@ -47,16 +51,14 @@
           allowfullscreen="true"></iframe>
       </v-responsive>
     </v-card-text>
-    <div class="d-flex justify-center py-5">
-      <Adsense
-      data-ad-client="ca-pub-8597405222136575"
-      data-ad-slot="3465851493"
-      :ins-style="`display:inline-block;width:100%;height:90px;background:red;`"
-      ></Adsense>
-    </div>
+    <Adsense
+    data-ad-client="ca-pub-8597405222136575"
+    data-ad-slot="3465851493"
+    :ins-style="`display:inline-block;width:100%;height:90px;`"
+    ></Adsense>
     <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
       <div class="px-1 mx-1">
-        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,clipData.title, setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
         <div class="text-caption">다시보기</div>
       </div>
       <div class="px-1 mx-1">
@@ -84,7 +86,6 @@
 </template>
 <script>
 import pinClip from '@/components/pinClip.vue';
-import axios from 'axios';
 import AddNewHotClipDialogVue from './AddNewHotClipDialog.vue';
 export default {
   components:{
@@ -141,33 +142,33 @@ export default {
       }
       return Math.abs(num);
     },
-    async getVidOffset(element){
-      if(!element.video_id){
-        return this.dialog = true;
-      }
-      const json = JSON.stringify(
-        {
-          operationName: "ClipsFullVideoButton",
-          variables: {
-            slug: element.id
-          },
-          extensions: {
-            persistedQuery: {
-              version: 1,
-              sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
-              }
-          }
-        })
-      await axios.post('https://gql.twitch.tv/gql',json, {
-        headers: {
-          'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
-        },
+    // async getVidOffset(element){
+    //   if(!element.video_id){
+    //     return this.dialog = true;
+    //   }
+    //   const json = JSON.stringify(
+    //     {
+    //       operationName: "ClipsFullVideoButton",
+    //       variables: {
+    //         slug: element.id
+    //       },
+    //       extensions: {
+    //         persistedQuery: {
+    //           version: 1,
+    //           sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
+    //           }
+    //       }
+    //     })
+    //   await axios.post('https://gql.twitch.tv/gql',json, {
+    //     headers: {
+    //       'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
+    //     },
 
-      }).then((res) => {
-          element.videoOffsetSeconds = res.data.data.clip.videoOffsetSeconds;
-          this.dialog = true;
-      })
-      }
+    //   }).then((res) => {
+    //       element.videoOffsetSeconds = res.data.data.clip.videoOffsetSeconds;
+    //       this.dialog = true;
+    //   })
+    // }
   },
   computed:{
   },
@@ -176,6 +177,11 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+
+video{
+  width: 100%    !important;
+  height: auto   !important;
+}
 .clip-thumbnail{
   cursor: pointer;
 }

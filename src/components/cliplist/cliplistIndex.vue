@@ -183,6 +183,11 @@ export default {
           }
         }).then( res => {
           this.userInfo = res.data.data[0];
+        }).catch( async (e) => {
+          if(e.response.status === 401){
+            await this.$store.dispatch('setNewTwitchAppToken');
+            await this.getUserInfo(userId);
+          }
         });
     },
     async deleteCliplist(){
@@ -194,6 +199,11 @@ export default {
       return await axios.get('https://api.twitch.tv/helix/clips', {
         headers: this.$store.state.headerConfig,
         params: { id: el }
+      }).catch( async (e) => {
+        if(e.response.status === 401){
+          await this.$store.dispatch('setNewTwitchAppToken');
+          await this.getTwitchClipData(el);
+        }
       })
     },
     async getMoreClips(){

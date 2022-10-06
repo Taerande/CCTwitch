@@ -3,7 +3,7 @@
     <Adsense
     data-ad-client="ca-pub-8597405222136575"
     data-ad-slot="3465851493"
-    :ins-style="`display:inline-block;width:${AdWidth};height:90px;`"
+    :ins-style="`display:inline-block;width:${AdWidth};height:90px;min-width:270px;`"
     ></Adsense>
   </div>
 </template>

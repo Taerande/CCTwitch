@@ -69,3 +69,11 @@ exports.twitchStreamDataCollector = functions.region('asia-northeast3').runWith(
 }).pubsub.schedule('*/30 * * * *')
   .timeZone('Asia/Seoul') // Users can choose timezone - default is America/Los_Angeles
   .onRun(require('./twitch/dailyStreamAnalyze'));
+
+
+// exports.createHotClip = functions.region('asia-northeast3').runWith({
+//   timeoutSeconds: 540,
+//   memory: "2GB",
+// }).pubsub.schedule('every 24 hours')
+//   .timeZone('Asia/Seoul') // Users can choose timezone - default is America/Los_Angeles
+//   .onRun(require('./twitch/dailyStreamAnalyze'));

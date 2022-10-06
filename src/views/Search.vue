@@ -121,9 +121,12 @@ export default {
           })
           this.searchList.sort((a,b) => b.view_count - a.view_count);
         }
+      }).catch(async (e) => {
+        if(e.response.status === 401){
+          await this.$store.dispatch('setNewTwitchAppToken');
+          await this.searchChannel(el);
+        }
       })
-      .catch(() =>{
-      });
       this.dataLoading = true;
 
     },

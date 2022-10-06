@@ -48,7 +48,10 @@ export default {
       this.$store.commit('TOGGLE_SearchBar')
     },
   },
-
+  // errorCaptured(err,vm,info) {
+  //   console.log(`cat EC: ${err.toString()}\ninfo: ${info}`);
+  //    return false;
+  // },
  async created() {
     this.$store.commit('INIT_localStorage');
     this.$store.commit('SET_SignInDialog', false);

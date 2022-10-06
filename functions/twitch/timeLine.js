@@ -12,8 +12,9 @@ app.post('/timeline', async (req, res) => {
   const user_login = req.body.user_login;
   const isLive = req.body.isLive;
   const vidId = req.body.vidId;
-  const appAccessToken = req.body.appAccessToken;
+  let appAccessToken = req.body.appAccessToken;
   const clientId = process.env.TWITCH_CLIENT_ID;
+  const clientSecret = process.env.TWITCH_CLIENT_SECRET;
   let sn = firestore.collection('timeline').doc(`${user_login}-${vidId}`);
   let isStream;
 
@@ -30,6 +31,17 @@ app.post('/timeline', async (req, res) => {
   // 3. vidId가 없으면 생성안댐.
   // 4. 인기 클립 100개 시간순으로 나열하자.
 
+
+  async function getNewAppAccessToken(){
+    await await axios.post(`https://id.twitch.tv/oauth2/token?` +
+    `client_id=${clientId}&` +
+    `client_secret=${clientSecret}&`+
+    `grant_type=client_credentials`)
+    .then((resp) => {
+      appAccessToken = `Bearer ${resp.data.access_token}`;
+    })
+  }
+
   async function getVid(el){
     await axios.get('https://api.twitch.tv/helix/videos',{
       headers:{
@@ -43,8 +55,15 @@ app.post('/timeline', async (req, res) => {
     }).then((resp) => {
         vidData = resp.data.data;
       // }
-    }).catch((err)=>{
-      res.status(400).send({message:err.message})
+    }).catch( async (err)=>{
+      if(err.response.status === 401){
+        console.log('getVid 401 error Occured');
+        await getNewAppAccessToken();
+        await getVid(el);
+        return
+      } else if( err.response.status === 400 ){
+        res.status(400).send({message:err.message})
+      }
     })
   }
 
@@ -79,8 +98,15 @@ app.post('/timeline', async (req, res) => {
       }
     }).then(()=>{
       thumbnail_url = cliplist[0].thumbnail_url
-    }).catch(() => {
-      res.status(400).send({message:err.message})
+    }).catch( async (err)=>{
+      if(err.response.status === 401){
+        console.log('getClips 401 error Occured');
+        await getNewAppAccessToken();
+        await getClip(el);
+        return
+      } else if( err.response.status === 400 ){
+        res.status(400).send({message:err.message})
+      }
     })
   }
 
@@ -107,7 +133,7 @@ app.post('/timeline', async (req, res) => {
       },
 
     }).then((resp) => {
-        element.videoOffsetSeconds = resp.data.data.clip.videoOffsetSeconds;
+      element.videoOffsetSeconds = resp.data.data.clip.videoOffsetSeconds;
     })
     }
 
@@ -124,27 +150,23 @@ app.post('/timeline', async (req, res) => {
           await getVid(vidId);
           await getClip(broadcaster_id);
 
-          Promise.all(
-            cliplist.map((v) => {
-              return getVidOffset(v);
-            })).then(() => {
-              cliplist.sort((a,b) => a.videoOffsetSeconds - b.videoOffsetSeconds);
+          cliplist.sort((a,b) => a.vod_offset - b.vod_offset);
               const last = cliplist[cliplist.length-1];
 
                 for(let i=0; i < cliplist.length-1;){
-                  if(cliplist[i+1].videoOffsetSeconds - cliplist[i].videoOffsetSeconds < 10){
+                  if(cliplist[i+1].vod_offset - cliplist[i].vod_offset < 10){
                     if(cliplist[i+1].view_count - cliplist[i].view_count >= 0){
                       result.push({
                         id: cliplist[i+1].id,
                         view_count: cliplist[i+1].view_count,
-                        offset: cliplist[i+1].videoOffsetSeconds
+                        offset: cliplist[i+1].vod_offset
                       })
                       i += 2;
                     } else {
                       result.push({
                         id: cliplist[i].id,
                         view_count: cliplist[i].view_count,
-                        offset: cliplist[i].videoOffsetSeconds
+                        offset: cliplist[i].vod_offset
                       })
                       i += 2;
                     }
@@ -152,7 +174,7 @@ app.post('/timeline', async (req, res) => {
                     result.push({
                       id: cliplist[i].id,
                       view_count: cliplist[i].view_count,
-                      offset: cliplist[i].videoOffsetSeconds
+                      offset: cliplist[i].vod_offset
                     })
                     i += 1;
                   }
@@ -161,7 +183,7 @@ app.post('/timeline', async (req, res) => {
                   result.push({
                     id: last.id,
                     view_count: last.view_count,
-                    offset: last.videoOffsetSeconds,
+                    offset: last.vod_offset,
                   })
                 }
                 const lastR = result[result.length-1];
@@ -199,39 +221,43 @@ app.post('/timeline', async (req, res) => {
                 thumbnail_url: thumbnail_url,
                 dataSet: resultR,
                 updatedAt: new Date(),
+              }).then(() => {
+                res.send({id:`${vidData[0].user_login}-${vidData[0].id}`, message:'Timeline updated'});
               })
-            }).then(() =>{
-              res.send({id:`${vidData[0].user_login}-${vidData[0].id}`, message:'Timeline updated'});
-            }).catch((err) => {
-              res.status(400).send({message:err.message})
-            })
+
+          // Promise.all(
+          //   cliplist.map((v) => {
+          //     return getVidOffset(v);
+          //   })).then(() => {
+
+          //   }).then(() =>{
+
+          //   }).catch((err) => {
+          //     res.status(400).send({message:err.message})
+          //   })
         }
       } else {
         // Create
         // 방송 종료 후 생성 가능.
         await getVid(vidId);
         await getClip(broadcaster_id);
-        Promise.all(
-          cliplist.map((v) => {
-            return getVidOffset(v);
-          })).then(() => {
-            cliplist.sort((a,b) => a.videoOffsetSeconds - b.videoOffsetSeconds);
+        cliplist.sort((a,b) => a.vod_offset - b.vod_offset);
               const last = cliplist[cliplist.length-1];
 
               for(let i=0; i < cliplist.length-1;){
-                if(cliplist[i+1].videoOffsetSeconds - cliplist[i].videoOffsetSeconds < 10){
+                if(cliplist[i+1].vod_offset - cliplist[i].vod_offset < 10){
                   if(cliplist[i+1].view_count - cliplist[i].view_count >= 0){
                     result.push({
                       id: cliplist[i+1].id,
                       view_count: cliplist[i+1].view_count,
-                      offset: cliplist[i+1].videoOffsetSeconds
+                      offset: cliplist[i+1].vod_offset
                     })
                     i += 2;
                   } else {
                     result.push({
                       id: cliplist[i].id,
                       view_count: cliplist[i].view_count,
-                      offset: cliplist[i].videoOffsetSeconds
+                      offset: cliplist[i].vod_offset
                     })
                     i += 2;
                   }
@@ -239,7 +265,7 @@ app.post('/timeline', async (req, res) => {
                   result.push({
                     id: cliplist[i].id,
                     view_count: cliplist[i].view_count,
-                    offset: cliplist[i].videoOffsetSeconds
+                    offset: cliplist[i].vod_offset
                   })
                   i += 1;
                 }
@@ -248,7 +274,7 @@ app.post('/timeline', async (req, res) => {
                 result.push({
                   id: last.id,
                   view_count: last.view_count,
-                  offset: last.videoOffsetSeconds,
+                  offset: last.vod_offset,
                 })
               }
               const lastR = result[result.length-1];
@@ -295,16 +321,24 @@ app.post('/timeline', async (req, res) => {
               viewCount: 0,
               likeCount: 0,
               likeUids: [],
+            }).then(() => {
+              res.send({id:`${vidData[0].user_login}-${vidData[0].id}`, message:'Timeline is created.'});
             })
-          }).then(() =>{
-            res.send({id:`${vidData[0].user_login}-${vidData[0].id}`, message:'Timeline is created.'});
-          }).catch((err) => {
-            res.status(400).send({message:err.message})
-          })
+        // Promise.all(
+        //   cliplist.map((v) => {
+        //     return getVidOffset(v);
+        //   })).then(() => {
+
+        //   }).then(() =>{
+
+        //   }).catch((err) => {
+        //     res.status(400).send({message:err.message})
+        //   })
       }
     });
   } catch {
     res.status(400).send({message:err.message})
+    // res.status(400).send({message:'Global Error'})
   }
 });
 module.exports = app

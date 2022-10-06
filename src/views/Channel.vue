@@ -354,8 +354,12 @@ export default {
               })
             }
           }
-        })
-        .catch((error) => console.log(error))
+        }).catch(async (e) => {
+        if(e.response.status === 401){
+          await this.$store.dispatch('setNewTwitchAppToken');
+          await this.getVid(userId);
+        }
+      })
     },
     async getUserInfo(element) {
       try{
@@ -370,13 +374,18 @@ export default {
           .then((res) => {
             this.userInfo.data = res.data.data['0']
             document.title = `${res.data.data['0'].display_name} | Channel - CCTwitch`
-          }).catch(()=>{
-            this.$router.push({path:'/'}).catch(()=>{});
-            this.$store.commit('SET_SnackBar',{
-              type:'error',
-              text:'스트리머를 찾을 수 없습니다.',
-              value:true,
-            })
+          }).catch( async (e)=>{
+            if(e.response.status === 401){
+              await this.$store.dispatch('setNewTwitchAppToken');
+              await this.getUserInfo(element);
+            }else{
+              this.$router.push({path:'/'}).catch(()=>{});
+              this.$store.commit('SET_SnackBar',{
+                type:'error',
+                text:'스트리머를 찾을 수 없습니다.',
+                value:true,
+              })
+            }
           })
       }
       catch{(err) => {

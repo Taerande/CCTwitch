@@ -237,19 +237,24 @@ export default {
           first: 100,
         },
         headers:this.$store.state.headerConfig,
-      }).then( async (res) => {
-        if(res.data.data.length > 0){
-          this.followList = await res.data.data.map( v => {
-            return v.to_id;
-          })
-          const result = await this.getUserInfo([...this.followList]);
-          this.streamerList.follow = result.data.data.sort((a,b) => b.view_count - a.view_count);
-        } else {
-          this.streamerList.follow = [];
-        }
-    }).then(() => {
-      this.loading.follow = false;
-    })
+        }).then( async (res) => {
+          if(res.data.data.length > 0){
+            this.followList = await res.data.data.map( v => {
+              return v.to_id;
+            })
+            const result = await this.getUserInfo([...this.followList]);
+            this.streamerList.follow = result.data.data.sort((a,b) => b.view_count - a.view_count);
+          } else {
+            this.streamerList.follow = [];
+          }
+        }).then(() => {
+          this.loading.follow = false;
+        }).catch( async (e) => {
+          if(e.response.status === 401){
+            await this.$store.dispatch('setNewTwitchAppToken');
+            await this.getFollowList(userInfo);
+          }
+        });
     },
     async subNotification(broadcaster_id){
       this.notiLoading = true;
@@ -294,26 +299,17 @@ export default {
           })
         }
         this.streamerList.stream = res.data.data;
-        })
-        .then(() => {
-          this.loading.stream = false;
-        }).catch(() => {
-          // 에러 발생, refresh token으로 OAuth Token 재발급
-          axios.post(`${this.$store.state.backendUrl}/twitchOauthToken/oauthtoken/issue`,
-          {
-            refresh_token : token.refresh_token
-          }
-          ,{
-            headers: { 'Content-Type': 'application/json'}
-          }).then(async (res) => {
-            localStorage.setItem('twitchOAuthToken', JSON.stringify(res.data));
-            await this.getStreamFollowList(userInfo);
-          }).catch(() => {
-            // refresh token도 망가졌음, 로그아웃 후 새롭게 로그인 유도
-            this.logOut();
-          });
-        })
-      },
+      }).then(() => {
+        this.loading.stream = false;
+      }).catch( async (e) => {
+        if(e.response.status === 401){
+          await this.$store.dispatch('setNewTwitchOAuthToken');
+          await this.getStreamFollowList(userInfo);
+        } else {
+          this.logOut()
+        }
+      });
+    },
     async logOut(){
       await this.$firebase.auth().signOut().then(() =>{
         localStorage.removeItem('twitchOAuthToken');

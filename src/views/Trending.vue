@@ -3,6 +3,15 @@
   <v-row class="py-5">
     <span class="text-h3 font-weight-bold pr-3">Trending</span>
   </v-row>
+  <div class="d-flex align-center pb-2">
+    <v-icon class="pr-2">mdi-label-multiple-outline</v-icon>
+    <v-chip class="d-flex align-center text-caption chipPill mx-1" :to="'/tag/트위치KR 핫클립'">
+      트위치KR 핫클립
+    </v-chip>
+    <v-chip class="d-flex align-center text-caption chipPill mx-1" :to="'/tag/주간 이세돌 핫클립'">
+      주간 이세돌 핫클립
+    </v-chip>
+  </div>
   <v-divider></v-divider>
   <v-subheader>Clips</v-subheader>
   <hotclipVue></hotclipVue>

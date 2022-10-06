@@ -121,6 +121,11 @@ export default {
           });
           $state.loaded();
         }
+      }).catch(async (e) => {
+        if(e.response.status === 401){
+          await this.$store.dispatch('setNewTwitchAppToken');
+          await this.channelInfiniteHandler($state);
+        }
       });
     },
      hmsToSec(el){

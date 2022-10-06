@@ -1,6 +1,7 @@
 const axios = require('axios')
 const admin = require('firebase-admin')
 const moment = require('moment');
+// const firestore = admin.firestore();
 
 const app2 = admin.initializeApp({
   databaseURL: "https://cctwitch-streamdata-kor.asia-southeast1.firebasedatabase.app"
@@ -260,8 +261,22 @@ let app = async function(){
     total_stream: treemap.total.total_stream,
     total_viewer: treemap.total.total_viewer,
   });
-  await firebaseStreamData.ref(`/treemap/${date}/timeSeries/${streamDateId}`).set(treemap);
+  // await firebaseStreamData.ref(`/treemap/${date}/timeSeries/${streamDateId}`).set(treemap);
   await firebaseStreamData.ref(`/treemap/${date}/topGame`).set(result);
+  // await firestore.collection('cliplist').doc().set({
+  //   authorId: "twitch:792857520",
+  //   authorName: "클립콜렉터",
+  //   clipCount: cliplist.length,
+  //   clipIds: clipIds,
+  //   createdAt: moment(`20${date}`),
+  //   title: `주간 이세돌 핫클립 - 22년 ${weekNumber - 1}주차`,
+  //   description:`기간: ${moment(started_at).format('LL')} ~ ${moment(ended_at).format('LL')}`,
+  //   color: '#D81B60FF',
+  //   isPublic: 2,
+  //   tags: ['이세계 아이돌','이세돌','주간 이세돌 핫클립'],
+  //   thumbnail_url: cliplist[0].thumbnail_url || null,
+  //   likeCount: 0,
+  // })
 }
 
 module.exports = app;

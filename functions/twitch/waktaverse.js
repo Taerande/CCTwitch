@@ -12,7 +12,7 @@ app.get('/waktaverse', async (req, res) => {
   // const userId = req.url.split('userId=')[1].split('&twitchAccesToken')[0]
   const twitchAccesToken = req.query.appAccessToken;
   const clientId = process.env.TWITCH_CLIENT_ID;
-  const time = '2022-08-03';
+  const time = '2022-09-28';
   const appAccessToken = twitchAccesToken;
 
   const weekNumber = moment(time).week();
@@ -98,7 +98,7 @@ app.get('/waktaverse', async (req, res) => {
       authorName: "클립콜렉터",
       clipCount: cliplist.length,
       clipIds: clipIds,
-      createdAt: moment(),
+      createdAt: moment(time).add(7,'day')._d,
       title: `주간 이세돌 핫클립 - 22년 ${weekNumber - 1}주차`,
       description:`기간: ${moment(started_at).format('LL')} ~ ${moment(ended_at).format('LL')}`,
       dataSet:dataSet,

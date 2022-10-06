@@ -1,5 +1,6 @@
 <template>
 <v-dialog
+  v-if="clipData.id !== undefined"
   scrollable
   :content-class="$vuetify.breakpoint.smAndDown ? 'iframeTop' : ''"
   max-width="1080"
@@ -12,12 +13,12 @@
         <span v-else class="text-caption font-weight-bold">{{index+1}}</span>
       </v-card-title>
       <v-card-text class="d-flex align-center ma-0 pa-0 text-truncate">
+        <!-- @click="getVidOffset(clipData)" -->
         <v-img
         :max-width="imgWidth"
         :aspect-ratio="16/9"
         v-on="on"
         class="pa-0 thumbnailImg ma-0 rounded-lg"
-        @click="getVidOffset(clipData)"
         lazy-src="@/assets/img/404.jpg"
         :src="clipData.thumbnail_url">
           <v-container fluid fill-height class="d-flex align-content-space-between flex-wrap">
@@ -50,60 +51,67 @@
   <v-card class="pa-0 ma-0 black">
     <v-card-title class="d-block pa-0 ma-0">
       <div class="d-flex justify-end align-center copyBody" v-if="dialog">
-        <span class="white--text pl-2">{{this.$moment(clipData.created_at).format('ll')}}</span>
+        <span class="white--text pl-1">{{this.$moment(clipData.created_at).format('ll')}}</span>
         <v-spacer></v-spacer>
         <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
       </div>
     </v-card-title>
     <v-card-text class="pa-0 ma-0">
-    <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
-      <iframe
-        allow="autoplay"
-        v-if="dialog"
-        :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=true&preload=auto`"
-        preload="auto"
-        frameborder="0"
-        height="100%"
-        width="100%"
-        allowfullscreen="true"></iframe>
-    </v-responsive>
+      <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
+        <iframe
+          allow="autoplay"
+          v-if="dialog"
+          :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=true&preload=auto`"
+          preload="auto"
+          frameborder="0"
+          height="100%"
+          width="100%"
+          allowfullscreen="true"></iframe>
+      </v-responsive>
     </v-card-text>
-     <div class="d-flex justify-center align-center pa-2 white--text">
+    <Adsense
+    data-ad-client="ca-pub-8597405222136575"
+    data-ad-slot="3465851493"
+    :ins-style="`display:inline-block;width:100%;height:90px;`"
+    ></Adsense>
+    <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
       <div class="px-1 mx-1">
-        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.videoOffsetSeconds)}`,clipData.title, setTimeHMSformat(clipData.videoOffsetSeconds))"><v-icon>mdi-twitch</v-icon></v-btn>
-        <div>다시보기</div>
+        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === undefined || clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,clipData.title, setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <div class="text-caption">다시보기</div>
       </div>
       <div class="px-1 mx-1">
         <v-btn class="d-flex mx-auto" color="error" icon @click="copyClip(clipData)">
           <v-icon>mdi-clipboard-multiple-outline</v-icon>
         </v-btn>
-        <div>URL 복사</div>
+        <div class="text-caption">URL 복사</div>
       </div>
       <div class="px-1 mx-1">
         <v-btn class="d-flex mx-auto" color="error" icon @click="downloadClip(clipData)">
           <v-icon>mdi-download</v-icon>
         </v-btn>
-        <div>다운로드</div>
+        <div class="text-caption">다운로드</div>
       </div>
       <div class="px-1 mx-1">
         <pinClip class="d-flex mx-auto" v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
         <v-btn class="d-flex mx-auto" v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon>
         </v-btn>
-        <div>추가하기</div>
+        <div class="text-caption">추가하기</div>
       </div>
+      <AddNewHotClipDialogVue :clipData="clipData"></AddNewHotClipDialogVue>
     </div>
   </v-card>
 </v-dialog>
 </template>
 <script>
-import axios from 'axios';
 import pinClip from '@/components/pinClip.vue';
 import clipMenuVue from '@/components/cliplist/clipMenu.vue';
+import AddNewHotClipDialogVue from './AddNewHotClipDialog.vue';
 export default {
   props:['clipData','listData','clipListData','index'],
   components:{
     pinClip,
     clipMenuVue,
+    AddNewHotClipDialogVue,
   },
   data() {
     return {
@@ -155,29 +163,29 @@ export default {
         window.open(url, '_blank');
       }
     },
-    async getVidOffset(element){
-      const json = JSON.stringify(
-        {
-          operationName: "ClipsFullVideoButton",
-          variables: {
-            slug: element.id
-          },
-          extensions: {
-            persistedQuery: {
-              version: 1,
-              sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
-              }
-          }
-        })
-     await axios.post('https://gql.twitch.tv/gql',json, {
-        headers: {
-          'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
-        },
+    // async getVidOffset(element){
+    //   const json = JSON.stringify(
+    //     {
+    //       operationName: "ClipsFullVideoButton",
+    //       variables: {
+    //         slug: element.id
+    //       },
+    //       extensions: {
+    //         persistedQuery: {
+    //           version: 1,
+    //           sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
+    //           }
+    //       }
+    //     })
+    //  await axios.post('https://gql.twitch.tv/gql',json, {
+    //     headers: {
+    //       'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
+    //     },
 
-      }).then((res) => {
-          element.videoOffsetSeconds = res.data.data.clip.videoOffsetSeconds;
-      })
-    },
+    //   }).then((res) => {
+    //       element.videoOffsetSeconds = res.data.data.clip.videoOffsetSeconds;
+    //   })
+    // },
   },
   computed:{
     imgWidth(){
@@ -194,6 +202,8 @@ export default {
       }
     },
   },
+  mounted() {
+  }
 }
 </script>
 <style lang="scss" scoped>

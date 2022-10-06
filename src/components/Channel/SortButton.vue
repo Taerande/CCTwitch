@@ -203,6 +203,13 @@ export default {
   },
   mounted() {
   },
+  destroyed() {
+    this.$store.commit('SET_DateSort', {
+      text:null,
+      start:null,
+      end:null,
+    });
+  },
 
 };
 </script>

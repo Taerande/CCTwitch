@@ -63,6 +63,10 @@
                     <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
                     <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
                   </v-list-item>
+                  <v-list-item to="/report?type=overall" @click="changeDrawer(false)">
+                    <v-icon color="orange" class="pa-0 ma-0 pr-1">mdi-poll</v-icon>
+                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Report</span>
+                  </v-list-item>
                   <div class="text-caption pl-5 pt-8">User</div>
                   <v-divider class="my-3"></v-divider>
                   <v-card flat v-if="$store.state.userinfo.userInfo">
@@ -184,7 +188,12 @@
           </router-link>
           <router-link class="ma-0 pa-0" to="/streamer">
             <div class="px-1 appbar-text">
-              <span :class="$route.name === 'streamer' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
+              <span :class="$route.name === 'Streamer' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
+            </div>
+          </router-link>
+          <router-link class="ma-0 pa-0" to="/report?type=overall">
+            <div class="px-1 appbar-text">
+              <span :class="$route.name === 'Report' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">Report</span>
             </div>
           </router-link>
         </div>

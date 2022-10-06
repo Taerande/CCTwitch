@@ -6,11 +6,11 @@ const axios = require('axios')
 app.use(cors())
 app.use(express.json())
 app.post('/oauthtoken/issue', async (request, response) => {
-  const refreshToken = request.body.refresh_token;
-  const clientId = process.env.TWITCH_CLIENT_ID;
-  const clientSecret = process.env.TWITCH_CLIENT_SECRET;
-
   try {
+    let refreshToken = request.body.refresh_token;
+    const clientId = process.env.TWITCH_CLIENT_ID;
+    const clientSecret = process.env.TWITCH_CLIENT_SECRET;
+
     let data = null;
     await axios.post(
       `https://id.twitch.tv/oauth2/token?` +
@@ -23,6 +23,7 @@ app.post('/oauthtoken/issue', async (request, response) => {
         response.send(data);
       })
       .catch(async (err) => {
+        console.log(err.message);
         data = { status: 400, message: 'Invalid refresh token' }
         response.status(400).send(data);
       });

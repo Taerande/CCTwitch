@@ -71,7 +71,7 @@ export default {
     async getMoreData(){
       this.dataLoading = true;
       try{
-        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('isPublic','==',2).startAfter(this.lastVisible).limit(24).get().then((sn) => {
+        await this.$firestore.collection('cliplist').orderBy('createdAt','desc').where('tags','array-contains',this.$route.params.id).where('isPublic','==',2).startAfter(this.lastVisible).limit(24).get().then((sn) => {
           if(sn.docs.length === 24){
               this.lastVisible = last(sn.docs);
             } else {

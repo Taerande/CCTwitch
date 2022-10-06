@@ -6,28 +6,37 @@
     <v-col cols="12" v-for="(clip, index) in currentCliplist" :key="index">
       <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
       <v-divider class="my-1"></v-divider>
+      <div class="d-flex justify-center" v-if="index&7 === 1">
+        <InFeedAdsense
+          data-ad-client="ca-pub-8597405222136575"
+          data-ad-slot="8126602496"
+          data-ad-format="fluid"
+          data-ad-layout-key="-gp+24+5f-4t-1o"
+          ins-style="display:block;width:inherit;background:red;"
+          ></InFeedAdsense>
+          <v-divider class="my-1"></v-divider>
+      </div>
     </v-col>
   </draggable>
   <v-row class="d-flex col-12" v-else-if="clipListData.dataSet !== undefined">
     <v-row class="d-flex col-12"  v-for="(chunk, index) in tempArrChunk" :key="index">
-
       <v-col cols="12" class="pa-1"
-            v-for="(clip,startIndex) in chunk"
-            :key="clip.id"
-            >
-            <ClipIframeDataTableDialog  :clipData="clip" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+        v-for="(clip,startIndex) in chunk"
+        :key="clip.id"
+        >
+        <ClipIframeDataTableDialog  :clipData="clip" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+      <v-divider class="my-1"></v-divider>
+      </v-col>
+      <div class="d-flex justify-center" v-if="chunk.length === 10">
+        <InFeedAdsense
+          data-ad-client="ca-pub-8597405222136575"
+          data-ad-slot="8126602496"
+          data-ad-format="fluid"
+          data-ad-layout-key="-gp+24+5f-4t-1o"
+          ins-style="display:block;width:inherit;background:red;"
+          ></InFeedAdsense>
           <v-divider class="my-1"></v-divider>
-          </v-col>
-          <v-col cols="12" v-if="chunk.length === 10">
-            <InFeedAdsense
-              data-ad-client="ca-pub-8597405222136575"
-              data-ad-slot="8126602496"
-              data-ad-format="fluid"
-              data-ad-layout-key="-gp+24+5f-4t-1o"
-              ins-style="display:block;width:inherit;"
-              ></InFeedAdsense>
-              <v-divider class="my-1"></v-divider>
-          </v-col>
+      </div>
     </v-row>
   </v-row>
   <v-row class="d-flex col-12" v-for="(chunk, index) in cliplistChunk" :key="index" v-else>
@@ -38,7 +47,7 @@
       <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
       <v-divider class="my-1"></v-divider>
     </v-col>
-    <v-col cols="12" v-if="chunk.length === 10">
+    <div class="d-flex justify-center" v-if="chunk.length === 10">
        <InFeedAdsense
         data-ad-client="ca-pub-8597405222136575"
         data-ad-slot="8126602496"
@@ -46,7 +55,7 @@
         data-ad-layout-key="-gp+24+5f-4t-1o"
         ins-style="display:block;width:inherit;"
         ></InFeedAdsense>
-    </v-col>
+    </div>
   </v-row>
 </v-row>
 </template>

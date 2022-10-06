@@ -5,7 +5,6 @@ import store from '../store';
 
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
-import axios from 'axios';
 
 // import Channel from '../views/Channel.vue';
 // import Search from '../views/Search.vue';
@@ -135,7 +134,7 @@ const routes = [
   },
   {
     path: '/streamer',
-    name: 'streamer',
+    name: 'Streamer',
     component: Streamer,
   },
   {

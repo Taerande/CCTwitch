@@ -59,7 +59,7 @@
       {{cliplist.description}}
     </div>
   </v-row>
-  <v-row class="justify-center">
+  <v-row class="justify-center" v-if="cliplist.dataSet.length > 0">
      <Bar
     :chart-options="chartOptions"
     :chart-data="chartData"
@@ -69,7 +69,9 @@
     :width="$vuetify.breakpoint.smAndDown ? 300 : 600"
     />
   </v-row>
-  <DisplyaAdContainerVue></DisplyaAdContainerVue>
+  <div class="d-flex justify-center">
+    <DisplyaAdContainerVue></DisplyaAdContainerVue>
+  </div>
   <v-divider class="my-2"></v-divider>
   <expandTableVue
     v-if="($store.state.currentCliplist.length > 0 || tempArr.length > 0 )&& clipDataLoading"
@@ -225,6 +227,11 @@ export default {
           }
         }).then( res => {
           this.userInfo = res.data.data[0];
+        }).catch( async (e) => {
+          if(e.response.status === 401){
+            await this.$store.dispatch('setNewTwitchAppToken');
+            await this.getUserInfo(userId);
+          }
         });
     },
     async deleteCliplist(){
@@ -239,7 +246,12 @@ export default {
       }).then((res) => {
         this.tempArr = res.data.data.sort((a,b) => b.view_count - a.view_count);
         this.clipDataLoading = true;
-      })
+      }).catch( async (e) => {
+          if(e.response.status === 401){
+            await this.$store.dispatch('setNewTwitchAppToken');
+            await this.getTwitchClipData(el);
+          }
+        });
     },
   },
   computed: {
@@ -276,36 +288,38 @@ export default {
           authorName: item.authorName,
           thumbnail_url: item.thumbnail_url,
         }
-        this.chartData = {
-          labels: [
-            this.cliplist.dataSet[0].userData.display_name,
-            this.cliplist.dataSet[1].userData.display_name,
-            this.cliplist.dataSet[2].userData.display_name,
-            this.cliplist.dataSet[3].userData.display_name,
-            this.cliplist.dataSet[4].userData.display_name,
-            this.cliplist.dataSet[5].userData.display_name,
-            ],
-          datasets: [
-            {
-              label: 'Clips',
-              data: [
-                this.cliplist.dataSet[0].count,
-                this.cliplist.dataSet[1].count,
-                this.cliplist.dataSet[2].count,
-                this.cliplist.dataSet[3].count,
-                this.cliplist.dataSet[4].count,
-                this.cliplist.dataSet[5].count,
+        if(item.dataSet[0] !== undefined){
+          this.chartData = {
+            labels: [
+              this.cliplist.dataSet[0].userData.display_name,
+              this.cliplist.dataSet[1].userData.display_name,
+              this.cliplist.dataSet[2].userData.display_name,
+              this.cliplist.dataSet[3].userData.display_name,
+              this.cliplist.dataSet[4].userData.display_name,
+              this.cliplist.dataSet[5].userData.display_name,
               ],
-              backgroundColor: [
-                this.colorSet.find(x => x.display_name === this.cliplist.dataSet[0].userData.display_name).color,
-                this.colorSet.find(x => x.display_name === this.cliplist.dataSet[1].userData.display_name).color,
-                this.colorSet.find(x => x.display_name === this.cliplist.dataSet[2].userData.display_name).color,
-                this.colorSet.find(x => x.display_name === this.cliplist.dataSet[3].userData.display_name).color,
-                this.colorSet.find(x => x.display_name === this.cliplist.dataSet[4].userData.display_name).color,
-                this.colorSet.find(x => x.display_name === this.cliplist.dataSet[5].userData.display_name).color,
-              ],
-            }
-          ]
+            datasets: [
+              {
+                label: 'Clips',
+                data: [
+                  this.cliplist.dataSet[0].count,
+                  this.cliplist.dataSet[1].count,
+                  this.cliplist.dataSet[2].count,
+                  this.cliplist.dataSet[3].count,
+                  this.cliplist.dataSet[4].count,
+                  this.cliplist.dataSet[5].count,
+                ],
+                backgroundColor: [
+                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[0].userData.display_name).color,
+                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[1].userData.display_name).color,
+                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[2].userData.display_name).color,
+                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[3].userData.display_name).color,
+                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[4].userData.display_name).color,
+                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[5].userData.display_name).color,
+                ],
+              }
+            ]
+          }
         }
         await this.getTwitchClipData(item.clipIds);
         if(item.thumbnail_url !== this.tempArr[0].thumbnail_url){

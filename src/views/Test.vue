@@ -50,11 +50,12 @@
     </v-col>
   </v-row>
   <v-row>
-    <v-btn color="success" block @click="getTreemap()">getTreemap</v-btn>
+    <v-btn color="orange" block @click="wak()">wak</v-btn>
+    <!-- <v-btn color="success" block @click="getTreemap()">getTreemap</v-btn>
     <v-btn color="error" block @click="addNewData()">load Data</v-btn>
     <v-btn color="info" block @click="removeData()">remove</v-btn>
-    <v-btn color="orange" block @click="wak()">wak</v-btn>
-    <v-btn color="black" class="white--text" block @click="testRtdb()">rtdb</v-btn>
+    <v-btn color="black" class="white--text" block @click="testRtdb()">rtdb</v-btn> -->
+    <v-btn color="success" block @click="createFirestore()">text</v-btn>
   </v-row>
   <v-row>
     <v-col>날짜 {{asdf}}</v-col>
@@ -71,6 +72,31 @@
     </div>
     </v-col>
   </v-row>
+  <v-row>
+    <v-col v-for="(item, index) in topClips" :key="item.id+index" cols="3">
+      <v-img
+      :aspect-ratio="16/9"
+      class="rounded-lg clip-thumbnail"
+      lazy-src="@/assets/img/404.jpg"
+      :src="item.thumbnail_url">
+        <v-container fluid fill-height class="d-flex align-content-space-between">
+          <v-row class="d-flex justify-space-between">
+            <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">{{$moment(item.created_at).fromNow()}}</span>
+            <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )"><v-icon class="white--text px-1" x-small>mdi-eye</v-icon>{{item.view_count}}</span>
+          </v-row>
+          <v-spacer></v-spacer>
+          <v-row>
+            <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">
+            {{item.game_name}}
+            </span>
+          </v-row>
+        </v-container>
+      </v-img>
+      <div>
+        {{item.title}}
+      </div>
+    </v-col>
+  </v-row>
 </v-container>
 </template>
 <script>
@@ -79,6 +105,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
+      topClips:[],
       minit:'',
       userSearch:'',
       lineloading:false,
@@ -170,7 +197,10 @@ export default {
           text: 'Distibuted Treemap (cctwitch.xyz)',
           align: 'center'
         },
-      }
+      },
+      tempArr:[],
+      afterCursor:null,
+      clipIds:[],
     }
   },
   computed:{
@@ -205,11 +235,107 @@ export default {
     }
   },
   methods: {
-    async test(){
-      await setTimeout(() => {
+    async getTopClip(date){
+      console.time();
+      const topStream = this.$streamData.ref(`/treemap/${date}/topGame`);
 
-      }, timeout);
+      await topStream.get().then( async (sn) => {
+        if(sn.exists()){
+          for(let item in sn.val()){
+            this.tempArr = [];
+            await this.getKrClipByGameId(item, this.afterCursor, sn.val()[item].game_name, date);
+            this.topClips = [...this.topClips, ...this.tempArr]
+            this.topClips.sort((a,b) => b.view_count - a.view_count);
+            this.topClips.splice(100);
+          }
+          // tempArr.sort((a,b) => b.view_count - a.view_count);
+          // console.log(tempArr);
+        }
+      });
+      this.clipIds = this.topClips.map((v) => {
+        return v.id;
+      });
+      this.$firestore.collection('cliplist').add({
+        authorId: "twitch:792857520",
+        authorName: "클립콜렉터",
+        clipCount: this.topClips.length,
+        clipIds: this.clipIds,
+        createdAt: this.$moment(`20${date}`).add(7,'hours')._d,
+        title: `트위치KR 핫클립 20${date}`,
+        description:`기간: 20${date}일차`,
+        color: '#FFD700',
+        isPublic: 2,
+        dataSet:[],
+        tags: ['트위치KR 핫클립','핫클립'],
+        thumbnail_url: this.topClips[0].thumbnail_url || null,
+        likeCount: 0,
+      }).then( async () => {
+        this.$store.commit('SET_SnackBar',{type:'info', text:`${date} 핫클립 생성 완료`,value:true});
+        this.topClips = [];
+        this.clipIds = [];
+        this.tempArr = [];
+      }).catch((err) => {
+        console.log(err);
+      })
+      console.timeEnd();
+    },
+    async getKrClipByGameId(game_id, after, game_name, date){
+      await axios.get('https://api.twitch.tv/helix/clips',{
+        params:{
+          after:after,
+          game_id:game_id,
+          first:100,
+          started_at:this.$moment(`20${date} 07:00`).toISOString(),
+          ended_at:this.$moment(`20${date} 07:00`).add(1,'days').toISOString(),
+        },
+        headers: this.$store.state.headerConfig
+      },
+      ).then(async (res) => {
+        if(this.topClips.length === 0){
+          this.afterCursor = res.data.pagination.cursor === undefined ? null : res.data.pagination.cursor;
+          res.data.data.forEach( (element) => {
+            if(element.language === 'ko'){
+              this.tempArr.push({...element, game_name:game_name});
+            }
+          });
+        }else if(this.topClips[this.topClips.length-1].view_count < res.data.data[res.data.data.length-1].view_count && res.data.data[res.data.data.length-1].view_count > 100){
+          this.afterCursor = res.data.pagination.cursor === undefined ? null : res.data.pagination.cursor;
+          res.data.data.forEach( (element) => {
+            if(element.language === 'ko'){
+              this.tempArr.push({...element, game_name:game_name});
+            }
+          });
+        }else{
+          this.afterCursor = null;
+          res.data.data.forEach( (element) => {
+            if(element.language === 'ko'){
+              this.tempArr.push({...element, game_name:game_name});
+            }
+          });
+        }
+      }).then(async()=>{
+        if(this.afterCursor !== null){
+          await this.getKrClipByGameId(game_id, this.afterCursor, game_name, date);
+        }
+      }).catch((err) => {
+        return
+      })
+    },
+    async createFirestore(){
+      const date = ['22-10-01','22-10-02','22-10-03','22-10-04','22-10-05'];
 
+
+      for(let i=0; i < date.length; i++){
+        this.topClips = [];
+        this.clipIds = [];
+        await this.getTopClip(date[i]);
+      }
+
+
+      // date.forEach( async (element) => {
+      //   console.log(element);
+      //   await this.getTopClip(element);
+      // });
     },
     async testRtdb(){
       const topStream = this.$streamData.ref('/treemap/22-07-17/topStream');
@@ -493,7 +619,12 @@ export default {
     },
   },
   async created() {
-    console.log(this.$moment('17:1','hh:mm'));
+
+// var usaTime = new Date().toLocaleString("en-US", {timeZone: "America/New_York"});
+// console.log('USA time: '+ (new Date(usaTime)).toISOString());
+console.log(this.$moment('2022-08-10')._d);
+    // console.log(new Date('2022-09-10T07:00:00.050Z'))
+    // console.log(this.$moment('2022-09-10T07:00:00.090Z').toISOString());
     // await this.getLiveStreamWithLang();
     // this.streamingList.sort((a,b) => b.viewer_count - a.viewer_count)
     // this.streamData.sort((a,b) => b.viewer_count - a.viewer_count)

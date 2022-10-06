@@ -1,0 +1,63 @@
+[debug] [2022-10-06T17:15:30.294Z] ----------------------------------------------------------------------
+[debug] [2022-10-06T17:15:30.298Z] Command:       E:\NodeJs\node.exe C:\Users\Righteous\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only functions
+[debug] [2022-10-06T17:15:30.298Z] CLI Version:   10.2.1
+[debug] [2022-10-06T17:15:30.298Z] Platform:      win32
+[debug] [2022-10-06T17:15:30.299Z] Node Version:  v14.17.3
+[debug] [2022-10-06T17:15:30.302Z] Time:          Fri Oct 07 2022 02:15:30 GMT+0900 (대한민국 표준시)
+[debug] [2022-10-06T17:15:30.303Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-10-06T17:15:30.435Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-10-06T17:15:30.435Z] > authorizing via signed-in user (revive0405@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[debug] [2022-10-06T17:15:30.523Z] [hub] writing locator at C:\Users\RIGHTE~1\AppData\Local\Temp\hub-twitchhotclip.json
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, firestore, database, hosting, pubsub, storage {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mauth, firestore, database, hosting, pubsub, storage\u001b[22m"}}
+[info] +  functions: Using node@14 from host. {"metadata":{"emulator":{"name":"functions"},"message":"Using node@14 from host."}}
+[debug] [2022-10-06T17:15:30.573Z] defaultcredentials: writing to file C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json
+[debug] [2022-10-06T17:15:30.575Z] Setting GAC to C:\Users\Righteous\AppData\Roaming\firebase\revive0405_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Righteous\\AppData\\Roaming\\firebase\\revive0405_gmail_com_application_default_credentials.json"}}
+[debug] [2022-10-06T17:15:30.579Z] > refreshing access token with scopes: []
+[debug] [2022-10-06T17:15:30.580Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ <request body omitted>
+[debug] [2022-10-06T17:15:31.072Z] <<< HTTP RESPONSE 200 {"date":"Thu, 06 Oct 2022 17:15:31 GMT","pragma":"no-cache","cache-control":"no-cache, no-store, max-age=0, must-revalidate","expires":"Mon, 01 Jan 1990 00:00:00 GMT","content-type":"application/json; charset=utf-8","vary":"X-Origin, Referer, Origin,Accept-Encoding","server":"scaffolding on HTTPServer2","x-xss-protection":"0","x-frame-options":"SAMEORIGIN","x-content-type-options":"nosniff","alt-svc":"h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000,h3-Q050=\":443\"; ma=2592000,h3-Q046=\":443\"; ma=2592000,h3-Q043=\":443\"; ma=2592000,quic=\":443\"; ma=2592000; v=\"46,43\"","accept-ranges":"none","transfer-encoding":"chunked"}
+[debug] [2022-10-06T17:15:31.121Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig [none]
+[debug] [2022-10-06T17:15:31.557Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig 200
+[debug] [2022-10-06T17:15:31.557Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/twitchhotclip/adminSdkConfig {"projectId":"twitchhotclip","databaseURL":"https://twitchhotclip-default-rtdb.asia-southeast1.firebasedatabase.app","storageBucket":"twitchhotclip.appspot.com","locationId":"asia-northeast3"}
+[debug] [2022-10-06T17:15:31.595Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2022-10-06T17:15:31.596Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"ui"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2022-10-06T17:15:31.596Z] Starting Emulator UI with command {"binary":"node","args":["C:\\Users\\Righteous\\.cache\\firebase\\emulators\\ui-v1.6.5\\server.bundle.js"],"optionalArgs":[],"joinArgs":false} {"metadata":{"emulator":{"name":"ui"},"message":"Starting Emulator UI with command {\"binary\":\"node\",\"args\":[\"C:\\\\Users\\\\Righteous\\\\.cache\\\\firebase\\\\emulators\\\\ui-v1.6.5\\\\server.bundle.js\"],\"optionalArgs\":[],\"joinArgs\":false}"}}
+[info] i  ui: Emulator UI logging to ui-debug.log {"metadata":{"emulator":{"name":"ui"},"message":"Emulator UI logging to \u001b[1mui-debug.log\u001b[22m"}}
+[debug] [2022-10-06T17:15:32.362Z] Web / API server started at localhost:4000
+ {"metadata":{"emulator":{"name":"ui"},"message":"Web / API server started at localhost:4000\n"}}
+[info] i  functions: Watching "E:\Vue_Project\twitch-hot-clip-tracker\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"E:\\Vue_Project\\twitch-hot-clip-tracker\\functions\" for Cloud Functions..."}}
+[debug] [2022-10-06T17:15:32.516Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions.
+Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[debug] [2022-10-06T17:15:44.409Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.0",
+    "firebase-admin": "^9.8.0",
+    "firebase-functions": "^3.22.0",
+    "moment": "^2.29.3",
+    "moment-duration-format": "^2.3.2"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}
+[debug] [2022-10-06T17:15:44.410Z] Building nodejs source
+[debug] [2022-10-06T17:15:44.410Z] Analyzing nodejs backend spec
