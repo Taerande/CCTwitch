@@ -322,7 +322,7 @@ export default {
       })
     },
     async createFirestore(){
-      const date = ['22-10-01','22-10-02','22-10-03','22-10-04','22-10-05'];
+      const date = ['22-10-08'];
 
 
       for(let i=0; i < date.length; i++){
