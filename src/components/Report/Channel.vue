@@ -75,7 +75,7 @@
     <v-col v-if="streamerModel.id !== null" cols="12" class="d-flex justify-center py-3">
       <v-date-picker
         v-model="date"
-        landscape
+        :landscape="!$vuetify.breakpoint.smAndDown"
         locale="ko-KR"
         color="twitch"
         event-color="#81C784"
@@ -119,7 +119,11 @@
         style="width:100%;"
       >
       <v-subheader>
-        Chart
+        <span>
+          Chart
+        </span>
+        <v-spacer></v-spacer>
+        <v-icon color="red" @click="streamerModel = { id:null }">mdi-close</v-icon>
       </v-subheader>
         <v-card-title class="d-flex align-center">
             <router-link :to="{name:'Channel', query:{
@@ -136,7 +140,6 @@
                 {{streamerModel.display_name}}
                </div>
             </router-link>
-            <v-spacer></v-spacer>
             <div class="d-flex align-center px-3">
               <v-checkbox
                 class="pa-0 ma-0"
@@ -148,7 +151,7 @@
                 color="twitch"
               >
               <template v-slot:label>
-                <span class="text-caption pr-5" :class="annoXaxis ? 'twitch--text' : 'grey--text text-decoration-line-through'">Category</span>
+                <span class="text-caption pa-0" :class="annoXaxis ? 'twitch--text' : 'grey--text text-decoration-line-through'">Category</span>
               </template>
               </v-checkbox>
               <v-checkbox
@@ -164,9 +167,6 @@
               </template>
               </v-checkbox>
             </div>
-            <v-icon color="red" @click="streamerModel = {
-              id:null
-            }">mdi-close</v-icon>
         </v-card-title>
         <v-card-text>
           <div v-if="!streamLoading" class="ma-2">
@@ -510,8 +510,14 @@ export default {
       }
 
     },
-    routerPush(path){
-      this.$router.push({path:path}).catch(() => {});
+    async routerPush(path){
+      if(path.slice(17) === this.$route.query.id){
+        const channelId = this.$route.query.id;
+        const userInfo = await this.getUserInfo(channelId);
+        await this.toggleTopStream(userInfo);
+      }else{
+        this.$router.push({path:path}).catch(() => {});
+      }
     },
     async changeDate(el){
       this.date = el;
@@ -720,5 +726,4 @@ export default {
 }
 </script>
 <style>
-
 </style>
