@@ -333,6 +333,18 @@ export default {
         },
         chart: {
           id: 'streamchart',
+          toolbar:{
+            show:true,
+            tools:{
+              download: true,
+              selection: false,
+              zoom: false,
+              zoomin: false,
+              zoomout: false,
+              pan: false,
+              reset: false,
+            },
+          },
           },
         height: 350,
         type: "line",
