@@ -20,26 +20,28 @@
     </v-overlay>
   </v-dialog>
   <v-row class="d-flex align-center py-3">
-    <v-btn :block="$vuetify.breakpoint.smAndDown" class="text-caption pa-2 mr-3" :color="clipSort === 'vids' ? 'twitch' : ''"
+    <v-btn :block="$vuetify.breakpoint.smAndDown" class="text-caption my-1 pa-2 mr-3" :color="clipSort === 'vids' ? 'twitch' : ''"
+    width="100"
     :class="clipSort === 'vids' ? 'white--text' : ''"
     @click="changeSortType()">
     <v-icon small>mdi-video</v-icon>
-    <span class="px-1">Sort By Vids</span>
+    <span class="px-1">Vids</span>
     </v-btn>
     <v-menu
       v-model="menu"
       offset-y>
       <template v-slot:activator="{ on }">
         <v-btn
+          width="100"
           :block="$vuetify.breakpoint.smAndDown"
-          class="text-caption mr-3 pa-2"
+          class="text-caption mr-3 pa-2 my-1"
           :color="clipSort === 'date' ? 'twitch' : ''"
           v-on="on"
           :class="clipSort === 'date' ? 'white--text' : ''"
         >
         <v-icon small>mdi-calendar</v-icon>
         <span class="px-1">
-          {{$store.state.dateSort.text === null ? "Sort By Date" : $store.state.dateSort.text}}
+          {{$store.state.dateSort.text === null ? "Date" : $store.state.dateSort.text}}
         </span>
         </v-btn>
       </template>
@@ -89,22 +91,76 @@
     :block="$vuetify.breakpoint.smAndDown"
     @click="createTimeline(vidInfo.data.user_login, vidInfo.data.user_id, vidInfo.data.id)"
     :loading="dbLoading"
-    :disabled="clipSort === 'date' || vidInfo.data.view_count === -1"
+    width="100"
+    :disabled="clipSort !== 'vids' || vidInfo.data.view_count === -1"
     :color="clipSort === 'vids' ? 'twitch' : ''"
     :class="clipSort === 'vids' ? 'white--text' : ''"
-    class="text-caption mr-3 pa-2" >
-    <v-icon small>mdi-timeline</v-icon><span class="px-2">Sort By Timeline</span></v-btn>
+    class="text-caption mr-3 pa-2 my-1" >
+    <v-icon small>mdi-timeline</v-icon><span class="px-2">Timeline</span></v-btn>
     <v-btn
     v-else
     :block="$vuetify.breakpoint.smAndDown"
     disabled
-    class="text-caption mr-3 pa-2"
+    width="100"
+    class="text-caption mr-3 pa-2 my-1"
     :color="clipSort === 'vids' ? 'twitch' : ''"
     :class="clipSort === 'vids' ? 'white--text' : ''"
-    ><v-icon small>mdi-timeline</v-icon><span class="px-2">Sort By Timeline</span></v-btn>
+    ><v-icon small>mdi-timeline</v-icon><span class="px-2">Timeline</span></v-btn>
+    <v-dialog
+    max-width="800"
+    v-model="searchDialog">
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn
+        v-on="on"
+        v-bind="attrs"
+        width="100"
+        :block="$vuetify.breakpoint.smAndDown"
+        class="text-caption mr-3 pa-2 my-1"
+        :color="clipSort === 'search' ? 'twitch' : ''"
+        :class="clipSort === 'search' ? 'white--text' : ''"
+        ><v-icon small>mdi-magnify</v-icon><span class="px-2">Keyword</span></v-btn>
+      </template>
+      <v-card
+      >
+        <v-card-title class="twitch white--text">
+          <v-avatar
+            class="pr-1"
+            size="36">
+            <img :src="userInfo.data.profile_image_url" alt="profile_img">
+          </v-avatar>
+          <div class="px-1">
+            {{userInfo.data.display_name}}님({{userInfo.data.login}})의 클립 검색
+          </div>
+        </v-card-title>
+        <v-card-text>
+          <v-form
+          @submit.prevent="sortTypeSearch()"
+          >
+            <v-text-field
+              class="pa-3"
+              v-model="searchString"
+              outlined
+              color="twitch"
+              :rules="[rule.required,rule.counter]"
+              maxlength="15"
+              counter
+              full-width
+              @click:append="sortTypeSearch()"
+              label="Input clip title keyword"
+              append-icon="mdi-magnify"
+            ></v-text-field>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn class="text-caption" color="error" depressed @click="searchDialog = false" text>close</v-btn>
+          <v-btn class="text-caption" color="success" depressed @click="sortTypeSearch()" :disabled="searchString === ''" text>search</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-row>
-  <v-row>
-    <div v-if="clipSort === 'date'" class="py-1 red--text text-subtitle-2">
+  <v-row v-if="clipSort === 'date'">
+    <div class="py-1 red--text text-subtitle-2">
         <v-icon color="error" size="1rem">mdi-calendar-range</v-icon> {{setDateFormat($store.state.dateSort)}}
     </div>
   </v-row>
@@ -122,9 +178,15 @@ export default {
   },
   data() {
     return {
+      rule:{
+        required: (value) => !!value || 'Required.',
+        counter: (value) => value.length <= 15 || 'Max 15 characters',
+      },
       menu: false,
       dbLoading: false,
-      dialog:false,
+      dialog: false,
+      searchDialog: false,
+      searchString: '',
     };
   },
   methods: {
@@ -142,6 +204,24 @@ export default {
       await asd();
       this.$emit('changeSort', 'date');
       this.$store.commit('SET_DateSort', el);
+    },
+    async sortTypeSearch() {
+      if(this.searchString === ''){
+        return this.$store.commit('SET_SnackBar',{type:'error', text:'Form is not valid!', value:true});
+      }
+      const asd = () => {
+        this.$emit('changeSort', '');
+        this.menu = false;
+      };
+      await asd();
+        this.$store.commit('SET_DateSort', {
+        text: null,
+        start: null,
+        end: null,
+      });
+      this.searchDialog = false;
+      this.$emit('changeSort', 'search');
+      this.$store.commit('SET_ClipKeyword',this.searchString);
     },
     async createTimeline(user_login, broadcaster_id, vidId){
       this.dialog = true;
@@ -166,12 +246,13 @@ export default {
           this.dbLoading = false;
       })
     },
-    async changeSortType() {
+    async changeSortType(el) {
       if(this.clipSort === 'vids'){
         this.$emit('openVidsListDialog');
       } else {
-        const asd = () => {
+      const asd = () => {
         this.$emit('changeSort', '');
+        this.menu = false;
       };
       await asd();
       this.$store.commit('SET_DateSort', {
@@ -210,9 +291,8 @@ export default {
       end:null,
     });
   },
-
 };
 </script>
-<style lang="">
+<style>
 
 </style>

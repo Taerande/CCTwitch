@@ -33,11 +33,6 @@
         <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
       </div>
     </v-card-title>
-    <!-- <v-card-text class="pa-0 ma-0">
-      <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
-        <video autoplay controls :src="`${clipData.thumbnail_url.split('-preview')[0]}.mp4`"></video>
-      </v-responsive>
-    </v-card-text> -->
     <v-card-text class="pa-0 ma-0">
       <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
           <iframe
@@ -51,11 +46,13 @@
           allowfullscreen="true"></iframe>
       </v-responsive>
     </v-card-text>
-    <Adsense
-    data-ad-client="ca-pub-8597405222136575"
-    data-ad-slot="3465851493"
-    :ins-style="`display:inline-block;width:100%;height:90px;`"
-    ></Adsense>
+    <div class="ma-0 px-1 py-2">
+      <Adsense
+      data-ad-client="ca-pub-8597405222136575"
+      data-ad-slot="3465851493"
+      :ins-style="`display:inline-block;width:100%;height:90px;`"
+      ></Adsense>
+    </div>
     <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
       <div class="px-1 mx-1">
         <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,clipData.title, setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
