@@ -132,7 +132,7 @@
             {{userInfo.data.display_name}}님({{userInfo.data.login}})의 클립 검색
           </div>
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="pa-0 pt-3">
           <v-form
           @submit.prevent="sortTypeSearch()"
           >

@@ -1,14 +1,16 @@
 <template>
 <v-container>
-  <v-row>
+  <v-row class="py-3">
     <v-col class="d-flex justify-center">
       <v-text-field
         name="name"
         solo
         flat
+        type="text"
         v-model="searchString"
         :loading="searchLoading"
         color="twitch"
+        loader-height="6"
         hide-details
         class="d-flex align-center justify-center ma-0 pa-0"
         append-icon="mdi-magnify"
@@ -17,13 +19,6 @@
         @keydown.enter="searchChannel(searchString)"
         outlined
       >
-      <template
-      v-slot:progress
-      >
-        <div class="d-flex justify-center align-center" style="position:absolute;left:50%;transform: translate(-50%, 100px);">
-          <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
-        </div>
-      </template>
       <template
       v-slot:prepend-inner>
       <div class="ma-0 mr-1 py-1" style="width:80px;">
@@ -43,7 +38,6 @@
       </v-text-field>
     </v-col>
   </v-row>
-  <DisplyaAdContainerVue></DisplyaAdContainerVue>
   <v-row v-if="!searchLoading && searchResult.length > 0">
     <v-col v-for="(searchItem) in searchResult" :key="`${searchItem.id}:${searchItem.broadcaster_login}`" cols="6" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''"  lg="3" md="4" sm="6" xs="6"  class="pa-2 d-flex justify-center">
       <v-card
@@ -64,13 +58,6 @@
       </v-card>
     </v-col>
   </v-row>
-  <v-row v-else-if="streamerModel.id === null">
-    <v-col cols="12" class="d-flex justify-center align-center" style="height:20vh;">
-      <div class="text-h5 font-weight-bold">
-        Search Chennel to get viewer Timeline
-      </div>
-    </v-col>
-  </v-row>
   <v-row class="py-5">
     <v-col v-if="streamerModel.id !== null" cols="12" class="d-flex justify-center py-3">
       <v-date-picker
@@ -87,30 +74,6 @@
         :max="streamerModel.date[streamerModel.date.length-1]"
         >
       </v-date-picker>
-      <!-- <v-img
-        width="200"
-        :src="streamerModel.box_art"
-        lazy-src="https://static-cdn.jtvnw.net/ttv-static/404_boxart-200x346.jpg"
-        class="rounded-lg d-flex align-center pa-3 ma-2"
-      ></v-img>
-      <v-btn color="success" @click="splitArr()">split</v-btn>
-      <div class="px-3">
-        <div>
-          1. 평청자, 최고청자. (평창자는 최단값 제외하여 평균값 내기)
-          2. 카테고리 변화 및 다른 summary 데이터 보여주기
-          3. 최고청자일때, category 랑 Title 보여주기
-          4. dailyStreamAnalyze Treemap timesiries 데이터 없앰.
-        </div>
-        <div>
-          {{streamerModel}}
-        </div>
-        <div>
-          {{Math.floor(this.streamLineSeries[0].data.reduce((a,b) => a+b, 0) / (this.streamLineSeries[0].data.length - 2))}}
-        </div>
-      </div>
-      <div>
-        {{this.streamLineSeries[0].data}}
-      </div> -->
     </v-col>
     <v-expand-transition>
       <v-card
@@ -176,7 +139,7 @@
             <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
           </div>
         </v-card-text>
-        <DisplyaAdContainerVue></DisplyaAdContainerVue>
+        <InArticleAdContainerVue></InArticleAdContainerVue>
         <v-subheader>Clips</v-subheader>
         <v-row class="d-flex justify-center col-12" v-if="streamerClips.length > 0 && !clipLoading">
           <v-col class="d-flex justify-center align-center py-10" cols="12">
@@ -211,18 +174,18 @@
       </v-card>
     </v-expand-transition>
   </v-row>
-
+  <InArticleAdContainerVue></InArticleAdContainerVue>
 </v-container>
 </template>
 <script>
 import axios from 'axios'
 import ClipIframeDialogVue from '../dialog/ClipIframeDialog.vue';
-import DisplyaAdContainerVue from '../DisplyaAdContainer.vue';
+import InArticleAdContainerVue from '../InArticleAdContainer.vue';
 export default {
   props:['listData'],
   components:{
     ClipIframeDialogVue,
-    DisplyaAdContainerVue,
+    InArticleAdContainerVue,
     // StreamerChartVue,
   },
   data() {

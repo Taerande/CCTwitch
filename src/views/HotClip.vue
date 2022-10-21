@@ -1,6 +1,6 @@
 <template>
 <v-container fluid v-if="loading">
-    <v-row class="d-flex align-center py-5">
+  <v-row class="d-flex align-center py-5">
     <div class="text-h3 font-weight-bold pr-3">
       Hot Clip |
     </div>
@@ -59,9 +59,14 @@
   </v-row>
 </v-container>
 <v-container v-else>
-  <div class="d-flex justify-center absolute-center">
+  <v-row class="d-flex align-center py-5">
+    <div class="text-h3 font-weight-bold pr-3">
+      Hot Clip
+    </div>
+  </v-row>
+  <v-row class="d-flex justify-center">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
-  </div>
+  </v-row>
 </v-container>
 </template>
 <script>

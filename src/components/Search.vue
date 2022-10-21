@@ -10,6 +10,7 @@
       @click:append="searchChannel($store.state.searchString)"
       outlined
       hide-details
+      :rules="[rule.required]"
       size="50"
       height="50"
       label="Search your Streamer" append-icon="mdi-magnify">
@@ -21,6 +22,9 @@
 export default {
   data() {
     return {
+      rule:{
+        required: (value) => !!value || 'Required.',
+      }
     };
   },
   methods: {

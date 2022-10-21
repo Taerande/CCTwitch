@@ -1,29 +1,22 @@
 <template>
-  <v-app v-if="$store.state.firebaseLoaded && initData">
+  <v-app v-if="$store.state.firebaseLoaded">
     <AppBar app></AppBar>
     <v-main app>
-      <div class="d-flex justify-center pt-3">
-        <adfit-banner
-          data-ad-unit="DAN-hpiQBj5dyLFFiXrc">
-        </adfit-banner>
-      </div>
-        <!-- <DisplyaAdContainerVue></DisplyaAdContainerVue> -->
-      <router-view :key="$route.fullPath" />
+      <ins class="adsbygoogle"
+      v-if="$vuetify.breakpoint.lgAndUp"
+     style="display:inline-block;width:160px;height:600px;position:fixed;top:15%;"
+     :style="$vuetify.breakpoint.xl ? 'left:5%' : 'left:10px;'"
+     data-ad-client="ca-pub-8597405222136575"
+     data-ad-slot="8549081118"></ins>
+      <router-view class="pt-10" :key="$route.fullPath" />
       <SnackBar app></SnackBar>
-      <DisplyaAdContainerVue></DisplyaAdContainerVue>
+      <ins class="adsbygoogle"
+      v-if="$vuetify.breakpoint.lgAndUp"
+     style="display:inline-block;width:160px;height:600px;position:fixed;top:15%;"
+     :style="$vuetify.breakpoint.xl ? 'right:5%;' : 'right:10px;'"
+     data-ad-client="ca-pub-8597405222136575"
+     data-ad-slot="8549081118"></ins>
     </v-main>
-    <div v-if="$vuetify.breakpoint.lgAndUp">
-      <div style="position:fixed;top:200px;" :style="$vuetify.breakpoint.xl ? 'left:50px' :'left:20px'">
-        <adfit-banner
-          data-ad-unit="DAN-KpMZnxsgynFt6CtD">
-        </adfit-banner>
-      </div>
-      <div style="position:fixed;top:200px;" :style="$vuetify.breakpoint.xl ? 'right:50px' :'right:20px'">
-        <adfit-banner
-          data-ad-unit="DAN-KpMZnxsgynFt6CtD">
-        </adfit-banner>
-      </div>
-    </div>
     <Footer app></Footer>
   </v-app>
   <v-app v-else>
@@ -43,9 +36,6 @@
 import SnackBar from '@/components/layout/SnackBar.vue'
 import AppBar from '@/components/layout/AppBar.vue'
 import Footer from '@/components/layout/Footer.vue'
-import axios from 'axios'
-import DisplyaAdContainerVue from './components/DisplyaAdContainer.vue'
-
 
 export default {
   name: 'App',
@@ -53,11 +43,10 @@ export default {
     AppBar,
     Footer,
     SnackBar,
-    DisplyaAdContainerVue
   },
   data() {
     return {
-      initData: false,
+      // initData: false,
     }
   },
   methods: {
@@ -65,49 +54,46 @@ export default {
       this.$store.commit('TOGGLE_SearchBar')
     },
   },
-  // errorCaptured(err,vm,info) {
-  //   console.log(`cat EC: ${err.toString()}\ninfo: ${info}`);
-  //    return false;
-  // },
  async created() {
     this.$store.commit('INIT_localStorage');
     this.$store.commit('SET_SignInDialog', false);
     const appAccessToken = JSON.parse(localStorage.getItem('twitchAppAccessToken'));
     this.$store.commit('SET_TwitchAppAccessToken', appAccessToken);
     this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'))
+    // this.initData = true;
 
-    // 백엔드에서 처리 해야댐.. twitch auth validation
-    try{
-      if(localStorage.getItem('twitchAppAccessToken')){
-        await axios.get('https://id.twitch.tv/oauth2/validate',{
-          headers:{
-            Authorization: `OAuth ${JSON.parse(localStorage.getItem('twitchAppAccessToken'))}`
-            }
-        }).then((res) => {
-          this.initData = true;
-          //정상
-        }).catch(async (error) => {
-          console.log(error);
-          //비정상, 앱엑세스 토큰 재발급 Backend 처리
-          await axios.get(this.$store.state.appTokenURL).then((res) => {
-            localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
-            this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
-          })
-        })
-      } else {
-        //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
-        await axios.get(this.$store.state.appTokenURL)
-        .then((res) => {
-          //받아온 엑세스토큰 로컬스토리지에 저장
-          this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
-          localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
-          });
-      }
+    // // 백엔드에서 처리 해야댐.. twitch auth validation
+    // try{
+    //   if(localStorage.getItem('twitchAppAccessToken')){
+    //     await axios.get('https://id.twitch.tv/oauth2/validate',{
+    //       headers:{
+    //         Authorization: `OAuth ${JSON.parse(localStorage.getItem('twitchAppAccessToken'))}`
+    //         }
+    //     }).then((res) => {
+    //       this.initData = true;
+    //       //정상
+    //     }).catch(async (error) => {
+    //       console.log(error);
+    //       //비정상, 앱엑세스 토큰 재발급 Backend 처리
+    //       await axios.get(this.$store.state.appTokenURL).then((res) => {
+    //         localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
+    //         this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
+    //       })
+    //     })
+    //   } else {
+    //     //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
+    //     await axios.get(this.$store.state.appTokenURL)
+    //     .then((res) => {
+    //       //받아온 엑세스토큰 로컬스토리지에 저장
+    //       this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
+    //       localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
+    //       });
+    //   }
 
-    this.initData = true;
-    }catch{
+    // this.initData = true;
+    // }catch{
 
-    }
+    // }
   },
 }
 </script>

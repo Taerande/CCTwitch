@@ -5,7 +5,7 @@ module.exports = {
   pwa:{
     manifestOptions:{
       "background_color": "#ffffff",
-      "description": "Twitch Clip Download, Search and Collect easily. CCTwitch can search clip by date and by videos. Also can save, download clips.",
+      "description": "Twitch Clip Download, Search and Collect easily. CCTwitch provide various sort of clips by keyword, date, vids. Also can save, download clips. CCTwitch는 트위치 클립 검색, 다운, 저장 및 다양한 정렬을 제공합니다.",
       "dir": "ltr",
       "display": "standalone",
       "name": "cctwitch",

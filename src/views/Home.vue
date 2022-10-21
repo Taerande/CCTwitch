@@ -23,7 +23,7 @@
       </v-col>
       <Search class="pt-6"></Search>
     </v-row>
-    <DisplyaAdContainerVue></DisplyaAdContainerVue>
+    <InArticleAdContainerVue></InArticleAdContainerVue>
     <div class="d-flex align-center">
       <span>Live Stream - {{lang}}</span>
       <v-spacer></v-spacer>
@@ -82,6 +82,7 @@
         </div>
       </div>
     </v-row>
+    <InArticleAdContainerVue></InArticleAdContainerVue>
   </v-container>
 </template>
 
@@ -89,13 +90,13 @@
 
 import axios from 'axios';
 import Search from '../components/Search';
-import DisplyaAdContainerVue from '../components/DisplyaAdContainer.vue';
+import InArticleAdContainerVue from '../components/InArticleAdContainer.vue';
 export default {
   name: 'Home',
 
   components: {
-    DisplyaAdContainerVue,
     Search,
+    InArticleAdContainerVue,
   },
   data() {
     return {

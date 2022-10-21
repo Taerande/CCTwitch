@@ -47,7 +47,7 @@ export default {
   methods: {
     ApplyDate(el) {
       this.$emit('ApplyDate', {
-        text: 'Custom Period',
+        text: 'Custom',
         start: this.$moment(el[0]).toISOString(),
         end: this.$moment(el[1]).add(86399,'seconds').toISOString(),
       });

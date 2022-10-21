@@ -27,9 +27,9 @@
     </template>
     </v-text-field>
   </v-row>
-  <DisplyaAdContainerVue></DisplyaAdContainerVue>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
   <v-btn class="pa-2 ma-0" color="twitch" small text @click="getNewData('')">show all</v-btn>
-  <v-row v-if="loading" class="d-flex justify-center">
+  <v-row v-if="loading" class="d-flex justify-center" style="height:30vh;">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-block justify-center" v-else>
@@ -93,17 +93,18 @@
       <v-btn small text :loading="dbloading" :disabled="lastVisible === null" color="twitch" @click="getNextData(streamer)">next<v-icon small>mdi-chevron-double-right</v-icon></v-btn>
     </v-row>
   </v-row>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
 </v-container>
 </template>
 
 <script>
-import DisplyaAdContainerVue from '../components/DisplyaAdContainer.vue';
 
 import { last, head } from 'lodash';
+import InArticleAdContainerVue from '../components/InArticleAdContainer.vue';
 
 export default {
   components: {
-    DisplyaAdContainerVue,
+    InArticleAdContainerVue,
   },
   data() {
     return {

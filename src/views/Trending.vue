@@ -16,8 +16,9 @@
   <v-subheader>Clips</v-subheader>
   <hotclipVue></hotclipVue>
   <v-divider class="my-3"></v-divider>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
   <v-subheader>Cliplist</v-subheader>
-  <v-row v-if="loading" class="d-flex justify-center">
+  <v-row v-if="loading" class="d-flex justify-center" style="height:30vh;">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-flex pt-5 col-12" v-else-if="cliplists.length > 0 && !loading">
@@ -39,7 +40,7 @@
         <CliplistDefaultVue :item="item"></CliplistDefaultVue>
       </v-col>
     </v-row>
-    <v-row v-if="lastVisible" class="d-flex justify-center">
+    <v-row v-if="lastVisible" class="d-flex justify-center py-3">
       <v-btn :loading="dataLoading" @click="getMoreData()" block color="twitch" dark><v-icon>mdi-chevron-down</v-icon>더 보기</v-btn>
     </v-row>
   </v-row>
@@ -48,6 +49,7 @@
       공유된 클립모음이 없습니다.
     </v-alert>
   </v-row>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
 </v-container>
 
 </template>
@@ -56,9 +58,11 @@
 import { last, chunk } from 'lodash';
 import CliplistDefaultVue from '@/components/CliplistDefault.vue';
 import hotclipVue from '../components/Trending/HotClipList.vue';
+import InArticleAdContainerVue from '../components/InArticleAdContainer.vue';
 
 export default {
   components:{
+    InArticleAdContainerVue,
     CliplistDefaultVue,
     hotclipVue,
   },

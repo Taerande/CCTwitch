@@ -59,7 +59,7 @@
       {{cliplist.description}}
     </div>
   </v-row>
-  <DisplyaAdContainerVue></DisplyaAdContainerVue>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
   <v-divider class="my-2"></v-divider>
   <expandTableVue
     v-if="$store.state.currentCliplist.length > 0"
@@ -94,7 +94,8 @@ import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import axios from 'axios';
 import expandTableVue from '@/components/cliplist/expandTable';
 import ImportNewClipDialogVue from '@/components/dialog/ImportNewClipDialog.vue';
-import DisplyaAdContainerVue from '@/components/DisplyaAdContainer.vue';
+import InArticleAdContainerVue from '../components/InArticleAdContainer.vue';
+
 
 export default {
   components: {
@@ -102,7 +103,7 @@ export default {
     AddNewCliplistDialog,
     expandTableVue,
     ImportNewClipDialogVue,
-    DisplyaAdContainerVue,
+    InArticleAdContainerVue,
 },
   data() {
     return {

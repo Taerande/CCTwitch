@@ -161,9 +161,6 @@
       :clipSort="clipSort"
       :vidInfo="vidLists[carsouelId]"
     ></SortButton>
-    <!-- <createClipVue
-    :vidInfo="vidLists[carsouelId]"
-    ></createClipVue> -->
     <v-row class="d-block" v-if="this.clipSort === 'vids'">
       <v-row
         :style="{height:`${imgHeight}px`}"
@@ -206,6 +203,14 @@
         :clips="{ user_id: userInfo.data.id }"
       ></clipsByDate>
     </v-row>
+    <v-row
+    class="d-flex justify-center align-center pa-0"
+      v-else-if="this.clipSort === 'search'">
+      <ChannelClipBySearchVue
+      :listData="cliplist"
+      :userData="userInfo.data"
+      ></ChannelClipBySearchVue>
+    </v-row>
   </v-container>
 </template>
 <script>
@@ -214,13 +219,12 @@ import clips from '../components/ChannelClip.vue'
 import clipsByDate from '../components/ChannelClipByDate.vue'
 import vids from '../components/vids.vue'
 import SortButton from '../components/Channel/SortButton'
-import AddNewDeviceVue from '../components/dialog/AddNewDevice.vue'
-// import createClipVue from '../components/Channel/createClip.vue'
-// createClipVue,
+import ChannelClipBySearchVue from '../components/ChannelClipBySearch.vue'
 export default {
   components: {
     clips,
     vids,
+    ChannelClipBySearchVue,
     clipsByDate,
     SortButton,
   },

@@ -7,7 +7,12 @@
       <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
       <v-divider class="my-1"></v-divider>
       <v-col cols="12" class="d-flex justify-center" v-if="index&7 === 1">
-        <DisplyaAdContainerVue></DisplyaAdContainerVue>
+        <InArticleAdsense
+          data-ad-client="ca-pub-8597405222136575"
+          data-ad-slot="4393417523"
+          data-ad-format="fluid"
+          ins-style="display:block;text-align:center;"
+        ></InArticleAdsense>
       </v-col>
     </v-col>
   </draggable>
@@ -20,8 +25,13 @@
         <ClipIframeDataTableDialog  :clipData="clip" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
         <v-divider class="my-1"></v-divider>
       </v-col>
-      <v-col cols="12" class="d-flex justify-center" v-if="chunk.length === 10">
-        <DisplyaAdContainerVue></DisplyaAdContainerVue>
+      <v-col cols="12" class="d-inline-block justify-center" v-if="chunk.length === 10">
+        <InArticleAdsense
+          data-ad-client="ca-pub-8597405222136575"
+          data-ad-slot="4393417523"
+          data-ad-format="fluid"
+          ins-style="display:block;text-align:center;"
+        ></InArticleAdsense>
       </v-col>
     </v-row>
   </v-row>
@@ -33,8 +43,13 @@
       <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
       <v-divider class="my-1"></v-divider>
     </v-col>
-    <v-col cols="12" class="d-flex justify-center" v-if="chunk.length === 10">
-      <DisplyaAdContainerVue></DisplyaAdContainerVue>
+    <v-col cols="12" class="block justify-center" v-if="chunk.length === 10">
+      <InArticleAdsense
+          data-ad-client="ca-pub-8597405222136575"
+          data-ad-slot="4393417523"
+          data-ad-format="fluid"
+          ins-style="display:block;text-align:center;"
+        ></InArticleAdsense>
     </v-col>
   </v-row>
 </v-row>
@@ -43,15 +58,16 @@
 <script>
 import ClipIframeDataTableDialog from '../dialog/ClipIframeDataTableDialog';
 import draggable from 'vuedraggable'
-import DisplyaAdContainerVue from '../DisplyaAdContainer.vue';
+// import DisplyaAdContainerVue from '../DisplyaAdContainer.vue';
+import InArticleAdContainer from '../InArticleAdContainer.vue';
 import { chunk } from 'lodash';
 
+// InArticleAdContainer,
 export default {
   props:['clipListData','tempArr'],
   components: {
     ClipIframeDataTableDialog,
     draggable,
-    DisplyaAdContainerVue,
   },
   data() {
     return {

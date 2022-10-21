@@ -1,6 +1,6 @@
 <template>
-<v-container fluid>
-  <v-row v-if="!loading" class="d-flex justify-center">
+<v-row class="d-flex pt-5 col-12">
+  <v-row v-if="!loading" class="d-flex justify-center" style="height:30vh;">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-flex pt-5 col-12" v-else-if="hotclips.length > 0 && loading">
@@ -52,7 +52,7 @@
       There is no Hot Clip!
     </v-alert>
   </v-row>
-</v-container>
+</v-row>
 </template>
 <script>
 

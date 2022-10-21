@@ -5,7 +5,6 @@
   </v-row>
   <v-divider></v-divider>
   <v-subheader>Book Mark</v-subheader>
-  <DisplyaAdContainerVue></DisplyaAdContainerVue>
   <v-row class="d-flex justify-start pa-3" v-if="streamerList.liked.length > 0">
     <v-col cols="6" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex flex-column  align-center"
     v-for="item in streamerList.liked"
@@ -50,9 +49,9 @@
       </div>
     </v-alert>
   </v-row>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
   <v-divider class="mt-5"></v-divider>
   <v-subheader>On Live</v-subheader>
-  <DisplyaAdContainerVue></DisplyaAdContainerVue>
   <v-row v-if="loading.stream" class="d-flex justify-center py-10">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
@@ -115,7 +114,6 @@
   </v-row>
   <v-divider class="mt-5"></v-divider>
   <v-subheader>All</v-subheader>
-  <DisplyaAdContainerVue></DisplyaAdContainerVue>
   <v-row v-if="loading.follow" class="d-flex justify-center py-10">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
@@ -164,16 +162,17 @@
       </div>
     </v-alert>
   </v-row>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
 </v-container>
 </template>
 
 <script>
 import axios from 'axios';
-import DisplyaAdContainerVue from '../components/DisplyaAdContainer.vue';
+import InArticleAdContainerVue from '../components/InArticleAdContainer.vue';
 
 export default {
   components: {
-    DisplyaAdContainerVue,
+    InArticleAdContainerVue,
   },
   data() {
     return {

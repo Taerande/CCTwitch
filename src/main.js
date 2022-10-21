@@ -8,11 +8,9 @@ import './plugins/moment';
 import Ads from 'vue-google-adsense'
 import './registerServiceWorker'
 import VueApexCharts from 'vue-apexcharts'
-import AdFit from 'vue-adfit-component'
 
 // import './error'
 
-Vue.use(AdFit.Banner)
 Vue.use(VueApexCharts)
 Vue.use(require('vue-script2'))
 Vue.use(Ads.Adsense)

@@ -4,7 +4,7 @@
     <span class="text-h3 font-weight-bold pr-3">Search | {{this.$route.query.q}}</span>
   </v-row>
   <v-divider></v-divider>
-  <v-row v-if="!dataLoading" class="absolute-center">
+  <v-row v-if="!dataLoading" class="d-flex justify-center align-center" style="height:30vh;">
     <div class="d-flex justify-center">
       <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
@@ -71,13 +71,18 @@
       </div>
     </v-alert>
   </v-row>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
 </v-container>
 </template>
 
 <script>
 import axios from 'axios';
+import InArticleAdContainerVue from '../components/InArticleAdContainer.vue';
 
 export default {
+  components:{
+    InArticleAdContainerVue,
+  },
   data() {
     return {
       searchList:[],

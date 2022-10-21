@@ -1,7 +1,6 @@
 <template>
 <v-container>
   <v-row class="d-flex justify-center align-center">
-    <!-- <v-icon color="twitch" :disabled="dateloading || this.date === '22-08-10'" x-large @click="beforeDate()">mdi-chevron-left</v-icon> -->
     <v-dialog
     v-model="dialog"
     scrollable
@@ -31,8 +30,8 @@
       <v-icon color="error" class="px-1">mdi-calendar</v-icon>
       <span class="text-h5 twitch--text font-weight-blod">{{this.$moment(`20${this.date}`).format('ll')}}</span>
     </span>
-    <!-- <v-icon color="twitch" :disabled="dateloading ||this.date === this.$moment().format('YY-MM-DD')" x-large @click="afterDate()">mdi-chevron-right</v-icon> -->
   </v-row>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
   <v-row v-if="overallLoading">
   <v-subheader>Viewers & Streams</v-subheader>
     <v-col cols="12" class="py-3 d-flex justify-center align-center">
@@ -86,8 +85,14 @@
         v-if="streamerModel.id !== null"
         style="width:100%;"
       >
-      <v-subheader>Chart</v-subheader>
-        <v-card-title class="d-flex align-center">
+      <v-card-title class="d-flex align-center">
+        <v-subheader>Chart</v-subheader>
+        <v-spacer></v-spacer>
+        <v-icon color="red" @click="streamerModel = {
+                id:null
+              }">mdi-close</v-icon>
+      </v-card-title>
+        <v-card-text class="d-flex align-center">
             <router-link :to="{name:'Channel', query:{
               q:streamerModel.login}}" class="d-flex align-center">
               <v-avatar size="48" color="black">
@@ -130,10 +135,7 @@
               </template>
               </v-checkbox>
             </div>
-            <v-icon color="red" @click="streamerModel = {
-              id:null
-            }">mdi-close</v-icon>
-        </v-card-title>
+        </v-card-text>
         <v-card-text>
           <div v-if="!streamLoading" class="ma-2">
             <apexchart ref="streamchart" type="line" height="350" :options="streamLineChartOptions" :series="streamLineSeries"></apexchart>
@@ -142,7 +144,7 @@
             <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
           </div>
         </v-card-text>
-        <DisplyaAdContainerVue></DisplyaAdContainerVue>
+        <InArticleAdContainerVue></InArticleAdContainerVue>
         <v-subheader>Clips</v-subheader>
         <v-row class="d-flex justify-center col-12" v-if="streamerClips.length > 0 && !clipLoading">
           <v-col class="d-flex justify-center align-center py-10" cols="12">
@@ -175,9 +177,6 @@
         </v-row>
       </v-card>
     </v-expand-transition>
-    <v-col cols="12" class="pa-0 ma-0">
-      <DisplyaAdContainerVue></DisplyaAdContainerVue>
-    </v-col>
     <v-subheader>Top Categories</v-subheader>
      <v-col class="pb-3 d-flex justify-center align-center" cols="12">
       <v-slide-group
@@ -294,18 +293,19 @@
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
   </v-row>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
 </v-container>
 </template>
 <script>
 import axios from 'axios';
 import ClipIframeDialogVue from '../dialog/ClipIframeDialog.vue';
-import DisplyaAdContainerVue from '../DisplyaAdContainer.vue';
+import InArticleAdContainerVue from '../InArticleAdContainer.vue';
 
 export default {
   props:['listData'],
   components:{
     ClipIframeDialogVue,
-    DisplyaAdContainerVue,
+    InArticleAdContainerVue,
     // StreamerChartVue,
   },
   data() {

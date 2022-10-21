@@ -34,7 +34,7 @@
 - Kr
 - Overall, Channel 구분
 -
-
+u
 ```
 npm install
 ```

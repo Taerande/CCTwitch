@@ -71,7 +71,7 @@
     </v-card-text>
     <Adsense
     data-ad-client="ca-pub-8597405222136575"
-    data-ad-slot="3465851493"
+    data-ad-slot="4467586752"
     :ins-style="`display:inline-block;width:100%;height:90px;`"
     ></Adsense>
     <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
