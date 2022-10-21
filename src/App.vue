@@ -2,11 +2,28 @@
   <v-app v-if="$store.state.firebaseLoaded && initData">
     <AppBar app></AppBar>
     <v-main app>
-      <DisplyaAdContainerVue></DisplyaAdContainerVue>
+      <div class="d-flex justify-center pt-3">
+        <adfit-banner
+          data-ad-unit="DAN-hpiQBj5dyLFFiXrc">
+        </adfit-banner>
+      </div>
+        <!-- <DisplyaAdContainerVue></DisplyaAdContainerVue> -->
       <router-view :key="$route.fullPath" />
       <SnackBar app></SnackBar>
       <DisplyaAdContainerVue></DisplyaAdContainerVue>
     </v-main>
+    <div v-if="$vuetify.breakpoint.lgAndUp">
+      <div style="position:fixed;top:200px;" :style="$vuetify.breakpoint.xl ? 'left:50px' :'left:20px'">
+        <adfit-banner
+          data-ad-unit="DAN-KpMZnxsgynFt6CtD">
+        </adfit-banner>
+      </div>
+      <div style="position:fixed;top:200px;" :style="$vuetify.breakpoint.xl ? 'right:50px' :'right:20px'">
+        <adfit-banner
+          data-ad-unit="DAN-KpMZnxsgynFt6CtD">
+        </adfit-banner>
+      </div>
+    </div>
     <Footer app></Footer>
   </v-app>
   <v-app v-else>
@@ -160,7 +177,7 @@ main {
 html.overflow-y-hidden{
   overflow-y:scroll !important;
 }
-@media screen and (max-width: 1264px) and (min-width: 960px) {
+@media screen and (max-width: 1263px) and (min-width: 960px) {
   header {
     padding-left: 3%;
     padding-right: 3%;
