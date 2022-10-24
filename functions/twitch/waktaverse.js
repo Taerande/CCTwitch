@@ -12,7 +12,7 @@ app.get('/waktaverse', async (req, res) => {
   // const userId = req.url.split('userId=')[1].split('&twitchAccesToken')[0]
   const twitchAccesToken = req.query.appAccessToken;
   const clientId = process.env.TWITCH_CLIENT_ID;
-  const time = '2022-10-12';
+  const time = req.query.time;
   const appAccessToken = twitchAccesToken;
 
   const weekNumber = moment(time).week();
@@ -117,23 +117,3 @@ app.get('/waktaverse', async (req, res) => {
 
 });
 module.exports = app
-
-{/* <v-row>
-   {{time}}
-   <v-text-field
-     v-model="time"
-   ></v-text-field>
- </v-row>
-   <v-btn :loading="dbLoading" color="success" block @click="wak(time)">test</v-btn>
-
-async wak(el){
-  this.dbLoading = true;
-  await axios.get(this.$store.state.backendUrl+'/weeklyWaktaverse/waktaverse'+`?time=${el}&appAccessToken=${this.$store.state.headerConfig.Authorization}`).then((res) => {
-    this.$store.commit('SET_SnackBar', {type:'success', text:'업데이트', value:true})
-    console.log(res);
-    this.dbLoading = false;
-  }).catch(()=>{
-      this.dbLoading = false;
-    })
-
-}, */}
