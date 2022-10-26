@@ -40,8 +40,11 @@
           :class="clipSort === 'date' ? 'white--text' : ''"
         >
         <v-icon small>mdi-calendar</v-icon>
-        <span class="px-1">
-          {{$store.state.dateSort.text === null ? "Date" : $store.state.dateSort.text}}
+        <span class="px-1" v-if="clipSort === 'date'">
+          {{$store.state.dateSort.text}}
+        </span>
+        <span v-else>
+          Date
         </span>
         </v-btn>
       </template>
@@ -82,7 +85,7 @@
           <v-list-item-title>All</v-list-item-title>
         </v-list-item>
         <v-list-item>
-          <DatePickerDialog :dateInfo="{min : this.userInfo.data.created_at, max : today }" @ApplyDate="changeDateSort"></DatePickerDialog>
+          <DatePickerDialog :dateInfo="{min : this.userInfo.data.created_at, max : $moment().format('YYYY-MM-DD'), type:'custom' }" @ApplyDate="changeDateSort"></DatePickerDialog>
         </v-list-item>
       </v-list>
     </v-menu>
@@ -132,38 +135,45 @@
             {{userInfo.data.display_name}}님({{userInfo.data.login}})의 클립 검색
           </div>
         </v-card-title>
-        <v-card-text class="pa-0 pt-3">
-          <v-form
-          @submit.prevent="sortTypeSearch()"
-          >
-            <v-text-field
-              class="pa-3"
-              v-model="searchString"
-              outlined
-              color="twitch"
-              :rules="[rule.required,rule.counter]"
-              maxlength="15"
-              counter
-              full-width
-              @click:append="sortTypeSearch()"
-              label="Input clip title keyword"
-              append-icon="mdi-magnify"
-            ></v-text-field>
-          </v-form>
+        <v-card-text class="pa-0 pt-3 px-5">
+          <!-- <v-subheader>Keyword</v-subheader> -->
+          <v-combobox
+            color="twitch"
+            v-model="searchKeywords"
+            outlined
+            multiple
+            counter="5"
+            deletable-chips
+            type="text"
+            small-chips
+            maxlength="15"
+            placeholder="Keyword는 최대 5개, 15자까지 가능합니다."
+            label="Keywords"
+            clear-icon="mdi-close-circle"
+            clearable>
+            </v-combobox>
+          <DatePickerDialog :dateInfo="{min : this.userInfo.data.created_at, max : $moment().format('YYYY-MM-DD'), type:'search' }" @ApplyDate="changeDateSort"></DatePickerDialog>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="pt-10">
           <v-spacer></v-spacer>
           <v-btn class="text-caption" color="error" depressed @click="searchDialog = false" text>close</v-btn>
-          <v-btn class="text-caption" color="success" depressed @click="sortTypeSearch()" :disabled="searchString === ''" text>search</v-btn>
+          <v-btn class="text-caption" color="success" depressed @click="sortTypeSearch(), searchDialog = false" :disabled="searchKeywords.length === 0" text>search</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
   </v-row>
-  <v-row v-if="clipSort === 'date'">
-    <div class="py-1 red--text text-subtitle-2">
-        <v-icon color="error" size="1rem">mdi-calendar-range</v-icon> {{setDateFormat($store.state.dateSort)}}
+  <v-row v-if="$store.state.dateSort.text !== 'vids' && $store.state.dateSort.text !== null" class="pt-3">
+    <v-icon class="px-1" color="error">mdi-calendar</v-icon>
+    <div class="d-flex justify-center align-center text-subtitle-2 red--text" v-if="$store.state.dateSort.start === null">
+      All Time
+    </div>
+    <div class="d-flex justify-center align-center text-subtitle-2 red--text" v-else>
+      {{`${$moment($store.state.dateSort.start).format('ll')} ~ ${$moment($store.state.dateSort.end).format('ll')} `}}
     </div>
   </v-row>
+  <div class="d-flex pt1 align-center text-caption red--text" v-if="$store.state.dateSort.text === 'search'">
+    (조회수가 1인 클립은 수집하지 않습니다.)
+  </div>
 </v-container>
 </template>
 
@@ -187,6 +197,12 @@ export default {
       dialog: false,
       searchDialog: false,
       searchString: '',
+      searchData:{
+        text:'search',
+        start:null,
+        end:null,
+      },
+      searchKeywords:[],
     };
   },
   methods: {
@@ -197,29 +213,30 @@ export default {
       return `${this.$moment(el.start).format('ll')} ~ ${this.$moment(el.end).format('ll')}`;
     },
     async changeDateSort(el) {
-      const asd = () => {
-        this.$emit('changeSort', '');
-        this.menu = false;
-      };
-      await asd();
-      this.$emit('changeSort', 'date');
-      this.$store.commit('SET_DateSort', el);
+      if(el.text === 'search'){
+        this.searchData.start = el.start;
+        this.searchData.end = el.end;
+      } else {
+        const asd = () => {
+          this.$emit('changeSort', '');
+          this.menu = false;
+        };
+        await asd();
+        this.$emit('changeSort', 'date');
+        this.$store.commit('SET_DateSort', el);
+      }
     },
     async sortTypeSearch() {
-      if(this.searchString === ''){
-        return this.$store.commit('SET_SnackBar',{type:'error', text:'Form is not valid!', value:true});
-      }
+      // if(this.searchString === ''){
+      //   return this.$store.commit('SET_SnackBar',{type:'error', text:'Form is not valid!', value:true});
+      // }
       const asd = () => {
         this.$emit('changeSort', '');
         this.menu = false;
       };
       await asd();
-        this.$store.commit('SET_DateSort', {
-        text: null,
-        start: null,
-        end: null,
-      });
-      this.searchDialog = false;
+      this.$store.commit('SET_ClipSearchKeywords',this.searchKeywords);
+      this.$store.commit('SET_DateSort', this.searchData);
       this.$emit('changeSort', 'search');
       this.$store.commit('SET_ClipKeyword',this.searchString);
     },
@@ -264,6 +281,13 @@ export default {
       }
     },
   },
+  watch:{
+    searchKeywords (val) {
+      if (val.length > 5) {
+        this.$nextTick(() => this.searchKeywords.pop())
+      }
+    },
+  },
   computed: {
     today() {
       return this.$moment().toISOString();
@@ -281,8 +305,6 @@ export default {
       return this.$moment().subtract(1, 'year').toISOString();
     },
 
-  },
-  mounted() {
   },
   destroyed() {
     this.$store.commit('SET_DateSort', {
