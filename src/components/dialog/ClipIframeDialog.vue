@@ -6,6 +6,7 @@
   max-width="1080">
   <template v-slot:activator="{ on, attrs }">
     <v-img
+    :title="clipData.title"
     :aspect-ratio="16/9"
     class="rounded-lg clip-thumbnail"
     v-bind="attrs"
@@ -50,12 +51,12 @@
       <Adsense
       data-ad-client="ca-pub-8597405222136575"
       data-ad-slot="3465851493"
-      :ins-style="`display:inline-block;width:100%;height:90px;`"
+      :ins-style="`display:inline-block;width:100%;height:90px;min-wdith:250px;`"
       ></Adsense>
     </div>
     <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
       <div class="px-1 mx-1">
-        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,clipData.title, setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,vidInfo.title, setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
         <div class="text-caption">다시보기</div>
       </div>
       <div class="px-1 mx-1">
@@ -83,6 +84,7 @@
 </template>
 <script>
 import pinClip from '@/components/pinClip.vue';
+import axios from 'axios';
 import AddNewHotClipDialogVue from './AddNewHotClipDialog.vue';
 export default {
   components:{
@@ -93,6 +95,7 @@ export default {
   data() {
     return {
       dialog:false,
+      vidInfo:null,
     }
   },
   methods: {
@@ -139,6 +142,16 @@ export default {
       }
       return Math.abs(num);
     },
+    async getVidInfo(){
+      await axios.get('https://api.twitch.tv/helix/videos',{
+        headers: this.$store.state.headerConfig,
+        params: {
+          id: this.clipData.video_id,
+        },
+      }).then((res) => {
+        this.vidInfo = res.data.data[0];
+      })
+    },
     // async getVidOffset(element){
     //   if(!element.video_id){
     //     return this.dialog = true;
@@ -168,8 +181,12 @@ export default {
     // }
   },
   computed:{
+
   },
-  mounted(){
+  async mounted(){
+    if(this.clipData.video_id){
+      await this.getVidInfo();
+    }
   }
 }
 </script>

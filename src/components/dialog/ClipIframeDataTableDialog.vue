@@ -18,6 +18,7 @@
         :max-width="imgWidth"
         :aspect-ratio="16/9"
         v-on="on"
+        :title="clipData.title"
         class="pa-0 thumbnailImg ma-0 rounded-lg"
         lazy-src="@/assets/img/404.jpg"
         :src="clipData.thumbnail_url">
@@ -71,12 +72,12 @@
     </v-card-text>
     <Adsense
     data-ad-client="ca-pub-8597405222136575"
-    data-ad-slot="4467586752"
-    :ins-style="`display:inline-block;width:100%;height:90px;`"
+    data-ad-slot="3465851493"
+    :ins-style="`display:inline-block;width:100%;height:90px;min-wdith:250px;`"
     ></Adsense>
     <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
       <div class="px-1 mx-1">
-        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === undefined || clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,clipData.title, setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === undefined || clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,vidInfo.title, setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
         <div class="text-caption">다시보기</div>
       </div>
       <div class="px-1 mx-1">
@@ -103,6 +104,7 @@
 </v-dialog>
 </template>
 <script>
+import axios from 'axios';
 import pinClip from '@/components/pinClip.vue';
 import clipMenuVue from '@/components/cliplist/clipMenu.vue';
 import AddNewHotClipDialogVue from './AddNewHotClipDialog.vue';
@@ -117,9 +119,20 @@ export default {
     return {
       hovering: false,
       dialog:false,
+      vidInfo:null,
     }
   },
   methods: {
+    async getVidInfo(){
+      await axios.get('https://api.twitch.tv/helix/videos',{
+        headers: this.$store.state.headerConfig,
+        params: {
+          id: this.clipData.video_id,
+        },
+      }).then((res) => {
+        this.vidInfo = res.data.data[0];
+      })
+    },
     copyClip(el) {
       const tempArea2 = document.createElement('textarea');
       document.getElementsByClassName('copyBody')[0].appendChild(tempArea2);
@@ -159,7 +172,7 @@ export default {
       return hour+'h'+min+'m'+sec+'s';
     },
     pushToTwitchVids(url, title, time) {
-      if (window.confirm(`${title}[${time}] 영상으로 이동하시겠습니까?`)) {
+      if (window.confirm(`[${this.$moment(this.vidInfo.created_at).fromNow()}] ${title}\n[${time}]으로 이동하시겠습니까?`)) {
         window.open(url, '_blank');
       }
     },
@@ -202,7 +215,10 @@ export default {
       }
     },
   },
-  mounted() {
+  async mounted(){
+    if(this.clipData.video_id){
+      await this.getVidInfo();
+    }
   }
 }
 </script>
