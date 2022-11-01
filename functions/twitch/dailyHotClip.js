@@ -107,9 +107,8 @@ async function setHotClipInCollection(){
         thumbnail_url: el.thumbnail_url,
         createdAt: el.created_at
       })
-    };
+    })
   })
-
 };
 
 async function getTopClip(){

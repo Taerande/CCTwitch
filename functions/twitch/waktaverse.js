@@ -127,7 +127,7 @@ app.get('/waktaverse', async (req, res) => {
           thumbnail_url: el.thumbnail_url,
           createdAt: el.created_at
         })
-      };
+      })
     })
     res.send(200);
   })
