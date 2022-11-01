@@ -8,17 +8,18 @@ const firestore = admin.firestore();
 
 app.use(cors());
 app.get('/waktaverse', async (req, res) => {
+
   moment.locale('ko');
-  // const userId = req.url.split('userId=')[1].split('&twitchAccesToken')[0]
   const twitchAccesToken = req.query.appAccessToken;
   const clientId = process.env.TWITCH_CLIENT_ID;
-  const time = req.query.time;
+  const currentTime = req.query.time;
   const appAccessToken = twitchAccesToken;
+  const time = moment(currentTime).add(-7,'days').format('YYYY-MM-DD');
 
   const weekNumber = moment(time).week();
 
   const started_at = moment(time).week(time).startOf('week').add(36,'hour').toISOString();
-  const ended_at = moment(started_at).add(7,'day').toISOString();
+  const ended_at = moment(started_at).add(7,'days').toISOString();
   // "49045679" 우왁굳
   // "137881582" 뢴트게늄
   // "132782743" 천양
@@ -92,13 +93,13 @@ app.get('/waktaverse', async (req, res) => {
         count: cliplist.filter(x => x.broadcaster_id === v.id).length,
       })
     })
-  }).then(() => {
-    firestore.collection('cliplist').add({
+  }).then(async () => {
+    await firestore.collection('cliplist').doc(`WeeklyWak-${time}`).set({
       authorId: "twitch:792857520",
       authorName: "클립콜렉터",
       clipCount: cliplist.length,
       clipIds: clipIds,
-      createdAt: moment(time).add(7,'day')._d,
+      createdAt: moment(currentTime).add(9,'hours')._d,
       title: `주간 이세돌 핫클립 - 22년 ${weekNumber - 1}주차`,
       description:`기간: ${moment(started_at).format('LL')} ~ ${moment(ended_at).format('LL')}`,
       dataSet:dataSet,
@@ -107,8 +108,28 @@ app.get('/waktaverse', async (req, res) => {
       tags: ['이세계 아이돌','이세돌','주간 이세돌 핫클립'],
       thumbnail_url: cliplist[0].thumbnail_url || null,
       likeCount: 0,
+    });
+
+    await axios.get('https://api.twitch.tv/helix/clips',{
+      params:{
+        id: clipIds,
+      },
+      headers: {
+        'Client-id': clientId,
+        Authorization: appAccessToken,
+        Accept: 'application/json',
+      },
+    }).then((resp) => {
+      let target = firestore.collection('cliplist').doc(`WeeklyWak-${time}`);
+      resp.data.data.forEach( el => {
+        target.collection('clips').doc(el.id).set({
+          clipId: el.id,
+          thumbnail_url: el.thumbnail_url,
+          createdAt: el.created_at
+        })
+      };
     })
-    res.send({cliplist:cliplist, clipCount:clipCount, dataSet:dataSet, date:`${started_at}~${ended_at}`});
+    res.send(200);
   })
 
 
