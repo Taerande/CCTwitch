@@ -22,9 +22,21 @@ let treemap = {
 
 let result = {};
 
-const min = moment().minutes();
-const hour = moment().hours();
-const streamDateId = moment(`${hour}:${min}`,'hh:mm').valueOf();
+const streamDateId = momentRound();
+
+function momentRound(){
+  const now = moment();
+  const hour = now.hour();
+  const minute = now.minute();
+  if(minute < 15){
+    return now.set({minute: 0, second: 0}).valueOf();
+  }else if(minute >  44){
+    return now.set({hour: hour + 1, minute: 0, second: 0}).valueOf();
+  } else {
+    return now.set({minute: 30, second: 0}).valueOf();
+  }
+}
+
 let viewCountLimit = 0;
 let lastId = '';
 
