@@ -43,8 +43,8 @@
         </div>
       </v-card-text>
       <v-card-actions class="d-flex justify-end pa-3">
-        <v-btn text @click="dialog = false">
-          <span class="error--text text-break">Close</span>
+        <v-btn text class="text-caption" color="error" @click="dialog = false">
+          Close
         </v-btn>
       </v-card-actions>
     </v-card>

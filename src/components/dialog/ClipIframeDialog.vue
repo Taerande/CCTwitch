@@ -56,7 +56,7 @@
     </div>
     <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
       <div class="px-1 mx-1">
-        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,vidInfo.title, setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`, setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
         <div class="text-caption">다시보기</div>
       </div>
       <div class="px-1 mx-1">
@@ -115,8 +115,9 @@ export default {
       document.getElementsByClassName('copyBody')[0].removeChild(tempArea2);
       this.$store.commit('SET_SnackBar', { type: 'success', text: `Clip URL : ${el.title} 가 복사되었습니다.`, value: true });
     },
-    pushToTwitchVids(url, title, time) {
-      if (window.confirm(`${title}[${time}]으로 이동하시겠습니까?`)) {
+    async pushToTwitchVids(url, time) {
+      await this.getVidInfo();
+      if (window.confirm(`[${this.$moment(this.vidInfo.created_at).fromNow()}] ${this.vidInfo.title}\n[${time}]으로 이동하시겠습니까?`)) {
         window.open(url, '_blank');
       }
     },
@@ -184,9 +185,9 @@ export default {
 
   },
   async mounted(){
-    if(this.clipData.video_id){
-      await this.getVidInfo();
-    }
+    // if(this.clipData.video_id){
+    //   await this.getVidInfo();
+    // }
   }
 }
 </script>

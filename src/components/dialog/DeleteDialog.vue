@@ -38,8 +38,8 @@
     </v-card-text>
     <v-card-actions class="pb-3 pt-0">
       <v-spacer></v-spacer>
-      <v-btn text class="error" @click="dialog = !dialog">Cancel</v-btn>
-      <v-btn :loading="btnLoading" text class="success" @click="btnLoading = true, DeleteData(curType, curData)">OK</v-btn>
+      <v-btn text class="text-caption" color="error" @click="dialog = !dialog">Cancel</v-btn>
+      <v-btn :loading="btnLoading" text class="text-caption" color="success" @click="btnLoading = true, DeleteData(curType, curData)">OK</v-btn>
     </v-card-actions>
   </v-card>
 </v-dialog>

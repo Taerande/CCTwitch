@@ -15,13 +15,15 @@
         </v-card-text>
       <v-card-actions class="ma-0 pa-3">
         <v-spacer></v-spacer>
-        <v-btn color="error" @click="dialog = false">close</v-btn>
-        <v-btn color="success" @click="deleteFav({index:liked.index, display_name: liked.data.display_name})">ok</v-btn>
+        <v-btn class="text-caption"  color="error" @click="dialog = false">close</v-btn>
+        <v-btn class="text-caption"  color="success" @click="deleteFav({index:liked.index, display_name: liked.data.display_name})">ok</v-btn>
       </v-card-actions>
     </v-card>
 </v-dialog>
 </template>
+
 <script>
+
 export default {
   props: ['liked'],
   data() {

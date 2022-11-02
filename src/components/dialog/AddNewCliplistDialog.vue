@@ -126,11 +126,12 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="error" text @click="setDefaultValue">CLOSE</v-btn>
+      <v-btn color="error" class="text-caption" text @click="setDefaultValue">CLOSE</v-btn>
       <v-btn
       v-if="type.type === 'add' || type.type==='pin'"
         color="green darken-1"
         text
+        class="text-caption"
         :disabled="form.title === '' || form.title === null"
         @click="saveCliplist(), dialog = false"
       >
@@ -140,6 +141,7 @@
       v-if="type.type === 'edit'"
         color="green darken-1"
         text
+        class="text-caption"
         :disabled="form.title === '' || form.title === null"
         @click="updateClipListData()"
       >

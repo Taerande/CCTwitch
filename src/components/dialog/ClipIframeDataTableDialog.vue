@@ -13,7 +13,6 @@
         <span v-else class="text-caption font-weight-bold">{{index+1}}</span>
       </v-card-title>
       <v-card-text class="d-flex align-center ma-0 pa-0 text-truncate">
-        <!-- @click="getVidOffset(clipData)" -->
         <v-img
         :max-width="imgWidth"
         :aspect-ratio="16/9"
@@ -77,7 +76,7 @@
     ></Adsense>
     <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
       <div class="px-1 mx-1">
-        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === undefined || clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,vidInfo.title, setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === undefined || clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
         <div class="text-caption">다시보기</div>
       </div>
       <div class="px-1 mx-1">
@@ -171,8 +170,9 @@ export default {
 
       return hour+'h'+min+'m'+sec+'s';
     },
-    pushToTwitchVids(url, title, time) {
-      if (window.confirm(`[${this.$moment(this.vidInfo.created_at).fromNow()}] ${title}\n[${time}]으로 이동하시겠습니까?`)) {
+    async pushToTwitchVids(url, time) {
+      await this.getVidInfo();
+      if (window.confirm(`[${this.$moment(this.vidInfo.created_at).fromNow()}] ${this.vidInfo.title}\n[${time}]으로 이동하시겠습니까?`)) {
         window.open(url, '_blank');
       }
     },

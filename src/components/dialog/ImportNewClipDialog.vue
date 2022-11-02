@@ -66,6 +66,7 @@
         <v-spacer></v-spacer>
         <v-btn
           color="red darken-1"
+          class="text-caption"
           text
           @click=" clipResult = { id: '' }, dialog = false"
         >
@@ -75,6 +76,7 @@
         text
         :loading="loading"
         color="success"
+        class="text-caption"
         @click="addToFireStoreCliplist()"
         :disabled="clipResult.id === '' || isIn"
         >

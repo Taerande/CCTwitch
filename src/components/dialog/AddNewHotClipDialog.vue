@@ -52,16 +52,13 @@
       clear-icon="mdi-close-circle"
       clearable>
       </v-combobox>
-
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="error" @click="dialog=false" text>close</v-btn>
-      <v-btn :loading="dbloading" :disabled="title === ''" color="success" @click="createHotClip()" text>Add</v-btn>
+      <v-btn class="text-caption" color="error" @click="dialog=false" text>close</v-btn>
+      <v-btn class="text-caption" :loading="dbloading" :disabled="title === ''" color="success" @click="createHotClip()" text>Add</v-btn>
     </v-card-actions>
-
   </v-card>
-
   </v-dialog>
 </template>
 <script>
@@ -83,7 +80,7 @@ export default {
     tags (val) {
       if (val.length > 5) {
         this.$nextTick(() => this.tags.pop())
-    }
+      }
     },
     dialog (val){
       if(val === false){

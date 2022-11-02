@@ -21,8 +21,8 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn @click="dialog = false" color="error" text>close</v-btn>
-      <v-btn color="success" text>register</v-btn>
+      <v-btn @click="dialog = false" color="error" class="text-caption"  text>close</v-btn>
+      <v-btn color="success" class="text-caption"  text>register</v-btn>
     </v-card-actions>
   </v-card>
 </v-dialog>
