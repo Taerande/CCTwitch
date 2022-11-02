@@ -1,5 +1,7 @@
 <template>
 <v-container>
+  <InArticleAdContainerVue></InArticleAdContainerVue>
+  <v-divider class="my-8"></v-divider>
   <v-row class="d-flex justify-center align-center">
     <v-dialog
     v-model="dialog"
@@ -21,8 +23,8 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text color="error" @click="dialog = !dialog">close</v-btn>
-        <v-btn text color="success" :disabled="reportDate === null"  @click="changeDate(), dialog = !dialog">Apply</v-btn>
+        <v-btn text class="text-caption" color="error" @click="dialog = !dialog">close</v-btn>
+        <v-btn text class="text-caption" color="success" :disabled="reportDate === null"  @click="changeDate(), dialog = !dialog">Apply</v-btn>
       </v-card-actions>
     </v-card>
     </v-dialog>
@@ -31,7 +33,6 @@
       <span class="text-h5 twitch--text font-weight-blod">{{this.$moment(`20${this.date}`).format('ll')}}</span>
     </span>
   </v-row>
-  <InArticleAdContainerVue></InArticleAdContainerVue>
   <v-row v-if="overallLoading">
   <v-subheader>Viewers & Streams</v-subheader>
     <v-col cols="12" class="py-3 d-flex justify-center align-center">
@@ -256,8 +257,8 @@
               xl="4" lg="4" md="6"
               v-for="streamer in gameModel.topStreamer" :key="streamer.id"
               >
-                <v-card elevation="3" outlined class="d-flex rounded-lg py-1 streamer-list" style="width:100%;" :to="{name: 'Channel', query:{
-              q: streamer.login}}" :title="streamer.title">
+                <v-card elevation="3" outlined class="d-flex rounded-lg py-1 streamer-list" style="width:100%;" :to="{name: 'Report', query:{
+              type: 'channel', id: streamer.login}}" :title="streamer.title">
                   <v-card-text class="d-flex align-center justify-center pa-2">
                       <div aria-label="avatar" class="flex-direction: column">
                         <v-avatar size="36">
@@ -556,6 +557,7 @@ export default {
       this.clipLoading = true;
       await axios.get('https://api.twitch.tv/helix/clips',{
         params:{
+          first:100,
           broadcaster_id:el,
           started_at:new Date(this.streamLineChartOptions.labels[0]).toISOString(),
           ended_at:new Date(this.streamLineChartOptions.labels[this.streamLineChartOptions.labels.length - 1]).toISOString(),
@@ -680,7 +682,7 @@ export default {
             } : this.streamLineChartOptions.annotations.points[this.streamLineChartOptions.annotations.points.length - 1];
             if(formerGameName !== streamData[item].game_name){
               this.streamLineChartOptions.annotations.xaxis.push({
-                x: new Date(item*1).getTime(),
+                x: new Date(this.momentRound(item*1)).getTime(),
                 strokeDashArray: 0,
                 borderColor: '#775DD0',
                 label: {
@@ -697,7 +699,7 @@ export default {
             }
             if(formerTitle !== streamData[item].title){
               this.streamLineChartOptions.annotations.points.push({
-                x: new Date(item*1).getTime(),
+                x: new Date(this.momentRound(item*1)).getTime(),
                 y: streamData[item].viewer_count,
                 marker: {
                   size: 6,
@@ -728,7 +730,7 @@ export default {
                 this.streamLineSeries[0].data.push(null);
               }
             }
-            this.streamLineChartOptions.labels.push( new Date(item*1).getTime());
+            this.streamLineChartOptions.labels.push( new Date(this.momentRound(item*1)).getTime());
             this.streamLineSeries[0].data.push(streamData[item].viewer_count);
           }
         });
@@ -848,6 +850,18 @@ export default {
       this.date = this.$moment(this.reportDate).format('YY-MM-DD');
       await this.newOverall();
     },
+    momentRound(el){
+      const now = this.$moment(el);
+      const hour = now.hour();
+      const minute = now.minute();
+      if(minute < 15){
+        return now.set({minute: 0, second: 0});
+      }else if(minute >  44){
+        return now.set({hour: hour + 1, minute: 0, second: 0});
+      } else {
+        return now.set({minute: 30, second: 0});
+      }
+    },
     async newOverall(){
       this.streamerModel = {id:null};
       this.gameModel = {id:null};
@@ -859,7 +873,7 @@ export default {
       this.lineSeries[1].data = [];
       await this.$streamData.ref(`/treemap/${this.date}/overall`).get().then((sn) =>{
         for(let item in sn.val()){
-          this.linechartOptions.labels.push( new Date(item*1).getTime());
+          this.linechartOptions.labels.push( new Date(this.momentRound(item*1)).getTime());
           this.lineSeries[0].data.push(sn.val()[item].total_viewer);
           this.lineSeries[1].data.push(sn.val()[item].total_stream);
         }

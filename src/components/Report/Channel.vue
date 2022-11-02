@@ -533,7 +533,7 @@ export default {
           } : this.streamLineChartOptions.annotations.points[this.streamLineChartOptions.annotations.points.length - 1];
           if(formerGameName !== streamData[item].game_name){
             this.streamLineChartOptions.annotations.xaxis.push({
-              x: new Date(item*1).getTime(),
+              x: new Date(this.momentRound(item*1)).getTime(),
               strokeDashArray: 0,
               borderColor: '#775DD0',
               label: {
@@ -550,7 +550,7 @@ export default {
           }
           if(formerTitle !== streamData[item].title){
             this.streamLineChartOptions.annotations.points.push({
-              x: new Date(item*1).getTime(),
+              x: new Date(this.momentRound(item*1)).getTime(),
               y: streamData[item].viewer_count,
               marker: {
                 size: 6,
@@ -581,7 +581,7 @@ export default {
               this.streamLineSeries[0].data.push(null);
             }
           }
-          this.streamLineChartOptions.labels.push( new Date(item*1).getTime());
+          this.streamLineChartOptions.labels.push( new Date(this.momentRound(item*1)).getTime());
           this.streamLineSeries[0].data.push(streamData[item].viewer_count);
         }
       });
@@ -619,6 +619,18 @@ export default {
     },
     allowedDates(el){
       return this.streamerModel.date.includes(el);
+    },
+    momentRound(el){
+      const now = this.$moment(el);
+      const hour = now.hour();
+      const minute = now.minute();
+      if(minute < 15){
+        return now.set({minute: 0, second: 0});
+      }else if(minute >  44){
+        return now.set({hour: hour + 1, minute: 0, second: 0});
+      } else {
+        return now.set({minute: 30, second: 0});
+      }
     },
     async searchChannel(searchString){
       this.searchLoading = true;
