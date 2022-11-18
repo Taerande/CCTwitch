@@ -15,7 +15,7 @@
 
 # Structure & Features
 
-## 1. Channel
+# 1. Channel
 
     해당 채널의 클립들을 다양한 정렬방식으로 제공합니다.
 
@@ -30,53 +30,95 @@ Category & Sort Options
 
   - ## Twitch API로 Video와 CLip 나열
 
-    > 1.Twitch API를 통해 `type === 'Archive'` 인 video를 받아옴.
-    >
-    > 2.받아온 Video data는 list화 하여 carousel 및 dialog 형태로 보여줌.
-    >
-    > 3.Video를 선택시 해당 Video 생성일로 부터 현재까지 Clip data를 가져와 video_id 일치 여부 판단하여 나열.
-    >
-    > 4.infinite scroll loader로 추가 Clip들 가져오기.
+    1. Twitch API를 통해 `type === 'Archive'` 인 video를 받아옴.
+
+    2. 받아온 Video data는 list화 하여 carousel 및 dialog 형태로 보여줌.
+
+    3. Video를 선택시 해당 Video 생성일로 부터 현재까지 Clip data를 가져와 video_id 일치 여부 판단하여 나열.
+
+    4. infinite scroll loader로 추가 Clip들 가져오기.
 
   - ## Timeline 만들기
-    > ## Cloud Functions로 해당 Video와 관련된 Clip들을 시간순으로 나열
-    >
-    > 1.Firebase Cloud functions > Http Request > timeline.js 실행
-    >
-    > 2.해당 Video가 isLive === 'live' ? '10분에 1번 업데이트' : '3시간에 1번 업데이트'
-    >
-    > 3.req.body.vid_id로 twitch api를 통해 video data 재확인
-    >
-    > 4.req.body.broadcaster_id로 twitch api를 통해 clip을 가져온 뒤, 각 클립의 video_id와 video data의 일치하는지 확인.
-    >
-    > 5.video_id === null인 clip은 video data의 started_at 과 duration을 통해 클립 생성시간과 비교하여 stream 상태에서 생성된 클립인지 확인 판별함.
-    >
-    > 6.확인된 클립을 시간순으로 나열하여 최대 100개까지 firestore에 저장.
-    >
-    > 7.생성된 firestore doc id를 res.send로 보냄.
 
-- ### 1-2. 날짜별(Date) 클립 확인
+    ### `Cloud Functions`로 해당 Video와 관련된 Clip들을 시간순으로 나열
+
+    1. _`Firebase Cloud functions > Http Request > timeline.js`_ 실행
+
+    2. 해당 Video가 isLive === 'live' ? '10분에 1번 업데이트' : '3시간에 1번 업데이트'
+
+    3. req.body.vid_id로 twitch api를 통해 video data 재확인
+
+    4. req.body.broadcaster_id로 twitch api를 통해 clip을 가져온 뒤, 각 클립의 video_id와 video data의 일치하는지 확인.
+
+    5. `video_id === null`인 clip은 video data의 started_at 과 duration을 통해 클립 생성시간과 비교하여 stream 상태에서 생성된 클립인지 확인 판별함.
+
+    6. 확인된 클립을 시간순으로 나열하여 최대 100개까지 firestore에 저장.
+
+    7. 생성된 firestore doc id를 res.send로 보냄.
+
+- ## 1-2. 날짜별(Date) 클립 확인
 
   - ## Twitch API로 Clip 나열
-    > 1.Keyword 검색을 통해 해당 기간내 등록한 키워드를 가진 Clip들을 나열
-    >
-    > 2.제공하는 옵션 : 24Hours, Week, Month, Year, All, Custom
-    >
-    > ##### (\*Custom: Channel 생성일부터 현재까지 Date Picker를 통해 지정가능)
+
+    지정된 기간내 등록한 Clip을 조회수 순으로 나열
+
+    제공하는 옵션 : 24Hours, Week, Month, Year, All, Custom
+
+    _*(Custom: Channel 생성일부터 현재까지 Date Picker를 통해 지정가능)*_
+
   - ## Keyword 검색
 
-    > 1.
-    > 2.
+    Keyword 검색을 통해 해당 기간내 등록한 키워드를 가진 Clip들을 나열
 
-  - Twitch API, Keyword 검색을 통해 Clip 나열
+    1. 최대 15자, 5개의 키워드 등록(대소문자 구분X),
+    2. Date Picker을 통해 검색할 날짜 지정가능
+    3. 검색된 클립제목의 키워드를 highlight 처리함.
+       ```javascript
+       filters:{
+         highlight: function(words, queries){
+           let result = words;
+           queries.forEach((query) => {
+             let targetReg = query.text;
+             let regex = new RegExp(targetReg, 'gi');
+             result = result.replace(regex, '<span class="'+query.color+'--text">' + query.text + '</span>');
+           })
+           return result;
+         }
+       },
+       ```
 
-## 2. Cliplist
+# 2. Cliplist
 
-```
-ㅁㄴㅇㄹ
-```
+    Cliplist를 만들어 최대 100개의 Clip Data를 수집 및 관리할 수 있게 도와줍니다.
 
-## 3. Login Session
+## 2-1. About Cliplist
+
+|    Category    | period |      Option       |
+| :------------: | :----: | :---------------: |
+|  User Created  | always | Rearrange, Import |
+| Daily Hotclips | daily  |  Auto generated   |
+|   Weekly Wak   | weekly |  Auto generated   |
+
+- User Crated :
+
+- Daily Hotclips : 매일 07:00에 전날 저장된 Stream Data에서 Top 50 Catergory를 추출하여 Category id로 Clip Data를 수집하고 조회수가 높은 100개의 클립을 저장한다.
+
+  _`(Google Cloud Scheduler - createHotClip)`_
+
+- Weekly Wak : _`Google Cloud Scheduler - createHotClip`_ 을 호출하여 매주 수요일에 특정 스트리머들의 Clip을 주간단위로 수집하여 게시한다.
+
+  ```javascript
+  if (new Date().getDay() === 3) {
+    axios.get(`HttpRequestURL`)
+  }
+  ```
+
+## 2-2. 기능
+
+- Cliplist내 Clip들의 정렬을 바꿀 수 있다.
+- Twitch Clip ID값을 통해 Clip을 불러오고 저장할 수 있다.
+
+# 3. Login Proccess
 
 - 로그인 요청 -> Twitch 서버에 로그인 정보 요청 -> login page로 리다이렉션 ->
 
@@ -84,7 +126,7 @@ Category & Sort Options
   >
   > case 2. 신규유저) Clound functions sigin -> Firebase Auth 유저 등록 -> Firebase Auth를 통해 로그인
 
-## 4. Streamer
+# 4. Streamer
 
 ```
 Twitch API, Localstorage를 통해 저장된 유저정보를 카드형태로 보여줍니다.
@@ -100,7 +142,7 @@ Twitch API, Localstorage를 통해 저장된 유저정보를 카드형태로 보
 2. Twitch API를 통해 follow된 유저중 Stream 상태인 스트리머
 3. Twitch Follow된 유저
 
-## 5. Report
+# 5. Report
 
 ```
 Twitch에서 언어 설정이 한국어인 채널들의 실시간 Stream 정보를 매 30분마다 수집하여 Chart로 보여줍니다.
@@ -135,7 +177,7 @@ Twitch에서 언어 설정이 한국어인 채널들의 실시간 Stream 정보�
 
 # Database
 
-|        DB        |   Data    |          Data           |        Data        |
+|        DB        |   Data1   |          Data2          |       Data3        |
 | :--------------: | :-------: | :---------------------: | :----------------: |
 |    Firestore     | Cliplist  |        Timeline         |      Hotclip       |
 | Realtime Databse | User Data | Notification Data (fcm) | Twitch Stream Data |
