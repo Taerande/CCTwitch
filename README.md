@@ -117,6 +117,8 @@ Category & Sort Options
 
 - Cliplist내 Clip들의 정렬을 바꿀 수 있다.
 - Twitch Clip ID값을 통해 Clip을 불러오고 저장할 수 있다.
+- 저장된 Clip들을 볼 수 있다.
+- 만일 삭제된 클립이있다면, Twitch 서버에서 완전히 삭제되기 전까지 해당 클립의 소스를 볼 수 있다.
 
 # 3. Login Proccess
 
@@ -148,18 +150,24 @@ Twitch API, Localstorage를 통해 저장된 유저정보를 카드형태로 보
 Twitch에서 언어 설정이 한국어인 채널들의 실시간 Stream 정보를 매 30분마다 수집하여 Chart로 보여줍니다.
 ```
 
+`Google Cloud Scheduler`을 이용하여 매 30분마다 `viewer_count > 9`인 모든 스트림 정보를 수집 및 저장하고 이 중 `viewer_count`가 높은순으로 Total Stream, Total Viewer, Top 100 Stream, Top 50 Category를 따로 저장합니다.
+
 - ## 5-1 Overall
 
-  - 해당 날짜의 07:00를 기준으로 Total Stream, Total Viewer을 시계열로 보여줍니다.
-  - Viewer_count로 Top100 Stream, Top50 Category를 보여줍니다.
-  -
+  ApexChartJS Library 을 이용하여 Chart 생성 (x: time, y: stream, viewer)
+
+  해당 날짜의 07:00를 기준으로 익일 07:00까지의 Total Stream, Total Viewer을 시계열로 보여줍니다.
+
+  Viewer_count로 Top100 Stream, Top50 Category를 보여줍니다.
+
+  - Streamer : streamer의 viewer를 시계열로 Chart를 그려 나타내고, 기간내 Clip을 보여줍니다. (Annotation: Title, Category)
+  - Catergory : viewer_count가 가장 많았던 시각의 Top10 Stream 정보를 Card 형태로 보여줍니다.
 
 - ## 5-2 Channel
 
-  - Twitch API 30분 간격으로 Stream Data 수집
-  - Kr
-  - Overall, Channel 구분
-  -
+  - Twitch API 를 통해 streamer을 검색하고, 만일 서버에 stream data가 저장되었다면 `<v-icon>mdi-calendar</v-icon>` 표시를 합니다.
+  - `Firebase Realtime Database`에 저장된 해당 유저의 Stream Data를 읽고 Data Picker에 나타냄.
+  - 해당 날짜의 Stream Data를 읽고 streamer의 viewer를 시계열로 Chart를 그려 나타내고, 기간내 Clip을 보여줍니다.
 
 ## Cloud functions with Node.JS
 
@@ -208,7 +216,7 @@ Twitch에서 언어 설정이 한국어인 채널들의 실시간 Stream 정보�
 
 - asdf
 
-## 1-2 Push Notificaiton with Firebase Cloud Message
+## 1-2 Push Notification with Firebase Cloud Message
 
 - asdf
 
@@ -216,28 +224,40 @@ Twitch에서 언어 설정이 한국어인 채널들의 실시간 Stream 정보�
 
 ## 2. SEO
 
-Google Search
+## 2-1. SEO 등록
 
-Naver Search
+- Google Search Console
 
-## 3. Open Graph
+- Naver Search Advisor
 
-- ### Set Open graph web version
+## 2-2 Meta tags
 
-```html
-<meta property="og:type" content="website" />
-<meta property="og:title" content="CCTwitch - Twitch Clip Collector" />
-<meta
-  property="og:description"
-  content="Download, search twitch clips easily. CCTwitch provide various sort of clips by keyword, date, videos."
-/>
-<meta
-  property="og:image"
-  content="https://firebasestorage.googleapis.com/v0/b/twitchhotclip.appspot.com/o/open_graph%2F192x192.png?alt=media&token=520a77f0-be36-44bf-93c1-724ccbf16b78"
-/>
-<meta property="og:url" content="https://cctwitch.xyz" />
-<meta property="og:site_name" content="CCTwitch" />
-```
+- Title, Description
+
+  ```html
+  <title>CCTwitch - Clip Collector</title>
+  <meta
+    name="description"
+    content="Twitch Clip Download, Search and Collect easily. CCTwitch provide various sort of clips by keyword, date, vids. Also can save, download clips. CCTwitch는 트위치 클립 검색, 다운, 저장 및 다양한 정렬을 제공합니다."
+  />
+  ```
+
+- Set Open graph web version
+
+  ```html
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="CCTwitch - Twitch Clip Collector" />
+  <meta
+    property="og:description"
+    content="Download, search twitch clips easily. CCTwitch provide various sort of clips by keyword, date, videos."
+  />
+  <meta
+    property="og:image"
+    content="https://firebasestorage.googleapis.com/v0/b/twitchhotclip.appspot.com/o/open_graph%2F192x192.png?alt=media&token=520a77f0-be36-44bf-93c1-724ccbf16b78"
+  />
+  <meta property="og:url" content="https://cctwitch.xyz" />
+  <meta property="og:site_name" content="CCTwitch" />
+  ```
 
 ## 4. Google Analytics & Adsense
 
