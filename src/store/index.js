@@ -16,6 +16,7 @@ export default new Vuex.Store({
     fcmApiKey:process.env.VUE_APP_FCM_API_KEY,
     firebaseLoaded: false,
     snackbarArr:[],
+    searchKeywords:[],
     clipKeyword:'',
     snackbar: {
       type: 'error',
@@ -47,6 +48,9 @@ export default new Vuex.Store({
     darkColorSet:['#E53935','#C62828','#D81B60','#AD1457','#8E24AA','#6A1B9A','#5E35B1','#4527A0','#3949AB','#283593','#1E88E5','#1565C0','#039BE5','#0277BD','#00ACC1','#00838F','#00897B','#00695C','#43A047','#2E7D32','#7CB342','#558B2F','#C0CA33','#9E9D24','#F9A825','#FFB300','#FF8F00','#FB8C00','#EF6C00','#F4511E','#D84315','#6D4C41','#4E342E','#546E7A','#37474F','#757575','#424242'],
   },
   mutations: {
+    SET_ClipSearchKeywords(state, payload){
+      state.searchKeywords = payload;
+    },
     SET_ClipKeyword(state, payload){
       state.clipKeyword = payload;
     },

@@ -8,7 +8,8 @@
     <v-card @mouseenter="hovering = true" @mouseleave="hovering = false" class="d-flex ma-0 pa-0"
     flat>
       <v-card-title class="justify-center ma-0 pa-0" style="width:3rem;">
-        <span class="text-caption font-weight-bold">{{index+1}}</span>
+        <span class="handle" v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId && hovering"> <v-icon>mdi-drag-horizontal-variant</v-icon></span>
+        <span v-else class="text-caption font-weight-bold">{{index+1}}</span>
       </v-card-title>
       <v-card-text class="d-flex align-center ma-0 pa-0 text-truncate">
         <v-img
@@ -63,7 +64,7 @@
 export default {
   components:{
   },
-  props:['clipData','index'],
+  props:['clipData','index','clipListData'],
   data() {
     return {
       hovering:false,
@@ -104,5 +105,8 @@ video{
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.2);
+}
+.handle{
+  cursor: grab;
 }
 </style>

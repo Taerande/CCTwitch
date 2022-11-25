@@ -117,7 +117,7 @@
                         <div class="text-caption error--text pa-0 ma-0">Can't available in IOS.</div>
                       </v-list-item>
                       <v-list-item v-else>
-                        <div class="text-subtitle error--text pa-0 ma-0">Already listed.</div>
+                        <div class="text-caption error--text pa-0 ma-0">This device is already listed.</div>
                       </v-list-item>
                       <v-subheader class="text-caption">Listed Device</v-subheader>
                       <v-list-item v-for="(item, index) in devices" :key="index" class="d-flex">
@@ -137,6 +137,7 @@
                   <v-divider class="my-3"></v-divider>
                   <div>
                     <v-btn
+                    width="105"
                     depressed
                     dark
                     v-if="!$vuetify.theme.dark"
@@ -148,6 +149,7 @@
                     <v-btn v-else
                     depressed
                     light
+                    width="105"
                     class="text-capitalize text-caption pa-0 ma-0 px-1"
                     @click="toggleDarkTheme()">
                       <v-icon color="red">mdi-weather-sunny</v-icon>
@@ -365,9 +367,6 @@ export default {
     } else {
       this.navi='other'
     }
-    this.$messaging.onMessage((payload) => {
-      console.log('received', payload);
-    });
     if(this.navi !== 'ipad' && this.navi !== 'iphone' && this.navi !== 'safari'){
       this.fcmToken = await this.$messaging.getToken({ vapidKey:this.$store.state.fcmApiKey}).catch(()=>{});
     }
@@ -387,7 +386,7 @@ export default {
           }
         })
       }
-    })
+    });
   },
 };
 </script>

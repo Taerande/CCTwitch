@@ -81,10 +81,11 @@
           type="text"
           v-model="editComment"
           hide-details="auto"
+          :placeholder="item.comment"
         >
         <template v-slot:append>
           <v-btn text color="error" small @click="closeEdit()" class="text-caption" >close</v-btn>
-          <v-btn :loading="dbloading" :disabled="editComment.length === 0 || item.comment === editComment" color="twitch" text class="text-caption" small @click="editComments(item)">Edit</v-btn>
+          <v-btn :loading="dbloading" :disabled="editComment.length === 0" color="twitch" text class="text-caption" small @click="editComments(item)">Edit</v-btn>
         </template>
         </v-text-field>
         <v-spacer v-if="item.id !== editId"></v-spacer>
@@ -113,7 +114,7 @@
           </v-list>
         </v-menu>
       </div>
-    <replyCommentsVue :hotclipComment="item" :replyId="replyId" @closeReply="closeReply()"></replyCommentsVue>
+    <replyCommentsVue :hotclipComment="item" :replyId="replyId" @closeReply="closeReply"></replyCommentsVue>
     </v-col>
   </v-row>
   <v-row v-else-if="hotClipData.commentCount > comments.length" class="d-block pb-16 pt-10" v-intersect="onIntersect">
@@ -161,8 +162,9 @@ export default {
     updateNewReply(el){
       console.log(el);
     },
-    closeReply(){
+    closeReply(el){
       this.replyId = '';
+      this.$emit('updateCommentCount',el);
     },
     onIntersect(entries , observer, isIntersecting){
       setTimeout(() => {
@@ -232,14 +234,14 @@ export default {
       let batch = this.$firestore.batch();
       batch.delete(hotclipComment)
       batch.update(hotclip, {
-        commentCount: this.$firebase.firestore.FieldValue.increment(-1),
+        commentCount: this.$firebase.firestore.FieldValue.increment((item.replyCount + 1) * (-1)),
       })
       await batch.commit().then(() => {
         this.comments.splice(idx,1);
-        this.hotClipData.commentCount -= 1;
         this.deleteLoading = false;
         this.$store.commit('SET_SnackBar',{type:'success', text:'Comment has been deleted!', value:true});
       })
+      this.$emit('updateCommentCount',(item.replyCount + 1) * (-1));
     },
     async editComments(item){
       this.dbloading = true;

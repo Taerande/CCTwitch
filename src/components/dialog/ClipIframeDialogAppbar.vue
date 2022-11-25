@@ -4,29 +4,6 @@
   :content-class="$vuetify.breakpoint.smAndDown ? 'iframeTop' : ''"
   v-model="dialog"
   max-width="1080">
-  <template v-slot:activator="{ on, attrs }">
-    <v-img
-    v-ripple
-    :title="clipData.title"
-    :aspect-ratio="16/9"
-    class="rounded-lg clip-thumbnail"
-    v-bind="attrs"
-    v-on="on"
-    lazy-src="@/assets/img/404.jpg"
-    :src="clipData.thumbnail_url">
-      <v-container fluid fill-height class="d-flex align-content-space-between">
-        <v-row class="d-flex justify-space-between align-center pl-1">
-          <v-spacer></v-spacer>
-          <pinClip v-if="$store.state.userinfo.userInfo" name="channelClipPin" :clipData="{data:clipData}" :listData="listData"></pinClip>
-          <v-btn v-else color="error" icon @click.stop="$store.commit('SET_SignInDialog',true)"><v-icon>mdi-plus-box-multiple</v-icon></v-btn>
-        </v-row>
-        <v-row class="d-flex justify-space-between">
-          <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">{{$moment(clipData.created_at).fromNow()}}</span>
-          <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )"><v-icon class="white--text px-1" x-small>mdi-eye</v-icon>{{clipData.view_count | commaCase}}</span>
-        </v-row>
-      </v-container>
-    </v-img>
-  </template>
   <v-card class="pa-0 ma-0 black">
     <v-card-title class="d-block pa-0 ma-0">
       <div class="d-flex justify-end align-center copyBody" v-if="dialog">
@@ -141,11 +118,41 @@ export default {
         this.vidInfo = res.data.data[0];
       })
     },
+    // async getVidOffset(element){
+    //   if(!element.video_id){
+    //     return this.dialog = true;
+    //   }
+    //   const json = JSON.stringify(
+    //     {
+    //       operationName: "ClipsFullVideoButton",
+    //       variables: {
+    //         slug: element.id
+    //       },
+    //       extensions: {
+    //         persistedQuery: {
+    //           version: 1,
+    //           sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
+    //           }
+    //       }
+    //     })
+    //   await axios.post('https://gql.twitch.tv/gql',json, {
+    //     headers: {
+    //       'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
+    //     },
+
+    //   }).then((res) => {
+    //       element.videoOffsetSeconds = res.data.data.clip.videoOffsetSeconds;
+    //       this.dialog = true;
+    //   })
+    // }
   },
   computed:{
 
   },
   async mounted(){
+    // if(this.clipData.video_id){
+    //   await this.getVidInfo();
+    // }
   }
 }
 </script>

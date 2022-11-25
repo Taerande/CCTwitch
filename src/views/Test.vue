@@ -1,103 +1,21 @@
 <template>
-<v-container fluid>
-  <v-row v-if="dataloading">
-    <v-col cols="12">
-      <div id="chart">
-        <apexchart type="treemap" height="1500" :options="chartOptions" :series="series"></apexchart>
-      </div>
-    </v-col>
-  </v-row>
-  <v-row class="red">
-    <div>{{minit}}</div>
-  </v-row>
-
-  <v-row class="col-12" v-if="lineloading">
-    <v-col cols="12">
-      <div id="chart">
-        <apexchart type="line" height="350" :options="linechartOptions" :series="lineSeries"></apexchart>
-      </div>
-    </v-col>
-  </v-row>
-  <v-row>
-    <v-card class="rounded-lg" color="black">
-      <v-card-title class="twitch pa-0 ma-0">
-        <div class="white--text">
-          12:30
-        </div>
-      </v-card-title>
-      <v-card-text>
-        <div class="text-caption white--text">
-          Viewer: 125233
-        </div>
-        <div class="text-catpion red--text">
-          Title: 고멤합방 없어
-        </div>
-        <div class="text-caption twitch--text">
-          Categroy: VRChat
-        </div>
-      </v-card-text>
-    </v-card>
-  </v-row>
-  <v-row>
-    <v-col>
-      <v-text-field
-        name="name"
-        label="label"
-        id="id"
-        v-model="userSearch"
-      ></v-text-field>
-      <v-btn color="success" @click="searchUser()">search</v-btn>
-    </v-col>
-  </v-row>
-  <v-row>
-    <v-btn color="orange" block @click="wak()">wak</v-btn>
-    <!-- <v-btn color="success" block @click="getTreemap()">getTreemap</v-btn>
-    <v-btn color="error" block @click="addNewData()">load Data</v-btn>
-    <v-btn color="info" block @click="removeData()">remove</v-btn>
-    <v-btn color="black" class="white--text" block @click="testRtdb()">rtdb</v-btn> -->
-    <v-btn color="success" block @click="createFirestore()">text</v-btn>
-  </v-row>
-  <v-row>
-    <v-col>날짜 {{asdf}}</v-col>
-    <v-col>생방송 갯수 {{streamerCount}}</v-col>
-    <v-col>토탈 카운트(시청자) {{viewerCount}}</v-col>
-  </v-row>
-  <v-row>
-    <v-col v-for="item in streamData" :key="item.id" class="pa-1">
-    <div class="green">
-      {{item.game_name}}
-    </div>
-    <div class="red">
-      {{item.viewer_count}}
-    </div>
-    </v-col>
-  </v-row>
-  <v-row>
-    <v-col v-for="(item, index) in topClips" :key="item.id+index" cols="3">
-      <v-img
-      :aspect-ratio="16/9"
-      class="rounded-lg clip-thumbnail"
-      lazy-src="@/assets/img/404.jpg"
-      :src="item.thumbnail_url">
-        <v-container fluid fill-height class="d-flex align-content-space-between">
-          <v-row class="d-flex justify-space-between">
-            <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">{{$moment(item.created_at).fromNow()}}</span>
-            <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )"><v-icon class="white--text px-1" x-small>mdi-eye</v-icon>{{item.view_count}}</span>
-          </v-row>
-          <v-spacer></v-spacer>
-          <v-row>
-            <span class="text-caption white--text ma-2 px-1" style="background-color: rgba( 0, 0, 0, 0.5 )">
-            {{item.game_name}}
-            </span>
-          </v-row>
-        </v-container>
-      </v-img>
-      <div>
-        {{item.title}}
-      </div>
-    </v-col>
-  </v-row>
-</v-container>
+  <v-container fluid>
+    <v-row>
+      <v-col cols="3" v-for="item in items" :key="item.text" class="pa-3">
+        <v-card>
+          <v-card-text>
+            <v-btn :color="item.color" text class="text-caption">
+              <v-icon>{{item.icon}}</v-icon>
+              <span>{{item.text}}</span>
+            </v-btn>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row>
+      {{fcmToken}}
+    </v-row>
+  </v-container>
 </template>
 <script>
 import axios from 'axios'
@@ -105,6 +23,28 @@ import axios from 'axios'
 export default {
   data() {
     return {
+      items:[
+        {
+          text:'Subs',
+          color:'primary',
+          icon:'mdi-bell',
+          action:'',
+        },
+        {
+          text:'Unsubs',
+          color:'error',
+          icon:'mdi-bell-off',
+          action:'',
+        },
+        {
+          text:'Enroll',
+          color:'orange',
+          icon:'mdi-home-plus',
+          action:'',
+        },
+      ],
+      cliplist:[],
+      today:null,
       topClips:[],
       minit:'',
       userSearch:'',
@@ -201,8 +141,10 @@ export default {
       tempArr:[],
       afterCursor:null,
       clipIds:[],
+      nonVidCursor:'',
     }
   },
+  // 22-08-10 ~ 22-09-13 [timeSiries 제거 해야댐]
   computed:{
     asdf(){
         const korTime = this.$moment().add(-22,'hours').hours();
@@ -235,6 +177,71 @@ export default {
     }
   },
   methods: {
+    momentRound(el){
+      const now = this.$moment(el);
+      const hour = now.hour();
+      const minute = now.minute();
+      if(minute < 15){
+        return now.set({minute: 0, second: 0}).valueOf();
+      }else if(minute >  44){
+        return now.set({hour: hour + 1, minute: 0, second: 0}).valueOf();
+      } else {
+        return now.set({minute: 30, second: 0}).valueOf();
+      }
+    },
+    hmsToSec(el){
+       if(el.includes('h')){
+         const hour = el.split('h')[0];
+         const min = el.split('h')[1].split('m')[0];
+         const sec = el.split('s')[1];
+         return hour*3600 + min*60 + sec;
+       } else if(el.includes('m')){
+         const min = el.split('m')[0];
+         const sec = el.split('s')[1];
+         return min*60 + sec;
+       } else {
+         const sec = el.split('s')[0];
+         return sec;
+       }
+    },
+    async getNonVidClips(el, vidInfo){
+      console.log('ended_at :',this.$moment(vidInfo.created_at).add(this.hmsToSec(vidInfo.duration),'seconds').toISOString());
+      console.log('durataion :',this.hmsToSec(vidInfo.duration));
+      await axios.get('https://api.twitch.tv/helix/clips',{
+        headers:this.$store.state.headerConfig,
+        params:{
+          broadcaster_id: el,
+          first: 100,
+          started_at: vidInfo.created_at,
+          ended_at: this.$moment(vidInfo.created_at).add(this.hmsToSec(vidInfo.duration),'seconds').toISOString(),
+          after: this.nonVidCursor,
+        }
+      }).then( async (resp) => {
+        if(resp.data.data.length > 0){
+          resp.data.data.map((el) => {
+            if (el.video_id === '') {
+              el.vod_offset = Math.abs(this.$moment(vidInfo.created_at).diff(el.created_at,'seconds'));
+              this.cliplist.push(el);
+            }
+          });
+          this.cliplist.sort((a,b) => b.view_count - a.view_count);
+          this.cliplist.splice(100);
+          this.nonVidCursor = resp.data.pagination.cursor;
+          if(this.nonVidCursor !== undefined && this.cliplist.length < 100){
+            await getNonVidClips(el, vidInfo);
+          } else {
+            this.nonVidCursor = '';
+          }
+        }
+      }).catch( async (err)=>{
+        if(err.response.status === 401){
+          console.log('getClips 401 error Occured');
+          await getNewAppAccessToken();
+          await getNonVidClips(el, vidInfo);
+          return
+        }
+      })
+    },
     async getTopClip(date){
       console.time();
       const topStream = this.$streamData.ref(`/treemap/${date}/topGame`);
@@ -322,7 +329,7 @@ export default {
       })
     },
     async createFirestore(){
-      const date = ['22-10-20'];
+      const date = ['22-10-24'];
 
 
       for(let i=0; i < date.length; i++){
@@ -619,10 +626,15 @@ export default {
     },
   },
   async created() {
+    this.fcmToken = await this.$messaging.getToken({ vapidKey:this.$store.state.fcmApiKey}).catch(()=>{});
+    // let date = this.$moment();
+    // let formerDay = this.$moment(date).format('YYYY-MM-DDT07:00:00');
+
+    // console.log(this.$moment(formerDay).toISOString());
+    // console.log(new Date().toISOString());
 
 // var usaTime = new Date().toLocaleString("en-US", {timeZone: "America/New_York"});
 // console.log('USA time: '+ (new Date(usaTime)).toISOString());
-console.log(this.$moment('2022-08-10')._d);
     // console.log(new Date('2022-09-10T07:00:00.050Z'))
     // console.log(this.$moment('2022-09-10T07:00:00.090Z').toISOString());
     // await this.getLiveStreamWithLang();

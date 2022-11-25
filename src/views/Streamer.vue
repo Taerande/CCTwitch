@@ -94,7 +94,7 @@
           </div>
           <v-spacer></v-spacer>
           <div class="d-flex justify-end">
-            <div class="d-flex error--text text-caption"><v-icon color="error" x-small class="pr-1">mdi-circle</v-icon>{{viewerkFormatter(item.viewer_count)}}</div>
+            <div class="d-flex error--text text-caption"><v-icon color="error" x-small class="pr-1">mdi-circle</v-icon>{{item.viewer_count | commaCase}}</div>
           </div>
         </v-card-text>
       </v-card>
@@ -206,19 +206,6 @@ export default {
       if (window.confirm(`${title} 영상으로 이동하시겠습니까?`)) {
         window.open(url);
       }
-    },
-    viewerkFormatter(el) {
-      const num = el.toString();
-      if (num > 999999999) {
-        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999999) {
-        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999) {
-        return `${num.slice(0, -3)},${num.slice(-3)}`;
-      }
-      return Math.abs(num);
     },
     async getUserInfo(element) {
       return await axios.get('https://api.twitch.tv/helix/users',{

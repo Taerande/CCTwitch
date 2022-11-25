@@ -20,9 +20,10 @@
     </v-overlay>
   </v-dialog>
   <v-row class="d-flex align-center py-3">
-    <v-btn :block="$vuetify.breakpoint.smAndDown" class="text-caption my-1 pa-2 mr-3" :color="clipSort === 'vids' ? 'twitch' : ''"
-    width="100"
+    <v-btn :block="$vuetify.breakpoint.smAndDown" class="text-caption my-1 pa-2 mr-3"
     :class="clipSort === 'vids' ? 'white--text' : ''"
+    :color="clipSort === 'vids' ? 'twitch' : ''"
+    width="100"
     @click="changeSortType()">
     <v-icon small>mdi-video</v-icon>
     <span class="px-1">Vids</span>
@@ -135,24 +136,26 @@
             {{userInfo.data.display_name}}님({{userInfo.data.login}})의 클립 검색
           </div>
         </v-card-title>
-        <v-card-text class="pa-0 pt-3 px-5">
-          <!-- <v-subheader>Keyword</v-subheader> -->
+        <v-card-text class="pa-0 pt-5 px-5">
+          <v-subheader>Keyword</v-subheader>
           <v-combobox
+            class="py-1"
             color="twitch"
             v-model="searchKeywords"
-            outlined
             multiple
             counter="5"
             deletable-chips
+            outlined
             type="text"
+            @input="makeUpperCase"
             small-chips
             maxlength="15"
             placeholder="Keyword는 최대 5개, 15자까지 가능합니다."
-            label="Keywords"
             clear-icon="mdi-close-circle"
             clearable>
             </v-combobox>
-          <DatePickerDialog :dateInfo="{min : this.userInfo.data.created_at, max : $moment().format('YYYY-MM-DD'), type:'search' }" @ApplyDate="changeDateSort"></DatePickerDialog>
+            <v-subheader>Period</v-subheader>
+          <DatePickerDialog :dateInfo="{min : this.userInfo.data.created_at, max : $moment().format('YYYY-MM-DD'), type:'search' }" @ApplySearchDate="ApplySearchDate"></DatePickerDialog>
         </v-card-text>
         <v-card-actions class="pt-10">
           <v-spacer></v-spacer>
@@ -196,7 +199,6 @@ export default {
       dbLoading: false,
       dialog: false,
       searchDialog: false,
-      searchString: '',
       searchData:{
         text:'search',
         start:null,
@@ -206,6 +208,24 @@ export default {
     };
   },
   methods: {
+    makeUpperCase(el){
+      if(el[0] === undefined) { return };
+      el = el.map((val) => {
+        return val.toUpperCase();
+      });
+      const isDup = el.some(function(x) {
+        return el.indexOf(x) !== el.lastIndexOf(x);
+      });
+      if(!isDup){
+        this.searchKeywords = el;
+      }else{
+        el.pop();
+        this.searchKeywords = el;
+      }
+    },
+    ApplySearchDate(el){
+      this.searchData = el;
+    },
     setDateFormat(el) {
       if (el.text === 'All') {
         return 'All Time';
@@ -213,23 +233,15 @@ export default {
       return `${this.$moment(el.start).format('ll')} ~ ${this.$moment(el.end).format('ll')}`;
     },
     async changeDateSort(el) {
-      if(el.text === 'search'){
-        this.searchData.start = el.start;
-        this.searchData.end = el.end;
-      } else {
-        const asd = () => {
-          this.$emit('changeSort', '');
-          this.menu = false;
-        };
-        await asd();
-        this.$emit('changeSort', 'date');
-        this.$store.commit('SET_DateSort', el);
-      }
+      const asd = () => {
+        this.$emit('changeSort', '');
+        this.menu = false;
+      };
+      await asd();
+      this.$emit('changeSort', 'date');
+      this.$store.commit('SET_DateSort', el);
     },
     async sortTypeSearch() {
-      // if(this.searchString === ''){
-      //   return this.$store.commit('SET_SnackBar',{type:'error', text:'Form is not valid!', value:true});
-      // }
       const asd = () => {
         this.$emit('changeSort', '');
         this.menu = false;
@@ -238,7 +250,6 @@ export default {
       this.$store.commit('SET_ClipSearchKeywords',this.searchKeywords);
       this.$store.commit('SET_DateSort', this.searchData);
       this.$emit('changeSort', 'search');
-      this.$store.commit('SET_ClipKeyword',this.searchString);
     },
     async createTimeline(user_login, broadcaster_id, vidId){
       this.dialog = true;

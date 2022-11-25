@@ -16,20 +16,19 @@ app.post('/timeline', async (req, res) => {
   const clientId = process.env.TWITCH_CLIENT_ID;
   const clientSecret = process.env.TWITCH_CLIENT_SECRET;
   let sn = firestore.collection('timeline').doc(`${user_login}-${vidId}`);
-  let isStream;
 
   let vidData = '';
   let cliplist = [];
   let cursor = '';
+  let nonVidCursor = '';
   let result = [];
   let resultR = [];
-  let thumbnail_url;
+  let duration = 0;
 
   // rules
   // 1. live면 10분.
   // 2. 최근 업데이트 3시간 이후에 업데이트 가능.
-  // 3. vidId가 없으면 생성안댐.
-  // 4. 인기 클립 100개 시간순으로 나열하자.
+  // 3. 인기 클립 100개 시간순으로 나열하자.
 
 
   async function getNewAppAccessToken(){
@@ -42,6 +41,21 @@ app.post('/timeline', async (req, res) => {
     })
   }
 
+  function hmsToSec(el){
+    if(el.includes('h')){
+      const hour = el.split('h')[0];
+      const min = el.split('h')[1].split('m')[0];
+      const sec = el.split('s')[1];
+      return hour*3600 + min*60 + sec;
+    } else if(el.includes('m')){
+      const min = el.split('m')[0];
+      const sec = el.split('s')[1];
+      return min*60 + sec;
+    } else {
+      const sec = el.split('s')[0];
+      return sec;
+    }
+ }
   async function getVid(el){
     await axios.get('https://api.twitch.tv/helix/videos',{
       headers:{
@@ -53,8 +67,8 @@ app.post('/timeline', async (req, res) => {
         id: el
       }
     }).then((resp) => {
-        vidData = resp.data.data;
-      // }
+      vidData = resp.data.data;
+      duration = hmsToSec(resp.data.data[0].duration);
     }).catch( async (err)=>{
       if(err.response.status === 401){
         console.log('getVid 401 error Occured');
@@ -63,6 +77,47 @@ app.post('/timeline', async (req, res) => {
         return
       } else if( err.response.status === 400 ){
         res.status(400).send({message:err.message})
+      }
+    })
+  }
+
+  async function getNonVidClips(el){
+    await axios.get('https://api.twitch.tv/helix/clips',{
+      headers:{
+        'Client-id': clientId,
+        Authorization: appAccessToken,
+        Accept: 'application/json',
+      },
+      params:{
+        broadcaster_id: el,
+        first: 100,
+        started_at: vidData[0].created_at,
+        ended_at: moment(vidData[0].created_at).add(duration,'seconds').toISOString(),
+        after: nonVidCursor,
+      }
+    }).then( async (resp) => {
+      if(resp.data.data.length > 0){
+        resp.data.data.map((el) => {
+          if (el.video_id === '') {
+            el.vod_offset = Math.abs(moment(vidData[0].created_at).diff(el.created_at,'seconds'));
+            cliplist.push(el);
+          }
+        });
+        cliplist.sort((a,b) => b.view_count - a.view_count);
+        cliplist.splice(100);
+        nonVidCursor = resp.data.pagination.cursor;
+        if(nonVidCursor !== undefined && cliplist.length < 100){
+          await getNonVidClips(el);
+        } else {
+          nonVidCursor = '';
+        }
+      }
+    }).catch( async (err)=>{
+      if(err.response.status === 401){
+        console.log('getClips 401 error Occured');
+        await getNewAppAccessToken();
+        await getNonVidClips(el);
+        return
       }
     })
   }
@@ -96,46 +151,42 @@ app.post('/timeline', async (req, res) => {
           cursor = '';
         }
       }
-    }).then(()=>{
-      thumbnail_url = cliplist[0].thumbnail_url
     }).catch( async (err)=>{
       if(err.response.status === 401){
         console.log('getClips 401 error Occured');
         await getNewAppAccessToken();
         await getClip(el);
         return
-      } else if( err.response.status === 400 ){
-        res.status(400).send({message:err.message})
       }
     })
   }
 
-  async function getVidOffset(element){
-    if(!element.video_id){
-      return
-    }
-    const json = JSON.stringify(
-      {
-        operationName: "ClipsFullVideoButton",
-        variables: {
-          slug: element.id
-        },
-        extensions: {
-          persistedQuery: {
-            version: 1,
-            sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
-            }
-        }
-      })
-    await axios.post('https://gql.twitch.tv/gql',json, {
-      headers: {
-        'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
-      },
+  // async function getVidOffset(element){
+  //   if(!element.video_id){
+  //     return
+  //   }
+  //   const json = JSON.stringify(
+  //     {
+  //       operationName: "ClipsFullVideoButton",
+  //       variables: {
+  //         slug: element.id
+  //       },
+  //       extensions: {
+  //         persistedQuery: {
+  //           version: 1,
+  //           sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
+  //           }
+  //       }
+  //     })
+  //   await axios.post('https://gql.twitch.tv/gql',json, {
+  //     headers: {
+  //       'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
+  //     },
 
-    }).then((resp) => {
-      element.videoOffsetSeconds = resp.data.data.clip.videoOffsetSeconds;
-    })
-    }
+  //   }).then((resp) => {
+  //     element.videoOffsetSeconds = resp.data.data.clip.videoOffsetSeconds;
+  //   })
+  //   }
 
   try{
     await sn.get().then( async (doc) => {
@@ -149,6 +200,8 @@ app.post('/timeline', async (req, res) => {
           // Update
           await getVid(vidId);
           await getClip(broadcaster_id);
+          await getNonVidClips(broadcaster_id);
+          thumbnail_url = cliplist[0].thumbnail_url;
 
           cliplist.sort((a,b) => a.vod_offset - b.vod_offset);
               const last = cliplist[cliplist.length-1];
@@ -241,6 +294,9 @@ app.post('/timeline', async (req, res) => {
         // 방송 종료 후 생성 가능.
         await getVid(vidId);
         await getClip(broadcaster_id);
+        await getNonVidClips(broadcaster_id);
+        thumbnail_url = cliplist[0].thumbnail_url;
+
         cliplist.sort((a,b) => a.vod_offset - b.vod_offset);
               const last = cliplist[cliplist.length-1];
 

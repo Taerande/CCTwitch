@@ -51,7 +51,7 @@
                   </div>
                   <div class="text-caption px-1">
                     <v-icon small>mdi-eye</v-icon>
-                    {{viewerkFormatter(timelineData.total_view || 0)}}
+                    {{timelineData.total_view || 0 | commaCase}}
                   </div>
                 </div>
               </div>
@@ -100,6 +100,7 @@
             <v-icon :color="rankColor(clip.rank)">mdi-crown</v-icon>
           </template>
           <span v-if="!$vuetify.breakpoint.smAndDown" slot="opposite">
+            <v-icon v-if="clip.video_id === ''">mdi-approximately-equal</v-icon>
             {{secToHMS(clip.offset)}}
           </span>
           <v-card
@@ -111,6 +112,7 @@
             :max-width="$vuetify.breakpoint.smAndDown ? '250' : '480'"
           >
           <v-card-title class="pa-0" v-if="$vuetify.breakpoint.smAndDown">
+            <v-icon v-if="clip.video_id === ''">mdi-approximately-equal</v-icon>
             <strong>{{secToHMS(clip.offset)}}</strong>
           </v-card-title>
             <v-card-text class="ma-a pa-0">
@@ -167,19 +169,6 @@ export default {
       if(el < 5) {return '#FFD700'}
       else if( el < 10) {return '#C0C0C0'}
       else {return '#CD7F32'}
-    },
-     viewerkFormatter(el) {
-      const num = el.toString();
-      if (num > 999999999) {
-        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999999) {
-        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999) {
-        return `${num.slice(0, -3)},${num.slice(-3)}`;
-      }
-      return Math.abs(num);
     },
     async getUserInfo(el){
       await axios.get('https://api.twitch.tv/helix/users',{

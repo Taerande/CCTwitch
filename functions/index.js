@@ -21,7 +21,7 @@ exports.twitchTokenValidation = functions.region('asia-northeast3').https.onRequ
 
 exports.twitchOauthToken = functions.region('asia-northeast3').https.onRequest(require('./auth/twitchOAuthToken.js'));
 
-exports.twitchLiveClips = functions.region('asia-northeast3').https.onRequest(require('./twitch/clips.js'));
+// exports.twitchLiveClips = functions.region('asia-northeast3').https.onRequest(require('./twitch/clips.js'));
 
 exports.twitchWebHook = functions.region('asia-northeast3').https.onRequest(require('./twitch/webhook.js'));
 
@@ -37,7 +37,7 @@ exports.timeLine = functions.region('asia-northeast3') .runWith({
 
 exports.fcm = functions.region('asia-northeast3').https.onRequest(require('./fcm/cloudMessaging.js'));
 
-exports.delteClipsInCliplist = functions.region('asia-northeast3').firestore.document('cliplist/{cliplistId}').onDelete( async (snap, context ) => {
+exports.deleteClipsInCliplist = functions.region('asia-northeast3').firestore.document('cliplist/{cliplistId}').onDelete( async (snap, context ) => {
   const batch = firstore.batch();
   const sn = await firstore.collection('cliplist').doc(context.params.cliplistId).collection('clips').get();
   sn.docs.forEach( doc =>
@@ -45,11 +45,17 @@ exports.delteClipsInCliplist = functions.region('asia-northeast3').firestore.doc
   await batch.commit();
 });
 
-exports.delteHotClip = functions.region('asia-northeast3').firestore.document('hotclip/{hotclipId}').onDelete( async (snap, context ) => {
+exports.deleteHotClip = functions.region('asia-northeast3').firestore.document('hotclip/{hotclipId}').onDelete( async (snap, context ) => {
   const batch = firstore.batch();
   const sn = await firstore.collection('hotclip').doc(context.params.hotclipId).collection('comments').get();
   sn.docs.forEach( doc =>
     batch.delete(doc.ref));
+  await batch.commit();
+});
+exports.deleteComments = functions.region('asia-northeast3').firestore.document('hotclip/{hotclipId}/comments/{commentsId}').onDelete( async (snap, context ) => {
+  const batch = firstore.batch();
+  const sn = await firstore.collection('hotclip').doc(context.params.hotclipId).collection('comments').doc(context.params.commentsId).collection('replies').get();
+  sn.docs.forEach( doc => batch.delete(doc.ref));
   await batch.commit();
 });
 

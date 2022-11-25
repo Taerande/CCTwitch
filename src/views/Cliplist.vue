@@ -279,6 +279,9 @@ export default {
             fireData: v.data(),
           }
         })
+        if(twitchClips.length !== this.tempArr.length){
+
+        }
         this.$store.commit('ADD_ClipInCurrentCliplist', this.tempArr);
       }
     }).then(() => {

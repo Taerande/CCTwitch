@@ -32,77 +32,6 @@
       <div class="text-caption info--text">{{ replySection ? `총 ${hotclipComment.replyCount}개 답글 숨기기` : `총 ${hotclipComment.replyCount}개 답글 보기`}}</div>
     </v-btn>
     <v-row class="col-12" v-show="replySection">
-      <v-col cols="12" class="d-flex py-2 indigo accent-1" v-if="myReply.id !== undefined">
-        <div class="px-1 d-flex">
-          <v-avatar
-            size="24">
-          <v-img
-          :src="myReply.profile_image_url"></v-img>
-          </v-avatar>
-        </div>
-        <div style="width:90%;" v-if="myReply.id !== editId"  :class="myReply.id === 'newlyAddedReply' ? 'error' : ''">
-          <div>
-            <span class="text-subtitle-2 font-weight-bold">
-              {{myReply.display_name}}
-            </span>
-            <span class="blue-grey--text text-caption">
-              {{formatDateWithFromNow(myReply.createdAt)}}
-            </span>
-          </div>
-          <div class="px-2 text-body-2 pt-1">
-            {{myReply.reply}}
-          </div>
-          <div class="d-flex align-center py-1 px-2">
-            <v-btn :disabled="likeIdx === 'index'" x-small icon @click="isLiked(myReply) ? removeLikeReply(myReply, 'index') : likeReply(myReply, 'index')" :color="isLiked(myReply) ? 'twitch' : ''"><v-icon small>{{isLiked(myReply) ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon></v-btn>
-            <span class="text-caption">
-              {{myReply.likeCount}}
-            </span>
-          </div>
-        </div>
-        <v-text-field
-          v-else
-          class="pb-3 pl-3 ma-0 text-body-2"
-          color="twitch"
-          full-width
-          width="80%"
-          dense
-          name="comments"
-          :loading="dbloading"
-          type="text"
-          v-model="editReply"
-          hide-details
-        >
-          <template v-slot:append>
-            <v-btn text color="error" small @click="closeEdit()" class="text-caption" >close</v-btn>
-            <v-btn :loading="dbloading" :disabled="editReply.length === 0 || myReply.reply === editReply" color="twitch" text class="text-caption" small @click="editReplies(myReply)">Edit</v-btn>
-          </template>
-        </v-text-field>
-        <v-spacer v-if="myReply.id !== editId"></v-spacer>
-        <v-menu
-        v-if="$store.state.userinfo.userInfo && myReply.authorId === $store.state.userinfo.userInfo.uid"
-        transition="slide-x-transition"
-        left
-        nudge-left="5"
-        offset-x>
-          <template v-slot:activator="{on}">
-            <div class="pt-2 d-flex justify-end">
-              <v-btn @click="dialogId = myReply.id" small v-on="on" slot="activator" icon><v-icon>mdi-dots-vertical</v-icon></v-btn>
-            </div>
-          </template>
-          <v-list class="text-caption pa-0">
-            <v-list-item class="pa-0 ma-0">
-              <v-btn block text @click="openEdit(myReply)" class="text-caption">
-                <v-icon small class="px-1">mdi-pencil</v-icon> 수정
-              </v-btn>
-            </v-list-item>
-            <v-list-item class="pa-0 ma-0">
-              <v-btn :loading="deleteLoading" block text @click="deleteReplies(myReply,'index')" class="text-caption">
-                <v-icon small class="px-1">mdi-trash-can</v-icon> 삭제
-              </v-btn>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </v-col>
       <v-divider class="my-5" v-if="myReply.id !== undefined"></v-divider>
       <v-col v-for="(item, index) in replies" :key="item.id+index" class="d-flex py-2" cols="12">
         <div class="px-1 d-flex">
@@ -143,6 +72,7 @@
           type="text"
           v-model="editReply"
           hide-details
+          :placeholder="item.reply"
         >
           <template v-slot:append>
             <v-btn text color="error" small @click="closeEdit()" class="text-caption" >close</v-btn>
@@ -211,15 +141,20 @@ export default {
     async deleteReplies(item,idx){
       this.deleteLoading = true;
       let hotclipComment = this.$firestore.collection('hotclip').doc(this.$route.params.id).collection('comments').doc(this.hotclipComment.id);
+      let hotclip = this.$firestore.collection('hotclip').doc(this.$route.params.id);
       let reply = this.$firestore.collection('hotclip').doc(this.$route.params.id).collection('comments').doc(this.hotclipComment.id).collection('replies').doc(item.id);
       let batch = this.$firestore.batch();
 
       batch.delete(reply)
+      batch.update(hotclip, {
+        commentCount: this.$firebase.firestore.FieldValue.increment(-1),
+      })
       batch.update(hotclipComment, {
         replyCount: this.$firebase.firestore.FieldValue.increment(-1),
       })
       await batch.commit().then(() => {
         this.hotclipComment.replyCount -= 1;
+        this.$emit('closeReply',-1);
         if(idx === 'index') {
           this.myReply = {};
           const index = this.replies.findIndex(x => x.id === item.id);
@@ -262,6 +197,10 @@ export default {
       this.editId = '';
     },
     async likeReply(item,idx){
+      if(!this.$store.state.userinfo.userInfo){
+        this.$store.commit('SET_SignInDialog',true);
+        return
+      }
       this.likeIdx = idx;
       let reply = this.$firestore.collection('hotclip').doc(this.$route.params.id).collection('comments').doc(this.hotclipComment.id).collection('replies').doc(item.id);
       let batch = this.$firestore.batch();
@@ -277,6 +216,10 @@ export default {
       })
     },
     async removeLikeReply(item, idx){
+      if(!this.$store.state.userinfo.userInfo){
+        this.$store.commit('SET_SignInDialog',true);
+        return
+      }
       this.likeIdx = idx;
       let reply = this.$firestore.collection('hotclip').doc(this.$route.params.id).collection('comments').doc(this.hotclipComment.id).collection('replies').doc(item.id);
       let batch = this.$firestore.batch();
@@ -367,6 +310,7 @@ export default {
     async addReplies(){
       this.dbloading = true;
       let comment = this.$firestore.collection('hotclip').doc(this.$route.params.id).collection('comments').doc(`${this.hotclipComment.id}`);
+      let hotclip = this.$firestore.collection('hotclip').doc(this.$route.params.id);
       let batch = this.$firestore.batch();
       const tempId = `${this.$store.state.userinfo.userInfo.uid}-${new Date().getTime()}`;
       let form = {
@@ -381,6 +325,9 @@ export default {
       };
 
       batch.set(comment.collection('replies').doc(tempId),form);
+      batch.update(hotclip, {
+        commentCount: this.$firebase.firestore.FieldValue.increment(1),
+      })
       batch.update(comment,{
         replyCount: this.$firebase.firestore.FieldValue.increment(1),
       })
@@ -392,10 +339,11 @@ export default {
         this.hotclipComment.replyCount += 1;
         this.dbloading = false;
         this.replyContent = '';
-        this.$emit('closeReply');
+        this.$emit('closeReply',1);
         this.myReply = form;
         this.$store.commit('SET_SnackBar',{type:'success', text:'Write comment successfully!'})
       })
+      await this.loadMoreReplies(this.hotclipComment);
 
     },
   },

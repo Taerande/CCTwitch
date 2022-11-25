@@ -113,7 +113,7 @@
         </v-avatar>
         <div class="align-baseline">
             <div class="text-h6 font-weight-black px-1 twitch--text hoverCursor">
-              {{hotClipData.broadcaster.display_name}} ({{hotClipData.broadcaster.login}}) <v-icon v-if="hotClipData.broadcaster.broadcaster_type === 'partner'" color="twitch" small>mdi-check-circle</v-icon>
+              {{hotClipData.broadcaster.display_name}} ({{hotClipData.broadcaster.login}})
             </div>
         </div>
       </div>

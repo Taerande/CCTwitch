@@ -67,15 +67,15 @@
               >
                 <v-icon>mdi-star</v-icon>
               </v-btn>
-              <!-- <v-btn v-if="isSubscribe" :disabled="subsLoading" color="twitch" @click="unsubNotification(userInfo.data.id)" icon><v-icon>mdi-bell</v-icon></v-btn>
-              <v-btn v-else :disabled="subsLoading" icon @click="subNotification(userInfo.data.id)"><v-icon>mdi-bell</v-icon></v-btn> -->
+              <v-btn v-if="isSubscribe" :disabled="subsLoading" color="twitch" @click="unsubNotification(userInfo.data.id)" icon><v-icon>mdi-bell</v-icon></v-btn>
+              <v-btn v-else :disabled="subsLoading" icon @click="subNotification(userInfo.data.id)"><v-icon>mdi-bell</v-icon></v-btn>
             </span>
           </div>
           <div v-if="userInfo.is_live">
             <v-icon color="red" small>mdi-circle</v-icon>
             <span class="red--text text-body-2 pa-1">LIVE</span>
             <span class="red--text text-caption">
-              {{ viewerkFormatter(userInfo.viewer_count) }}
+              {{ userInfo.viewer_count | commaCase }}
             </span>
           </div>
           <div v-else>
@@ -132,10 +132,10 @@
                       <div class="text-truncate">{{ item.data.title }}</div>
                       <div class="text-caption d-flex align-center">
                         <v-icon class="pr-1" x-small>mdi-eye</v-icon>
-                        {{ item.data.view_count === -1 ? 'No Archive' : viewerkFormatter(item.data.view_count) }}
+                        {{ item.data.view_count === -1 ? 'No Archive' : item.data.view_count | commaCase }}
                       </div>
                       <div class="text-caption">
-                        {{ getDurationTime(item.data.duration) }}
+                        {{ item.data.duration | getDurationTime}}
                       </div>
                       <div class="text-caption">{{ $moment(item.data.created_at).format('ll') }}</div>
                     </div>
@@ -145,7 +145,7 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="error" text @click="dialog = false">Close</v-btn>
+              <v-btn color="error" text class="text-caption" @click="dialog = false">Close</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -155,7 +155,7 @@
       {{ userInfo.data.description }}
     </v-row>
     <SortButton
-      @changeSort="changeDateSort"
+      @changeSort="changeSort"
       @openVidsListDialog="openVidsListDialog"
       :userInfo="userInfo"
       :clipSort="clipSort"
@@ -204,7 +204,7 @@
       ></clipsByDate>
     </v-row>
     <v-row
-    class="d-flex justify-center align-center pa-0"
+      class="d-flex justify-center align-center pa-0"
       v-else-if="this.clipSort === 'search'">
       <ChannelClipBySearchVue
       :listData="cliplist"
@@ -249,49 +249,15 @@ export default {
     }
   },
   methods: {
-    viewerkFormatter(el) {
-      const num = el.toString()
-      if (num > 999999999) {
-        return `${num.slice(0, -9)},${num.slice(
-          num.length - 9,
-          -6,
-        )},${num.slice(num.length - 6, -3)},${num.slice(-3)}`
-      }
-      if (num > 999999) {
-        return `${num.slice(0, -6)},${num.slice(
-          num.length - 6,
-          -3,
-        )},${num.slice(-3)}`
-      }
-      if (num > 999) {
-        return `${num.slice(0, -3)},${num.slice(-3)}`
-      }
-      return Math.abs(num)
-    },
     openVidsListDialog() {
       this.dialog = true
     },
-    changeDateSort(el) {
+    changeSort(el) {
       this.clipSort = el
     },
     changeCarsouelId(currentId) {
       this.carsouelId = currentId
       this.dialog = false
-    },
-    getDurationTime(el) {
-      const regex = /h|m|s/
-      const duration = el.split(regex)
-      if (duration.length === 4) {
-        if (duration[1] === '0') {
-          return `${duration[0]}시간`
-        }
-        return `${duration[0]}시간 ${duration[1]}분`
-      }
-      if (duration.length === 3) {
-        return `${duration[0]}분`
-      }
-
-      return '1분 미만'
     },
     setTimeHMSformat(item){
       const hour = Math.floor(item/3600);
@@ -320,11 +286,7 @@ export default {
                 data:v,
               }
             })
-            if(this.userInfo.is_live && this.vidLists[0].data.thumbnail_url === ''){
-              this.vidLists[0].data.thumbnail_url = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.userInfo.data.login}-480x272.jpg`;
-              this.vidLists[0].data.is_live = this.userInfo.is_live;
-              this.vidLists[0].data.viewer_count = this.userInfo.viewer_count;
-            } else if(this.userInfo.is_live && this.vidLists[0].data.thumbnail_url !== ''){
+            if(this.userInfo.is_live && this.vidLists[0].data.stream_id !== this.streamData.id){
               this.vidLists.unshift({
                 data:{
                   id: new Date().getTime(),
@@ -339,6 +301,21 @@ export default {
                   duration: this.setTimeHMSformat(this.$moment().diff(this.streamData.started_at,'seconds')),
                 }
               })
+            } else if(this.userInfo.is_live && this.vidLists[0].data.stream_id === this.streamData.id){
+              this.vidLists[0] = {
+                data:{
+                  id: res.data.data[0].id,
+                  is_live: 'live',
+                  viewer_count: this.streamData.viewer_count,
+                  user_login: this.streamData.user_login,
+                  user_id: this.streamData.user_id,
+                  created_at: res.data.data[0].created_at,
+                  view_count: res.data.data[0].view_count,
+                  thumbnail_url: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${this.streamData.user_login}-480x272.jpg`,
+                  title: this.streamData.title,
+                  duration: this.setTimeHMSformat(this.$moment().diff(res.data.data[0].created_at,'seconds')),
+                }
+              }
             }
           } else {
             if(this.streamData){
@@ -509,7 +486,7 @@ export default {
     async process() {
       await this.getUserInfo(this.$route.query)
       await this.getFollower()
-      // await this.isNotificated()
+      await this.isNotificated()
       await this.getStreamData(this.userInfo.data.login)
       await this.getVid(this.userInfo.data.id)
       this.dataLoading = true

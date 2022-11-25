@@ -1,6 +1,6 @@
 <template>
 <v-container fluid>
-  <v-row class="pt-10">
+  <v-row class="pt-5">
     <v-divider></v-divider>
   </v-row>
   <v-row

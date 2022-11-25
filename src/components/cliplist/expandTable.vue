@@ -4,7 +4,8 @@
   v-if="$store.state.userinfo.userInfo && $store.state.userinfo.userInfo.uid === clipListData.authorId && clipListData.dataSet === undefined" v-model="currentCliplist"
   handle=".handle" ghost-class="ghost" @change="changeIndex" chosen-class="chosen" drag-class="drag">
     <v-col cols="12" v-for="(clip, index) in currentCliplist" :key="index">
-      <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+      <ClipIframeDataTableDialog v-if="clip.clipData" :clipData="clip.clipData" :index="index" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+      <DeletedClipIframDialog v-else :clipData="clip.fireData" :index="index" :clipListData="clipListData"></DeletedClipIframDialog>
       <v-divider class="my-1"></v-divider>
       <v-col cols="12" class="d-flex justify-center" v-if="index&7 === 1">
         <InArticleAdsense
@@ -22,7 +23,8 @@
         v-for="(clip,startIndex) in chunk"
         :key="clip.id"
         >
-        <ClipIframeDataTableDialog  :clipData="clip" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+        <ClipIframeDataTableDialog v-if="clip" :clipData="clip" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+        <!-- <DeletedClipIframDialog v-else :clipData="clip.fireData" :index="index"></DeletedClipIframDialog> -->
         <v-divider class="my-1"></v-divider>
       </v-col>
       <v-col cols="12" class="d-inline-block justify-center" v-if="chunk.length === 10">
@@ -40,7 +42,8 @@
       v-for="(clip,startIndex) in chunk"
       :key="clip.id"
       >
-      <ClipIframeDataTableDialog  :clipData="clip.clipData" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+      <ClipIframeDataTableDialog v-if="clip.clipData" :clipData="clip.clipData" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
+      <DeletedClipIframDialog v-else :clipData="clip.fireData" :index="index*10+startIndex"></DeletedClipIframDialog>
       <v-divider class="my-1"></v-divider>
     </v-col>
     <v-col cols="12" class="block justify-center" v-if="chunk.length === 10">
@@ -57,16 +60,15 @@
 
 <script>
 import ClipIframeDataTableDialog from '../dialog/ClipIframeDataTableDialog';
+import DeletedClipIframDialog from '../dialog/DeletedClipIframDialog';
 import draggable from 'vuedraggable'
-// import DisplyaAdContainerVue from '../DisplyaAdContainer.vue';
-import InArticleAdContainer from '../InArticleAdContainer.vue';
 import { chunk } from 'lodash';
 
-// InArticleAdContainer,
 export default {
   props:['clipListData','tempArr'],
   components: {
     ClipIframeDataTableDialog,
+    DeletedClipIframDialog,
     draggable,
   },
   data() {
@@ -95,7 +97,7 @@ export default {
           createdAt: tempDate
         });
         batch.update(target,{
-          thumbnail_url: data.element.clipData.thumbnail_url
+          thumbnail_url: data.element.clipData !== undefined ?  data.element.clipData.thumbnail_url : data.element.fireData.thumbnail_url
         });
         await batch.commit().then(() => {
         this.$store.commit('UPDATE_Firedata',{index:data.newIndex, createdAt:tempDate})

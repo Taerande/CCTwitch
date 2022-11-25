@@ -26,7 +26,7 @@
               <span class="rounded-md text-caption white--text mx-1 px-1 rounded-lg" style="background-color: rgba( 0, 0, 0, 0.5 )">{{$moment(clipData.created_at).fromNow()}}</span>
             </v-row>
             <v-row class="d-flex justify-end pa-1">
-              <span class="text-caption white--text px-1 mx-1 rounded-lg" style="background-color: rgba( 0, 0, 0, 0.5 )"><v-icon class="white--text pr-1" x-small>mdi-eye</v-icon>{{viewerkFormatter(clipData.view_count)}}</span>
+              <span class="text-caption white--text px-1 mx-1 rounded-lg" style="background-color: rgba( 0, 0, 0, 0.5 )"><v-icon class="white--text pr-1" x-small>mdi-eye</v-icon>{{clipData.view_count | commaCase}}</span>
             </v-row>
           </v-container>
           <div v-if="hovering" class="d-flex justify-center hoveringImg">
@@ -149,19 +149,6 @@ export default {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-    },
-    viewerkFormatter(el) {
-      const num = el.toString();
-      if (num > 999999999) {
-        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999999) {
-        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999) {
-        return `${num.slice(0, -3)},${num.slice(-3)}`;
-      }
-      return Math.abs(num);
     },
     setTimeHMSformat(item){
       const hour = Math.floor(item/3600);

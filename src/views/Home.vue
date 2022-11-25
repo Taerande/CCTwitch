@@ -48,7 +48,7 @@
                 </v-row>
                 <v-spacer></v-spacer>
                 <v-row>
-                  <div class="white--text rounded-lg px-1 text-caption ma-1" style="background-color: rgba( 0, 0, 0, 0.5 )"><v-icon color="red" x-small>mdi-eye</v-icon> {{viewerkFormatter(item.viewer_count)}}</div>
+                  <div class="white--text rounded-lg px-1 text-caption ma-1" style="background-color: rgba( 0, 0, 0, 0.5 )"><v-icon color="red" x-small>mdi-eye</v-icon> {{item.viewer_count | commaCase}}</div>
                 </v-row>
               </v-container>
             </v-img>
@@ -110,21 +110,8 @@ export default {
     };
   },
   methods: {
-    viewerkFormatter(el) {
-      const num = el.toString();
-      if (num > 999999999) {
-        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999999) {
-        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999) {
-        return `${num.slice(0, -3)},${num.slice(-3)}`;
-      }
-      return Math.abs(num);
-    },
     setThumbnailSize(el) {
-      return el.split('{width}x{height}')[0]+'480x272.jpg';
+      return el.split('{width}x{height}')[0]+'300x172.jpg';
     },
     async getLiveStreamWithLang(){
       this.dataLoading = true;
@@ -175,9 +162,9 @@ export default {
 
   },
   async mounted(){
+    document.title = 'CCTwitch - Twitch Clip Collector';
     await this.getLiveStreamWithLang();
     this.loading = true;
-    document.title = 'CCTwitch - Clip Collector'
   },
   destroyed() {
     this.streamingList = [];

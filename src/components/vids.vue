@@ -102,35 +102,11 @@ export default {
         return this.vids[index].data;
       }
     },
-    // setThumbnailSize(el, index) {
-    //   if (index === 0 || index === this.vidlist.length) {
-    //     return this.vidlist[0].data.thumbnail_url;
-    //   } else if (index === -1 ) {
-    //     return this.vidlist[this.vidlist.length - 1].data.thumbnail_url;
-    //   } else {
-    //     return this.vidlist[index].data.thumbnail_url;
-    //   }
-    // },
     pushToTwitchVids(url, title) {
       if (window.confirm(`${title} 영상으로 이동하시겠습니까?`)) {
         window.open(url);
       }
     },
-    // async getLiveThumbnail(el, index) {
-    //   await axios.get('https://api.twitch.tv/helix/streams', {
-    //     params: {
-    //       user_login: el.data.user_login,
-    //     },
-    //     headers: this.$store.state.headerConfig,
-    //   }).then((res) => {
-    //     const width2 = /{width}/;
-    //     const height2 = /{height}/;
-    //     const convert = res.data.data[0].thumbnail_url.replace(width2, '480').replace(height2, '272');
-    //     this.vidlist[index].data.thumbnail_url = convert;
-    //     this.vidlist[index].data.is_live = res.data.data[0].type;
-    //     this.vidlist[index].data.viewer_count = res.data.data[0].viewer_count;
-    //   });
-    // },
     getDurationTime(el) {
       const regex = /h|m|s/;
       const duration = el.split(regex);

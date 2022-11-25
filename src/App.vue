@@ -1,5 +1,5 @@
 <template>
-  <v-app v-if="$store.state.firebaseLoaded">
+  <v-app v-if="$store.state.firebaseLoaded && initData">
     <AppBar app></AppBar>
     <v-main app>
       <ins class="adsbygoogle"
@@ -8,14 +8,14 @@
      :style="$vuetify.breakpoint.xl ? 'left:5%' : 'left:10px;'"
      data-ad-client="ca-pub-8597405222136575"
      data-ad-slot="8549081118"></ins>
-      <router-view class="pt-10" :key="$route.fullPath" />
-      <SnackBar app></SnackBar>
-      <ins class="adsbygoogle"
+     <ins class="adsbygoogle"
       v-if="$vuetify.breakpoint.lgAndUp"
      style="display:inline-block;width:160px;height:600px;position:fixed;top:15%;"
      :style="$vuetify.breakpoint.xl ? 'right:5%;' : 'right:10px;'"
      data-ad-client="ca-pub-8597405222136575"
      data-ad-slot="8549081118"></ins>
+      <router-view class="pt-10" :key="$route.fullPath" />
+      <SnackBar app></SnackBar>
     </v-main>
     <Footer app></Footer>
   </v-app>
@@ -36,6 +36,7 @@
 import SnackBar from '@/components/layout/SnackBar.vue'
 import AppBar from '@/components/layout/AppBar.vue'
 import Footer from '@/components/layout/Footer.vue'
+import axios from 'axios'
 
 export default {
   name: 'App',
@@ -46,7 +47,7 @@ export default {
   },
   data() {
     return {
-      // initData: false,
+      initData: false,
     }
   },
   methods: {
@@ -55,50 +56,43 @@ export default {
     },
   },
  async created() {
+    document.documentElement.setAttribute('lang', navigator.language.split('-')[0]);
     this.$store.commit('INIT_localStorage');
     this.$store.commit('SET_SignInDialog', false);
     const appAccessToken = JSON.parse(localStorage.getItem('twitchAppAccessToken'));
     this.$store.commit('SET_TwitchAppAccessToken', appAccessToken);
     this.$vuetify.theme.dark = JSON.parse(localStorage.getItem('dark'))
-    // this.initData = true;
-
-    // // 백엔드에서 처리 해야댐.. twitch auth validation
-    // try{
-    //   if(localStorage.getItem('twitchAppAccessToken')){
-    //     await axios.get('https://id.twitch.tv/oauth2/validate',{
-    //       headers:{
-    //         Authorization: `OAuth ${JSON.parse(localStorage.getItem('twitchAppAccessToken'))}`
-    //         }
-    //     }).then((res) => {
-    //       this.initData = true;
-    //       //정상
-    //     }).catch(async (error) => {
-    //       console.log(error);
-    //       //비정상, 앱엑세스 토큰 재발급 Backend 처리
-    //       await axios.get(this.$store.state.appTokenURL).then((res) => {
-    //         localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
-    //         this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
-    //       })
-    //     })
-    //   } else {
-    //     //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
-    //     await axios.get(this.$store.state.appTokenURL)
-    //     .then((res) => {
-    //       //받아온 엑세스토큰 로컬스토리지에 저장
-    //       this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
-    //       localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
-    //       });
-    //   }
-
-    // this.initData = true;
-    // }catch{
-
-    // }
+    // 백엔드에서 처리 해야댐.. twitch auth validation
+    if(localStorage.getItem('twitchAppAccessToken')){
+      await axios.get('https://id.twitch.tv/oauth2/validate',{
+        headers:{
+          Authorization: `OAuth ${JSON.parse(localStorage.getItem('twitchAppAccessToken'))}`
+          }
+      }).then((res) => {
+        this.initData = true;
+        //정상
+      }).catch(async (error) => {
+        //비정상, 앱엑세스 토큰 재발급 Backend 처리
+        await axios.get(this.$store.state.appTokenURL).then((res) => {
+          localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token));
+          this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
+          this.initData = true;
+        })
+      })
+    } else {
+      //앱 엑세스 토큰이 없는 경우 이므로 앱엑세스 토큰 발급해야댐 백엔드처리
+      await axios.get(this.$store.state.appTokenURL)
+      .then((res) => {
+        //받아온 엑세스토큰 로컬스토리지에 저장
+        this.$store.commit('SET_TwitchAppAccessToken', res.data.access_token);
+        localStorage.setItem('twitchAppAccessToken', JSON.stringify(res.data.access_token))
+        });
+        this.initData = true;
+      }
   },
 }
 </script>
 <style lang="scss">
-// @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&display=swap');
 :root {
   --twitch-color: rgb(119, 44, 232);
   --hoverBack-color: rgba(255, 255, 255, 0.3);

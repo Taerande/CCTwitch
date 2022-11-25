@@ -1,6 +1,5 @@
 importScripts('https://www.gstatic.com/firebasejs/8.2.7/firebase-app.js')
 importScripts('https://www.gstatic.com/firebasejs/8.2.7/firebase-messaging.js')
-
 var firebaseConfig = {
   apiKey: 'AIzaSyCk0FgcGm0bt9d3IDxcGTjlqfOBOPRdWw4',
   authDomain: 'twitchhotclip.firebaseapp.com',
@@ -11,21 +10,21 @@ var firebaseConfig = {
   measurementId: 'G-B8P868HW7Y',
 }
 
-const app = firebase.initializeApp(firebaseConfig);
-// app.messaging().getToken({ vapidKey:'BKLOaHl9k-gFVZJIFGnxNOB5pJ8KHuyNuHQQnRmL5pQFqPgPavVFtD8gZzlUwinf1V0ZxGBqgkwIBZ1gM2IunXQ'});
 
-const messaging = firebase.messaging()
+firebase.initializeApp(firebaseConfig);
 
+const messaging = firebase.messaging();
 
-// app.messaging().onBackgroundMessage((payload) => {
-//   console.log('[firebase-messaging-sw.js] Received background message ', payload);
-//   // Customize notification here
-//   const notificationTitle = payload.notification.title;
-//   const notificationOptions = {
-//     body: payload.notification.body,
-//     icon: payload.notification.icon,
-//   };
+messaging.onBackgroundMessage((payload) => {
+  // Customize notification here
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: payload.notification.icon,
+    badge: 'https://firebasestorage.googleapis.com/v0/b/twitchhotclip.appspot.com/o/open_graph%2Flogo.png?alt=media&token=56097b02-9e84-4b70-875d-b7027bc82a12',
+    timestamp: payload.data.time,
+  };
 
-//   self.registration.showNotification(notificationTitle,
-//     notificationOptions);
-// });
+  return self.registration.showNotification(notificationTitle,
+    notificationOptions);
+});

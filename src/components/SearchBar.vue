@@ -47,8 +47,8 @@
     </v-card-text>
     <v-card-actions class="pt-0">
       <v-spacer></v-spacer>
-      <v-btn color="error" text @click="changeSearchBar(false)">close</v-btn>
-      <v-btn color="success" @click="searchChannel(searchString)"
+      <v-btn color="error" text class="text-caption" @click="changeSearchBar(false)">close</v-btn>
+      <v-btn color="success" class="text-caption" @click="searchChannel(searchString)"
       :disabled="searchString === ''"
       text>search</v-btn>
     </v-card-actions>

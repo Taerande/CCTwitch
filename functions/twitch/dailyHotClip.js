@@ -116,6 +116,7 @@ async function getTopClip(){
     if(sn.exists()){
       for(let item in sn.val()){
         tempArr = [];
+        afterCursor = null;
         await getKrClipByGameId(item, afterCursor, sn.val()[item].game_name);
         topClips = [...topClips, ...tempArr]
         topClips.sort((a,b) => b.view_count - a.view_count);

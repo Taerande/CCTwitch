@@ -29,11 +29,11 @@ function momentRound(){
   const hour = now.hour();
   const minute = now.minute();
   if(minute < 15){
-    return now.set({minute: 0, second: 0}).valueOf();
+    return now.set({minute: 0, second: 0, millisecond:0}).valueOf();
   }else if(minute >  44){
-    return now.set({hour: hour + 1, minute: 0, second: 0}).valueOf();
+    return now.set({hour: hour + 1, minute: 0, second: 0, millisecond:0}).valueOf();
   } else {
-    return now.set({minute: 30, second: 0}).valueOf();
+    return now.set({minute: 30, second: 0, millisecond:0}).valueOf();
   }
 }
 
@@ -164,22 +164,24 @@ async function getTreemap(){
     if(res.data.pagination.cursor !== undefined){
       await getTreemap()
     }
-  }).catch((err) => {
-    console.log(err)
+  }).catch(async (err) => {
+    if(err.response.status === 401){
+      await getAccessToken();
+      await getTreemap();
+    }
   })
 };
 
 async function getAccessToken(){
-  try {
-    await axios.post(`https://id.twitch.tv/oauth2/token?` +
-    `client_id=${clientId}&` +
-    `client_secret=${clientSecret}&`+
-    `grant_type=client_credentials`)
-    .then((res) => {
-      appAccessToken = 'Bearer ' + res.data.access_token;
-    })
-  } catch(err) {
-  }
+  await axios.post(`https://id.twitch.tv/oauth2/token?` +
+  `client_id=${clientId}&` +
+  `client_secret=${clientSecret}&`+
+  `grant_type=client_credentials`)
+  .then((res) => {
+    appAccessToken = 'Bearer ' + res.data.access_token;
+  }).catch(async(err) => {
+    await getAccessToken();
+  })
 };
 
 async function getTopGame(){

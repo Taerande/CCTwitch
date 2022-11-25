@@ -55,7 +55,7 @@
     <hotclipInfoVue :hotClipData="hotClipData" @changeInfo="changeInfo"></hotclipInfoVue>
   </v-row>
   <v-row class="d-flex justify-center">
-    <hotclipCommentsVue :hotClipData="hotClipData"></hotclipCommentsVue>
+    <hotclipCommentsVue @updateCommentCount="updateCommentCount" :hotClipData="hotClipData"></hotclipCommentsVue>
   </v-row>
 </v-container>
 <v-container v-else>
@@ -107,6 +107,9 @@ export default {
   computed:{
   },
   methods: {
+    updateCommentCount(el){
+      this.hotClipData.commentCount += el;
+    },
     changeInfo(el){
       this.hotClipData.title = el.title;
       this.hotClipData.tags = el.tags;

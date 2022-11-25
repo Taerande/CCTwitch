@@ -672,7 +672,7 @@ export default {
           this.streamLineChartOptions.annotations.xaxis = [];
           this.streamLineChartOptions.annotations.points = [];
           for(let item in streamData){
-            const diffIdx = (item*1 - this.streamLineChartOptions.labels[this.streamLineChartOptions.labels.length-1])/1800000;
+            const diffIdx = (this.momentRound(item*1) - this.streamLineChartOptions.labels[this.streamLineChartOptions.labels.length-1])/1800001;
             const lastPoint = this.streamLineChartOptions.annotations.points[this.streamLineChartOptions.annotations.points.length - 1] === undefined ? {
               x:0,
               y:0,
@@ -855,11 +855,11 @@ export default {
       const hour = now.hour();
       const minute = now.minute();
       if(minute < 15){
-        return now.set({minute: 0, second: 0});
+        return now.set({minute: 0, second: 0, millisecond:0});
       }else if(minute >  44){
-        return now.set({hour: hour + 1, minute: 0, second: 0});
+        return now.set({hour: hour + 1, minute: 0, second: 0, millisecond:0});
       } else {
-        return now.set({minute: 30, second: 0});
+        return now.set({minute: 30, second: 0, millisecond:0});
       }
     },
     async newOverall(){

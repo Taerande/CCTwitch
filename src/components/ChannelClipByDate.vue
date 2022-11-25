@@ -1,5 +1,8 @@
 <template>
 <v-container fluid>
+  <v-row class="pt-5">
+    <v-divider></v-divider>
+  </v-row>
   <v-row
   class="pa-1 justify-space-between align-baseline"
   v-if="this.cliplist.length > 0">
@@ -14,7 +17,6 @@
      v-for="(item,startIndex) in chunk.slice(0,index%7+4)"
           :key="item.id+startIndex"
       cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2"
-      :class="item.broadcaster_id"
       >
        <v-card class="ma-0 pa-0" flat style="width:inherit">
         <v-card-text class="d-flex justify-center pa-0 ma-0">
@@ -40,7 +42,6 @@
      style="min-width:250px;"
           :key="item.id+endIndex"
       cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2"
-      :class="item.broadcaster_id"
       >
        <v-card class="ma-0 pa-0" flat style="width:inherit">
         <v-card-text class="d-flex justify-center pa-0 ma-0">
@@ -93,19 +94,6 @@ export default {
       const krTime = time + 9 * 60 * 60 * 1000;
       const dateFormatted = new Date(krTime).toISOString().substr(0, 10);
       return dateFormatted;
-    },
-    viewerkFormatter(el) {
-      const num = el.toString();
-      if (num > 999999999) {
-        return `${num.slice(0, -9)},${num.slice(num.length - 9, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999999) {
-        return `${num.slice(0, -6)},${num.slice(num.length - 6, -3)},${num.slice(-3)}`;
-      }
-      if (num > 999) {
-        return `${num.slice(0, -3)},${num.slice(-3)}`;
-      }
-      return Math.abs(num);
     },
     async channelInfiniteHandler($state) {
       await axios.get('https://api.twitch.tv/helix/clips', {
