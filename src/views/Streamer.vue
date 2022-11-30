@@ -34,11 +34,6 @@
               </div>
             </div>
         </v-card-text>
-        <!-- <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="success" @click.prevent="" icon><v-icon>mdi-bell</v-icon></v-btn>
-          <v-btn color="success" icon><v-icon>mdi-bell-off</v-icon></v-btn>
-        </v-card-actions> -->
       </v-card>
     </v-col>
   </v-row>
@@ -121,7 +116,7 @@
     <v-col cols="6" :class="$vuetify.breakpoint.xl ? 'custom5cols' : ''" lg="3" md="4" sm="6" xs="12"  class="pa-2 d-flex justify-center"
     v-for="item in streamerList.follow"
     :key="item.to_id">
-     <v-card outlined dark class="d-flex  py-1 align-center rounded-lg" width="320px" :img="reduceOfflineImgSize(item.offline_image_url)" :to="{name: 'Channel', query:{
+     <v-card outlined dark class="d-flex  py-1 align-center rounded-lg" width="320px" :to="{name: 'Channel', query:{
             q: item.login}}">
         <v-card-title class="d-flex align-center justify-space-between pa-2">
           <div aria-label="avatar" class="flex-direction: column">
@@ -181,7 +176,6 @@ export default {
         stream: false,
         liked: false,
       },
-      notiLoading: false,
       streamerList:{
         follow:[],
         stream:[],
@@ -189,24 +183,9 @@ export default {
       },
       followList:[],
       streamFollowList:[],
-      islogin: false,
     };
   },
   methods: {
-    reduceOfflineImgSize(el){
-      if(el){
-        const fw = el.split('1920x1080')[0];
-        const bw = el.split('1920x1080')[1];
-        return fw + '320x180' + bw;
-      } else {
-        return null;
-      }
-    },
-    pushToTwitchVids(url, title) {
-      if (window.confirm(`${title} 영상으로 이동하시겠습니까?`)) {
-        window.open(url);
-      }
-    },
     async getUserInfo(element) {
       return await axios.get('https://api.twitch.tv/helix/users',{
         params: {
@@ -241,22 +220,6 @@ export default {
             await this.getFollowList(userInfo);
           }
         });
-    },
-    async subNotification(broadcaster_id){
-      this.notiLoading = true;
-      await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
-        [this.$store.state.userinfo.userInfo.uid] : true
-      }).then(()=>{
-        this.notiLoading = false;
-      })
-    },
-    async unsubNotification(broadcaster_id){
-      this.notiLoading = true;
-      await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
-        [this.$store.state.userinfo.userInfo.uid] : false
-      }).then(()=>{
-        this.notiLoading = false;
-      })
     },
     async getStreamFollowList(userInfo){
       this.loading.stream = true;
@@ -308,14 +271,12 @@ export default {
         const user = this.$store.state.userinfo.userInfo;
         const twitchOAuthToken = JSON.parse(localStorage.getItem('twitchOAuthToken'));
         if(user && twitchOAuthToken){
-          this.islogin = true;
           Promise.all([
             this.getStreamFollowList(user),
             this.getFollowList(user)
           ])
         } else if(user && twitchOAuthToken === null) {
           this.logOut();
-          // this.postProcess();
         }
       } catch {
         (err) => {
@@ -337,35 +298,15 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.v-progress-circular {
-  margin: 1rem;
-}
-#checkedIcon_partner, #checkedIcon_none{
-  display: flex;
-  background-color: rgb(0,0,0,0.3);
-  width: inherit;
-  > i {
-    width: -webkit-fill-available;
-  }
-  :hover{
-    cursor: pointer;
-  }
-}
 .v-avatar:hover{
   cursor: pointer;
 }
-.v-card--reveal {
-  align-items: center;
-  bottom: 0;
-  filter: none;
-  justify-content: center;
-  position: absolute;
-  width: 100%;
-}
-.v-card:hover{
-  z-index: 3;
-  transition: all ease 0.2s 0s;
-  transform: scale(1.1) !important;
-  box-shadow: 5px 5px 0 var(--twitch-color);
-}
+// .v-card--reveal {
+//   align-items: center;
+//   bottom: 0;
+//   filter: none;
+//   justify-content: center;
+//   position: absolute;
+//   width: 100%;
+// }
 </style>

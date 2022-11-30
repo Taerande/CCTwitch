@@ -80,7 +80,7 @@ export default {
           if(sn.docs.length > 0){
             sn.docs.forEach(async (el) => {
               const item = el.data();
-              this.cliplists.push({
+              this.hotclips.push({
               id: el.id,
               title: item.title,
               description: item.description,

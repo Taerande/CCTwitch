@@ -46,7 +46,7 @@ const PageNotFound = () => import(/* webpackChunkName: "PageNotFound" */ '@/view
 const SpecialList = () => import(/* webpackChunkName: "SpecialList" */ '@/views/SpecialList.vue');
 const User = () => import(/* webpackChunkName: "User" */ '@/views/User.vue');
 const Tag = () => import(/* webpackChunkName: "Tag" */ '@/views/Tag.vue');
-const Test = () => import(/* webpackChunkName: "Test" */ '@/views/Test.vue');
+// const Test = () => import(/* webpackChunkName: "Test" */ '@/views/Test.vue');
 const Report = () => import(/* webpackChunkName: "Report" */ '@/views/Report.vue');
 
 const routes = [
@@ -142,11 +142,11 @@ const routes = [
     name: 'Report',
     component: Report,
   },
-  {
-    path: '/test',
-    name: 'Test',
-    component: Test,
-  },
+  // {
+  //   path: '/test',
+  //   name: 'Test',
+  //   component: Test,
+  // },
   // {
   //   path: '/analysis',
   //   name: 'Analysis',

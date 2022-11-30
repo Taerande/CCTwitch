@@ -15,16 +15,28 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage((payload) => {
-  // Customize notification here
-  const notificationTitle = payload.notification.title;
+
+// Customize notification here
+messaging.onBackgroundMessage( async (payload) => {
+  const tags = {tag: payload.data.tag};
+  let renotify = false;
+  await registration.getNotifications(tags).then((noti) => {
+    if(noti.length > 0){
+      renotify = true;
+    }
+  })
+  const notificationTitle = payload.data.title;
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: payload.notification.icon,
-    badge: 'https://firebasestorage.googleapis.com/v0/b/twitchhotclip.appspot.com/o/open_graph%2Flogo.png?alt=media&token=56097b02-9e84-4b70-875d-b7027bc82a12',
+    body: payload.data.body,
+    icon: payload.data.icon,
+    image: payload.data.image === "" ? 'https://static-cdn.jtvnw.net/ttv-static/404_preview-356x200.jpg' : payload.data.image,
+    tag: payload.data.tag,
+    renotify: renotify,
+    badge: '/img/icons/monochrome_96x96_reverse.png',
     timestamp: payload.data.time,
   };
-
-  return self.registration.showNotification(notificationTitle,
-    notificationOptions);
+  if(payload.notification === undefined){
+    registration.showNotification(notificationTitle,
+      notificationOptions);
+  }
 });

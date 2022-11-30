@@ -24,7 +24,7 @@
         :key="clip.id"
         >
         <ClipIframeDataTableDialog v-if="clip" :clipData="clip" :index="index*10+startIndex" :clipListData="clipListData" :listData="AllCliplists"></ClipIframeDataTableDialog>
-        <!-- <DeletedClipIframDialog v-else :clipData="clip.fireData" :index="index"></DeletedClipIframDialog> -->
+        <DeletedClipIframDialog v-else :clipData="clip.fireData" :index="index"></DeletedClipIframDialog>
         <v-divider class="my-1"></v-divider>
       </v-col>
       <v-col cols="12" class="d-inline-block justify-center" v-if="chunk.length === 10">

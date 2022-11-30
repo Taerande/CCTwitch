@@ -1,5 +1,158 @@
 <template>
   <v-app-bar class="white--text indigo lighten-3" height="60" app flat absolute>
+    <v-dialog
+      content-class="drawer"
+      v-model="$store.state.drawer"
+      no-click-animation
+      fullscreen
+      scrollable
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-card-title class="blue">
+          <div class="white--text">Quick Menu</div>
+          <v-spacer></v-spacer>
+          <v-btn color="white" @click="changeDrawer(false)" icon>
+            <v-icon>mdi-chevron-double-down</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text class="pt-3">
+          <v-list class="mb-16">
+            <div class="text-caption pl-5">Search</div>
+            <v-form
+            @submit.prevent="searchChannel($store.state.searchString)">
+              <v-text-field
+                v-model="$store.state.searchString"
+                @click:prepend="searchChannel($store.state.searchString)"
+                color="twitch"
+                outlined
+                flat
+                type="text"
+                dense
+                prepend-inner-icon="mdi-magnify"
+                placeholder="Find streamer"
+                solo
+              ></v-text-field>
+            </v-form>
+            <div class="text-caption pl-5 pt-3">Menu</div>
+            <v-divider class="my-3"></v-divider>
+            <v-list-item to="/" @click="changeDrawer(false)">
+              <v-icon color="twitch" class="pr-1">mdi-home</v-icon>
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">Home</span>
+            </v-list-item>
+            <v-list-item to="/trending" @click="changeDrawer(false)">
+              <v-icon color="green" class="pr-1">mdi-trending-up</v-icon>
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
+            </v-list-item>
+            <v-list-item to="/timelines" @click="changeDrawer(false)">
+              <v-icon color="cyan" class="pa-0 ma-0 pr-1">mdi-timeline</v-icon>
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">Timeline</span>
+            </v-list-item>
+            <v-list-item to="/mycliplist" @click="changeDrawer(false)">
+              <v-icon color="blue" class="pr-1">mdi-playlist-check</v-icon>
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
+            </v-list-item>
+            <v-list-item to="/streamer" @click="changeDrawer(false)">
+              <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
+            </v-list-item>
+            <v-list-item to="/report?type=overall" @click="changeDrawer(false)">
+              <v-icon color="orange" class="pa-0 ma-0 pr-1">mdi-poll</v-icon>
+              <span class="text-subtitle-2 text-lg-body-1 pr-1">Report</span>
+            </v-list-item>
+            <div class="text-caption pl-5 pt-8">User</div>
+            <v-divider class="my-3"></v-divider>
+            <v-card flat v-if="$store.state.userinfo.userInfo">
+              <v-card-text>
+                <v-avatar
+                size="24">
+                  <img
+                    :src="$store.state.userinfo.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
+                </v-avatar>
+              <span class="text-subtitle px-1">{{$store.state.userinfo.userInfo.displayName}}</span>
+              <div class="d-flex justify-center py-3">
+                <v-btn width="100%" @click="logOut()" :loading="logoutLoading" color="error">Logout</v-btn>
+              </div>
+              </v-card-text>
+            </v-card>
+            <v-card flat v-else>
+              <div class="d-flex justify-center px-10 pt-5">
+                <v-btn color="twitch" dark width="100%" @click="$store.commit('SET_SignInDialog', true)">Log In</v-btn>
+              </div>
+            </v-card>
+            <div class="pa-0 ma-0" v-if="$store.state.userinfo.userInfo">
+              <div class="text-caption pl-5 pt-3">Alram</div>
+              <v-divider class="my-3"></v-divider>
+              <v-list>
+                <v-subheader class="text-caption">Current Device</v-subheader>
+                <v-list-item class="d-flex align-center" v-if="!isListed && !isIOS">
+                  <v-text-field
+                    v-model="deviceName"
+                    color="twitch"
+                    name="device name"
+                    :rules="[deviceRules.required, deviceRules.counter]"
+                    counter
+                    :disabled="subscribeDeviceLoading"
+                    flat
+                    type="text"
+                    maxlength="15"
+                    full-width
+                    label="Device Name"
+                    :prepend-icon="deviceLogo(navi)"
+                    dense
+                  >
+                    <template v-slot:append>
+                      <v-btn :disabled="deviceName === ''" :loading="subscribeDeviceLoading" @click="enrollFCM()" color="twitch" text class="text-caption" small><v-icon small>mdi-bell</v-icon> <span>구독하기</span></v-btn>
+                    </template>
+                  </v-text-field>
+                </v-list-item>
+                <v-list-item v-else-if="isIOS">
+                  <div class="text-caption error--text pa-0 ma-0">Can't available in IOS.</div>
+                </v-list-item>
+                <v-list-item v-else>
+                  <div class="text-caption error--text pa-0 ma-0">This device is already listed.</div>
+                </v-list-item>
+                <v-subheader class="text-caption">Listed Device</v-subheader>
+                <v-list-item v-for="(item, index) in devices" :key="index" class="d-flex">
+                <v-icon>{{deviceLogo(item[1].device)}}</v-icon>
+                <span class="text-caption px-1">{{item[1].name}}</span>
+                <span class="text-caption px-1 success--text" v-if="item[0] === fcmToken">(current device)</span>
+                <v-spacer></v-spacer>
+                <v-btn small color="error" :loading="unsubloadingId === item[0]" depressed class="text-caption" @click="disenrollFCM(item[0])"><v-icon small>mdi-bell-off-outline</v-icon><span>구독해제</span></v-btn>
+                </v-list-item>
+                <v-list-item v-if="devices.length === 0">
+                    <div class="text-caption error--text pa-0 ma-0">구독된 기기가 없습니다.</div>
+                </v-list-item>
+              </v-list>
+              <v-icon>mdi-alram</v-icon>
+            </div>
+            <div class="text-caption pl-5 pt-3">Option</div>
+            <v-divider class="my-3"></v-divider>
+            <div>
+              <v-btn
+              width="105"
+              depressed
+              dark
+              v-if="!$vuetify.theme.dark"
+              class="text-capitalize text-caption pa-0 ma-0 px-1"
+              @click="toggleDarkTheme()">
+                <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
+                <span>Dark Theme</span>
+              </v-btn>
+              <v-btn v-else
+              depressed
+              light
+              width="105"
+              class="text-capitalize text-caption pa-0 ma-0 px-1"
+              @click="toggleDarkTheme()">
+                <v-icon color="red">mdi-weather-sunny</v-icon>
+                <span>Light Theme</span>
+              </v-btn>
+            </div>
+          </v-list>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <v-container
     class="align-center justify-center">
       <v-row class="d-flex align-center">
@@ -7,159 +160,6 @@
           <v-btn icon @click="changeDrawer(!drawer)">
             <v-icon color="white">mdi-menu</v-icon>
           </v-btn>
-          <v-dialog
-            content-class="drawer"
-            v-model="$store.state.drawer"
-            no-click-animation
-            fullscreen
-            scrollable
-            transition="dialog-bottom-transition"
-          >
-            <v-card>
-              <v-card-title class="blue">
-                <div class="white--text">Quick Menu</div>
-                <v-spacer></v-spacer>
-                <v-btn color="white" @click="changeDrawer(false)" icon>
-                  <v-icon>mdi-chevron-double-down</v-icon>
-                </v-btn>
-              </v-card-title>
-              <v-card-text class="pt-3">
-                <v-list class="pb-16">
-                  <div class="text-caption pl-5">Search</div>
-                  <v-form
-                  @submit.prevent="searchChannel($store.state.searchString)">
-                    <v-text-field
-                      v-model="$store.state.searchString"
-                      @click:prepend="searchChannel($store.state.searchString)"
-                      color="twitch"
-                      outlined
-                      flat
-                      type="text"
-                      dense
-                      prepend-inner-icon="mdi-magnify"
-                      placeholder="Find streamer"
-                      solo
-                    ></v-text-field>
-                  </v-form>
-                  <div class="text-caption pl-5 pt-3">Menu</div>
-                  <v-divider class="my-3"></v-divider>
-                  <v-list-item to="/" @click="changeDrawer(false)">
-                    <v-icon color="twitch" class="pr-1">mdi-home</v-icon>
-                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Home</span>
-                  </v-list-item>
-                  <v-list-item to="/trending" @click="changeDrawer(false)">
-                    <v-icon color="green" class="pr-1">mdi-trending-up</v-icon>
-                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
-                  </v-list-item>
-                  <v-list-item to="/timelines" @click="changeDrawer(false)">
-                    <v-icon color="cyan" class="pa-0 ma-0 pr-1">mdi-timeline</v-icon>
-                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Timeline</span>
-                  </v-list-item>
-                  <v-list-item to="/mycliplist" @click="changeDrawer(false)">
-                    <v-icon color="blue" class="pr-1">mdi-playlist-check</v-icon>
-                    <span class="text-subtitle-2 text-lg-body-1 pr-1">My Cliplist</span>
-                  </v-list-item>
-                  <v-list-item to="/streamer" @click="changeDrawer(false)">
-                    <v-icon color="red" class="pa-0 ma-0 pr-1">mdi-heart</v-icon>
-                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Streamer</span>
-                  </v-list-item>
-                  <v-list-item to="/report?type=overall" @click="changeDrawer(false)">
-                    <v-icon color="orange" class="pa-0 ma-0 pr-1">mdi-poll</v-icon>
-                    <span class="text-subtitle-2 text-lg-body-1 pr-1">Report</span>
-                  </v-list-item>
-                  <div class="text-caption pl-5 pt-8">User</div>
-                  <v-divider class="my-3"></v-divider>
-                  <v-card flat v-if="$store.state.userinfo.userInfo">
-                    <v-card-text>
-                      <v-avatar
-                      size="24">
-                        <img
-                          :src="$store.state.userinfo.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
-                      </v-avatar>
-                    <span class="text-subtitle px-1">{{$store.state.userinfo.userInfo.displayName}}</span>
-                    <div class="d-flex justify-center py-3">
-                      <v-btn width="100%" @click="logOut()" :loading="logoutLoading" color="error">Logout</v-btn>
-                    </div>
-                    </v-card-text>
-                  </v-card>
-                  <v-card flat v-else>
-                    <div class="d-flex justify-center px-10 pt-5">
-                      <v-btn color="twitch" dark width="100%" @click="$store.commit('SET_SignInDialog', true)">Log In</v-btn>
-                    </div>
-                  </v-card>
-                  <div class="pa-0 ma-0" v-if="$store.state.userinfo.userInfo">
-                    <div class="text-caption pl-5 pt-3">Alram</div>
-                    <v-divider class="my-3"></v-divider>
-                    <v-list>
-                      <v-subheader class="text-caption">Current Device</v-subheader>
-                      <v-list-item class="d-flex align-center" v-if="!isListed && !isIOS">
-                        <v-text-field
-                          v-model="deviceName"
-                          color="twitch"
-                          name="device name"
-                          :rules="[deviceRules.required, deviceRules.counter]"
-                          counter
-                          :disabled="subscribeDeviceLoading"
-                          flat
-                          type="text"
-                          maxlength="15"
-                          full-width
-                          label="Device Name"
-                          :prepend-icon="deviceLogo(navi)"
-                          dense
-                        >
-                          <template v-slot:append>
-                            <v-btn :disabled="deviceName === ''" :loading="subscribeDeviceLoading" @click="enrollFCM()" color="twitch" text class="text-caption" small><v-icon small>mdi-bell</v-icon> <span>구독하기</span></v-btn>
-                          </template>
-                        </v-text-field>
-                      </v-list-item>
-                      <v-list-item v-else-if="isIOS">
-                        <div class="text-caption error--text pa-0 ma-0">Can't available in IOS.</div>
-                      </v-list-item>
-                      <v-list-item v-else>
-                        <div class="text-caption error--text pa-0 ma-0">This device is already listed.</div>
-                      </v-list-item>
-                      <v-subheader class="text-caption">Listed Device</v-subheader>
-                      <v-list-item v-for="(item, index) in devices" :key="index" class="d-flex">
-                      <v-icon>{{deviceLogo(item[1].device)}}</v-icon>
-                      <span class="text-caption px-1">{{item[1].name}}</span>
-                      <span class="text-caption px-1 success--text" v-if="item[0] === fcmToken">(current device)</span>
-                      <v-spacer></v-spacer>
-                      <v-btn small color="error" :loading="unsubloadingId === item[0]" depressed class="text-caption" @click="disenrollFCM(item[0])"><v-icon small>mdi-bell-off-outline</v-icon><span>구독해제</span></v-btn>
-                      </v-list-item>
-                      <v-list-item v-if="devices.length === 0">
-                          <div class="text-caption error--text pa-0 ma-0">구독된 기기가 없습니다.</div>
-                      </v-list-item>
-                    </v-list>
-                    <v-icon>mdi-alram</v-icon>
-                  </div>
-                  <div class="text-caption pl-5 pt-3">Option</div>
-                  <v-divider class="my-3"></v-divider>
-                  <div>
-                    <v-btn
-                    width="105"
-                    depressed
-                    dark
-                    v-if="!$vuetify.theme.dark"
-                    class="text-capitalize text-caption pa-0 ma-0 px-1"
-                    @click="toggleDarkTheme()">
-                      <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
-                      <span>Dark Theme</span>
-                    </v-btn>
-                    <v-btn v-else
-                    depressed
-                    light
-                    width="105"
-                    class="text-capitalize text-caption pa-0 ma-0 px-1"
-                    @click="toggleDarkTheme()">
-                      <v-icon color="red">mdi-weather-sunny</v-icon>
-                      <span>Light Theme</span>
-                    </v-btn>
-                  </div>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </v-dialog>
           <router-link class="d-flex" :to="{name: 'Home'}">
             <v-img
               class="shrink mr-1"
@@ -237,7 +237,6 @@ export default {
       unsubloadingId:'',
       devices:[],
       fcmToken:'',
-      isListed:false,
       navi:'',
       deviceName:'',
       deviceRules:{
@@ -249,6 +248,7 @@ export default {
   methods: {
     ...mapMutations({
       changeDrawer: 'SET_Drawer',
+      changeIsListed: 'SET_isListed',
     }),
     deviceLogo(element){
       if(element === 'Chrome'){
@@ -310,7 +310,7 @@ export default {
         'Content-Type':'application/json',
       }).then((res) => {
         if(fcmToken === this.fcmToken){
-          this.isListed = false;
+          this.changeIsListed(false);
         };
         this.unsubloadingId = '';
       })
@@ -334,9 +334,11 @@ export default {
   computed: {
     ...mapState({
       drawer: 'drawer',
+      isListed: 'isListed',
     }),
     isIOS(){
-      if(this.navi === 'iPad' || this.nav === 'iPhone' || this.navi === 'Safari'){
+      const upper = this.navi.toUpperCase();
+      if(upper === 'IPAD' || upper === 'IPHONE' || upper === 'SAFARI'){
         return true;
       } else {
         return false;
@@ -377,11 +379,10 @@ export default {
           if(sn.val() !== null){
             const item = sn.val();
             this.devices = Object.entries(item);
-            if(item[this.fcmToken] !== undefined){
-              this.isListed = true;
+            if(item[this.fcmToken]){
+              this.changeIsListed(true);
             }
           }else {
-            this.isListed = false;
             this.devices = [];
           }
         })
@@ -397,9 +398,6 @@ export default {
 .v-toolbar__extension{
   padding-top: 0px !important;
 }
-// .v-text-field__details{
-//   display: none;
-// }
 #app-bar{
   position: absolute;
   top: 0;
@@ -408,49 +406,38 @@ export default {
 }
 .v-dialog.drawer{
   border-radius: 5px;
-  margin: 24px;
   overflow-y: auto;
   pointer-events: auto;
   transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   width: 100%;
+  height:inherit;
   z-index: inherit;
   box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
 }
 .v-dialog--fullscreen.drawer{
   border-radius: 5px;
-  margin: 0;
-  height: 70%;
   position: fixed;
-  overflow-y: auto;
-  top: 30%;
+  top: 30vh;
+  height: 70vh;
   left: 15%;
   width: 40%;
 }
-@media screen and (max-width: 1264px) {
+@media screen and (min-width: 600px) and (max-width: 1264px) {
   .v-dialog--fullscreen.drawer{
-  border-radius: 5px;
-  margin: 0;
-  height: 70%;
-  position: fixed;
-  overflow-y: auto;
-  top: 30%;
-  left: 10px;
-  width: 70%;
+    border-radius: 5px;
+    top: 10vh;
+    height:90vh;
+    left: 10px;
+    width: 70%;
+  }
 }
-
-}
-
-
 @media screen and (max-width: 600px){
-  .v-dialog--fullscreen.drawer{
-  margin: 0;
-  height: 100%;
-  position: fixed;
-  overflow-y: auto;
-  top: 60px;
-  left: 0;
-  width: 100%;
-}
+    .v-dialog--fullscreen.drawer{
+    top: 60px;
+    left: 0;
+    height:95vh;
+    width: 100%;
+  }
 }
 .appbar-text:hover{
   color: var(--twitch-color);

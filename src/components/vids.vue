@@ -56,7 +56,7 @@
         </div>
         <div class="d-flex align-baseline pt-1 text-caption">
           <span>({{setDate(item.data.created_at)}})  [{{getDurationTime(item.data.duration)}}]</span>
-          <span v-if="item.data.is_live" class="pl-1 red--text text-caption"><v-icon  color="error" small class="px-1">mdi-circle</v-icon>{{item.data.viewer_count}}</span>
+          <span v-if="item.data.is_live" class="pl-1 red--text text-caption"><v-icon  color="error" small class="px-1">mdi-circle</v-icon>{{item.data.viewer_count | commaCase}}</span>
           <v-spacer></v-spacer>
         </div>
       </div>

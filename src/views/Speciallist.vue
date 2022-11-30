@@ -6,7 +6,7 @@
     </div>
     <div class="d-flex align-center py-1">
         <span class="text-title-1 pr-3">
-        <v-icon >mdi-playlist-play</v-icon>{{ cliplist.clipCount }}</span>
+        <v-icon >mdi-playlist-play</v-icon>{{ cliplist.clipCount }}({{100 - cliplist.clipCount}})</span>
         <span class="text-title-1">
           <v-btn small icon @click="likeCliplist()" :disabled="likeLoading">
             <v-icon :color="liked ? 'twitch' : ''" class="pb-1">{{liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'}}</v-icon>
@@ -322,8 +322,9 @@ export default {
           }
         }
         await this.getTwitchClipData(item.clipIds);
-        if(item.thumbnail_url !== this.tempArr[0].thumbnail_url){
+        if(item.thumbnail_url !== this.tempArr[0].thumbnail_url || this.tempArr.length !== item.clipCount){
           docRef.update({
+            clipCount: this.tempArr.length,
             thumbnail_url: this.tempArr[0].thumbnail_url
           });
         }

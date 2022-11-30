@@ -21,7 +21,6 @@ exports.twitchTokenValidation = functions.region('asia-northeast3').https.onRequ
 
 exports.twitchOauthToken = functions.region('asia-northeast3').https.onRequest(require('./auth/twitchOAuthToken.js'));
 
-// exports.twitchLiveClips = functions.region('asia-northeast3').https.onRequest(require('./twitch/clips.js'));
 
 exports.twitchWebHook = functions.region('asia-northeast3').https.onRequest(require('./twitch/webhook.js'));
 

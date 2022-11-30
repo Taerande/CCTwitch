@@ -156,10 +156,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.v-progress-circular {
-  margin: 1rem;
-}
-
 .v-card--reveal {
   align-items: center;
   bottom: 0;
@@ -167,11 +163,5 @@ export default {
   justify-content: center;
   position: absolute;
   width: 100%;
-}
-.v-card:hover{
-  z-index: 3;
-  transition: all ease 0.2s 0s;
-  transform: scale(1.1) !important;
-  box-shadow: 5px 5px 0 var(--twitch-color);
 }
 </style>

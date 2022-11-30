@@ -1,39 +1,53 @@
 <template>
   <v-container v-if="userInfo" fluid>
-    <v-row class="py-5">
-      <span class="text-h3 font-weight-bold pr-3">Channel | {{userInfo.data.display_name}}</span>
+    <v-row class="py-5 col-12">
+      <span class="text-h3 text-truncate font-weight-bold pr-3">Channel | {{userInfo.data.display_name}}</span>
     </v-row>
     <v-divider></v-divider>
-    <v-row class="pt-5 align-center">
-      <v-row v-if="userInfo">
-        <v-badge
+    <v-row class="col-12 d-flex pt-5 align-center text-truncate">
+      <div class="d-flex align-center py-3 text-truncate">
+        <div class="d-flex align-baseline mx-2">
+          <v-badge
           v-if="userInfo.data.broadcaster_type == 'partner'"
           bordered
           color="rgb(119,44,232)"
           icon="mdi-check"
           overlap
         >
-          <v-avatar size="80">
+          <v-avatar :size="$vuetify.breakpoint.smAndDown ? 48 : 80">
             <v-img
               :src="userInfo.data.profile_image_url"
               alt="profile_img"
             ></v-img>
           </v-avatar>
         </v-badge>
-        <v-avatar size="80" v-else>
+        <v-avatar :size="$vuetify.breakpoint.smAndDown ? 48 : 80" v-else>
           <v-img
             :src="userInfo.data.profile_image_url"
             alt="profile_img"
           ></v-img>
         </v-avatar>
-        <div class="d-flex flex-column justify-center pl-5">
-          <div class="d-flex align-baseline">
-            <span class="text-h5">{{ userInfo.data.display_name }}</span>
-            <span class="px-1">({{userInfo.data.login}})</span>
-            <span class="grey--text pl-1"
-              >{{ kFormatter(userInfo.data.follower_count) }}
-            </span>
-            <span v-if="dataLoading">
+        </div>
+        <div class="pl-2 text-truncate">
+          <span>
+            {{userInfo.data.display_name}} ({{userInfo.data.login}})
+          </span>
+          <span class="grey--text text-caption">
+            {{ kFormatter(userInfo.data.follower_count) }}
+          </span>
+          <div class="d-flex align-center pa-0 ma-0">
+            <div v-if="userInfo.is_live">
+              <v-icon color="red" small>mdi-circle</v-icon>
+              <span class="red--text text-body-2 pa-1">LIVE</span>
+              <span class="red--text text-caption">
+                {{ userInfo.viewer_count | commaCase }}
+              </span>
+            </div>
+            <div v-else>
+              <v-icon color="blue" small>mdi-circle</v-icon>
+              <span class="blue--text text-body-2 pa-1">OFF</span>
+            </div>
+            <span v-if="dataLoading" class="px-1">
               <v-btn
                 v-if="
                   $store.state.likedStreamer.find(
@@ -41,6 +55,7 @@
                   )
                 "
                 icon
+                small
                 @click="
                   deleteFav({
                     index: $store.state.likedStreamer.findIndex(
@@ -55,6 +70,7 @@
               <v-btn
                 v-else
                 icon
+                small
                 @click="
                   like({
                     id: userInfo.data.id,
@@ -67,93 +83,92 @@
               >
                 <v-icon>mdi-star</v-icon>
               </v-btn>
-              <v-btn v-if="isSubscribe" :disabled="subsLoading" color="twitch" @click="unsubNotification(userInfo.data.id)" icon><v-icon>mdi-bell</v-icon></v-btn>
-              <v-btn v-else :disabled="subsLoading" icon @click="subNotification(userInfo.data.id)"><v-icon>mdi-bell</v-icon></v-btn>
+              <v-badge
+              overlap
+              borderd
+              offset-x="20"
+              offset-y="20"
+              icon="mdi-exclamation-thick"
+              :value="badge"
+              color="error"
+              >
+                <v-btn v-if="isSubscribe" :disabled="subsLoading" color="twitch" @click="unsubNotification(userInfo.data.id)" icon><v-icon>mdi-bell</v-icon></v-btn>
+                <v-btn v-else :disabled="subsLoading" icon @click="subNotification(userInfo.data.id)"><v-icon>mdi-bell</v-icon></v-btn>
+              </v-badge>
             </span>
-          </div>
-          <div v-if="userInfo.is_live">
-            <v-icon color="red" small>mdi-circle</v-icon>
-            <span class="red--text text-body-2 pa-1">LIVE</span>
-            <span class="red--text text-caption">
-              {{ userInfo.viewer_count | commaCase }}
-            </span>
-          </div>
-          <div v-else>
-            <v-icon color="blue" small>mdi-circle</v-icon>
-            <span class="blue--text text-body-2 pa-1">OFF</span>
           </div>
         </div>
-        <v-dialog
-          height="100%"
-          scrollable
-          max-width="90%"
-          :content-class="$vuetify.breakpoint.smAndUp ? '' : 'clipIframe'"
-          v-model="dialog"
-        >
-          <v-card>
-            <v-card-title class="twitch">
-              <span class="text-h5 white--text"
-                >{{ userInfo.data.display_name }}님의 Archive</span
-              >
-            </v-card-title>
-            <v-card-text class="pa-0 ma-0">
-              <div class="d-flex justify-center align-center pa-3" v-if="vidLists.length > 0">
-                <span>
-                  {{$moment(vidLists[vidLists.length-1].data.created_at).format('ll')}} ~
-                  {{$moment(vidLists[0].data.created_at).format('ll')}}
-                </span>
-              </div>
-              <v-container class="pa-0 mx-auto">
-                <v-row class="align-center">
-                  <v-col
-                    @click="changeCarsouelId(index)"
-                    class="d-flex vid-list-item text-truncate pa-1 align-center"
-                    cols="12"
-                    xl="3"
-                    lg="4"
-                    md="4"
-                    sm="6"
-                    xs="12"
-                    v-for="(item, index) in vidLists"
-                    :key="index"
-                  >
-                  <v-responsive :aspect-ratio="16/9" height="100%">
-                    <v-img
-                      :max-width="imgWidth"
-                      :src="
-                        item.data.thumbnail_url ||
-                        '@/assets/img/404.jpg'
-                      "
-                      lazy-src="@/assets/img/404.jpg"
-                    >
-                    </v-img>
-                  </v-responsive>
-                    <div class="pl-2 text-truncate" style="width:inherit">
-                      <div class="text-truncate">{{ item.data.title }}</div>
-                      <div class="text-caption d-flex align-center">
-                        <v-icon class="pr-1" x-small>mdi-eye</v-icon>
-                        {{ item.data.view_count === -1 ? 'No Archive' : item.data.view_count | commaCase }}
-                      </div>
-                      <div class="text-caption">
-                        {{ item.data.duration | getDurationTime}}
-                      </div>
-                      <div class="text-caption">{{ $moment(item.data.created_at).format('ll') }}</div>
-                    </div>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="error" text class="text-caption" @click="dialog = false">Close</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-row>
+      </div>
     </v-row>
     <v-row class="d-flex pt-3 align-baseline">
       {{ userInfo.data.description }}
     </v-row>
+    <v-dialog
+      height="100%"
+      scrollable
+      max-width="90%"
+      :content-class="$vuetify.breakpoint.smAndUp ? '' : 'clipIframe'"
+      v-model="dialog"
+    >
+      <v-card>
+        <v-card-title class="twitch">
+          <span class="text-h5 white--text"
+            >{{ userInfo.data.display_name }}님의 Archive</span
+          >
+        </v-card-title>
+        <v-card-text class="pa-0 ma-0">
+          <div class="d-flex justify-center align-center pa-3" v-if="vidLists.length > 0">
+            <span>
+              {{$moment(vidLists[vidLists.length-1].data.created_at).format('ll')}} ~
+              {{$moment(vidLists[0].data.created_at).format('ll')}}
+            </span>
+          </div>
+          <v-container class="pa-0 mx-auto">
+            <v-row class="align-center">
+              <v-col
+                @click="changeCarsouelId(index)"
+                class="d-flex vid-list-item text-truncate pa-1 align-center"
+                cols="12"
+                xl="3"
+                lg="4"
+                md="4"
+                sm="6"
+                xs="12"
+                v-for="(item, index) in vidLists"
+                :key="index"
+              >
+              <v-responsive :aspect-ratio="16/9" height="100%">
+                <v-img
+                  :max-width="imgWidth"
+                  :src="
+                    item.data.thumbnail_url ||
+                    '@/assets/img/404.jpg'
+                  "
+                  lazy-src="@/assets/img/404.jpg"
+                >
+                </v-img>
+              </v-responsive>
+                <div class="pl-2 text-truncate" style="width:inherit">
+                  <div class="text-truncate">{{ item.data.title }}</div>
+                  <div class="text-caption d-flex align-center">
+                    <v-icon class="pr-1" x-small>mdi-eye</v-icon>
+                    {{ item.data.view_count === -1 ? 'No Archive' : item.data.view_count | commaCase }}
+                  </div>
+                  <div class="text-caption">
+                    {{ item.data.duration | getDurationTime}}
+                  </div>
+                  <div class="text-caption">{{ $moment(item.data.created_at).format('ll') }}</div>
+                </div>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" text class="text-caption" @click="dialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <SortButton
       @changeSort="changeSort"
       @openVidsListDialog="openVidsListDialog"
@@ -427,13 +442,19 @@ export default {
         starCountRef.on('value', (snapshot) => {
           this.isSubscribe = snapshot.val();
         });
-      } else {
-        this.isSubscribe = false;
       }
     },
     async subNotification(broadcaster_id){
+      if(!this.$store.state.isListed){
+        this.$store.commit('SET_SnackBar',{type:'error',text:'현재 기기는 등록되지 않은 상태로 알람이 가지 않습니다.',value:true});
+      }
       if(this.$store.state.userinfo.userInfo){
         this.subsLoading = true;
+        await this.$firertdb.ref(`/notification/${broadcaster_id}`).get().then( async (sn) => {
+          if(!sn.exists()){
+            this.subscribe(broadcaster_id);
+          }
+        });
         await this.$firertdb.ref(`/notification/${broadcaster_id}/subscribers`).update({
           [this.$store.state.userinfo.userInfo.uid] : true
         }).then(() => {
@@ -475,7 +496,6 @@ export default {
           'Content-Type':'application/json',
         }
         ).then((res) => {
-          console.log(res);
           error = res.data.error;
         });
         if(error !== undefined){
@@ -493,7 +513,14 @@ export default {
     }
   },
   computed:{
-     imgHeight(){
+    badge(){
+      if(!this.$store.state.userinfo.userInfo){
+        return false;
+      }else{
+        return !this.$store.state.isListed
+      }
+    },
+    imgHeight(){
       if(this.$vuetify.breakpoint.mobile){
         return `${285*9/16+50}`;
       } else {

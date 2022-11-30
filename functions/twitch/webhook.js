@@ -68,7 +68,7 @@ function verifySignature(messageSignature, messageID, messageTimestamp, body) {
 
     return expectedSignatureHeader === messageSignature
 }
-function sendNotification(name, title, category, live, subscribers, profileImg){
+function sendNotification(name, title, category, live, subscribers, userInfo){
   Object.keys(subscribers).map( async (v)=> {
     if(subscribers[v] === false){ return }
     const notification_key = await admin.database().ref(`/users/${v}/notification_key`).get().then((sn) => {
@@ -79,13 +79,13 @@ function sendNotification(name, title, category, live, subscribers, profileImg){
     axios.post('https://fcm.googleapis.com/fcm/send',
     {
       "data":{
-        "time": new Date(),
+        "title":`${name}님의 상태 (${live})`,
+        "body":`${title}\r\n| ${category}`,
+        "icon": userInfo.profile_image_url,
+        "time": Date.now(),
+        "tag": userInfo.id,
+        "image": live === 'LIVE' ? `https://static-cdn.jtvnw.net/previews-ttv/live_user_${userInfo.login}-356x200.jpg` : userInfo.offline_image_url.replace('1920x1080','356x200'),
       },
-      "notification":{
-          "title":`${name}님의 상태`,
-          "body":`Live:${live}\r\nTitle:${title}\r\nCategory:${category}`,
-          "icon": profileImg,
-          },
       "to" : notification_key,
       "direct_boot_ok" : true
     },
@@ -113,7 +113,45 @@ async function getAccessToken(){
     await getAccessToken();
   })
 };
-async function getUserProfileImg(user_id){
+async function isStream(user_id){
+  await getAccessToken();
+  return await axios.get('https://api.twitch.tv/helix/streams',{
+    headers:{
+      'Client-id': clientId,
+      Authorization: appAccessToken,
+      Accept: 'application/json',
+    },
+    params:{
+      user_id: user_id,
+    }
+  }).then( async (res) => {
+    if(res.data.data.length > 0){
+      return res.data.data[0];
+    }else{
+      const result = await getChannelInfo(user_id);
+      return {
+        type: null,
+        game_name: result.game_name,
+        title: result.title,
+      }
+    }
+  })
+};
+async function getChannelInfo(user_id){
+  return await axios.get('https://api.twitch.tv/helix/channels',{
+    headers:{
+      'Client-id': clientId,
+      Authorization: appAccessToken,
+      Accept: 'application/json',
+    },
+    params:{
+      broadcaster_id: user_id,
+    }
+  }).then((res) => {
+    return res.data.data[0];
+  })
+}
+async function getUserInfo(user_id){
   await getAccessToken();
   return await axios.get('https://api.twitch.tv/helix/users',{
     headers:{
@@ -125,10 +163,9 @@ async function getUserProfileImg(user_id){
       id: user_id,
     }
   }).then((res)=>{
-    return res.data.data[0].profile_image_url;
+    return res.data.data[0];
   })
 };
-
 app.post('/notification', async (req, res) => {
     if (!verifySignature(req.header("Twitch-Eventsub-Message-Signature"),
         req.header("Twitch-Eventsub-Message-Id"),
@@ -136,11 +173,18 @@ app.post('/notification', async (req, res) => {
         req.rawBody)) {
         res.status(403).send("Forbidden") // Reject requests with invalid signatures
     } else {
-        if (req.header("Twitch-Eventsub-Message-Type") === "webhook_callback_verification") {
+      if (req.header("Twitch-Eventsub-Message-Type") === "webhook_callback_verification") {
+            const streamData = await isStream(req.body.subscription.condition.broadcaster_user_id);
+            await admin.database().ref(`/notification/${req.body.subscription.condition.broadcaster_user_id}`).update({
+              type: streamData.type,
+              category_name: streamData.game_name,
+              title: streamData.title,
+              broadcaster_user_id: req.body.subscription.condition.broadcaster_user_id
+            });
             res.send(req.body.challenge) // Returning a 200 status with the received challenge to complete webhook creation flow
 
         } else if (req.header("Twitch-Eventsub-Message-Type") === "notification") {
-          const profile_image_url = await getUserProfileImg(req.body.event.broadcaster_user_id);
+          const userInfo = await getUserInfo(req.body.event.broadcaster_user_id);
           const info = await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}`).get().then((sn) => {
             if(sn.exists){
               return sn.val();
@@ -151,24 +195,22 @@ app.post('/notification', async (req, res) => {
           if(req.body.subscription.type === 'channel.update'){
             await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}`).update(req.body.event);
             let isLive;
-            if(info.isStream === undefined){
-              isLive = 'OFF'
-            } else if(info.isStream.type === undefined){
-              isLive = 'OFF'
-            } else {
+            if(info.type === 'live'){
               isLive = 'LIVE'
+            } else {
+              isLive = 'OFF'
             }
             if(info.subscribers !== undefined){
-              sendNotification(info.broadcaster_user_name, req.body.event.title, req.body.event.category_name, isLive , info.subscribers, profile_image_url);
+              sendNotification(req.body.event.broadcaster_user_name, req.body.event.title, req.body.event.category_name, isLive , info.subscribers, userInfo);
             };
           } else if ( req.body.subscription.type === 'stream.online'){
-            await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}/isStream`).set(req.body.event)
+            await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}`).update(req.body.event)
             let isLive = 'LIVE';
             if(info.subscribers !== undefined){
-              sendNotification(info.broadcaster_user_name, info.title, info.category_name, isLive , info.subscribers, profile_image_url);
+              sendNotification(req.body.event.broadcaster_user_name, info.title, info.category_name, isLive , info.subscribers, userInfo);
             }
           } else if ( req.body.subscription.type === 'stream.offline'){
-            await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}/isStream`).set(req.body.event);
+            await admin.database().ref(`/notification/${req.body.event.broadcaster_user_id}`).update({type:''});
           }
           res.send("") // Default .send is a 200 status
         }

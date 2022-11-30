@@ -36,17 +36,23 @@ module.exports = {
   ],
   pwa:{
     manifestOptions:{
-      "background_color": "#ffffff",
+      "background_color": "#9ea8da",
       "description": "Twitch Clip Download, Search and Collect easily. CCTwitch provide various sort of clips by keyword, date, vids. Also can save, download clips. CCTwitch는 트위치 클립 검색, 다운, 저장 및 다양한 정렬을 제공합니다.",
       "dir": "ltr",
       "display": "standalone",
-      "name": "CCTwitch - Clip Collector",
+      "name": "CCTwitch - Twitch Clip Collector",
       "orientation": "portrait",
       "scope": "/",
       "short_name": "CCTwitch",
       "start_url": "/",
       "theme_color": "#9ea8da",
       "icons": [
+        {
+          "src": "/img/icons/monochrome_96x96_reverse.png",
+          "type": "image/png",
+          "sizes": "96x96",
+          "purpose": "monochrome",
+        },
         {
           "src": "/img/icons/100x100.png",
           "type": "image/png",

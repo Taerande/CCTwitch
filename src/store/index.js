@@ -9,6 +9,7 @@ export default new Vuex.Store({
   state: {
     signInDialog: false,
     drawer: false,
+    isListed: false,
     backendUrl: process.env.VUE_APP_BACKEND_URL_DEV,
     appTokenURL:process.env.VUE_APP_TWITCH_APPTOKEN_ISSUE_DEV,
     redirectUri:process.env.VUE_APP_TWITCH_REDIRECTURI_DEV,
@@ -169,6 +170,9 @@ export default new Vuex.Store({
       const title = response.target.title.length > 25 ? `${response.target.title.substr(0, 24)}...` : response.target.title;
       this.commit('SET_SnackBar', { type: 'error', text: `Clip : ${title}가 삭제되었습니다.`, value: true });
     },
+    SET_isListed(state, payload){
+      state.isListed = payload
+    }
   },
   actions: {
     async setNewTwitchAppToken({ commit, state }){

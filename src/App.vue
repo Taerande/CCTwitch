@@ -1,7 +1,7 @@
 <template>
-  <v-app v-if="$store.state.firebaseLoaded && initData">
+  <v-app>
     <AppBar app></AppBar>
-    <v-main app>
+    <v-main app v-if="$store.state.firebaseLoaded && initData">
       <ins class="adsbygoogle"
       v-if="$vuetify.breakpoint.lgAndUp"
      style="display:inline-block;width:160px;height:600px;position:fixed;top:15%;"
@@ -17,10 +17,7 @@
       <router-view class="pt-10" :key="$route.fullPath" />
       <SnackBar app></SnackBar>
     </v-main>
-    <Footer app></Footer>
-  </v-app>
-  <v-app v-else>
-    <v-main app>
+    <v-main app v-else>
       <v-row class="d-block absolute-center">
         <div class="d-flex justify-center">
           <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
@@ -30,6 +27,7 @@
       </div>
       </v-row>
     </v-main>
+    <Footer app></Footer>
   </v-app>
 </template>
 <script>
@@ -49,11 +47,6 @@ export default {
     return {
       initData: false,
     }
-  },
-  methods: {
-    searchBarToggle() {
-      this.$store.commit('TOGGLE_SearchBar')
-    },
   },
  async created() {
     document.documentElement.setAttribute('lang', navigator.language.split('-')[0]);
@@ -118,7 +111,6 @@ html,
 body {
   height: 100vh !important;
   box-sizing: border-box;
-  font-family: 'Noto Sans KR', sans-serif;
 }
 #app {
   font-family: 'Noto Sans KR', sans-serif;
@@ -200,7 +192,6 @@ html.overflow-y-hidden{
   #bookmark {
     display: none;
   }
-
   .table-duration,
   .table-date {
     display: none;
@@ -208,7 +199,7 @@ html.overflow-y-hidden{
 }
 @media screen and (max-width: 600px) {
   html{
-    font-size: 90%;
+    font-size: 80%;
   }
   header {
     padding-left: 3px;

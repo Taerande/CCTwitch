@@ -9,8 +9,8 @@ const app2 = admin.initializeApp({
 
 const firebaseStreamData = admin.database(app2);
 const clientId = process.env.TWITCH_CLIENT_ID;
-let appAccessToken;
 const clientSecret = process.env.TWITCH_CLIENT_SECRET;
+let appAccessToken;
 
 let cursor;
 let treemap = {
