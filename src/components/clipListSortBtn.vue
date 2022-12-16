@@ -5,6 +5,7 @@
     <v-icon>
       mdi-sort
     </v-icon>
+    {{sortType[model].text}}
     </v-btn>
   </template>
   <v-list class="text-caption">
@@ -23,7 +24,6 @@
 </template>
 <script>
 export default {
-  props:['data'],
   data() {
     return {
       model:0,
@@ -39,11 +39,11 @@ export default {
   },
   methods: {
     sortEmit(el){
-      if(this.model !== undefined){
-        this.$emit('sortCliplist',el);
-      } else {
-        this.$emit('sortCliplist',this.sortType[0].actions);
-      }
+      this.$emit('sortCliplist',el);
+      // if(this.model !== undefined){
+      // } else {
+      //   this.$emit('sortCliplist',this.sortType[0].actions);
+      // }
     }
   },
 }

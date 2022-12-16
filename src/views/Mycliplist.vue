@@ -6,11 +6,19 @@
     <AddNewCliplistDialog v-if="$store.state.userinfo.userInfo" :type="{type:'add'}"></AddNewCliplistDialog>
   </v-row>
   <v-divider></v-divider>
+  <v-row class="py-1">
+    <v-spacer></v-spacer>
+    <div>
+      <clipListSortBtnVue v-if="(tabModel === 0)" :data="cliplist" @sortCliplist="sortCliplist"></clipListSortBtnVue>
+      <clipListSortBtnVue v-else-if="(tabModel === 1)" :data="likedCliplist" @sortCliplist="sortlLkedCliplist"></clipListSortBtnVue>
+    </div>
+  </v-row>
   <v-row v-if="loading" class="absolute-center">
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
-  <v-row class="d-flex pt-5" v-else>
+  <v-row class="d-flex" v-else>
     <v-tabs
+      v-model="tabModel"
       color="twitch"
       >
         <v-tab class="text-capitalize">
@@ -22,11 +30,7 @@
           <span>Liked</span>
         </v-tab>
         <v-tab-item>
-          <v-row class="d-flex align-center pt-3">
-            <v-spacer></v-spacer>
-            <clipListSortBtnVue :data="cliplist" @sortCliplist="sortCliplist"></clipListSortBtnVue>
-          </v-row>
-          <v-row v-if="cliplist.length >0">
+          <v-row v-if="(cliplist.length >0 && !loading)">
               <v-col cols="12" xl="3" lg="4" md="4" sm="6" class="pa-3" v-for="(item,index) in cliplist" :key="item.id+index">
                 <CliplistDefaultVue :item="item" :type="'mycliplist'"></CliplistDefaultVue>
               </v-col>
@@ -41,11 +45,7 @@
           </v-row>
         </v-tab-item>
         <v-tab-item>
-            <v-row class="pt-3">
-            <v-spacer></v-spacer>
-            <clipListSortBtnVue :data="likedCliplist" @sortCliplist="sortlLkedCliplist"></clipListSortBtnVue>
-          </v-row>
-          <v-row v-if="likedCliplist.length > 0">
+          <v-row v-if="(likedCliplist.length > 0 && !loading)">
               <v-col cols="12" xl="3" lg="4" md="4" sm="6" class="pa-3" v-for="(item,index) in likedCliplist" :key="item.id+index">
                 <CliplistDefaultVue :item="item" :type="'mycliplist'"></CliplistDefaultVue>
               </v-col>
@@ -66,7 +66,7 @@
 
 <script>
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog';
-import { last } from 'lodash';
+import last from 'lodash/last';
 import CliplistDefaultVue from '@/components/CliplistDefault.vue';
 import clipListSortBtnVue from '@/components/clipListSortBtn.vue';
 
@@ -79,6 +79,7 @@ export default {
   },
   data() {
     return {
+      tabModel:0,
       lastVisible: null,
       likedLastVisible: null,
       cliplist: [],
@@ -106,13 +107,14 @@ export default {
       this.sort = el.text;
       this.order.data = el.actions.data;
       this.order.sort = el.actions.sort;
-      this.cliplist = [];
-      this.lastVisible = null;
+      this.likedCliplist = [];
+      this.likedLastVisible = null;
       await this.getMoreDataLiked();
     },
     async getMoreDataCreated(){
       this.dataLoading = true;
-      this.loading = this.lastVisible ? false : true;
+      this.loading = true;
+      if(this.cliplist.length === 0) {this.lastVisible = null};
       const sn = this.lastVisible ? await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('authorId','==',this.$store.state.userinfo.userInfo.uid).startAfter(this.lastVisible).limit(24).get() : await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('authorId','==',this.$store.state.userinfo.userInfo.uid).limit(24).get();
 
 
@@ -138,15 +140,15 @@ export default {
           viewCount: item.viewCount,
           likeCount: item.likeCount,})
         })
-      }else {
-        this.$store.commit('SET_SnackBar',{type:'error', text:`No More Data`, value:true});
       }
       this.dataLoading = false;
       this.loading = false;
     },
     async getMoreDataLiked(){
       this.dataLoading = true;
-      const sn = await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('likeUids','array-contains',this.$store.state.userinfo.userInfo.uid).startAfter(this.likedLastVisible).limit(24).get()
+      this.loading = true;
+      if(this.likedCliplist.length === 0) {this.likedLastVisible = null};
+      const sn = this.likedLastVisible ? await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('likeUids','array-contains',this.$store.state.userinfo.userInfo.uid).startAfter(this.likedLastVisible).limit(24).get() : await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('likeUids','array-contains',this.$store.state.userinfo.userInfo.uid).limit(24).get();
       if(sn.docs.length === 24){
           this.likedLastVisible = last(sn.docs);
         } else {
@@ -155,7 +157,7 @@ export default {
       if(sn.docs.length > 0){
         sn.docs.forEach(async (el) => {
           const item = el.data();
-          this.cliplist.push({
+          this.likedCliplist.push({
           id: el.id,
           title: item.title,
           createdAt: item.createdAt.toDate(),
@@ -169,13 +171,20 @@ export default {
           viewCount: item.viewCount,
           likeCount: item.likeCount,})
           })
-        }else {
-          this.$store.commit('SET_SnackBar',{type:'error', text:`No More Data`, value:true});
         }
         this.dataLoading = false;
+        this.loading = false;
     },
   },
-  computed:{
+  watch:{
+    async tabModel(newData){
+      if(newData === 0 ){
+        this.cliplist = [];
+        return await this.getMoreDataCreated()}
+      if(newData === 1){
+        this.likedCliplist = [];
+        return await this.getMoreDataLiked()}
+    }
   },
   created(){
     document.title = 'My Cliplists - CCTWITCH';
@@ -206,29 +215,6 @@ export default {
         this.cliplist.sort((b,a) => {
           return a.createdAt - b.createdAt;
         })
-      const sn = await this.$firestore.collection('cliplist').orderBy(this.order.data, this.order.sort).where('likeUids','array-contains',this.$store.state.userinfo.userInfo.uid).limit(24).get();
-      if(sn.docs.length === 24){
-          this.likedLastVisible = last(sn.docs);
-        } else {
-          this.likedLastVisible = null;
-        }
-      if(sn.empty){
-        this.likedCliplist = []
-        this.loading = false;
-        return
-      }
-      sn.docs.forEach((doc) => {
-        const exists = this.likedCliplist.some(item => doc.id === item.id)
-        if(!exists){
-          const item = doc.data();
-          item.id= doc.id;
-          item.createdAt= item.createdAt.toDate();
-          this.likedCliplist.push(item)
-        }
-      })
-      this.likedCliplist.sort((b,a) => {
-        return a.createdAt - b.createdAt;
-      })
     }
     this.loading = false;
 

@@ -99,7 +99,8 @@
 
 <script>
 
-import { last, head } from 'lodash';
+import last from 'lodash/last';
+import head from 'lodash/head';
 import InArticleAdContainerVue from '../components/InArticleAdContainer.vue';
 
 export default {

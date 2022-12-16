@@ -552,18 +552,25 @@ export default {
     }
   },
   methods: {
-    async getClips(el){
+    async getClips(el) {
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/clips',
+          params: {
+            first: 100,
+            broadcaster_id: el,
+            started_at: new Date(this.streamLineChartOptions.labels[0]).toISOString(),
+            ended_at: new Date(this.streamLineChartOptions.labels[this.streamLineChartOptions.labels.length - 1]).toISOString(),
+          },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
       this.streamerClips = [];
       this.clipLoading = true;
-      await axios.get('https://api.twitch.tv/helix/clips',{
-        params:{
-          first:100,
-          broadcaster_id:el,
-          started_at:new Date(this.streamLineChartOptions.labels[0]).toISOString(),
-          ended_at:new Date(this.streamLineChartOptions.labels[this.streamLineChartOptions.labels.length - 1]).toISOString(),
-        },
-        headers:this.$store.state.headerConfig
-      }).then((res) => {
+      await axios(axiosOption).then((res) => {
         this.streamerClips = res.data.data;
         this.clipLoading = false;
       }).catch(async (e) => {
@@ -895,17 +902,24 @@ export default {
       this.overallLoading = true;
       this.loading = true;
     },
-    async getHotClips(game_id){
-      await axios.get('https://api.twitch.tv/helix/clips',{
-        params:{
-          game_id: game_id,
-          started_at: this.$moment(`20${this.date}`).add(7,'hours').toISOString(),
-          ended_at: this.$moment(`20${this.date}`).add(31,'hours').toISOString(),
-          first:100,
-          after:this.afterCursor
-        },
-        headers:this.$store.state.headerConfig
-      }).then( async (res) => {
+    async getHotClips(game_id) {
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/clips',
+          params: {
+            game_id: game_id,
+            started_at: this.$moment(`20${this.date}`).add(7, 'hours').toISOString(),
+            ended_at: this.$moment(`20${this.date}`).add(31, 'hours').toISOString(),
+            first: 100,
+            after: this.afterCursor
+          },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
+      await axios(axiosOption).then( async (res) => {
         this.afterCursor = res.data.pagination.cursor;
         res.data.data.forEach((el) => {
           if(el.language === 'ko' && el.view_count > 99){

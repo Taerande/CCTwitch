@@ -17,22 +17,23 @@ const firstore = admin.firestore();
 
 exports.twitchAuth = functions.region('asia-northeast3').https.onRequest(require('./auth/twitchAuth.js'));
 
+exports.clipDownload = functions.region('asia-northeast2').https.onRequest(require('./twitch/clipDownload.js'));
+
+exports.clipDownloadTest = functions.region('asia-northeast2').https.onRequest(require('./twitch/clipDownloadTest.js'));
+
+// exports.gotStream = functions.region('asia-northeast2').https.onRequest(require('./twitch/gotStream.js'));
+
 exports.twitchTokenValidation = functions.region('asia-northeast3').https.onRequest(require('./auth/twitchAppAccessToken.js'));
 
 exports.twitchOauthToken = functions.region('asia-northeast3').https.onRequest(require('./auth/twitchOAuthToken.js'));
 
+exports.getTwitchData = functions.region('asia-northeast2').https.onRequest(require('./twitch/getData.js'));
 
 exports.twitchWebHook = functions.region('asia-northeast3').https.onRequest(require('./twitch/webhook.js'));
 
-exports.weeklyWaktaverse = functions.region('asia-northeast3').https.onRequest(require('./twitch/waktaverse.js'));
+exports.weeklyWaktaverse = functions.region('asia-northeast2').https.onRequest(require('./twitch/waktaverse.js'));
 
-exports.timeLine = functions.region('asia-northeast3') .runWith({
-  // Ensure the function has enough memory and time
-  // to process large files
-  timeoutSeconds: 540,
-  memory: "1GB",
-})
-.https.onRequest(require('./twitch/timeLine.js'));
+exports.timeLine = functions.region('asia-northeast2').runWith({timeoutSeconds: 540,memory: "1GB",}).https.onRequest(require('./twitch/timeLine.js'));
 
 exports.fcm = functions.region('asia-northeast3').https.onRequest(require('./fcm/cloudMessaging.js'));
 
@@ -76,7 +77,7 @@ exports.twitchStreamDataCollector = functions.region('asia-northeast3').runWith(
   .onRun(require('./twitch/dailyStreamAnalyze'));
 
 
-exports.createHotClip = functions.region('asia-northeast3').runWith({
+exports.createHotClip = functions.region('asia-northeast2').runWith({
   timeoutSeconds: 300,
   memory: "2GB",
 }).pubsub.schedule('5 7 * * *')

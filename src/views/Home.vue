@@ -119,11 +119,11 @@ export default {
         headers:this.$store.state.headerConfig,
         params:{
           language: navigator.language.split('-')[0],
-          first: 24,
+          first: 48,
           after: this.cursor,
         }
       }).then(res => {
-        this.streamingList = res.data.data
+        this.streamingList = res.data.data.splice(0, 24);
         this.cursor = res.data.pagination.cursor;
         this.dataLoading = false;
       }).catch(async (e) => {

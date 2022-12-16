@@ -114,7 +114,7 @@
   </v-container>
 </template>
 <script>
-import { last } from 'lodash'
+import last from 'lodash/last'
 
 export default {
   props:['hotclipComment','replyId'],

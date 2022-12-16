@@ -124,7 +124,7 @@
           <div class="d-flex justify-center align-center py-5">
             <InArticleAdsense
               data-ad-client="ca-pub-8597405222136575"
-              data-ad-slot="1875328416"
+              data-ad-slot="4194229053"
               data-ad-format="fluid"
               ins-style="display:inline-block;width:90%;min-width:266px;"
             ></InArticleAdsense>
@@ -138,7 +138,7 @@
 <script>
 import ClipIframeDialogVue from '../components/dialog/ClipIframeDialog.vue';
 import axios from 'axios';
-import { chunk } from 'lodash';
+import chunk from 'lodash/chunk';
 
 export default {
   components:{
@@ -190,7 +190,7 @@ export default {
       this.btnLoading = true;
       this.dbLoading = true;
       this.$store.commit('SET_SnackBar',{type:'info', text:'Timeline 생성은 1분 정도 소요됩니다.', value:true});
-      await axios.post(this.$store.state.backendUrl+'/timeLine/timeline',{
+      await axios.post('https://asia-northeast2-twitchhotclip.cloudfunctions.net/timeLine/timeline',{
         user_login: user_login,
         broadcaster_id: broadcaster_id,
         vidId: vidId,
@@ -209,13 +209,20 @@ export default {
         this.dbLoading = false;
       })
     },
-    async getVidInfo(el){
-      await axios.get('https://api.twitch.tv/helix/videos',{
-        headers: this.$store.state.headerConfig,
-        params:{
-          id:el,
+    async getVidInfo(el) {
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/videos',
+          params: {
+            id: el,
+          },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
         }
-      }).then((res) => {
+      }
+      await axios(axiosOption).then((res) => {
         this.vidInfo = res.data.data;
       }).catch( async (e) => {
           if(e.response.status === 401){
@@ -225,12 +232,19 @@ export default {
         });
     },
     async getClip(el){
-      await axios.get('https://api.twitch.tv/helix/clips',{
-        headers: this.$store.state.headerConfig,
-        params:{
-          id:el,
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/clips',
+          params: {
+            id: el,
+          },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
         }
-      }).then((res) => {
+      }
+      await axios(axiosOption).then((res) => {
         this.cliplist = res.data.data;
       }).catch( async (e) => {
           if(e.response.status === 401){

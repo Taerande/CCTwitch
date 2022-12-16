@@ -161,33 +161,6 @@ app.post('/timeline', async (req, res) => {
     })
   }
 
-  // async function getVidOffset(element){
-  //   if(!element.video_id){
-  //     return
-  //   }
-  //   const json = JSON.stringify(
-  //     {
-  //       operationName: "ClipsFullVideoButton",
-  //       variables: {
-  //         slug: element.id
-  //       },
-  //       extensions: {
-  //         persistedQuery: {
-  //           version: 1,
-  //           sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
-  //           }
-  //       }
-  //     })
-  //   await axios.post('https://gql.twitch.tv/gql',json, {
-  //     headers: {
-  //       'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
-  //     },
-
-  //   }).then((resp) => {
-  //     element.videoOffsetSeconds = resp.data.data.clip.videoOffsetSeconds;
-  //   })
-  //   }
-
   try{
     await sn.get().then( async (doc) => {
       if(doc.exists){

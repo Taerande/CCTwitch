@@ -10,7 +10,7 @@
       <v-col cols="12" class="d-flex justify-center" v-if="index&7 === 1">
         <InArticleAdsense
           data-ad-client="ca-pub-8597405222136575"
-          data-ad-slot="4393417523"
+          data-ad-slot="4194229053"
           data-ad-format="fluid"
           ins-style="display:block;text-align:center;"
         ></InArticleAdsense>
@@ -30,7 +30,7 @@
       <v-col cols="12" class="d-inline-block justify-center" v-if="chunk.length === 10">
         <InArticleAdsense
           data-ad-client="ca-pub-8597405222136575"
-          data-ad-slot="4393417523"
+          data-ad-slot="4194229053"
           data-ad-format="fluid"
           ins-style="display:block;text-align:center;"
         ></InArticleAdsense>
@@ -49,7 +49,7 @@
     <v-col cols="12" class="block justify-center" v-if="chunk.length === 10">
       <InArticleAdsense
           data-ad-client="ca-pub-8597405222136575"
-          data-ad-slot="4393417523"
+          data-ad-slot="4194229053"
           data-ad-format="fluid"
           ins-style="display:block;text-align:center;"
         ></InArticleAdsense>
@@ -62,7 +62,7 @@
 import ClipIframeDataTableDialog from '../dialog/ClipIframeDataTableDialog';
 import DeletedClipIframDialog from '../dialog/DeletedClipIframDialog';
 import draggable from 'vuedraggable'
-import { chunk } from 'lodash';
+import chunk from 'lodash/chunk';
 
 export default {
   props:['clipListData','tempArr'],

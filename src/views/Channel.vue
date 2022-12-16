@@ -282,16 +282,21 @@ export default {
       return hour+'h'+min+'m'+sec+'s';
     },
     async getVid(userId) {
-      await axios
-        .get('https://api.twitch.tv/helix/videos', {
-          headers: this.$store.state.headerConfig,
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/videos',
           params: {
             user_id: userId,
             first: 100,
             type: 'archive',
           },
-        })
-        .then((res) => {
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
+      await axios(axiosOption).then((res) => {
           if(res.data.data.length > 0){
             const width = /%{width}/;
             const height = /%{height}/;

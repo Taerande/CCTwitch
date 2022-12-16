@@ -1,4 +1,5 @@
 const SitemapPlugin = require('sitemap-webpack-plugin').default
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const paths = [
   {
       path: '/',
@@ -28,7 +29,8 @@ const paths = [
 module.exports = {
   configureWebpack: {
     plugins: [
-        new SitemapPlugin({ base: 'https://cctwitch.xyz', paths })
+      new SitemapPlugin({ base: 'https://cctwitch.xyz', paths }),
+      // new BundleAnalyzerPlugin()
     ]
   },
   transpileDependencies: [
@@ -54,12 +56,6 @@ module.exports = {
           "purpose": "monochrome",
         },
         {
-          "src": "/img/icons/100x100.png",
-          "type": "image/png",
-          "sizes": "100x100",
-          "purpose": "any maskable",
-        },
-        {
           "src": "/img/icons/192x192.webp",
           "type": "image/webp",
           "sizes": "192x192",
@@ -69,18 +65,6 @@ module.exports = {
           "src": "/img/icons/256x256.webp",
           "type": "image/webp",
           "sizes": "256x256",
-          "purpose": "any maskable",
-        },
-        {
-          "src": "/img/icons/384x384.webp",
-          "type": "image/webp",
-          "sizes": "384x384",
-          "purpose": "any maskable",
-        },
-        {
-          "src": "/img/icons/512x512.webp",
-          "type": "image/webp",
-          "sizes": "512x512",
           "purpose": "any maskable",
         },
         {

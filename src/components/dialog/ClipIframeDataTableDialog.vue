@@ -17,10 +17,11 @@
         :max-width="imgWidth"
         :aspect-ratio="16/9"
         v-on="on"
+        @error="onImgError"
         :title="clipData.title"
+        :src="srcImg"
         class="pa-0 thumbnailImg ma-0 rounded-lg"
-        lazy-src="@/assets/img/404.jpg"
-        :src="clipData.thumbnail_url">
+        lazy-src="@/assets/img/404.jpg">
           <v-container fluid fill-height class="d-flex align-content-space-between flex-wrap">
             <v-row class="d-flex justify-start pa-1">
               <span class="rounded-md text-caption white--text mx-1 px-1 rounded-lg" style="background-color: rgba( 0, 0, 0, 0.5 )">{{$moment(clipData.created_at).fromNow()}}</span>
@@ -56,27 +57,35 @@
         <v-btn color="error" icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
       </div>
     </v-card-title>
-    <v-card-text class="pa-0 ma-0">
-      <v-responsive :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
+    <v-card-text class="pa-0 ma-0 d-flex justify-center" v-if="dialog">
+        <video
+        v-if="$store.state.lang === 'ko'"
+            :id="`${clipData.id}`"
+            width="100%"
+            controls
+            :onerror="hello()"
+            :src="`${clipData.thumbnail_url.split('-preview')[0]}.mp4`"
+            >
+          </video>
+        <v-responsive v-else :aspect-ratio="$vuetify.breakpoint.smAndDown ? 1/1 : 4/3" height="100%">
+
         <iframe
           allow="autoplay"
-          v-if="dialog"
           :src="`https://clips.twitch.tv/embed?clip=${clipData.id}&parent=${$store.state.embedUrl}&autoplay=true&preload=auto`"
           preload="auto"
           frameborder="0"
           height="100%"
           width="100%"
           allowfullscreen="true"></iframe>
-      </v-responsive>
+        </v-responsive>
     </v-card-text>
-    <Adsense
-    data-ad-client="ca-pub-8597405222136575"
-    data-ad-slot="3465851493"
-    :ins-style="`display:inline-block;width:100%;height:90px;min-wdith:250px;`"
-    ></Adsense>
-    <div class="d-flex justify-center align-center pa-0 pb-4 white--text">
+    <div class="ma-0 px-1 py-2">
+      <Adsense data-ad-client="ca-pub-8597405222136575" data-ad-slot="8940370849"
+        :ins-style="`display:inline-block;width:100%;height:90px;min-wdith:250px;`"></Adsense>
+    </div>
+    <div class="d-flex flex-wrap justify-center align-center pa-0 pb-4 white--text">
       <div class="px-1 mx-1">
-        <v-btn dark class="d-flex mx-auto" :disabled="clipData.video_id === undefined || clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
+        <v-btn dark :loading="getvidLoading" class="d-flex mx-auto" :disabled="clipData.video_id === undefined || clipData.video_id === ''" color="error" icon @click="pushToTwitchVids(`https://twitch.tv/videos/${clipData.video_id}?t=${setTimeHMSformat(clipData.vod_offset)}`,setTimeHMSformat(clipData.vod_offset))"><v-icon>mdi-twitch</v-icon></v-btn>
         <div class="text-caption">다시보기</div>
       </div>
       <div class="px-1 mx-1">
@@ -98,6 +107,16 @@
         <div class="text-caption">추가하기</div>
       </div>
       <AddNewHotClipDialogVue :clipData="clipData"></AddNewHotClipDialogVue>
+      <div class="px-1 mx-" v-if="$store.state.lang === 'ko'">
+        <v-btn :loading="m3u8Loading" dark class="d-flex mx-auto" :disabled="clipData.video_id === ''" color="error" icon
+          @click="getm3u8()"><v-icon>mdi-file-download-outline</v-icon></v-btn>
+        <div class="text-caption">.m3u8</div>
+      </div>
+      <div class="px-1 mx-" v-if="$store.state.lang === 'ko'">
+        <v-btn :loading="mineLoad" dark class="d-flex mx-auto" color="error" icon
+          @click="mining()"><v-icon>mdi-pickaxe</v-icon></v-btn>
+        <div class="text-caption">발굴하기</div>
+      </div>
     </div>
   </v-card>
 </v-dialog>
@@ -117,19 +136,109 @@ export default {
   data() {
     return {
       hovering: false,
+      getvidLoading: false,
       dialog:false,
       vidInfo:null,
+      m3u8Loading: false,
+      mineLoad: false,
+      imgSrc: true,
+      failedImg: null,
     }
   },
+  computed: {
+    srcImg() {
+      return !this.imgSrc ? this.failedImg : this.clipData.thumbnail_url;
+    },
+    imgWidth() {
+      if (this.$vuetify.breakpoint.lgAndUp) {
+        return '200';
+      } else if (this.$vuetify.breakpoint.md) {
+        return '175';
+      } else if (this.$vuetify.breakpoint.sm) {
+        return '150';
+      } else if (this.$vuetify.breakpoint.xs) {
+        return '100';
+      } else {
+        return '100';
+      }
+    },
+  },
   methods: {
-    async getVidInfo(){
-      await axios.get('https://api.twitch.tv/helix/videos',{
-        headers: this.$store.state.headerConfig,
-        params: {
-          id: this.clipData.video_id,
-        },
-      }).then((res) => {
+    hello() {
+      const storageRef = this.$storage.ref(`clips/${this.clipData.broadcaster_id}/${this.clipData.id}.mp4`);
+      storageRef.getDownloadURL().then((url) => {
+        document.getElementById(`${this.clipData.id}`).setAttribute('src', url);
+      }).catch(() => { });
+    },
+    async onImgError() {
+      const storageRef = this.$storage.ref(`thumbnails/${this.clipData.broadcaster_id}/${this.clipData.id}.jpg`);
+      await storageRef.getDownloadURL().then((url) => {
+        this.failedImg = url
+        this.imgSrc = false;
+      }).catch(() => { });
+    },
+    async mining() {
+      this.mineLoad = true;
+      const storageRef = this.$storage.ref(`clips/${this.clipData.broadcaster_id}/${this.clipData.id}.mp4`);
+      storageRef.getDownloadURL().then((url) => {
+        this.mineLoad = false;
+        document.getElementById(`${this.clipData.id}`).setAttribute('src', url);
+      }).catch(async () => {
+        await axios.post('https://asia-northeast2-twitchhotclip.cloudfunctions.net/clipDownload/clips', {
+          broadcaster_id: this.clipData.broadcaster_id,
+          id: this.clipData.id,
+          title: this.clipData.title,
+          created_at: this.clipData.created_at,
+          thumbnail_url: this.clipData.thumbnail_url,
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }).then((res) => {
+          this.mineLoad = false;
+          this.imgSrc = false;
+          document.getElementById(`${this.clipData.id}`).setAttribute('src', res.data.url);
+          this.failedImg = res.data.thumb;
+          this.$store.commit('SET_SnackBar', { type: 'success', text: ' We only support 480p', value: true });
+        }).catch(() => {
+          this.$store.commit('SET_SnackBar', { type: 'error', text: 'Not supported', value: true });
+        });
+      });
+    },
+    async getm3u8() {
+      if (this.vidInfo === null) {
+        this.m3u8Loading = true;
+        await this.getVidInfo();
+        this.m3u8Loading = false;
+      }
+      if (this.vidInfo.thumbnail_url.split('/')[5] === undefined) { return window.alert("Can't create .m3u8 file") }
+      if (this.$store.state.lang === 'ko' && window.confirm(`${this.vidInfo.title}으로 이동하시겠습니까?\r\n Clip timestamp: ${this.setTimeHMSformat(this.clipData.vod_offset)}`)) {
+        const vid = document.getElementsByTagName('video')[0];
+        vid.pause()
+        const m3u8 = 'https://d3vd9lfkzbru3h.cloudfront.net/' + this.vidInfo.thumbnail_url.split('/')[5] + '/chunked/index-dvr.m3u8';
+        window.open(m3u8, '_blank');
+      }
+    },
+    async getVidInfo() {
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/videos',
+          params: {
+            id: this.clipData.video_id,
+          },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
+      await axios(axiosOption).then((res) => {
         this.vidInfo = res.data.data[0];
+      }).catch(async (e) => {
+        if (e.response.status === 401) {
+          await this.$store.dispatch('setNewTwitchAppToken');
+          await this.getVidInfo();
+        }
       })
     },
     copyClip(el) {
@@ -158,55 +267,16 @@ export default {
       return hour+'h'+min+'m'+sec+'s';
     },
     async pushToTwitchVids(url, time) {
-      await this.getVidInfo();
+      if (this.vidInfo === null) {
+        this.getvidLoading = true;
+        await this.getVidInfo();
+        this.getvidLoading = false;
+      }
       if (window.confirm(`[${this.$moment(this.vidInfo.created_at).fromNow()}] ${this.vidInfo.title}\n[${time}]으로 이동하시겠습니까?`)) {
         window.open(url, '_blank');
       }
     },
-    // async getVidOffset(element){
-    //   const json = JSON.stringify(
-    //     {
-    //       operationName: "ClipsFullVideoButton",
-    //       variables: {
-    //         slug: element.id
-    //       },
-    //       extensions: {
-    //         persistedQuery: {
-    //           version: 1,
-    //           sha256Hash: "d519a5a70419d97a3523be18fe6be81eeb93429e0a41c3baa9441fc3b1dffebf"
-    //           }
-    //       }
-    //     })
-    //  await axios.post('https://gql.twitch.tv/gql',json, {
-    //     headers: {
-    //       'Client-id' : 'kimne78kx3ncx6brgo4mv6wki5h1ko'
-    //     },
-
-    //   }).then((res) => {
-    //       element.videoOffsetSeconds = res.data.data.clip.videoOffsetSeconds;
-    //   })
-    // },
   },
-  computed:{
-    imgWidth(){
-      if(this.$vuetify.breakpoint.lgAndUp){
-        return '200';
-      } else if(this.$vuetify.breakpoint.md) {
-        return '175';
-      } else if(this.$vuetify.breakpoint.sm) {
-        return '150';
-      } else if (this.$vuetify.breakpoint.xs) {
-        return '100';
-      } else {
-        return '100';
-      }
-    },
-  },
-  async mounted(){
-    if(this.clipData.video_id){
-      await this.getVidInfo();
-    }
-  }
 }
 </script>
 <style lang="scss" scoped>

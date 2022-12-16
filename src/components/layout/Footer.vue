@@ -4,9 +4,8 @@
     padless>
     <v-card
       class="py-2"
-      flat
-      tile>
-      <v-card-text class="pa-0 py-2 my-5 align-center justify-center">
+      depressed>
+      <v-card-text class="pa-0 py-2 my-5">
         <div class="px-2">
           {{ new Date().getFullYear() }} — <strong>Clip Collector for TWITCH</strong>
         </div>

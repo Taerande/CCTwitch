@@ -58,7 +58,7 @@ export default {
   methods: {
     async DeleteData(type, data) {
       if (type === 'clip') {
-        const index = this.$store.state.currentCliplist.findIndex( (element) => element.clipData.id === data.target.id);
+        const index = this.$store.state.currentCliplist.findIndex( (element) => element.fireData.clipId === data.target.id);
         let batch = this.$firestore.batch();
         let target = this.$firestore.collection('cliplist').doc(data.belongsTo);
         batch.delete(target.collection('clips').doc(data.target.id))

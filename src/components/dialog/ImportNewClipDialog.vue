@@ -152,6 +152,18 @@ export default {
       this.resultId = '';
       },
     async getClip(el) {
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/clips',
+          params: {
+            id: this.resultId,
+          },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
       this.clipResult = [];
       this.importLoading = true;
       let preClipId = el.trim();
@@ -164,12 +176,7 @@ export default {
         this.$store.commit('SET_SnackBar', { type: 'error', text: `Import : 이미 추가된 클립입니다.`, value: true });
         this.importLoading = false;
       } else {
-        await axios.get('https://api.twitch.tv/helix/clips', {
-          headers: this.$store.state.headerConfig,
-          params: {
-            id: this.resultId,
-          },
-        }).then((res) => {
+        await axios(axiosOption).then((res) => {
           if(res.data.data.length > 0){
             this.clipResult = res.data.data[0];
           } else {

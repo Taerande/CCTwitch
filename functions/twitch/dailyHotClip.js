@@ -39,7 +39,7 @@ today = moment(date).add(-2,'hours').toISOString();
 formerDay = moment(today).add(-1,'days').toISOString();
 
 async function weeklyWaktaverse(){
-  await axios.get(`https://asia-northeast3-twitchhotclip.cloudfunctions.net//weeklyWaktaverse/waktaverse?appAccessToken=${appAccessToken}&time=${date}`);
+  await axios.get(`https://asia-northeast2-twitchhotclip.cloudfunctions.net//weeklyWaktaverse/waktaverse?appAccessToken=${appAccessToken}&time=${date}`);
 };
 
 async function getKrClipByGameId(game_id, after, game_name){

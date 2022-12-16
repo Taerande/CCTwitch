@@ -134,7 +134,7 @@
               depressed
               dark
               v-if="!$vuetify.theme.dark"
-              class="text-capitalize text-caption pa-0 ma-0 px-1"
+              class="text-caption pa-0 ma-0 px-1 mx-1"
               @click="toggleDarkTheme()">
                 <v-icon color="yellow darken-3">mdi-weather-night</v-icon>
                 <span>Dark Theme</span>
@@ -143,11 +143,12 @@
               depressed
               light
               width="105"
-              class="text-capitalize text-caption pa-0 ma-0 px-1"
+              class="text-caption pa-0 ma-0 px-1 mx-1"
               @click="toggleDarkTheme()">
                 <v-icon color="red">mdi-weather-sunny</v-icon>
                 <span>Light Theme</span>
               </v-btn>
+              <v-btn href="https://www.buymeacoffee.com/cctwitch" width="105" class="mx-1 my-0 pa-0" depressed><img width="105" height="36" src="@/assets/bmc-button.png" /></v-btn>
             </div>
           </v-list>
         </v-card-text>
@@ -168,11 +169,12 @@
               width="30"
             />
           <div
+            v-if="!$vuetify.breakpoint.xs"
             :class="$route.name === 'Home' ? 'twitch--text' : '' "
             class="text-lg-h4 text-h5 font-weight-bold d-flex align-center pl-3 appbar-text">CCTwitch</div>
           </router-link>
         </div>
-        <div v-if="$vuetify.breakpoint.mdAndUp" class="d-flex pl-3">
+        <div v-if="$vuetify.breakpoint.width > 760" class="d-flex pl-3">
           <router-link to="/trending">
             <div class="px-1 appbar-text" to="/trending">
               <span :class="$route.name === 'Trending' ? 'twitch--text' : '' " class="text-subtitle-2 text-lg-body-1 pr-1">Trending</span>
@@ -215,6 +217,11 @@
       :src="$store.state.userinfo.userInfo.photoURL" lazy-src="@/assets/img/404.jpg">
     </v-avatar>
     <SignInDialog v-else :type="{parent:'appBar'}"></SignInDialog>
+    <v-btn class="mx-1" href="https://www.buymeacoffee.com/cctwitch" icon>
+      <v-avatar :size="$vuetify.breakpoint.mdAndUp ? 48 : 36">
+        <img src="@/assets/bmc.png" alt="bmc_link">
+      </v-avatar>
+    </v-btn>
   </v-app-bar>
 </template>
 <script>

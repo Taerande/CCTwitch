@@ -31,7 +31,7 @@
         cols="12" xl="3" lg="4" md="4" sm="12" class="pa-2">
           <InArticleAdsense
             data-ad-client="ca-pub-8597405222136575"
-            data-ad-slot="1875328416"
+            data-ad-slot="9638127425"
             data-ad-format="fluid"
             ins-style="display:block;text-align:center;width:inherit;"
             ></InArticleAdsense>
@@ -55,7 +55,8 @@
 </template>
 
 <script>
-import { last, chunk } from 'lodash';
+import last from 'lodash/last';
+import chunk from 'lodash/chunk';
 import CliplistDefaultVue from '@/components/CliplistDefault.vue';
 import hotclipVue from '../components/Trending/HotClipList.vue';
 import InArticleAdContainerVue from '../components/InArticleAdContainer.vue';

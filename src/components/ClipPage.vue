@@ -104,17 +104,36 @@ export default {
       document.body.removeChild(a);
     },
     async getVidInfo(){
-      await axios.get('https://api.twitch.tv/helix/videos',{
-        headers: this.$store.state.headerConfig,
-        params: {
-          id: this.clipData.video_id,
-        },
-      }).then((res) => {
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/videos',
+          params: {
+            id: this.clipData.video_id,
+          },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
+      await axios(axiosOption).then((res) => {
         this.vidInfo = res.data.data[0];
       })
     },
     async getClip(el){
       this.importLoading = true;
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/clips',
+          params: {
+            id: resultId,
+          },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
       let preClipId = el.trim();
       let resultId;
       if (preClipId.match('clip')){
@@ -124,12 +143,7 @@ export default {
       }else{
         resultId = preClipId.split('?')[0];
       }
-      await axios.get('https://api.twitch.tv/helix/clips', {
-          headers: this.$store.state.headerConfig,
-          params: {
-            id: resultId,
-          },
-        }).then((res) => {
+      await axios(axiosOption).then((res) => {
           if(res.data.data.length > 0){
             this.clipData = res.data.data[0];
             this.dialog = true;

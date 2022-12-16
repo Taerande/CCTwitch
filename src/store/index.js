@@ -7,9 +7,11 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    lang: 'ko',
     signInDialog: false,
     drawer: false,
     isListed: false,
+    clipVidKr: process.env.VUE_APP_TWITCH_DATA_VPN,
     backendUrl: process.env.VUE_APP_BACKEND_URL_DEV,
     appTokenURL:process.env.VUE_APP_TWITCH_APPTOKEN_ISSUE_DEV,
     redirectUri:process.env.VUE_APP_TWITCH_REDIRECTURI_DEV,
@@ -49,6 +51,9 @@ export default new Vuex.Store({
     darkColorSet:['#E53935','#C62828','#D81B60','#AD1457','#8E24AA','#6A1B9A','#5E35B1','#4527A0','#3949AB','#283593','#1E88E5','#1565C0','#039BE5','#0277BD','#00ACC1','#00838F','#00897B','#00695C','#43A047','#2E7D32','#7CB342','#558B2F','#C0CA33','#9E9D24','#F9A825','#FFB300','#FF8F00','#FB8C00','#EF6C00','#F4511E','#D84315','#6D4C41','#4E342E','#546E7A','#37474F','#757575','#424242'],
   },
   mutations: {
+    SET_Language(state,payload){
+      state.lang = payload;
+    },
     SET_ClipSearchKeywords(state, payload){
       state.searchKeywords = payload;
     },
@@ -161,7 +166,7 @@ export default new Vuex.Store({
       state.likedStreamer = JSON.parse(localStorage.getItem('alllikes'));
     },
     DELETE_Clip(state, response) {
-      let index = state.currentCliplist.findIndex( (element) => element.clipData.id === response);
+      let index = state.currentCliplist.findIndex( (element) => element.fireData.clipId === response);
       state.currentCliplist.splice(index,1);
     },
     DELETE_importedClip(state, response) {

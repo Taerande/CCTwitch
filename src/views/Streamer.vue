@@ -21,11 +21,11 @@
                 <v-avatar
                 outline
                 size="36">
-                    <v-img :src="item.thumbnail" alt="profile_img"></v-img>
+                    <v-img :src="item.profile_image_url" alt="profile_img"></v-img>
                 </v-avatar>
               </v-badge>
               <v-avatar size="36" v-else>
-                <v-img :src="item.thumbnail" alt="profile_img"></v-img>
+                <v-img :src="item.profile_image_url" alt="profile_img"></v-img>
               </v-avatar>
             </div>
             <div aria-label="streamer info" class="d-flex align-center pl-3" style="max-width:150px">
@@ -288,25 +288,20 @@ export default {
   },
   computed: {
   },
-  async mounted() {
+  async created() {
+    document.title = 'Streamer - CCTWITCH';
     this.streamerList.liked = JSON.parse(localStorage.getItem('alllikes')) || [];
+    const ids = this.streamerList.liked.map(v => v.id);
+    if (ids.length > 0) {
+      const result = await this.getUserInfo(ids);
+      this.streamerList.liked = result.data.data;
+     }
     await this.postProcess();
   },
-  created(){
-    document.title = 'Streamer - CCTWITCH';
-  }
 };
 </script>
 <style lang="scss" scoped>
 .v-avatar:hover{
   cursor: pointer;
 }
-// .v-card--reveal {
-//   align-items: center;
-//   bottom: 0;
-//   filter: none;
-//   justify-content: center;
-//   position: absolute;
-//   width: 100%;
-// }
 </style>

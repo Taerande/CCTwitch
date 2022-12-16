@@ -1,32 +1,29 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Home from '../views/Home.vue';
 import store from '../store';
 
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
+// import firebase from 'firebase/compat/app';
+// import 'firebase/compat/auth';
 
-// import Channel from '../views/Channel.vue';
-// import Search from '../views/Search.vue';
 Vue.use(VueRouter);
-firebase.getCurrentUser = () => {
-  return new Promise((resolve, reject) => {
-      const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-          unsubscribe();
-          resolve(user);
-      }, reject);
-  })
-};
+// firebase.getCurrentUser = () => {
+//   return new Promise((resolve, reject) => {
+//       const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+//           unsubscribe();
+//           resolve(user);
+//       }, reject);
+//   })
+// };
 
 // route level code-splitting
 // this generates a separate chunk (abaout.[hash].js) for this route
 // which is lazy-loaded when the route is visited.
-// const About = () => import(/* webpackChunkName: "about" */ '@/views/About.vue');
+
 const Search = () => import(/* webpackChunkName: "123" */ '@/views/Search.vue');
 const Channel = () => import(/* webpackChunkName: "423123" */ '@/views/Channel.vue');
 const Login = () => import(/* webpackChunkName: "Login" */ '@/views/Login.vue');
 const Trending = () => import(/* webpackChunkName: "Trending" */ '@/views/Trending.vue');
-
+const Home = () => import(/* webpackChunkName: "Home" */ '@/views/Home.vue');
 
 const Timeline = () => import(/* webpackChunkName: "Timeline" */ '@/views/Timeline.vue');
 
@@ -38,15 +35,11 @@ const Mycliplist = () => import(/* webpackChunkName: "Mycliplist" */ '@/views/My
 const Timelines = () => import(/* webpackChunkName: "Timelines" */ '@/views/Timelinelist.vue');
 
 const HotClip = () => import(/* webpackChunkName: "HotClip" */ '@/views/HotClip.vue');
-
-
 const Streamer = () => import(/* webpackChunkName: "Streamer" */ '@/views/Streamer.vue');
 const PageNotFound = () => import(/* webpackChunkName: "PageNotFound" */ '@/views/PageNotFound.vue');
-
 const SpecialList = () => import(/* webpackChunkName: "SpecialList" */ '@/views/SpecialList.vue');
 const User = () => import(/* webpackChunkName: "User" */ '@/views/User.vue');
 const Tag = () => import(/* webpackChunkName: "Tag" */ '@/views/Tag.vue');
-// const Test = () => import(/* webpackChunkName: "Test" */ '@/views/Test.vue');
 const Report = () => import(/* webpackChunkName: "Report" */ '@/views/Report.vue');
 
 const routes = [
@@ -142,21 +135,6 @@ const routes = [
     name: 'Report',
     component: Report,
   },
-  // {
-  //   path: '/test',
-  //   name: 'Test',
-  //   component: Test,
-  // },
-  // {
-  //   path: '/analysis',
-  //   name: 'Analysis',
-  //   component: Analysis,
-  // },
-  // {
-  //   path: '/random',
-  //   name: 'Random',
-  //   component: Random,
-  // },
   {
     path: '*',
     name: 'PageNotFound',
@@ -169,19 +147,15 @@ const router = new VueRouter({
   mode: 'history',
   routes,
 });
-// base: process.env.BASE_URL,
 
 
 router.beforeEach( async (to, from, next) => {
   store.commit('INIT_SnackBar')
   const requireAuth = to.meta.requireAuth;
-  const user = await firebase.getCurrentUser();
-  if(requireAuth && user){
-      next();
-    } else if(requireAuth && !user) {
-      next({name:'Home'});
-      store.commit('SET_SnackBar', {type:'error', text:'로그인이 필요합니다.', value:true})
-      store.commit('SET_SignInDialog', true)
+  const user = store.state.userinfo.userInfo;
+  if(requireAuth && !user){
+    store.commit('SET_SnackBar', {type:'error', text:'로그인이 필요합니다.', value:true})
+    store.commit('SET_SignInDialog', true)
     } else {
       next();
     }

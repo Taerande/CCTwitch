@@ -59,16 +59,6 @@
       {{cliplist.description}}
     </div>
   </v-row>
-  <v-row class="justify-center" v-if="cliplist.dataSet.length > 0">
-     <Bar
-    :chart-options="chartOptions"
-    :chart-data="chartData"
-    :chart-id="chartId"
-    :dataset-id-key="datasetIdKey"
-    :height="$vuetify.breakpoint.smAndDown ? 150 : 300"
-    :width="$vuetify.breakpoint.smAndDown ? 300 : 600"
-    />
-  </v-row>
   <div class="d-flex justify-center">
     <DisplyaAdContainerVue></DisplyaAdContainerVue>
   </div>
@@ -106,14 +96,6 @@ import axios from 'axios';
 import expandTableVue from '@/components/cliplist/expandTable';
 import ImportNewClipDialogVue from '@/components/dialog/ImportNewClipDialog.vue';
 import DisplyaAdContainerVue from '@/components/DisplyaAdContainer.vue';
-
-import { Bar } from 'vue-chartjs/legacy'
-import { Chart as ChartJS, Tooltip, BarElement, CategoryScale, LinearScale } from 'chart.js'
-
-ChartJS.register(Tooltip, BarElement, CategoryScale, LinearScale)
-
-
-
 export default {
   components: {
     DeleteDialog,
@@ -121,59 +103,26 @@ export default {
     expandTableVue,
     ImportNewClipDialogVue,
     DisplyaAdContainerVue,
-    Bar,
   },
-  props: {
-    chartId: {
-      type: String,
-      default: 'bar-chart'
-    },
-    datasetIdKey: {
-      type: String,
-      default: 'label'
-    },
-    barThickness:{
-      type:Number,
-      default: 1,
-    },
-    plugins: {
-      type: Object,
-      default: () => {}
-    }
-  },
-
   data() {
     return {
-      chartData:{},
-      chartOptions: {
-        indexAxis: 'y',
-        responsive: true,
-      },
       lastVisible: null,
       cliplist: {
-        id:'',
-        title:'',
-        description:'',
-        color:'',
-        createdAt:'',
-        authorId:'',
-        authorName:'',
-        tags:[],
+        id: '',
+        title: '',
+        description: '',
+        color: '',
+        createdAt: '',
+        authorId: '',
+        authorName: '',
+        tags: [],
       },
-      tempArr:[],
-      userInfo:'',
+      tempArr: [],
+      userInfo: '',
       loading: false,
       clipDataLoading: false,
       likeLoading: false,
-      colorSet:[
-        { display_name: '아이네_', color:'#8a2be2' },
-        { display_name: '징버거', color:'#f0a957' },
-        { display_name: '릴파_', color:'#000080' },
-        { display_name: '주르르', color:'#800080' },
-        { display_name: '고세구___', color:'#467ec6' },
-        { display_name: '비챤_', color:'#85ac20' },
-      ]
-    };
+    }
   },
   methods: {
     likeIcon(el){
@@ -240,10 +189,18 @@ export default {
       this.$store.commit('SET_SnackBar',{type:'error', text:`Cliplist : ${this.cliplist.title}클립 모음집이 삭제되었습니다.`, value:true});
     },
     async getTwitchClipData(el){
-      await axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: { id: el }
-      }).then((res) => {
+
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/clips',
+          params: { id: el },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
+      await axios(axiosOption).then((res) => {
         this.tempArr = res.data.data.sort((a,b) => b.view_count - a.view_count);
         this.clipDataLoading = true;
       }).catch( async (e) => {
@@ -288,39 +245,6 @@ export default {
           authorName: item.authorName,
           thumbnail_url: item.thumbnail_url,
         }
-        if(item.dataSet[0] !== undefined){
-          this.chartData = {
-            labels: [
-              this.cliplist.dataSet[0].userData.display_name,
-              this.cliplist.dataSet[1].userData.display_name,
-              this.cliplist.dataSet[2].userData.display_name,
-              this.cliplist.dataSet[3].userData.display_name,
-              this.cliplist.dataSet[4].userData.display_name,
-              this.cliplist.dataSet[5].userData.display_name,
-              ],
-            datasets: [
-              {
-                label: 'Clips',
-                data: [
-                  this.cliplist.dataSet[0].count,
-                  this.cliplist.dataSet[1].count,
-                  this.cliplist.dataSet[2].count,
-                  this.cliplist.dataSet[3].count,
-                  this.cliplist.dataSet[4].count,
-                  this.cliplist.dataSet[5].count,
-                ],
-                backgroundColor: [
-                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[0].userData.display_name).color,
-                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[1].userData.display_name).color,
-                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[2].userData.display_name).color,
-                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[3].userData.display_name).color,
-                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[4].userData.display_name).color,
-                  this.colorSet.find(x => x.display_name === this.cliplist.dataSet[5].userData.display_name).color,
-                ],
-              }
-            ]
-          }
-        }
         await this.getTwitchClipData(item.clipIds);
         if(item.thumbnail_url !== this.tempArr[0].thumbnail_url || this.tempArr.length !== item.clipCount){
           docRef.update({
@@ -339,5 +263,3 @@ export default {
 
 };
 </script>
-<style lang="scss" scoped>
-</style>

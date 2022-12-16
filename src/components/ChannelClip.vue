@@ -32,7 +32,7 @@
         cols="12" xl="3" lg="4" md="4" sm="6">
          <InArticleAdsense
           data-ad-client="ca-pub-8597405222136575"
-          data-ad-slot="1875328416"
+          data-ad-slot="9638127425"
           data-ad-format="fluid"
           ins-style="display:inline-block;width:100%;"
           ></InArticleAdsense>
@@ -59,7 +59,7 @@
 import axios from 'axios';
 import infiniteLoading from 'vue-infinite-loading';
 import clipIframeDialog from '@/components/dialog/ClipIframeDialog';
-import { chunk } from 'lodash';
+import chunk from 'lodash/chunk';
 
 export default {
   props: ['clips','listData'],
@@ -88,17 +88,23 @@ export default {
     }
   },
   methods: {
-    // ended_at: this.infiniteData.ended_at,
     async channelInfiniteHandler($state) {
-      await axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: {
-          broadcaster_id: this.infiniteData.broadcaster_id,
-          started_at: this.infiniteData.started_at,
-          first: this.infiniteData.first,
-          after: this.paginationCursor,
-        },
-      }).then((res) => {
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/clips',
+          params: {
+            broadcaster_id: this.infiniteData.broadcaster_id,
+            started_at: this.infiniteData.started_at,
+            first: this.infiniteData.first,
+            after: this.paginationCursor,
+          },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
+      await axios(axiosOption).then((res) => {
         this.paginationCursor = res.data.pagination.cursor;
         if (res.data.data.length === 0) {
           $state.complete();

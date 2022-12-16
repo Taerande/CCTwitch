@@ -136,7 +136,7 @@
 </v-container>
 </template>
 <script>
-import { last } from 'lodash'
+import last from 'lodash/last'
 import replyCommentsVue from './replyComments.vue'
 export default {
   props:['hotClipData'],

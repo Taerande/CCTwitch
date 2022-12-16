@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import { last } from 'lodash';
+import last from 'lodash/last';
 import AddNewCliplistDialog from '@/components/dialog/AddNewCliplistDialog.vue';
 import DeleteDialog from '@/components/dialog/DeleteDialog.vue';
 import axios from 'axios';
@@ -196,11 +196,19 @@ export default {
       this.$router.push({path:'/mycliplist'}).catch(()=>{});
       this.$store.commit('SET_SnackBar',{type:'error', text:`Cliplist : ${this.cliplist.title}클립 모음집이 삭제되었습니다.`, value:true});
     },
-    async getTwitchClipData(el){
-      return await axios.get('https://api.twitch.tv/helix/clips', {
-        headers: this.$store.state.headerConfig,
-        params: { id: el }
-      }).catch( async (e) => {
+    async getTwitchClipData(el) {
+
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/clips',
+          params: { id: el },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
+      return await axios(axiosOption).catch( async (e) => {
         if(e.response.status === 401){
           await this.$store.dispatch('setNewTwitchAppToken');
           return await this.getTwitchClipData(el);

@@ -4,11 +4,12 @@
     <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
   </v-row>
   <v-row class="d-flex pt-5 col-12" v-else-if="hotclips.length > 0 && loading">
-    <v-col cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2" v-for="(item) in hotclips" :key="item.id">
+    <v-col cols="12" xl="3" lg="4" md="4" sm="6" class="pa-2" v-for="(item, index) in hotclips" :key="item.id">
       <v-card :to="{path:`/hotclip/${item.id}`,params:{title:item.title}}" flat>
         <v-card-text class="pa-0 ma-0">
           <v-img
           class="rounded-lg"
+          @error="onImgError(item, index)"
           :src="item.thumbnail_url"
           lazy-src="@/assets/img/404.jpg"
           >
@@ -56,7 +57,7 @@
 </template>
 <script>
 
-import { last } from 'lodash'
+import last from 'lodash/last'
 
 export default {
   data() {
@@ -65,9 +66,20 @@ export default {
       hotclips:[],
       dataLoading:false,
       lastVisible:null,
+      failedImg: null,
+      imgSrc: true,
     }
   },
   methods: {
+    async onImgError(item, index) {
+      const storageRef = this.$storage.ref(`thumbnails/${item.broadcaster_id}/${item.id}.jpg`);
+      await storageRef.getDownloadURL().then((url) => {
+        this.hotclips[index].thumbnail_url = url
+        this.imgSrc = false;
+      }).catch(() => {
+        this.hotclips[index].thumbnail_url = '@/assets/img/404.jpg';
+       });
+    },
     async getMoreData(){
       this.dataLoading = true;
       try{

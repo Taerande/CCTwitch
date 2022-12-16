@@ -7,13 +7,13 @@
      style="display:inline-block;width:160px;height:600px;position:fixed;top:15%;"
      :style="$vuetify.breakpoint.xl ? 'left:5%' : 'left:10px;'"
      data-ad-client="ca-pub-8597405222136575"
-     data-ad-slot="8549081118"></ins>
+     data-ad-slot="9870309135"></ins>
      <ins class="adsbygoogle"
       v-if="$vuetify.breakpoint.lgAndUp"
      style="display:inline-block;width:160px;height:600px;position:fixed;top:15%;"
      :style="$vuetify.breakpoint.xl ? 'right:5%;' : 'right:10px;'"
      data-ad-client="ca-pub-8597405222136575"
-     data-ad-slot="8549081118"></ins>
+     data-ad-slot="9870309135"></ins>
       <router-view class="pt-10" :key="$route.fullPath" />
       <SnackBar app></SnackBar>
     </v-main>
@@ -50,6 +50,7 @@ export default {
   },
  async created() {
     document.documentElement.setAttribute('lang', navigator.language.split('-')[0]);
+    this.$store.commit('SET_Language',navigator.language.slice(0,2));
     this.$store.commit('INIT_localStorage');
     this.$store.commit('SET_SignInDialog', false);
     const appAccessToken = JSON.parse(localStorage.getItem('twitchAppAccessToken'));

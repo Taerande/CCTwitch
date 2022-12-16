@@ -442,14 +442,21 @@ export default {
     },
     async getClips(el){
       this.clipLoading = true;
-      await axios.get('https://api.twitch.tv/helix/clips',{
-        params:{
-          broadcaster_id:el,
-          started_at:new Date(this.streamLineChartOptions.labels[0]).toISOString(),
-          ended_at:new Date(this.streamLineChartOptions.labels[this.streamLineChartOptions.labels.length - 1]).toISOString(),
-        },
-        headers:this.$store.state.headerConfig
-      }).then((res) => {
+      let axiosOption;
+      if (this.$store.state.lang === 'ko') {
+        axiosOption = {
+          method: 'get',
+          baseURL: this.$store.state.lang === 'ko' ? this.$store.state.clipVidKr : 'https://api.twitch.tv/helix',
+          url: '/clips',
+          params: {
+            broadcaster_id: el,
+            started_at: new Date(this.streamLineChartOptions.labels[0]).toISOString(),
+            ended_at: new Date(this.streamLineChartOptions.labels[this.streamLineChartOptions.labels.length - 1]).toISOString(),
+          },
+          headers: this.$store.state.lang === 'ko' ? null : this.$store.state.headerConfig,
+        }
+      }
+      await axios(axiosOption).then((res) => {
         this.streamerClips = res.data.data;
         this.clipLoading = false;
       }).catch( async (e) => {

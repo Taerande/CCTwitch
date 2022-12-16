@@ -1,10 +1,12 @@
 import Vue from 'vue';
 import store from './store'
-import axios from 'axios';
+// import axios from 'axios';
 // import router from 'vue-router'
 
 
 // Vue.config.errorHandler = async (e) => {
+//   store.commit('SET_SnackBar', { type: 'error', text: e.message, value: true });
+// }
 //   console.log(e);
 //   if(e.response.status === 401){
 //     try{
@@ -33,4 +35,3 @@ import axios from 'axios';
 //     }catch{
 //     }
 //   }
-// }

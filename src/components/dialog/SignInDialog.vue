@@ -49,27 +49,7 @@ export default {
       localStorage.setItem('state',state);
       localStorage.setItem('path',this.$route.fullPath);
       localStorage.setItem('autoLogin',this.autoLogin);
-      // const codeUri =
-      // `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&redirect_uri=http://localhost:8080/login&scope=user%3Aread%3Aemail+user%3Aread%3Afollows&state=${state}`;
       window.location.href = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=c3ovwwcs9lhrx1rq13fsllzqfu9o9t&redirect_uri=${this.$store.state.redirectUri}&scope=user%3Aread%3Aemail%20user%3Aread%3Afollows&state=${state}`;
-      // const code = await this.getCode(codeUri);
-      // const twitchOAuthToken = JSON.stringify(Buffer.from(code.twitchOAuthToken, 'base64').toString());
-      // if(this.autoLogin){
-      //   await this.$firebase.auth().setPersistence(this.$firebase.auth.Auth.Persistence.LOCAL).then(() => {
-      //     return this.$firebase.auth().signInWithCustomToken(code.token);
-      //   })
-      // } else {
-      //   await this.$firebase.auth().setPersistence(this.$firebase.auth.Auth.Persistence.SESSION).then(() => {
-      //     return this.$firebase.auth().signInWithCustomToken(code.token);
-      //   })
-      // }
-      // localStorage.setItem('twitchOAuthToken', JSON.parse(twitchOAuthToken));
-      // this.loginLoading = false;
-      // this.$store.commit('SET_SignInDialog', false);
-      // this.$store.commit('SET_Drawer', false);
-      // this.$router.push({name:'Home'}).catch(()=>{});
-      // this.$store.commit('SET_SnackBar',{type: 'info', text:'로그인 성공', value:true})
-
     },
     async getAuthToken(id){
       try {

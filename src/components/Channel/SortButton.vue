@@ -255,7 +255,7 @@ export default {
       this.dialog = true;
       this.dbLoading = true;
       this.$store.commit('SET_SnackBar',{type:'info', text:'Timeline 생성은 1분 정도 소요됩니다.', value:true});
-      await axios.post(this.$store.state.backendUrl+'/timeLine/timeline',{
+      await axios.post('https://asia-northeast2-twitchhotclip.cloudfunctions.net/timeLine/timeline',{
         user_login: user_login,
         broadcaster_id: broadcaster_id,
         vidId: vidId,
